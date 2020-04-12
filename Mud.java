@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MUD {
+public class Mud {
     private static final int MAP_SIZE = 3000;
     private static final int MOB_SPAWN_CHANCE = 5;
     private static final int MOB_SPAWN_CHANCE_GRASS = 30;
