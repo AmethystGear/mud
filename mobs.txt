@@ -9,6 +9,9 @@ health: 10
 aggression: 50
 xp: 0
 dmg: -1
+drops: "rusty-sword" "broken-armor" "missspelled-incantation" 
+drop-max: 3
+drop-min: 0
 img:
                    _.--.    .--._
                  ."  ."      ".  ".
@@ -41,7 +44,10 @@ mob-victory: "THREAT-NEUTRALIZED"
 health: 20
 aggression: 90
 dmg: 1
-xp: 5
+xp: 100
+drops: "pugenum"
+drop-max: 20
+drop-min: 5
 img:
                             @#**/**/#/#       
                         (** .. (*/ *@@    
@@ -72,7 +78,7 @@ mob-victory: "you_are_a_sad_excuse_for_a_loser._very_sad._SAD!"
 health: 7
 aggression: 100
 dmg: 1
-xp: 3
+xp: 200
 img:
 
 &&&&&&&@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&@@&&&&@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -115,7 +121,7 @@ mob-victory: "deth"
 health: 20
 aggression: 50
 dmg: 100
-xp: 20
+xp: 3000
 img:
                      (#        ((       *(#                                    
                      (((#      (((#      (((#       ((                          
@@ -156,7 +162,10 @@ mob-victory: *sad-slime-noises*
 aggression: 20
 health: 2
 dmg: 1
-xp: 1
+xp: 50
+drops: "disgusting-slime" "viscous-fluids"
+drop-min: 3
+drop-max: 17
 img:
                                                @*//////.@                       
                                            @**//*,*////,*//@                    
@@ -187,7 +196,7 @@ player-victory: "I_see_you_have_given_your_OWN_life_MEANING" *evaporates-like-a-
 mob-victory: "YOU_ARE_NOTHING!"
 health: 3
 dmg: 6
-xp: 4
+xp: 400
 aggression: 40
 
 /begin/
@@ -197,7 +206,7 @@ player-run: "Trolololololololol"
 player-victory: "Trolololololololol"
 aggression: 100
 dmg: 0
-xp: -5
+xp: -50
 health: 0
 img:
                                           ,*/((#%%%&&&@@&&&%%(/,.                                                                                                       
@@ -253,9 +262,12 @@ player-run: "You-lack-courage"
 player-victory: *Well-done!*
 mob-victory: *I-mourn-for-the-breaking-down-of-honour*
 aggression: 77
-dmg: 3
-xp: 10
-health: 3
+dmg: 4
+xp: 330
+health: 4
+drops: "Mage's-Staff" "missspelled-incantation"
+drop-min: 0
+drop-max: 1
 img:
 
                        .
@@ -284,9 +296,12 @@ player-run: "Atleast-you-have-some-concience"
 player-victory: *How-could-a-mere-mortal...*
 mob-victory: *Puny-Mortal*
 aggression: 100
-dmg: 20
-xp: 10
-health: 5
+dmg: 12
+xp: 350
+health: 3
+drops: "Dragon-scales" "Dragon-heart" "Eternal-embers"
+drop-min: 0
+drop-max: 3
 img:
              __.-/|
              \`o_O'
@@ -311,7 +326,7 @@ player-victory: *We-are-permanently-closed*
 mob-victory: *Thanks-for-dorming-with-us,-Mwahahaha*
 aggression: 10
 dmg: 1
-xp: -1
+xp: -100
 health: 30
 img:
 
@@ -348,7 +363,7 @@ mob-victory: *Not-even-one-pushup?*
 aggression: 100
 dmg: 10
 xp: 4010
-health: 1000
+health: 100
 img:
 
 ||\                  /||  ----------------------- ||\           || -------------------------
@@ -372,7 +387,7 @@ player-victory: "I-shall-forever-be-under-your-command" "COMMUNISM-WINS!!!"
 mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
 aggression: 75
 dmg: 5
-xp: 10
+xp: 500
 health: 10
 img:
                                                                  #####
@@ -397,7 +412,7 @@ player-victory: "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
 mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
 aggression: 100
 dmg: 10
-xp: 20
+xp: 1000
 health: 20
 img:
                    -`

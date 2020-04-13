@@ -192,6 +192,10 @@ public class Mud {
                 System.out.print(player.getStats().toString());
                 continue;
             }
+            if(action.equals("inv")){
+                System.out.println("Inventory: ");
+                System.out.print(player.getInventory().toString());
+            }
             if(action.equals("mobstat")) {
                 if(!isFightingMob) {
                     System.out.println("you are not currently fighting a mob!");
@@ -221,7 +225,15 @@ public class Mud {
                         System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("player-victory"));
                         System.out.println("You murdered " + mobToFight.name());
                         mobMap[player.x()][player.y()] = 0; // remove mob from map
+                        System.out.println("You got " + mobToFight.getBaseStats().get("xp") + " xp.");
                         player.changeStat("xp", mobToFight.getBaseStats().get("xp"));
+
+                        String[] drops = mobToFight.getDrops();
+                        for(String drop : drops) {
+                            System.out.println("You got " + drop);
+                            player.addToInventory(drop);
+                        }
+
                         isFightingMob = false;
                     } else {
                         System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("attack"));
@@ -368,7 +380,7 @@ class Stats {
         stats = new HashMap<>();
         Scanner scan = new Scanner(new File(saveFile));
         while(scan.hasNext()) {
-            String s = scan.next();
+            String s = scan.next().replace('-', ' ');
             int i = scan.nextInt();
             set(s, i);
         }
@@ -408,7 +420,7 @@ class Stats {
     public void saveTo(String file) throws Exception {
         PrintWriter writer = new PrintWriter(file, "UTF-8");
         for(Map.Entry<String, Integer> e : stats.entrySet()) {
-            writer.write(e.getKey());
+            writer.write(e.getKey().replace(' ', '-'));
             writer.write(" ");
             writer.write(e.getValue() + "");
             writer.write("\n");
@@ -528,6 +540,14 @@ class Player {
         return stats.get("health") <= 0;
     }
 
+    public void addToInventory(String item) {
+        try {
+            inventory.change(item, 1);
+        } catch(IllegalArgumentException e) {
+            inventory.set(item, 1);
+        }        
+    }
+
     public String toString() {
         return playerRep;
     }        
@@ -537,6 +557,7 @@ class Mob {
     private String name;
     private StringBuilder img = new StringBuilder("");
     private HashMap<String, String[]> quoteTypeToQuoteList;
+    private String[] drops;
     private Stats baseStats;
     private Stats stats;
 
@@ -563,14 +584,13 @@ class Mob {
                     if(gettingImg) {
                         img.append(data);
                         img.append("\n");
-                    }
-                    else if(dataType.equals("name:")) {
+                    } else if(dataType.equals("name:")) {
                         this.name = getRemainingInputAsString(tokenizer);
-                    }
-                    else if(dataType.equals("img:")) {
+                    } else if(dataType.equals("img:")) {
                         gettingImg = true;
-                    }
-                    else if(tokenizer.hasNextInt()) {
+                    } else if(dataType.equals("drops:")) {
+                        drops = getRemainingInputAsStringArray(tokenizer);
+                    } else if(tokenizer.hasNextInt()) {
                         String colonRemoved = dataType.substring(0, dataType.length() - 1);
                         baseStats.set(colonRemoved, tokenizer.nextInt());
                     } else {
@@ -602,6 +622,30 @@ class Mob {
 
     public boolean isDead() {
         return stats.get("health") <= 0;
+    }
+
+    public String[] getDrops() {
+        if(drops == null) {
+            return new String[0];
+        }
+        int min;
+        int max;
+        try {
+            min = getBaseStats().get("drop-min");
+        } catch (IllegalArgumentException e) {
+            min = 1;
+        }
+        try {
+            max = getBaseStats().get("drop-max");
+        } catch (IllegalArgumentException e) {
+            max = min;
+        }
+        int numDrops = rand(min, max);
+        String[] playerDrops = new String[numDrops];
+        for(int i = 0; i < playerDrops.length; i++) {
+            playerDrops[i] = getRandom(drops);
+        }
+        return playerDrops;
     }
 
     public String name() {
