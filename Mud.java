@@ -4,12 +4,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Mud {
     private static final int MAP_SIZE = 3000;
-    private static final int MOB_SPAWN_CHANCE = 5;
-    private static final int MOB_SPAWN_CHANCE_GRASS = 30;
+    private static final int MOB_SPAWN_CHANCE = 10;
+    private static final int MOB_SPAWN_CHANCE_GRASS = 40;
     private static final int GRASS_BLOCK_SPAWN_CHANCE = 10;
     private static final int GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 65;
-    private static final int FILLED_BLOCK_SPAWN_CHANCE = 1;
-    private static final int FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 40;
+    private static final int FILLED_BLOCK_SPAWN_CHANCE = 5;
+    private static final int FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 50;
 
     private static final String[] BLOCK_TYPES = new String[]{"  ", "\033[92m░░\033[0m", "██"};
     private static final String MOB_FILE = "mobs.txt";
@@ -96,41 +96,64 @@ public class Mud {
 
         Mob mobToFight = null;
         boolean isFightingMob = false;
+        String lastAction = "";
         //game loop
         while(true) {
             System.out.print("Enter a command: ");
             String action = in.nextLine();
+            if(action.length() == 0) {
+                action = lastAction;
+            }
+            lastAction = action;
+
             if(action.equals("quit")) {
                 break;
             }
-            if(action.equals("health")){
-                System.out.println("Your current health: " + player.health());
+            if(action.equals("stat")){
+                System.out.println("Base stats: ");
+                System.out.print(player.getBaseStats().toString());
+                System.out.println("Stats: ");
+                System.out.print(player.getStats().toString());
                 continue;
             }
-            if(action.equals("dmg")){
-                System.out.println("Your current damage: " + player.dmg());
-                continue;
+            if(action.equals("mobstat")) {
+                if(!isFightingMob) {
+                    System.out.println("you are not currently fighting a mob!");
+                } else {
+                    System.out.println("Base stats: ");
+                    System.out.print(mobToFight.getBaseStats().toString());
+                    System.out.println("Stats: ");
+                    System.out.print(mobToFight.getStats().toString());
+                }
+            }
+            if(action.equals("upgrade")) {
+                System.out.print("Enter stat to upgrade: ");
+                String stat = in.nextLine();
+                try {
+                    player.upgradeBaseStat(stat);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("that stat doesn't exist!");
+                }                
             }
             if(isFightingMob) { // mob fight world
                 if(action.equals("attack")) {
-                    System.out.println("You attacked " + mobToFight.name() + " and dealt " + player.dmg() + " damage.");
-                    mobToFight.changeHealth(-player.dmg());
+                    System.out.println("You attacked " + mobToFight.name() + " and dealt " + player.getBaseStats().get("dmg") + " damage.");
+                    mobToFight.changeStat("health", -player.getBaseStats().get("dmg"));
                     if(mobToFight.isDead()) {
                         System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("player-victory"));
                         System.out.println("You murdered " + mobToFight.name());
                         mobMap[player.x()][player.y()] = 0; // remove mob from map
+                        player.changeStat("xp", mobToFight.getBaseStats().get("xp"));
                         isFightingMob = false;
                     } else {
                         System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("attack"));
-                        System.out.println(mobToFight.name() + " attacked you and dealt " + mobToFight.dmg() + " damage.");
-                        player.changeHealth(-mobToFight.dmg());
+                        System.out.println(mobToFight.name() + " attacked you and dealt " + mobToFight.getBaseStats().get("dmg") + " damage.");
+                        player.changeStat("health", -mobToFight.getBaseStats().get("dmg"));
                         if(player.isDead()) {
                             System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("mob-victory"));
                             System.out.println("You were killed by " + mobToFight.name());
                             return;
                         }
-                        System.out.println("Your current health: " + player.health());
-                        System.out.println(mobToFight.name() + "'s current health: " + mobToFight.health());
                     }
                 } else if(action.equals("run")) {
                     System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("player-run"));
@@ -164,12 +187,11 @@ public class Mud {
                         System.out.println("You encountered " + mobToFight.name());
                         System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("entrance"));
                         System.out.print(mobToFight.getImg());
-                        System.out.println("Your current health: " + player.health());
-                        System.out.println(mobToFight.name() + "'s current health: " + mobToFight.health());
                         isFightingMob = true;
                     }
                 }
-            }
+            }            
+            
         }
         in.close();
     }
@@ -223,7 +245,7 @@ public class Mud {
                     return x - sign(numUnits);
                 } else if(mobMap[x][yOrigin] != 0) {
                     Mob m = new Mob(mobMap[x][yOrigin], MOB_FILE);
-                    if(rand(0, 99) < m.aggression()) {
+                    if(rand(0, 99) < m.getBaseStats().get("aggression")) {
                         System.out.println("you were blocked by a mob!");
                         return x;
                     }
@@ -237,7 +259,7 @@ public class Mud {
                     return y - sign(numUnits);
                 } else if(mobMap[xOrigin][y] != 0) {
                     Mob m = new Mob(mobMap[xOrigin][y], MOB_FILE);
-                    if(rand(0, 99) < m.aggression()) {
+                    if(rand(0, 99) < m.getBaseStats().get("aggression")) {
                         System.out.println("you were blocked by a mob!");
                         return y;
                     }
@@ -258,24 +280,94 @@ public class Mud {
     }
 }
 
+class Stats {
+    private HashMap<String, Integer> stats;
+    public Stats () {
+        stats = new HashMap<>();
+    }
+
+    // get a stat. If it doesn't exist, throw an IllegalArgumentException.
+    public int get(String stat) {
+        if(!stats.containsKey(stat) || stats.get(stat) == null) {
+            throw new IllegalArgumentException();
+        }
+        return stats.get(stat);
+    }
+
+    // set a stat to a value. If the stat doesn't exist, create it.
+    public void set(String stat, int value) {
+        stats.put(stat, value);
+    }
+
+    // change an already-existing stat by the value.
+    // throws IllegalArgumentException if the stat doesn't exist.
+    public void change(String stat, int value) {
+        if(!stats.containsKey(stat)) {
+            throw new IllegalArgumentException();
+        }
+        stats.put(stat, stats.get(stat) + value);
+    }
+
+    // creates a deep copy of stats
+    public Stats clone() {
+        Stats newStats = new Stats();
+        for(Map.Entry<String, Integer> e : stats.entrySet()) {
+            newStats.set(e.getKey(), e.getValue());
+        }
+        return newStats;
+    }
+
+    // string rep of the stats.
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for(Map.Entry<String, Integer> e : stats.entrySet()) {
+            s.append(e.getKey());
+            s.append(": ");
+            s.append(e.getValue());
+            s.append("\n");
+        }
+        return s.toString();
+    }
+}
+
+class ReadOnlyStats {
+    private Stats stats;
+    public ReadOnlyStats(Stats stats) {
+        this.stats = stats;
+    }
+    public int get(String stat) {
+        return stats.get(stat);
+    }
+    public String toString() {
+        return stats.toString();
+    }
+}
+
 class Player {
     public static String playerRep = "\033[33m++\033[0m";
     public static final int DEFAULT_HEALTH = 10;
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
+    public static final int DEFAULT_XP = 0;
 
     private int x;
-    private int y;
-    private int health;
-    private int dmg;
-    private int speed;
+    private int y; 
+    private Stats baseStats;
+    private Stats stats;
 
     public Player(int x, int y) {
         this.x = x;
         this.y = y;
-        this.health = DEFAULT_HEALTH;
-        this.dmg = DEFAULT_DMG;
-        this.speed = DEFAULT_SPEED;
+
+        baseStats = new Stats();
+        stats = new Stats();
+
+        baseStats.set("health", DEFAULT_HEALTH);
+        baseStats.set("dmg", DEFAULT_DMG);
+        baseStats.set("speed", DEFAULT_SPEED);
+        baseStats.set("xp", DEFAULT_XP);
+
+        stats = baseStats.clone();
     }
 
     public void moveTo(int x, int y) {
@@ -291,32 +383,32 @@ class Player {
         return y;
     }
 
-    public void changeHealth(int delta) {
-        health += delta;
+    public ReadOnlyStats getBaseStats() {
+        return new ReadOnlyStats(baseStats);
     }
 
-    public void changeDmg(int delta) {
-        dmg += delta;
+    public ReadOnlyStats getStats() {
+        return new ReadOnlyStats(stats);
     }
 
-    public void changeSpeed(int delta) {
-        speed += delta;
+    public void upgradeBaseStat(String stat) {
+        if(stat.equals("xp")) {
+            System.out.println("You can't upgrade your XP!");
+        } else if (baseStats.get(stat) < stats.get("xp")) {
+            baseStats.change(stat, 1);
+            stats.change("xp", -baseStats.get(stat));
+            stats.set(stat, baseStats.get(stat));
+        } else {
+            System.out.println("Not enough XP to upgrade stat. You need " + (baseStats.get(stat) + 1) + " xp.");
+        }
     }
 
-    public int dmg() {
-        return dmg;
-    }
-
-    public int health() {
-        return health;
-    }
-
-    public int speed() {
-        return speed;
+    public void changeStat(String stat, int amount) {
+        stats.change(stat, amount);
     }
 
     public boolean isDead() {
-        return health <= 0;
+        return stats.get("health") <= 0;
     }
 
     public String toString() {
@@ -325,16 +417,16 @@ class Player {
 }
 
 class Mob {
-    private int health;
-    private int maxHealth;
-    private int aggression;
-    private int dmg;
-
     private String name;
-    private HashMap<String, String[]> quoteTypeToQuoteList;
     private StringBuilder img = new StringBuilder("");
+    private HashMap<String, String[]> quoteTypeToQuoteList;
+    private Stats baseStats;
+    private Stats stats;
+
 
     public Mob(int mobType, String mobFile) {
+        baseStats = new Stats();
+        stats = new Stats();
         try {
             quoteTypeToQuoteList = new HashMap<>();
             int mob = 0;
@@ -361,16 +453,10 @@ class Mob {
                     else if(dataType.equals("img:")) {
                         gettingImg = true;
                     }
-                    else if(dataType.equals("health:")) {
-                        maxHealth = tokenizer.nextInt();
-                        health = maxHealth;
-                    } else if (dataType.equals("aggression:")) {
-                        aggression = tokenizer.nextInt();
-                    }
-                    else if(dataType.equals("dmg:")) {
-                        dmg = tokenizer.nextInt();
-                    }
-                    else {
+                    else if(tokenizer.hasNextInt()) {
+                        String colonRemoved = dataType.substring(0, dataType.length() - 1);
+                        baseStats.set(colonRemoved, tokenizer.nextInt());
+                    } else {
                         String[] quotes = getRemainingInputAsStringArray(tokenizer);
                         String colonRemoved = dataType.substring(0, dataType.length() - 1);
                         quoteTypeToQuoteList.put(colonRemoved, quotes);
@@ -382,26 +468,23 @@ class Mob {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+        stats = baseStats.clone();
     }
 
-    public int aggression() {
-        return aggression;
+    public ReadOnlyStats getBaseStats() {
+        return new ReadOnlyStats(stats);
     }
 
-    public int health() {
-        return health;
+    public ReadOnlyStats getStats() {
+        return new ReadOnlyStats(stats);
+    }
+
+    public void changeStat(String stat, int amount) {
+        stats.change(stat, amount);
     }
 
     public boolean isDead() {
-        return health <= 0;
-    }
-
-    public int dmg() {
-        return dmg;
-    }
-
-    public void changeHealth(int delta) {
-        health += delta;
+        return stats.get("health") <= 0;
     }
 
     public String name() {
