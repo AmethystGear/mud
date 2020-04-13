@@ -13,6 +13,8 @@ public class Mud {
 
     private static final String[] BLOCK_TYPES = new String[]{"  ", "\033[92m░░\033[0m", "██"};
     private static final String MOB_FILE = "mobs.txt";
+    private static final String SAVE = "save.txt";
+
     private static int NUM_MOB_TYPES = 0;
 
     private static boolean hasNeighbor(int x, int y, int type, int[][] worldMap) {
@@ -20,7 +22,7 @@ public class Mud {
                 || worldMap[x][max(0, y - 1)] == type || worldMap[max(0, x - 1)][y] == type;
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws Exception {
         Scanner fr = new Scanner(new File(MOB_FILE)); // find the number of mobs
         while (fr.hasNextLine()) {
             if(fr.nextLine().trim().equals("/begin/")) {
@@ -76,7 +78,12 @@ public class Mud {
             spawnY = rand(0, MAP_SIZE - 1);
         }
 
-        Player player = new Player(spawnX, spawnY);
+        Player player;
+        if(new File(SAVE).exists() && !new File(SAVE).isDirectory()) {
+            player = new Player(spawnX, spawnY, SAVE);
+        } else {
+            player = new Player(spawnX, spawnY);
+        }
         Scanner in = new Scanner(System.in);
 
 
@@ -109,6 +116,11 @@ public class Mud {
             if(action.equals("quit")) {
                 break;
             }
+            if(action.equals("save")) {
+                player.updateXP();
+                player.getBaseStats().saveTo(SAVE);
+                continue;
+            }
             if(action.equals("stat")){
                 System.out.println("Base stats: ");
                 System.out.print(player.getBaseStats().toString());
@@ -125,6 +137,7 @@ public class Mud {
                     System.out.println("Stats: ");
                     System.out.print(mobToFight.getStats().toString());
                 }
+                continue;
             }
             if(action.equals("upgrade")) {
                 System.out.print("Enter stat to upgrade: ");
@@ -133,7 +146,8 @@ public class Mud {
                     player.upgradeBaseStat(stat);
                 } catch (IllegalArgumentException e) {
                     System.out.println("that stat doesn't exist!");
-                }                
+                }
+                continue;             
             }
             if(isFightingMob) { // mob fight world
                 if(action.equals("attack")) {
@@ -286,6 +300,16 @@ class Stats {
         stats = new HashMap<>();
     }
 
+    public Stats (String saveFile) throws FileNotFoundException {
+        stats = new HashMap<>();
+        Scanner scan = new Scanner(new File(saveFile));
+        while(scan.hasNext()) {
+            String s = scan.next();
+            int i = scan.nextInt();
+            set(s, i);
+        }
+    }
+
     // get a stat. If it doesn't exist, throw an IllegalArgumentException.
     public int get(String stat) {
         if(!stats.containsKey(stat) || stats.get(stat) == null) {
@@ -317,6 +341,17 @@ class Stats {
         return newStats;
     }
 
+    public void saveTo(String file) throws Exception {
+        PrintWriter writer = new PrintWriter(file, "UTF-8");
+        for(Map.Entry<String, Integer> e : stats.entrySet()) {
+            writer.write(e.getKey());
+            writer.write(" ");
+            writer.write(e.getValue() + "");
+            writer.write("\n");
+        }
+        writer.close();
+    }
+
     // string rep of the stats.
     public String toString() {
         StringBuilder s = new StringBuilder();
@@ -341,6 +376,9 @@ class ReadOnlyStats {
     public String toString() {
         return stats.toString();
     }
+    public void saveTo(String file) throws Exception {
+        stats.saveTo(file);
+    }
 }
 
 class Player {
@@ -351,22 +389,22 @@ class Player {
     public static final int DEFAULT_XP = 0;
 
     private int x;
-    private int y; 
+    private int y;
     private Stats baseStats;
     private Stats stats;
 
+    public Player(int x, int y, String save) throws Exception {
+        moveTo(x, y);
+        baseStats = new Stats(save);
+        stats = baseStats.clone();
+    }
+
     public Player(int x, int y) {
-        this.x = x;
-        this.y = y;
-
+        moveTo(x, y);
         baseStats = new Stats();
-        stats = new Stats();
-
         baseStats.set("health", DEFAULT_HEALTH);
         baseStats.set("dmg", DEFAULT_DMG);
         baseStats.set("speed", DEFAULT_SPEED);
-        baseStats.set("xp", DEFAULT_XP);
-
         stats = baseStats.clone();
     }
 
@@ -401,6 +439,10 @@ class Player {
         } else {
             System.out.println("Not enough XP to upgrade stat. You need " + (baseStats.get(stat) + 1) + " xp.");
         }
+    }
+
+    public void updateXP() {
+        baseStats.set("xp", stats.get("xp"));
     }
 
     public void changeStat(String stat, int amount) {

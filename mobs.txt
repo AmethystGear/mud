@@ -41,7 +41,7 @@ mob-victory: "THREAT-NEUTRALIZED"
 health: 20
 aggression: 90
 dmg: 1
-xp: 3
+xp: 5
 img:
                             @#**/**/#/#       
                         (** .. (*/ *@@    
@@ -72,7 +72,7 @@ mob-victory: "you_are_a_sad_excuse_for_a_loser._very_sad._SAD!"
 health: 7
 aggression: 100
 dmg: 1
-xp: 2
+xp: 3
 img:
 
 &&&&&&&@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&@@&&&&@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -244,3 +244,178 @@ img:
                                                             @@@@@@@/                                                           @@@@                                     
                                                                   @@@@@@@@@@@@                                                @@@@                                       
                                                                                                         @@@@@@@@@@@@@@@     
+
+/begin/
+name: Honour Mage
+entrance: "Pass-my-trial-and-I-shall-reward-you"
+attack: *Take-that* *Zap!!!!*
+player-run: "You-lack-courage"
+player-victory: *Well-done!*
+mob-victory: *I-mourn-for-the-breaking-down-of-honour*
+aggression: 77
+dmg: 3
+xp: 10
+health: 3
+img:
+
+                       .
+
+                        .
+              /^\     .
+         /\   "V"
+        /__\   I      O  o
+       //..\\  I     .
+       \].`[/  I
+       /l\/j\  (]    .  O
+      /. ~~ ,\/I          .
+      \\L__j^\/I       o
+       \/--v}  I     o   .
+       |    |  I   _________
+       |    |  I c(`       ')o
+       |    l  I   \.     ,/
+     _/j  L l\_!  _//^---^\\_   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/begin/
+name: Ben - the Dragon at the End
+entrance: "How-dare-you-disturb-my-slumber!"
+attack: *Leave-at-once!* *RAAAAAAWWWWRRRRR!!!!*
+player-run: "Atleast-you-have-some-concience"
+player-victory: *How-could-a-mere-mortal...*
+mob-victory: *Puny-Mortal*
+aggression: 100
+dmg: 20
+xp: 10
+health: 5
+img:
+             __.-/|
+             \`o_O'
+              =( )=  +-----+
+                U|   | BEN |
+      /\  /\   / |   +-----+
+     ) /^\) ^\/ _)\     |
+     )   /^\/   _) \    |
+     )   _ /  / _)  \___|_
+ /\  )/\/ ||  | )_)\___,|))
+<  >      |(,,) )__)    |
+ ||      /    \)___)\
+ | \____(      )___) )____
+  \______(_______;;;)__;;;)
+
+/begin/
+name: Snagget the Hagget
+entrance: "myhfs-has-done-well"
+attack: *Communal-bathrooms!* *Tiny-Corridors!!!*
+player-run: "Atleast-you-have-some-concience"
+player-victory: *We-are-permanently-closed*
+mob-victory: *Thanks-for-dorming-with-us,-Mwahahaha*
+aggression: 10
+dmg: 1
+xp: -1
+health: 30
+img:
+
+                           o                    
+                       _---|         _ _ _ _ _ 
+                    o   ---|     o   ]-I-I-I-[ 
+   _ _ _ _ _ _  _---|      | _---|    \ ` ' / 
+   ]-I-I-I-I-[   ---|      |  ---|    |.   | 
+    \ `   '_/       |     / \    |    | /^\| 
+     [*]  __|       ^    / ^ \   ^    | |*|| 
+     |__   ,|      / \  /    `\ / \   | ===| 
+  ___| ___ ,|__   /    /=_=_=_=\   \  |,  _|
+  I_I__I_I__I_I  (====(_________)___|_|____|____
+  \-\--|-|--/-/  |     I  [ ]__I I_I__|____I_I_| 
+   |[]      '|   | []  |`__  . [  \-\--|-|--/-/  
+   |.   | |' |___|_____I___|___I___|---------| 
+  / \| []   .|_|-|_|-|-|_|-|_|-|_|-| []   [] | 
+ <===>  |   .|-=-=-=-=-=-=-=-=-=-=-|   |    / \  
+ ] []|`   [] ||.|.|.|.|.|.|.|.|.|.||-      <===> 
+ ] []| ` |   |/////////\\\\\\\\\\.||__.  | |[] [ 
+ <===>     ' ||||| |   |   | ||||.||  []   <===>
+  \T/  | |-- ||||| | O | O | ||||.|| . |'   \T/ 
+   |      . _||||| |   |   | ||||.|| |     | |
+../|' v . | .|||||/____|____\|||| /|. . | . ./
+.|//\............/...........\........../../\\\
+
+/begin/
+name: The Game of Life
+entrance: "Now-you-can't-leave!!!!"
+attack: *Mine!!!* *Mine-Mine-Mine!*
+player-run: "Mwahahaha-You-can-run-from-the-game,-but-you-can't-hide!"
+player-victory: *How?-That-was-4010-Pushups!?*
+mob-victory: *Not-even-one-pushup?*
+aggression: 100
+dmg: 10
+xp: 4010
+health: 1000
+img:
+
+||\                  /||  ----------------------- ||\           || -------------------------
+|| \                / ||             ||           || \          || ||
+||  \              /  ||             ||           ||  \         || ||
+||   \            /   ||             ||           ||   \        || ||
+||    \          /    ||             ||           ||    \       || ||
+||     \        /     ||             ||           ||     \      || ||-----------------------
+||      \      /      ||             ||           ||      \     || ||
+||       \    /       ||             ||           ||       \    || ||
+||        \  /        ||             ||           ||        \   || ||
+||         \/         ||             ||           ||         \  || ||
+||                    ||  ----------------------- ||          \ || --------------------------
+
+/begin/
+name: Linux
+entrance: "Complicated-Setup-Jargon" "COMMUNISM-WINS!!!"
+attack: *not-recognized* *Permission-Denied* "COMMUNISM-WINS!!!"
+player-run: "I-was-too-complicated!!!" "YOU-DID-NOT-USE-SUDO" "COMMUNISM-WINS!!!"
+player-victory: "I-shall-forever-be-under-your-command" "COMMUNISM-WINS!!!"
+mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
+aggression: 75
+dmg: 5
+xp: 10
+health: 10
+img:
+                                                                 #####
+                                                                #######
+                   #                                            ##O#O##
+  ######          ###                                           #VVVVV#
+    ##             #                                          ##  VVV  ##
+    ##         ###    ### ####   ###    ###  ##### #####     #          ##
+    ##        #  ##    ###    ##  ##     ##    ##   ##      #            ##
+    ##       #   ##    ##     ##  ##     ##      ###        #            ###
+    ##          ###    ##     ##  ##     ##      ###       QQ#           ##Q
+    ##       # ###     ##     ##  ##     ##     ## ##    QQQQQQ#       #QQQQQQ
+    ##      ## ### #   ##     ##  ###   ###    ##   ##   QQQQQQQ#     #QQQQQQQ
+  ############  ###   ####   ####   #### ### ##### #####   QQQQQ#######QQQQQ
+
+/begin/
+name: ARCH Linux
+entrance: "KEEP_IT_SIMPLE" 
+attack: "error:-failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error:-failed-retrieving-file"
+player-run: "Btw I use ARCH"
+player-victory: "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
+mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
+aggression: 100
+dmg: 10
+xp: 20
+health: 20
+img:
+                   -`
+                  .o+`
+                 `ooo/
+                `+oooo:
+               `+oooooo:
+               -+oooooo+:
+             `/:-:++oooo+:
+            `/++++/+++++++:
+           `/++++++++++++++:
+          `/+++ooooooooooooo/`
+         ./ooosssso++osssssso+`
+        .oossssso-````/ossssss+`
+       -osssssso.      :ssssssso.
+      :osssssss/        osssso+++.
+     /ossssssss/        +ssssooo/-
+   `/ossssso+/:-        -:/+osssso+-
+  `+sso+:-`                 `.-/+oso:
+ `++:.                           `-/+/
+ .`                                 `
