@@ -11,15 +11,76 @@ public class Mud {
     private static final int FILLED_BLOCK_SPAWN_CHANCE = 5;
     private static final int FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 50;
 
-    private static final String[] BLOCK_TYPES = new String[]{"  ", "\033[92m░░\033[0m", "██"};
+    private static final String[] BLOCK_TYPES = new String[]{"  ", 
+                                                             "\033[48;5;149m  \033[0m",
+                                                             "\033[48;5;245m  \033[0m",
+                                                             "\033[48;5;136m  \033[0m",
+                                                             "\033[48;5;94m  \033[0m"};
+    private static final String[] BLOCK_TYPES_DESCR = new String[]{"plain", "grass", "rock", "village floor", "village wall"};
     private static final String MOB_FILE = "mobs.txt";
-    private static final String SAVE = "save.txt";
+    private static final String STATS_SAVE = "stats-save.txt";
+    private static final String INVENTORY_SAVE = "inventory-save.txt";
 
     private static int NUM_MOB_TYPES = 0;
 
     private static boolean hasNeighbor(int x, int y, int type, int[][] worldMap) {
         return worldMap[min(MAP_SIZE - 1, x + 1)][y] == type || worldMap[x][min(MAP_SIZE - 1, y + 1)] == type
                 || worldMap[x][max(0, y - 1)] == type || worldMap[max(0, x - 1)][y] == type;
+    }
+
+    private static boolean fileExists(String file) {
+        return new File(file).exists() && !new File(file).isDirectory();
+    }
+
+
+    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap) {
+        int villageLength = rand(8, 30) * 5;
+        int pathSize = rand(3, 5);
+        for(int x = xOrigin; x < xOrigin + villageLength; x++) {
+            for(int y = yOrigin; y < yOrigin + pathSize; y++) {
+                worldMap[x][y] = 3;
+                mobMap[x][y] = 0;
+            }
+        }
+        boolean generateUp = false;
+        for(int x = xOrigin + rand(2, 5); x < xOrigin + villageLength; x+= rand(5, 10)) {
+            int pathlen = rand(3, 10);
+            int hutSize = rand(2, 4);
+            if(generateUp) {
+                for(int y = yOrigin; y > yOrigin - pathlen; y--) {
+                    worldMap[x][y] = 3;
+                    mobMap[x][y] = 0;
+                }
+                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, mobMap);
+            } else {
+                for(int y = yOrigin + pathSize; y < yOrigin + pathlen + pathSize; y++) {
+                    worldMap[x][y] = 3;
+                    mobMap[x][y] = 0;
+                }
+                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, mobMap);
+            }
+            generateUp = !generateUp;
+        }
+    }
+
+    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, int[][] mobMap) {
+        size = size * 2 + 1;
+        for(int x = xOrigin; x < xOrigin + size; x++) {
+            for(int y = yOrigin; y < yOrigin + size; y++) {
+                worldMap[x][y] = 3;
+                mobMap[x][y] = 0;
+            }
+        }
+        for(int x = xOrigin; x < xOrigin + size; x++) {
+            if(x - xOrigin != size/2) {
+                worldMap[x][yOrigin] = 4;
+                worldMap[x][yOrigin + size - 1] = 4;
+            }
+        }
+        for(int y = yOrigin; y < yOrigin + size; y++) {
+            worldMap[xOrigin][y] = 4;
+            worldMap[xOrigin + size - 1][y] = 4;
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -69,6 +130,14 @@ public class Mud {
                 }
             }
         }
+
+        int numVillages = rand(50, 100);
+        for(int i = 0; i < numVillages; i++) {
+            int x = rand(500, 2500);
+            int y = rand(500, 2500);
+            System.out.println(x + ", " + y);
+            spawnVillage(x, y, worldMap, mobMap);
+        }
         
         // assign spawn location to a place that is open and doesn't have a mob.
         int spawnX = rand(0, MAP_SIZE - 1);
@@ -79,27 +148,13 @@ public class Mud {
         }
 
         Player player;
-        if(new File(SAVE).exists() && !new File(SAVE).isDirectory()) {
-            player = new Player(spawnX, spawnY, SAVE);
+
+        if(fileExists(STATS_SAVE) && fileExists(INVENTORY_SAVE)) {
+            player = new Player(spawnX, spawnY, STATS_SAVE, INVENTORY_SAVE);
         } else {
             player = new Player(spawnX, spawnY);
         }
         Scanner in = new Scanner(System.in);
-
-
-        System.out.print("Do you want ascii only? This is for players that don't support unicode (y/n): ");
-        String inp = in.nextLine();
-        while(!inp.equals("y") && !inp.equals("n")) {
-            System.out.print("please enter (y/n): ");
-            inp = in.nextLine();
-        }
-
-        if(inp.equals("y")) {
-            BLOCK_TYPES[0] = "  ";
-            BLOCK_TYPES[1] = "..";
-            BLOCK_TYPES[2] = "@@";
-            Player.playerRep = "++";
-        }
 
         Mob mobToFight = null;
         boolean isFightingMob = false;
@@ -116,9 +171,18 @@ public class Mud {
             if(action.equals("quit")) {
                 break;
             }
+            if(action.equals("tp")) {
+                isFightingMob = false;
+                System.out.print("Enter x: ");
+                int x = Integer.parseInt(in.nextLine());
+                System.out.print("Enter y: ");
+                int y = Integer.parseInt(in.nextLine());
+                player.moveTo(x, y);
+            }
             if(action.equals("save")) {
                 player.updateXP();
-                player.getBaseStats().saveTo(SAVE);
+                player.getBaseStats().saveTo(STATS_SAVE);
+                player.getInventory().saveTo(INVENTORY_SAVE);
                 continue;
             }
             if(action.equals("stat")){
@@ -387,16 +451,19 @@ class Player {
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
     public static final int DEFAULT_XP = 0;
+    public static final int XP_MULTIPLIER = 100;
 
     private int x;
     private int y;
     private Stats baseStats;
     private Stats stats;
+    private Stats inventory;
 
-    public Player(int x, int y, String save) throws Exception {
+    public Player(int x, int y, String statsSave, String inventorySave) throws Exception {
         moveTo(x, y);
-        baseStats = new Stats(save);
+        baseStats = new Stats(statsSave);
         stats = baseStats.clone();
+        inventory = new Stats(inventorySave);
     }
 
     public Player(int x, int y) {
@@ -405,7 +472,9 @@ class Player {
         baseStats.set("health", DEFAULT_HEALTH);
         baseStats.set("dmg", DEFAULT_DMG);
         baseStats.set("speed", DEFAULT_SPEED);
+        baseStats.set("xp", DEFAULT_XP);
         stats = baseStats.clone();
+        inventory = new Stats();
     }
 
     public void moveTo(int x, int y) {
@@ -429,24 +498,30 @@ class Player {
         return new ReadOnlyStats(stats);
     }
 
+    public ReadOnlyStats getInventory() {
+        return new ReadOnlyStats(inventory);
+    }
+
     public void upgradeBaseStat(String stat) {
         if(stat.equals("xp")) {
             System.out.println("You can't upgrade your XP!");
-        } else if (baseStats.get(stat) < stats.get("xp")) {
+        } else if (baseStats.get(stat) < stats.get("xp") * XP_MULTIPLIER) {
             baseStats.change(stat, 1);
-            stats.change("xp", -baseStats.get(stat));
+            stats.change("xp", -baseStats.get(stat) * XP_MULTIPLIER);
             stats.set(stat, baseStats.get(stat));
         } else {
-            System.out.println("Not enough XP to upgrade stat. You need " + (baseStats.get(stat) + 1) + " xp.");
+            System.out.println("Not enough XP to upgrade stat. You need " + (baseStats.get(stat) + 1) * XP_MULTIPLIER + " xp.");
         }
-    }
-
-    public void updateXP() {
-        baseStats.set("xp", stats.get("xp"));
+        updateXP();
     }
 
     public void changeStat(String stat, int amount) {
         stats.change(stat, amount);
+        updateXP();
+    }
+
+    public void updateXP() {
+        baseStats.set("xp", stats.get("xp"));
     }
 
     public boolean isDead() {
