@@ -1,0 +1,28 @@
+import java.util.*;
+
+public class ScannerUtils {
+    public static String[] getRemainingInputAsStringArray(Scanner s) {
+        ArrayList<String> a = new ArrayList<>();
+        while(s.hasNext()) {
+            a.add(s.next().replace('_', ' ').replace('-', ' '));
+        }
+        String [] arr = new String[a.size()];
+        for(int i = 0; i < arr.length; i++) {
+            arr[i] = a.get(i);
+        }
+        return arr;
+    }
+
+    public static String getRemainingInputAsString(Scanner s) {
+        String [] input = getRemainingInputAsStringArray(s);
+        if(input.length > 0) {
+            StringBuilder concat = new StringBuilder(input[0]);
+            for(int i = 1; i < input.length; i++) {
+                concat.append(input[i]);
+            }
+            return concat.toString();
+        } else {
+            return "";
+        }
+    }
+}

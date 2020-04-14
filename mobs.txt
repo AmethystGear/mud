@@ -1,17 +1,18 @@
 /begin/
-name: Aurelius Knight
-entrance: "I-have-come-to-do-battle!" "Fight-me!-Fight-me!-Fight-me!"
-attack: "I-fight-for-HONOUR!"
-player-run: "You-have-no-honour!" "Come-back-and-fight-me,-scum!" "Alas!-Chivalry-is-dead!"
-player-victory: "Alas!-I-am-slain!"
-mob-victory: "You-were-a-worthy-adversary."
-health: 10
-aggression: 50
-xp: 0
-dmg: -1
-drops: "rusty-sword" "broken-armor" "missspelled-incantation" 
-drop-max: 3
-drop-min: 0
+name  Aurelius Knight
+entrance  "I-have-come-to-do-battle!" "Fight-me!-Fight-me!-Fight-me!"
+attack  "I-fight-for-HONOUR!"
+player-run  "You-have-no-honour!" "Come-back-and-fight-me,-scum!" "Alas!-Chivalry-is-dead!"
+player-victory  "Alas!-I-am-slain!"
+mob-victory  "You-were-a-worthy-adversary."
+health  10
+aggression  50
+xp  0
+dmg  -1
+drops  "rusty-sword" "broken-armor" "missspelled-incantation" 
+drop-max  3
+drop-min  0
+/end/
 img:
                    _.--.    .--._
                  ."  ."      ".  ".
@@ -30,24 +31,25 @@ img:
    _(  \  \   \"=--"-.  |  |  .-"--="/   /  /  )_
  ,"  \  \  \   \      "-'--'-"      /   /  /  /  ".
 !     \  \  \   \                  /   /  /  /     !
-:      \  \  \   \                /   /  /  /      TK
+       \  \  \   \                /   /  /  /      TK
 
 
 
 /begin/
-name: Sentinel
-entrance: "THEAT-DETECTED" *ANGRY-BOOP*
-attack: *ANGRY-BOOP* "PEW-PEW" "No-free-slots-left-in-suit-inventory"
-player-run: "THEAT-SUBSIDING"
-player-victory: "sad-boop" *sentinel-explodes*
-mob-victory: "THREAT-NEUTRALIZED"
-health: 20
-aggression: 90
-dmg: 1
-xp: 100
-drops: "pugenum"
-drop-max: 20
-drop-min: 5
+name  Sentinel
+entrance  "THEAT-DETECTED" *ANGRY-BOOP*
+attack  *ANGRY-BOOP* "PEW-PEW" "No-free-slots-left-in-suit-inventory"
+player-run  "THEAT-SUBSIDING"
+player-victory  "sad-boop" *sentinel-explodes*
+mob-victory  "THREAT-NEUTRALIZED"
+health  20
+aggression  90
+dmg  1
+xp  100
+drops  "pugenum"
+drop-max  20
+drop-min  5
+/end/
 img:
                             @#**/**/#/#       
                         (** .. (*/ *@@    
@@ -69,16 +71,17 @@ img:
                                 @/.*@@@       
                                 @#*(@
 /begin/
-name: Donald Trump
-entrance: "I_am_the_best_at_fighting_ever._Trust_me._I'm_the_best._People_tell_me_how_good_I_am"
-attack: "This_punch_is_gonna_hurt_bigly" "Don't_Misunderestimate_me" "I'm_THE_COOLEST"
-player-run: "Smart!_Well,_not_as_smart_as_me,_but_smart._you_avoided_a_yuge_loss"
-player-victory: "That_was_my_greatest_victory_yet._I_WIN!!!!_If_you_say_otherwise,_it_is_FAKE_NEWS._SAD!"
-mob-victory: "you_are_a_sad_excuse_for_a_loser._very_sad._SAD!"
-health: 7
-aggression: 100
-dmg: 1
-xp: 200
+name  Donald Trump
+entrance  "I_am_the_best_at_fighting_ever._Trust_me._I'm_the_best._People_tell_me_how_good_I_am"
+attack  "This_punch_is_gonna_hurt_bigly" "Don't_Misunderestimate_me" "I'm_THE_COOLEST"
+player-run  "Smart!_Well,_not_as_smart_as_me,_but_smart._you_avoided_a_yuge_loss"
+player-victory  "That_was_my_greatest_victory_yet._I_WIN!!!!_If_you_say_otherwise,_it_is_FAKE_NEWS._SAD!"
+mob-victory  "you_are_a_sad_excuse_for_a_loser._very_sad._SAD!"
+health  7
+aggression  100
+dmg  1
+xp  200
+/end/
 img:
 
 &&&&&&&@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&@@&&&&@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -112,16 +115,17 @@ img:
 ((#####%%%#####%%%&&&*     /&&&&&#%&&&&@%%%%%###*.......  .*%&&&%%%%%%%#%%&&&&&&
 
 /begin/
-name: Coronavirus
-entrance: "OH_NO!_you_contracted_the_coronavirus_because_an_Auraelius_Knight_coughed_on_you"
-attack: "Social_distance_or_I_will_get_stronger"
-player-run: "I_see_you_decided_to_self-quarantine"
-player-victory: "Wow_you_found_the_vaccine"
-mob-victory: "deth"
-health: 20
-aggression: 50
-dmg: 100
-xp: 3000
+name  Coronavirus
+entrance  "OH_NO!_you_contracted_the_coronavirus_because_an_Auraelius_Knight_coughed_on_you"
+attack  "Social_distance_or_I_will_get_stronger"
+player-run  "I_see_you_decided_to_self-quarantine"
+player-victory  "Wow_you_found_the_vaccine"
+mob-victory  "deth"
+health  20
+aggression  50
+dmg  100
+xp  3000
+/end/
 img:
                      (#        ((       *(#                                    
                      (((#      (((#      (((#       ((                          
@@ -153,20 +157,21 @@ img:
                                 #((.     #((       
 
 /begin/
-name: Depressed Slime
-entrance: *PLORP*
-attack: *SQUISH* *SLURPPP*
-player-run: "..."
-player-victory: *PLORP*
-mob-victory: *sad-slime-noises*
-aggression: 20
-health: 2
-dmg: 1
-xp: 50
-drops: "disgusting-slime" "viscous-fluids"
-drop-min: 3
-drop-max: 17
-trade: 5
+name  Depressed Slime
+entrance  *PLORP*
+attack  *SQUISH* *SLURPPP*
+player-run  "..."
+player-victory  *PLORP*
+mob-victory  *sad-slime-noises*
+aggression  20
+health  2
+dmg  1
+xp  50
+drops  "disgusting-slime" "viscous-fluids"
+drop-min  3
+drop-max  17
+trade  5
+/end/
 img:
                                                @*//////.@                       
                                            @**//*,*////,*//@                    
@@ -189,26 +194,27 @@ img:
   @@@@/*/,,.     *,,..///.,   (/(*/*, ,@@@@@@@@@@,.  .#@@(    /@@@@@@@@@@@
 
 /begin/
-name: Existential Anxiety
-entrance: "Life_has_no_meaning"
-attack: "Everything_will_end" "There_is_no_reason_to_do_anything"
-player-run: "You_can_never_truly_escape_self_doubt!"
-player-victory: "I_see_you_have_given_your_OWN_life_MEANING" *evaporates-like-a-ghost.It-was-never-truly-there-to-begin-with.*
-mob-victory: "YOU_ARE_NOTHING!"
-health: 3
-dmg: 6
-xp: 400
-aggression: 40
+name  Existential Anxiety
+entrance  "Life_has_no_meaning"
+attack  "Everything_will_end" "There_is_no_reason_to_do_anything"
+player-run  "You_can_never_truly_escape_self_doubt!"
+player-victory  "I_see_you_have_given_your_OWN_life_MEANING" *evaporates-like-a-ghost.It-was-never-truly-there-to-begin-with.*
+mob-victory  "YOU_ARE_NOTHING!"
+health  3
+dmg  6
+xp  400
+aggression  40
 
 /begin/
-name: Troll
-entrance: "Lol"
-player-run: "Trolololololololol"
-player-victory: "Trolololololololol"
-aggression: 100
-dmg: 0
-xp: -50
-health: 0
+name  Troll
+entrance  "Lol"
+player-run  "Trolololololololol"
+player-victory  "Trolololololololol"
+aggression  100
+dmg  0
+xp  -50
+health  0
+/end/
 img:
                                           ,*/((#%%%&&&@@&&&%%(/,.                                                                                                       
                             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.                                                                   
@@ -256,21 +262,22 @@ img:
                                                                                                         @@@@@@@@@@@@@@@     
 
 /begin/
-name: Honour Mage
-entrance: "Pass-my-trial-and-I-shall-reward-you"
-attack: *Take-that* *Zap!!!!*
-player-run: "You-lack-courage"
-player-victory: *Well-done!*
-mob-victory: *I-mourn-for-the-breaking-down-of-honour*
-aggression: 77
-dmg: 4
-xp: 330
-health: 4
-drops: "Mage's-Staff" "missspelled-incantation"
-drop-min: 0
-drop-max: 1
-trade: 5
-trade-xp: 100
+name  Honour Mage
+entrance  "Pass-my-trial-and-I-shall-reward-you"
+attack  *Take-that* *Zap!!!!*
+player-run  "You-lack-courage"
+player-victory  *Well-done!*
+mob-victory  *I-mourn-for-the-breaking-down-of-honour*
+aggression  77
+dmg  4
+xp  330
+health  4
+drops  "Mage's-Staff" "missspelled-incantation"
+drop-min  0
+drop-max  1
+trade  5
+trade-xp  100
+/end/
 img:
 
                        .
@@ -292,19 +299,20 @@ img:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /begin/
-name: Ben - the Dragon at the End
-entrance: "How-dare-you-disturb-my-slumber!"
-attack: *Leave-at-once!* *RAAAAAAWWWWRRRRR!!!!*
-player-run: "Atleast-you-have-some-concience"
-player-victory: *How-could-a-mere-mortal...*
-mob-victory: *Puny-Mortal*
-aggression: 100
-dmg: 12
-xp: 350
-health: 3
-drops: "Dragon-scales" "Dragon-heart" "Eternal-embers"
-drop-min: 0
-drop-max: 3
+name  Ben - the Dragon at the End
+entrance  "How-dare-you-disturb-my-slumber!"
+attack  *Leave-at-once!* *RAAAAAAWWWWRRRRR!!!!*
+player-run  "Atleast-you-have-some-concience"
+player-victory  *How-could-a-mere-mortal...*
+mob-victory  *Puny-Mortal*
+aggression  100
+dmg  12
+xp  350
+health  3
+drops  "Dragon-scales" "Dragon-heart" "Eternal-embers"
+drop-min  0
+drop-max  3
+/end/
 img:
              __.-/|
              \`o_O'
@@ -321,16 +329,17 @@ img:
   \______(_______;;;)__;;;)
 
 /begin/
-name: Snagget the Hagget
-entrance: "myhfs-has-done-well"
-attack: *Communal-bathrooms!* *Tiny-Corridors!!!*
-player-run: "Atleast-you-have-some-concience"
-player-victory: *We-are-permanently-closed*
-mob-victory: *Thanks-for-dorming-with-us,-Mwahahaha*
-aggression: 10
-dmg: 1
-xp: -100
-health: 30
+name  Snagget the Hagget
+entrance  "myhfs-has-done-well"
+attack  *Communal-bathrooms!* *Tiny-Corridors!!!*
+player-run  "Atleast-you-have-some-concience"
+player-victory  *We-are-permanently-closed*
+mob-victory  *Thanks-for-dorming-with-us,-Mwahahaha*
+aggression  10
+dmg  1
+xp  -100
+health  30
+/end/
 img:
 
                            o                    
@@ -357,16 +366,17 @@ img:
 .|//\............/...........\........../../\\\
 
 /begin/
-name: The Game of Life
-entrance: "Now-you-can't-leave!!!!"
-attack: *Mine!!!* *Mine-Mine-Mine!*
-player-run: "Mwahahaha-You-can-run-from-the-game,-but-you-can't-hide!"
-player-victory: *How?-That-was-4010-Pushups!?*
-mob-victory: *Not-even-one-pushup?*
-aggression: 100
-dmg: 10
-xp: 4010
-health: 100
+name  The Game of Life
+entrance  "Now-you-can't-leave!!!!"
+attack  *Mine!!!* *Mine-Mine-Mine!*
+player-run  "Mwahahaha-You-can-run-from-the-game,-but-you-can't-hide!"
+player-victory  *How?-That-was-4010-Pushups!?*
+mob-victory  *Not-even-one-pushup?*
+aggression  100
+dmg  10
+xp  4010
+health  100
+/end/
 img:
 
 ||\                  /||  ----------------------- ||\           || -------------------------
@@ -382,16 +392,17 @@ img:
 ||                    ||  ----------------------- ||          \ || --------------------------
 
 /begin/
-name: Linux
-entrance: "Complicated-Setup-Jargon" "COMMUNISM-WINS!!!"
-attack: *not-recognized* *Permission-Denied* "COMMUNISM-WINS!!!"
-player-run: "I-was-too-complicated!!!" "YOU-DID-NOT-USE-SUDO" "COMMUNISM-WINS!!!"
-player-victory: "I-shall-forever-be-under-your-command" "COMMUNISM-WINS!!!"
-mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
-aggression: 75
-dmg: 5
-xp: 500
-health: 10
+name  Linux
+entrance  "Complicated-Setup-Jargon" "COMMUNISM-WINS!!!"
+attack  *not-recognized* *Permission-Denied* "COMMUNISM-WINS!!!"
+player-run  "I-was-too-complicated!!!" "YOU-DID-NOT-USE-SUDO" "COMMUNISM-WINS!!!"
+player-victory  "I-shall-forever-be-under-your-command" "COMMUNISM-WINS!!!"
+mob-victory  "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
+aggression  75
+dmg  5
+xp  500
+health  10
+/end/
 img:
                                                                  #####
                                                                 #######
@@ -407,33 +418,34 @@ img:
   ############  ###   ####   ####   #### ### ##### #####   QQQQQ#######QQQQQ
 
 /begin/
-name: ARCH Linux
-entrance: "KEEP_IT_SIMPLE" 
-attack: "error:-failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error:-failed-retrieving-file"
-player-run: "Btw I use ARCH"
-player-victory: "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
-mob-victory: "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
-aggression: 100
-dmg: 10
-xp: 1000
-health: 20
+name  ARCH Linux
+entrance  "KEEP_IT_SIMPLE" 
+attack  "error -failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error -failed-retrieving-file"
+player-run  "Btw I use ARCH"
+player-victory  "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
+mob-victory  "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
+aggression  100
+dmg  10
+xp  1000
+health 20
+/end/
 img:
                    -`
                   .o+`
                  `ooo/
-                `+oooo:
-               `+oooooo:
-               -+oooooo+:
-             `/:-:++oooo+:
-            `/++++/+++++++:
-           `/++++++++++++++:
+                `+oooo 
+               `+oooooo 
+               -+oooooo+ 
+             `/ - ++oooo+ 
+            `/++++/+++++++ 
+           `/++++++++++++++ 
           `/+++ooooooooooooo/`
          ./ooosssso++osssssso+`
         .oossssso-````/ossssss+`
-       -osssssso.      :ssssssso.
-      :osssssss/        osssso+++.
+       -osssssso.       ssssssso.
+       osssssss/        osssso+++.
      /ossssssss/        +ssssooo/-
-   `/ossssso+/:-        -:/+osssso+-
-  `+sso+:-`                 `.-/+oso:
- `++:.                           `-/+/
+   `/ossssso+/ -        - /+osssso+-
+  `+sso+ -`                 `.-/+oso 
+ `++ .                           `-/+/
  .`                                 `
