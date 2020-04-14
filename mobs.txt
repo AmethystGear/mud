@@ -166,6 +166,7 @@ xp: 50
 drops: "disgusting-slime" "viscous-fluids"
 drop-min: 3
 drop-max: 17
+trade: 5
 img:
                                                @*//////.@                       
                                            @**//*,*////,*//@                    
@@ -268,6 +269,8 @@ health: 4
 drops: "Mage's-Staff" "missspelled-incantation"
 drop-min: 0
 drop-max: 1
+trade: 5
+trade-xp: 100
 img:
 
                        .

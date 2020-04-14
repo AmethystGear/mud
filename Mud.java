@@ -83,13 +83,47 @@ public class Mud {
         }
     }
 
+    private static String[] getRemainingInputAsStringArray(Scanner s) {
+        ArrayList<String> a = new ArrayList<>();
+        while(s.hasNext()) {
+            String next = s.next();
+            String spacesAdded = next.replace('-', ' ').replace('_', ' ');
+            a.add(spacesAdded);
+
+        }
+        String [] arr = new String[a.size()];
+        for(int i = 0; i < a.size(); i++) {
+            arr[i] = a.get(i);
+        }
+        return arr;
+    }
+
     public static void main(String[] args) throws Exception {
-        Scanner fr = new Scanner(new File(MOB_FILE)); // find the number of mobs
+
+        // find all drops, and find the number of mobs.
+        Set<String> set = new HashSet<String>();
+        Scanner fr = new Scanner(new File(MOB_FILE));
         while (fr.hasNextLine()) {
-            if(fr.nextLine().trim().equals("/begin/")) {
+            String line = fr.nextLine();
+            if(line.trim().equals("/begin/")) {
                 NUM_MOB_TYPES++;
+            } else {
+                Scanner tok = new Scanner(line);
+                if(tok.hasNext() && tok.next().equals("drops:")) {
+                    String[] drops = getRemainingInputAsStringArray(tok);
+                    for(String drop : drops) {
+                        set.add(drop);
+                    }
+                }
             }
         }
+        String [] allDrops = new String[set.size()];
+        int j = 0;
+        for(String s : set) {
+            allDrops[j] = s;
+            j++;
+        }
+
         
         int[][] worldMap = new int[MAP_SIZE][];
         for(int i = 0; i < MAP_SIZE; i++) {
@@ -249,6 +283,48 @@ public class Mud {
                     System.out.println(mobToFight.name() + ": " + mobToFight.getQuote("player-run"));
                     System.out.println("You ran away from " + mobToFight.name() + ".");
                     isFightingMob = false;
+                } else if(action.equals("trade")) {
+                    int numItems;
+                    int xp;
+                    try {
+                        numItems = mobToFight.getBaseStats().get("trade");
+                        xp = mobToFight.getBaseStats().get("trade-xp");
+                    } catch(IllegalArgumentException e) {
+                        System.out.println("You can't trade with " + mobToFight + "!");
+                        numItems = -1;
+                        xp = -1;
+                    }
+                    if(numItems != -1) {                      
+                        int x = player.x();
+                        int y = player.y();
+                        //get hash that will be unique for all x, y
+                        //this only works when x, y << INT_MAX, so make sure the map
+                        //isn't too big.
+                        int hash = x * (int)Math.pow(10, (x + "").length()) + y; 
+                        Random XYRand = new Random(hash);
+
+                        System.out.println("I can trade " + xp + " xp for each: ");
+                        String[] trades = new String[numItems];
+                        for(int i = 0; i < trades.length; i++) {
+                            trades[i] = allDrops[XYRand.nextInt(allDrops.length)];
+                            System.out.println((i + 1) + ". " + trades[i]);
+                        }
+                        System.out.print("Enter which # item you wish to trade: ");
+                        int itemNum = Integer.parseInt(in.nextLine()) - 1;
+                        try {
+                            int amount = player.getInventory().get(trades[itemNum]);
+                            System.out.print("You have " + amount + " of that item. How many do you wish to trade? ");
+                            int numToTrade = Integer.parseInt(in.nextLine());
+                            try {
+                                player.removeFromInventory(trades[itemNum], numToTrade);
+                                player.changeStat("xp", xp * numToTrade);
+                            } catch(IllegalArgumentException e) {
+                                System.out.println("You don't have enough of that item!");
+                            }
+                        } catch(IllegalArgumentException e) {
+                            System.out.println("You don't have that item!");
+                        }
+                    }
                 }
             } else { // actual world
                 if(action.equals("disp")) { //display
@@ -272,6 +348,7 @@ public class Mud {
                         player.moveTo(actualPosn, player.y());
                     }
                     System.out.println(display(10, player, worldMap));
+
                     if(mobMap[player.x()][player.y()] != 0) {                        
                         mobToFight = new Mob(mobMap[player.x()][player.y()], MOB_FILE);
                         System.out.println("You encountered " + mobToFight.name());
@@ -514,10 +591,17 @@ class Player {
         return new ReadOnlyStats(inventory);
     }
 
+    public void removeFromInventory(String item, int count) {
+        if(inventory.get(item) - count < 0) {
+            throw new IllegalArgumentException();
+        }
+        inventory.change(item, -count);
+    }
+
     public void upgradeBaseStat(String stat) {
         if(stat.equals("xp")) {
             System.out.println("You can't upgrade your XP!");
-        } else if (baseStats.get(stat) < stats.get("xp") * XP_MULTIPLIER) {
+        } else if ((baseStats.get(stat) + 1) * XP_MULTIPLIER <= stats.get("xp")) {
             baseStats.change(stat, 1);
             stats.change("xp", -baseStats.get(stat) * XP_MULTIPLIER);
             stats.set(stat, baseStats.get(stat));
