@@ -29,7 +29,7 @@ public class Mud {
 
     private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
         int floor = blocks.getBlock("village floor").BLOCK_ID;
-        int villageLength = RandUtils.rand(8, 30) * 5;
+        int villageLength = RandUtils.rand(4, 15) * 5;
         int pathSize = RandUtils.rand(3, 5);
         for(int x = xOrigin; x < xOrigin + villageLength; x++) {
             for(int y = yOrigin; y < yOrigin + pathSize; y++) {
@@ -157,7 +157,7 @@ public class Mud {
             }
         }
 
-        int numVillages = RandUtils.rand(50, 100);
+        int numVillages = RandUtils.rand(300, 400);
         for(int i = 0; i < numVillages; i++) {
             int x = RandUtils.rand(500, 2500);
             int y = RandUtils.rand(500, 2500);
@@ -316,9 +316,25 @@ public class Mud {
                     if(blocks.getBlock("surveyor").BLOCK_ID == worldMap[player.x()][player.y()]) {
                         System.out.print("Enter how far: ");
                         int dist = Integer.parseInt(in.nextLine());
-                        System.out.println(display(dist, player, worldMap, blocks));
+                        System.out.print("Enter which direction: ");
+                        String dir = in.nextLine();
+                        int xPos = player.x();
+                        int yPos = player.y();
+                        if(dir.contains("w")) {
+                            yPos -= dist;
+                        }
+                        if(dir.contains("a")) {
+                            xPos -= dist;
+                        }
+                        if(dir.contains("s")) {
+                            yPos += dist;
+                        }
+                        if(dir.contains("d")) {
+                            xPos += dist;
+                        }
+                        System.out.println(display(dist, xPos, yPos, worldMap, blocks));
                     } else {
-                        System.out.println(display((Integer)player.getBaseStats().get("view"), player, worldMap, blocks));
+                        System.out.println(display((Integer)player.getBaseStats().get("view"), player.x(), player.y(), worldMap, blocks));
                     }
                 } else if(action.charAt(0) == 'w' || action.charAt(0) == 'a' || action.charAt(0) == 's' || action.charAt(0) == 'd') { // movement
                     int dist;
@@ -348,7 +364,7 @@ public class Mud {
                         int actualPosn = move(player.x(), player.y(), true, dist, worldMap, mobMap, blocks);
                         player.moveTo(actualPosn, player.y());
                     }
-                    System.out.println(display((Integer)player.getBaseStats().get("view"), player, worldMap, blocks));
+                    System.out.println(display((Integer)player.getBaseStats().get("view"),  player.x(), player.y(), worldMap, blocks));
 
                     if(mobMap[player.x()][player.y()] != 0) {                        
                         mobToFight = new Mob(mobMap[player.x()][player.y()], MOB_FILE);
@@ -364,14 +380,13 @@ public class Mud {
         in.close();
     }
 
-    private static StringBuilder display(int dist, Player player, int[][] worldMap, Block.BlockSet blocks) {
-        System.out.println("You are at position: " + player.x() + ", " + player.y());
+    private static StringBuilder display(int dist, int xView, int yView, int[][] worldMap, Block.BlockSet blocks) {
         StringBuilder s = new StringBuilder();
-        for(int y = max(0,player.y() - dist); y < min(MAP_SIZE, player.y() + dist + 1); y++) {
+        for(int y = max(0,yView - dist); y < min(MAP_SIZE, yView + dist + 1); y++) {
             s.append("|");
-            for(int x = max(0,player.x() - dist); x < min(MAP_SIZE, player.x() + dist + 1); x++) {                    
-                if(x == player.x() && y == player.y()) {
-                    s.append(player.toString());
+            for(int x = max(0,xView - dist); x < min(MAP_SIZE, xView + dist + 1); x++) {                    
+                if(x == xView && y == yView) {
+                    s.append(Player.playerRep);
                 } else {
                     int asciiColor = (Integer)blocks.getBlock(worldMap[x][y]).STATS.get("display");
                     if(asciiColor == -1) {
