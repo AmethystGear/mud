@@ -12,6 +12,7 @@ int dmg  -1
 String[] drops  "rusty-sword" "broken-armor" "missspelled-incantation" 
 int drop-max  3
 int drop-min  0
+int speed 6
 /end/
 img:
                    _.--.    .--._
@@ -49,6 +50,7 @@ int xp  100
 String[] drops  "pugenum"
 int drop-max  20
 int drop-min  5
+int speed 3
 /end/
 img:
                             @#**/**/#/#       
@@ -81,6 +83,7 @@ int health  7
 int aggression  100
 int dmg  1
 int xp  200
+int speed 7
 /end/
 img:
 
@@ -125,6 +128,7 @@ int health  20
 int aggression  50
 int dmg  100
 int xp  3000
+int speed 1
 /end/
 img:
                      (#        ((       *(#                                    
@@ -170,6 +174,7 @@ int xp  50
 String[] drops  "disgusting-slime" "viscous-fluids"
 int drop-min  3
 int drop-max  17
+int speed 2
 /end/
 img:
                                                @*//////.@                       
@@ -203,6 +208,7 @@ int health  3
 int dmg  6
 int xp  400
 int aggression  40
+int speed 10
 /end/
 
 
@@ -213,8 +219,9 @@ String[] player-run  "Trolololololololol"
 String[] player-victory  "Trolololololololol"
 int aggression  100
 int dmg  0
-int xp  -50
+int xp  -100
 int health  0
+int speed 20
 /end/
 img:
                                           ,*/((#%%%&&&@@&&&%%(/,.                                                                                                       
@@ -278,6 +285,7 @@ int drop-min  0
 int drop-max  1
 int trade  5
 int trade-xp  100
+int speed 1
 /end/
 img:
 
@@ -313,6 +321,7 @@ int health  3
 String[] drops  "Dragon-scales" "Dragon-heart" "Eternal-embers"
 int drop-min  0
 int drop-max  3
+int speed 8
 /end/
 img:
              __.-/|
@@ -341,6 +350,7 @@ int aggression  10
 int dmg  1
 int xp  -100
 int health  30
+int speed 1
 /end/
 img:
 
@@ -379,6 +389,7 @@ int aggression  100
 int dmg  10
 int xp  4010
 int health  100
+int speed 4
 /end/
 img:
 
@@ -406,6 +417,7 @@ int aggression  75
 int dmg  5
 int xp  500
 int health  10
+int speed 25
 /end/
 img:
                                                                  #####
@@ -424,7 +436,7 @@ img:
 /begin/
 String name  ARCH Linux
 String[] entrance  "KEEP_IT_SIMPLE" 
-String[] attack  "error -failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error -failed-retrieving-file"
+String[] attack  "error-failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error-failed-retrieving-file"
 String[] player-run  "Btw I use ARCH"
 String[] player-victory  "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
 String[] mob-victory  "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!"
@@ -432,6 +444,7 @@ int aggression  100
 int dmg  10
 int xp  1000
 int health 20
+int speed 50
 /end/
 img:
                    -`

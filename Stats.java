@@ -119,7 +119,8 @@ class Stats {
     // return the object corresponding to the variable name.
     public Object get(String name) {
         if(!stats.containsKey(name)) {
-            throw new IllegalArgumentException("that variable doesn't exist!");
+
+            throw new IllegalArgumentException("that variable doesn't exist: " + name);
         }
         Object val = stats.get(name);
         // return a copy if returning an array.

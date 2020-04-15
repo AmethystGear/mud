@@ -6,6 +6,9 @@ public class ReadOnlyStats {
     public ReadOnlyStats(Stats stats) {
         this.stats = stats;
     }
+    public boolean hasVariable(String stat) {
+        return stats.hasVariable(stat);
+    }
     public Object get(String stat) {
         return stats.get(stat);
     }

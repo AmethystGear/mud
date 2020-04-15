@@ -43,14 +43,14 @@ public class Block {
 
         public Block getBlock(int ID) {
             if(!blockIDtoBlock.containsKey(ID)) {
-                throw new IllegalArgumentException("that block doesn't exist!");
+                throw new IllegalArgumentException("that block doesn't exist: " + ID);
             }
             return blockIDtoBlock.get(ID);
         }
 
         public Block getBlock(String name) {
             if(!nameToBlock.containsKey(name)) {
-                throw new IllegalArgumentException("that block doesn't exist!");
+                throw new IllegalArgumentException("that block doesn't exist: " + name);
             }
             return nameToBlock.get(name);
         }

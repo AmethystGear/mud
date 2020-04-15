@@ -123,37 +123,33 @@ public class Mud {
             mobMap[i] = new int[MAP_SIZE];
         }
 
+        Random rand = new Random(RandUtils.rand(0, 99));
+        float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
+        float waterLevel = 0.5f;
+        float sandLevel = 0.53f;
+        float grassLevel = 0.8f;
+        float tallGrassLevel = 0.82f;
         // create map
         for(int x = 0; x < MAP_SIZE; x++) {
             for(int y = 0; y < MAP_SIZE; y++) {
-                int empty = blocks.getBlock("empty").BLOCK_ID;
+                int water = blocks.getBlock("water").BLOCK_ID;
+                int sand = blocks.getBlock("sand").BLOCK_ID;
                 int grass = blocks.getBlock("grass").BLOCK_ID;
+                int tallGrass = blocks.getBlock("tall grass").BLOCK_ID;
                 int rock = blocks.getBlock("rock").BLOCK_ID;
-
-                int blockType = empty;
-                if(RandUtils.rand(0, 99) < GRASS_BLOCK_SPAWN_CHANCE) {
-                    blockType = grass;
+                int block = 0;
+                if(perlinNoise[x][y] < waterLevel) {
+                    block = water;
+                } else if (perlinNoise[x][y] >= waterLevel && perlinNoise[x][y] < sandLevel) {
+                    block = sand;
+                } else if  (perlinNoise[x][y] >= sandLevel && perlinNoise[x][y] < grassLevel) {
+                    block = grass;
+                } else if  (perlinNoise[x][y] >= grassLevel && perlinNoise[x][y] < tallGrassLevel){
+                    block = tallGrass;
+                } else {
+                    block = rock;
                 }
-                if(hasNeighbor(x, y, grass, worldMap) && RandUtils.rand(0, 99) < GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
-                    blockType = grass;
-                }
-                if(RandUtils.rand(0, 99) < FILLED_BLOCK_SPAWN_CHANCE) {
-                    blockType = rock;
-                }
-                if(hasNeighbor(x, y, rock, worldMap) && RandUtils.rand(0, 99) < FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
-                    blockType = rock;
-                }
-                worldMap[x][y] = blockType;
-
-                if(blockType == 0) {
-                    if(RandUtils.rand(0, 99) < MOB_SPAWN_CHANCE) {
-                        mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
-                    }
-                } else if(blockType == 1) {
-                    if(RandUtils.rand(0, 99) < MOB_SPAWN_CHANCE_GRASS) {
-                        mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
-                    }
-                }
+                worldMap[x][y] = block;
             }
         }
 
@@ -163,6 +159,20 @@ public class Mud {
             int y = RandUtils.rand(500, 2500);
             System.out.println(x + ", " + y);
             spawnVillage(x, y, worldMap, mobMap, blocks);
+        }
+
+        for(int x = 0; x < MAP_SIZE; x++) {
+            for(int y = 0; y < MAP_SIZE; y++) {
+                Block currentBlock = blocks.getBlock(worldMap[x][y]);
+                if(!(Boolean)currentBlock.STATS.get("solid")) {
+                    if(currentBlock.STATS.hasVariable("mob-spawn-chance")) {
+                        int mobSpawnChance = (Integer)currentBlock.STATS.get("mob-spawn-chance");
+                        if(RandUtils.rand(0, 99) < mobSpawnChance) {
+                            mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
+                        }
+                    }
+                }
+            }
         }
         
         // assign spawn location to a place that is open and doesn't have a mob.
@@ -174,7 +184,6 @@ public class Mud {
         }
 
         Player player;
-
         if(fileExists(STATS_SAVE) && fileExists(INVENTORY_SAVE)) {
             player = new Player(spawnX, spawnY, STATS_SAVE, INVENTORY_SAVE);
         } else {
@@ -336,9 +345,9 @@ public class Mud {
                         if(dir.contains("d")) {
                             xPos += dist;
                         }
-                        System.out.println(display(dist, xPos, yPos, worldMap, blocks));
+                        System.out.println(display(dist, xPos, yPos, worldMap, mobMap, blocks));
                     } else {
-                        System.out.println(display((Integer)player.getBaseStats().get("view"), player.x(), player.y(), worldMap, blocks));
+                        System.out.println(display((Integer)player.getBaseStats().get("view"), player.x(), player.y(), worldMap, mobMap, blocks));
                     }
                 } else if(action.charAt(0) == 'w' || action.charAt(0) == 'a' || action.charAt(0) == 's' || action.charAt(0) == 'd') { // movement
                     int dist;
@@ -368,13 +377,23 @@ public class Mud {
                         int actualPosn = move(player.x(), player.y(), true, dist, worldMap, mobMap, blocks);
                         player.moveTo(actualPosn, player.y());
                     }
-                    System.out.println(display((Integer)player.getBaseStats().get("view"),  player.x(), player.y(), worldMap, blocks));
+                    System.out.println(display((Integer)player.getBaseStats().get("view"),  player.x(), player.y(), worldMap, mobMap, blocks));
 
                     if(mobMap[player.x()][player.y()] != 0) {                        
                         mobToFight = new Mob(mobMap[player.x()][player.y()], MOB_FILE);
                         System.out.println("You encountered " + mobToFight.getBaseStats().get("name"));
                         System.out.println(mobToFight.getBaseStats().get("name") + ": " + mobToFight.getQuote("entrance"));
                         System.out.print(mobToFight.getImg());
+                        if((Integer)mobToFight.getStats().get("speed") > (Integer)player.getStats().get("speed")) {
+                            System.out.println(mobToFight.getBaseStats().get("name") + ": " + mobToFight.getQuote("attack"));
+                            System.out.println(mobToFight.getBaseStats().get("name") + " attacked you and dealt " + mobToFight.getBaseStats().get("dmg") + " damage.");
+                            player.changeStat("health", -(Integer)mobToFight.getBaseStats().get("dmg"));
+                            if(player.isDead()) {
+                                System.out.println(mobToFight.getBaseStats().get("name") + ": " + mobToFight.getQuote("mob-victory"));
+                                System.out.println("You were killed by " + mobToFight.getBaseStats().get("name"));
+                                return;
+                            }
+                        }
                         isFightingMob = true;
                     }
                 }
@@ -414,19 +433,25 @@ public class Mud {
                 while(blocks.size() <= blockID) {
                     blocks.add(0);
                 }
-                blocks.set(blockID, blocks.get(blockID) + 1);
+                int mapWeight;
+                if(b.getBlock(blockID).STATS.hasVariable("map-weight")) {
+                    mapWeight = (Integer)b.getBlock(blockID).STATS.get("map-weight");
+                } else {
+                    mapWeight = 1;
+                }
+                blocks.set(blockID, blocks.get(blockID) + mapWeight);
             }
         }
         int maxIndex = 0;
         for(int i = 1; i < blocks.size(); i++) {
-            if(blocks.get(i) > blocks.get(maxIndex) || maxIndex == b.getBlock("empty").BLOCK_ID) {
+            if(blocks.get(i) > blocks.get(maxIndex)) {
                 maxIndex = i;
             }
         }
         return maxIndex;
     }
 
-    private static StringBuilder display(int dist, int xView, int yView, int[][] worldMap, Block.BlockSet blocks) {
+    private static StringBuilder display(int dist, int xView, int yView, int[][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
         StringBuilder s = new StringBuilder();
         for(int y = max(0,yView - dist); y < min(MAP_SIZE, yView + dist + 1); y++) {
             s.append("|");
@@ -434,11 +459,23 @@ public class Mud {
                 if(x == xView && y == yView) {
                     s.append(Player.playerRep);
                 } else {
-                    int asciiColor = (Integer)blocks.getBlock(worldMap[x][y]).STATS.get("display");
+                    Block b = blocks.getBlock(worldMap[x][y]);
+                    int asciiColor = (Integer)b.STATS.get("display");
+                    boolean hideMob = b.STATS.hasVariable("hide-mobs") && (Boolean)b.STATS.get("hide-mobs");
                     if(asciiColor == -1) {
-                        s.append("  ");
+                        if(!hideMob && mobMap[x][y] != 0) {
+                            s.append("??");
+                        } else {
+                            s.append("  ");
+                        }
                     } else {
-                        s.append("\033[48;5;" + asciiColor + "m  \033[0m");
+                        if(!hideMob && mobMap[x][y] != 0) {
+                            int display = b.STATS.hasVariable("mob-display") ? (Integer)b.STATS.get("mob-display") : 0;
+                            s.append("\033[38;5;" + display + ";48;5;" + asciiColor + "m??\033[0m");
+                        } else {
+                            s.append("\033[48;5;" + asciiColor + "m  \033[0m");
+                        }
+                        
                     }
                 }
             }

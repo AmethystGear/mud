@@ -3,19 +3,21 @@ String name empty
 int display -1
 boolean solid false
 int mob-spawn-chance 5
+int map-weight 0
 /end/
 
 /begin/
 String name grass
 int display 149
 boolean solid false
-int mob-spawn-chance 40
+int mob-spawn-chance 1
 /end/
 
 /begin/
 String name village-floor
 int display 136
 boolean solid false
+int map-weight 2
 /end/
 
 /begin/
@@ -28,6 +30,7 @@ boolean solid true
 String name rock
 int display 245
 boolean solid true
+int map-weight 3
 /end/
 
 /begin/
@@ -35,4 +38,27 @@ String name surveyor
 int display 55
 boolean solid false
 int spawn-chance 1
+/end/
+
+/begin/
+String name water
+int display 45
+boolean solid false
+/end/
+
+/begin/
+String name sand
+int display 178
+boolean solid false
+int mob-spawn-chance 5
+int map-weight 2
+/end/
+
+/begin/
+String name tall-grass
+int display 107
+boolean solid false
+int mob-spawn-chance 75
+int map-weight 5
+boolean hide-mobs true
 /end/
