@@ -20,6 +20,10 @@ public class Mob {
                 }
                 if(data.strip().equals("/begin/")) {
                     mob++;
+                    if(mob == mobType) {
+                        baseStats = new Stats(fr);
+                        stats = baseStats.clone();
+                    }
                 }
                 else if(mob == mobType) {                    
                     if(data.strip().equals("img:")) {
@@ -27,9 +31,6 @@ public class Mob {
                     } else if(gettingImg) {
                         img.append(data);
                         img.append('\n');
-                    } else {
-                        baseStats = new Stats(fr);
-                        stats = baseStats.clone();
                     }
                 }
             }

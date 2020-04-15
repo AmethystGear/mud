@@ -23,20 +23,22 @@ class Stats {
     // creates a new stats class from a Scanner.
     // throws IllegalArgumentException if the Scanner has invalid input.
     public Stats (Scanner scan) throws IllegalArgumentException {
+        types = new HashMap<>();
         stats = new HashMap<>();
         while(scan.hasNextLine()) {
-            String line = scan.nextLine();
             Scanner lineScan = new Scanner(scan.nextLine());
-            if(line.trim().equals("/end/")) {
-                lineScan.close();
-                return;
-            }
-            else if(lineScan.hasNext()) {
+            if(lineScan.hasNext()) {
                 String type = lineScan.next();
-                String varname = lineScan.next().replace('_', ' ').replace('-', ' ');
+                if(type.equals("/begin/")) {
+                    continue;
+                }
+                if(type.equals("/end/")) {
+                    break;
+                }
+                String varname = lineScan.next();
                 Object value;
                 if (type.equals("boolean")) {
-                    if(!lineScan.hasNextInt()) {
+                    if(!lineScan.hasNextBoolean()) {
                         lineScan.close();
                         throw new IllegalArgumentException("variable of type boolean does not contain a boolean!");
                     }
@@ -65,6 +67,7 @@ class Stats {
                     value = ScannerUtils.getRemainingInputAsStringArray(lineScan);
                 } else {
                     lineScan.close();
+                    System.out.println(type);
                     throw new IllegalArgumentException("type not recognized!");
                 }
                 types.put(varname, type);
@@ -118,12 +121,22 @@ class Stats {
         if(!stats.containsKey(name)) {
             throw new IllegalArgumentException("that variable doesn't exist!");
         }
+        Object val = stats.get(name);
         // return a copy if returning an array.
-        if(stats.get(name) instanceof int[] || stats.get(name) instanceof String[]) {
-            Object[] arr = (Object[])stats.get(name);
-            Object[] copy = new Object[arr.length];
-            for(int i = 0; i < arr.length; i++) {
-                copy[i] = arr[i];
+        if(val instanceof int[] || val instanceof String[]) {
+            Object copy;
+            if(val instanceof int[]) {
+                int len = ((int[])val).length;
+                copy = new int[len];
+                for(int i = 0; i < len; i++) {
+                    ((int[])copy)[i] = ((int[])val)[i];
+                }
+            } else {
+                int len = ((String[])val).length;
+                copy = new String[len];
+                for(int i = 0; i < len; i++) {
+                    ((String[])copy)[i] = ((String[])val)[i];
+                }
             }
             return copy;
         }
@@ -151,15 +164,19 @@ class Stats {
     }
 
     // string rep of a value. 
-    private String getStringRep(Object o, boolean replaceSpaces) {        
-        if(o instanceof int[] || o instanceof String[]) {
+    private String getStringRep(Object o, boolean replaceSpaces) {
+        if(o instanceof Object[]) {
             Object[] arr = (Object[])o;
             StringBuilder s = new StringBuilder();
             for(int i = 0; i < arr.length; i++) {
-                if(replaceSpaces) {
-                    s.append(arr[i].toString().replace(' ', '-'));
+                if(arr[i] instanceof String) {
+                    if(replaceSpaces) {
+                        s.append(((String)arr[i]).replace(' ', '-'));
+                    } else {
+                        s.append((String)arr[i]);
+                    }
                 } else {
-                    s.append(arr[i].toString());
+                    s.append(((Integer)arr[i]) + "");
                 }
                 if(i != arr.length - 1) {
                     s.append(" ");

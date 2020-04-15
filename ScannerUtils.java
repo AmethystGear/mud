@@ -18,6 +18,7 @@ public class ScannerUtils {
         if(input.length > 0) {
             StringBuilder concat = new StringBuilder(input[0]);
             for(int i = 1; i < input.length; i++) {
+                concat.append(" ");
                 concat.append(input[i]);
             }
             return concat.toString();

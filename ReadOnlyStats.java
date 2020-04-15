@@ -1,7 +1,7 @@
 import java.io.FileNotFoundException;
 
 // Wrapper for the stats class that limits functionality.
-class ReadOnlyStats {
+public class ReadOnlyStats {
     private Stats stats;
     public ReadOnlyStats(Stats stats) {
         this.stats = stats;

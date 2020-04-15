@@ -1,31 +1,37 @@
 /begin/
-String name: empty
-String display: __
-boolean solid: false
-int mob-spawn-chance: 5
+String name empty
+int display -1
+boolean solid false
+int mob-spawn-chance 5
 /end/
 
 /begin/
-String name: grass
-String display: \033[48;5;149m__\033[0m
-boolean solid: false
-int mob-spawn-chance: 40
+String name grass
+int display 149
+boolean solid false
+int mob-spawn-chance 40
 /end/
 
 /begin/
-String name: village-floor
-String display: \033[48;5;136m__\033[0m
-boolean solid: false
+String name village-floor
+int display 136
+boolean solid false
 /end/
 
 /begin/
-String name: village-wall
-String display: \033[48;5;136m__\033[0m
-boolean solid: true
+String name village-wall
+int display 94
+boolean solid true
 /end/
 
 /begin/
-String name: rock
-String display: \033[48;5;245m__\033[0m
-boolean solid: true
+String name rock
+int display 245
+boolean solid true
+/end/
+
+/begin/
+String name surveyor
+int display 55
+boolean solid false
 /end/

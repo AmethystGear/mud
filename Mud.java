@@ -3,8 +3,8 @@ import java.util.*;
 
 public class Mud {
     private static final int MAP_SIZE = 3000;
-    private static final int MOB_SPAWN_CHANCE = 10;
-    private static final int MOB_SPAWN_CHANCE_GRASS = 40;
+    private static final int MOB_SPAWN_CHANCE = 1;
+    private static final int MOB_SPAWN_CHANCE_GRASS = 10;
     private static final int GRASS_BLOCK_SPAWN_CHANCE = 10;
     private static final int GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 65;
     private static final int FILLED_BLOCK_SPAWN_CHANCE = 5;
@@ -27,12 +27,13 @@ public class Mud {
     }
 
 
-    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap) {
+    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
+        int floor = blocks.getBlock("village floor").BLOCK_ID;
         int villageLength = RandUtils.rand(8, 30) * 5;
         int pathSize = RandUtils.rand(3, 5);
         for(int x = xOrigin; x < xOrigin + villageLength; x++) {
             for(int y = yOrigin; y < yOrigin + pathSize; y++) {
-                worldMap[x][y] = 3;
+                worldMap[x][y] = floor;
                 mobMap[x][y] = 0;
             }
         }
@@ -42,38 +43,40 @@ public class Mud {
             int hutSize = RandUtils.rand(2, 4);
             if(generateUp) {
                 for(int y = yOrigin; y > yOrigin - pathlen; y--) {
-                    worldMap[x][y] = 3;
+                    worldMap[x][y] = floor;
                     mobMap[x][y] = 0;
                 }
-                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, mobMap);
+                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, mobMap, blocks);
             } else {
                 for(int y = yOrigin + pathSize; y < yOrigin + pathlen + pathSize; y++) {
-                    worldMap[x][y] = 3;
+                    worldMap[x][y] = floor;
                     mobMap[x][y] = 0;
                 }
-                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, mobMap);
+                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, mobMap, blocks);
             }
             generateUp = !generateUp;
         }
     }
 
-    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, int[][] mobMap) {
+    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
+        int floor = blocks.getBlock("village floor").BLOCK_ID;
+        int wall = blocks.getBlock("village wall").BLOCK_ID;
         size = size * 2 + 1;
         for(int x = xOrigin; x < xOrigin + size; x++) {
             for(int y = yOrigin; y < yOrigin + size; y++) {
-                worldMap[x][y] = 3;
+                worldMap[x][y] = floor;
                 mobMap[x][y] = 0;
             }
         }
         for(int x = xOrigin; x < xOrigin + size; x++) {
             if(x - xOrigin != size/2) {
-                worldMap[x][yOrigin] = 4;
-                worldMap[x][yOrigin + size - 1] = 4;
+                worldMap[x][yOrigin] = wall;
+                worldMap[x][yOrigin + size - 1] = wall;
             }
         }
         for(int y = yOrigin; y < yOrigin + size; y++) {
-            worldMap[xOrigin][y] = 4;
-            worldMap[xOrigin + size - 1][y] = 4;
+            worldMap[xOrigin][y] = wall;
+            worldMap[xOrigin + size - 1][y] = wall;
         }
     }
 
@@ -118,18 +121,22 @@ public class Mud {
         // create map
         for(int x = 0; x < MAP_SIZE; x++) {
             for(int y = 0; y < MAP_SIZE; y++) {
-                int blockType = blocks.getBlock("empty").BLOCK_ID;
+                int empty = blocks.getBlock("empty").BLOCK_ID;
+                int grass = blocks.getBlock("grass").BLOCK_ID;
+                int rock = blocks.getBlock("rock").BLOCK_ID;
+
+                int blockType = empty;
                 if(RandUtils.rand(0, 99) < GRASS_BLOCK_SPAWN_CHANCE) {
-                    blockType = blocks.getBlock("grass").BLOCK_ID;
+                    blockType = grass;
                 }
-                if(hasNeighbor(x, y, 1, worldMap) && RandUtils.rand(0, 99) < GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
-                    blockType = blocks.getBlock("grass").BLOCK_ID;
+                if(hasNeighbor(x, y, grass, worldMap) && RandUtils.rand(0, 99) < GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
+                    blockType = grass;
                 }
                 if(RandUtils.rand(0, 99) < FILLED_BLOCK_SPAWN_CHANCE) {
-                    blockType = blocks.getBlock("rock").BLOCK_ID;
+                    blockType = rock;
                 }
-                if(hasNeighbor(x, y, 2, worldMap) && RandUtils.rand(0, 99) < FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
-                    blockType = blocks.getBlock("rock").BLOCK_ID;
+                if(hasNeighbor(x, y, rock, worldMap) && RandUtils.rand(0, 99) < FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR) {
+                    blockType = rock;
                 }
                 worldMap[x][y] = blockType;
 
@@ -150,7 +157,7 @@ public class Mud {
             int x = RandUtils.rand(500, 2500);
             int y = RandUtils.rand(500, 2500);
             System.out.println(x + ", " + y);
-            spawnVillage(x, y, worldMap, mobMap);
+            spawnVillage(x, y, worldMap, mobMap, blocks);
         }
         
         // assign spawn location to a place that is open and doesn't have a mob.
@@ -301,26 +308,42 @@ public class Mud {
                 }
             } else { // actual world
                 if(action.equals("disp")) { //display
-                    System.out.print("Enter how far: ");
-                    int dist = Integer.parseInt(in.nextLine());
-                    System.out.println(display(dist, player, worldMap, blocks));
-                } else if(action.equals("w") || action.equals("a") || action.equals("s") || action.equals("d")) { // movement
-                    System.out.print("Enter how far: ");
-                    int dist = Integer.parseInt(in.nextLine());
-                    if(action.equals("w")) {
+                    if(blocks.getBlock("surveyor").BLOCK_ID == worldMap[player.x()][player.y()]) {
+                        System.out.print("Enter how far: ");
+                        int dist = Integer.parseInt(in.nextLine());
+                        System.out.println(display(dist, player, worldMap, blocks));
+                    } else {
+                        System.out.println(display((Integer)player.getBaseStats().get("view"), player, worldMap, blocks));
+                    }
+                } else if(action.charAt(0) == 'w' || action.charAt(0) == 'a' || action.charAt(0) == 's' || action.charAt(0) == 'd') { // movement
+                    int dist;
+                    if(action.length() > 1) {
+                        try {
+                            dist = Integer.parseInt(action.substring(1, action.length()));
+                            if(dist > (Integer)player.getStats().get("speed")) {
+                                System.out.println("You can't move that far! Upgrade your speed stat to go farther each turn.");
+                                continue;
+                            }
+                        } catch (Exception e) {
+                            continue;
+                        }
+                    } else {
+                        dist = (Integer)player.getStats().get("speed");
+                    }
+                    if(action.charAt(0) == 'w') {
                         int actualPosn = move(player.x(), player.y(), false, -dist, worldMap, mobMap, blocks);
                         player.moveTo(player.x(), actualPosn);
-                    } else if (action.equals("a")) {
+                    } else if (action.charAt(0) == 'a') {
                         int actualPosn = move(player.x(), player.y(), true, -dist, worldMap, mobMap, blocks);
                         player.moveTo(actualPosn, player.y());
-                    } else if (action.equals("s")) {
+                    } else if (action.charAt(0) == 's') {
                         int actualPosn = move(player.x(), player.y(), false, dist, worldMap, mobMap, blocks);
                         player.moveTo(player.x(), actualPosn);
-                    } else if (action.equals("d")) {
+                    } else if (action.charAt(0) == 'd') {
                         int actualPosn = move(player.x(), player.y(), true, dist, worldMap, mobMap, blocks);
                         player.moveTo(actualPosn, player.y());
                     }
-                    System.out.println(display(10, player, worldMap, blocks));
+                    System.out.println(display((Integer)player.getBaseStats().get("view"), player, worldMap, blocks));
 
                     if(mobMap[player.x()][player.y()] != 0) {                        
                         mobToFight = new Mob(mobMap[player.x()][player.y()], MOB_FILE);
@@ -345,7 +368,12 @@ public class Mud {
                 if(x == player.x() && y == player.y()) {
                     s.append(player.toString());
                 } else {
-                    s.append((String)blocks.getBlock(worldMap[x][y]).STATS.get("display"));
+                    int asciiColor = (Integer)blocks.getBlock(worldMap[x][y]).STATS.get("display");
+                    if(asciiColor == -1) {
+                        s.append("  ");
+                    } else {
+                        s.append("\033[48;5;" + asciiColor + "m  \033[0m");
+                    }
                 }
             }
             s.append("|\n");
@@ -374,7 +402,7 @@ public class Mud {
             return yOrigin;
         }
 
-        if(xAxis) {      
+        if(xAxis) {
             int bounded = bound(xOrigin + numUnits, 0, MAP_SIZE - 1);
             for(int x = xOrigin + sign(numUnits); x != bounded; x += sign(numUnits)) {
                 if((Boolean)blocks.getBlock(worldMap[x][yOrigin]).STATS.get("solid")) {
@@ -387,7 +415,8 @@ public class Mud {
                     }
                 }
             }
-            return worldMap[bounded][yOrigin] == 2 ? bounded - sign(numUnits) : bounded;
+            boolean solid = (Boolean)blocks.getBlock(worldMap[bounded][yOrigin]).STATS.get("solid");
+            return solid ? bounded - sign(numUnits) : bounded;
         } else {
             int bounded = bound(yOrigin + numUnits, 0, MAP_SIZE - 1);
             for(int y = yOrigin + sign(numUnits); y != bounded; y += sign(numUnits)) {
@@ -401,7 +430,8 @@ public class Mud {
                     }
                 }
             }
-            return worldMap[xOrigin][bounded] == 2 ? bounded - sign(numUnits) : bounded;
+            boolean solid = (Boolean)blocks.getBlock(worldMap[bounded][yOrigin]).STATS.get("solid");
+            return solid ? bounded - sign(numUnits) : bounded;
         }
     }
 

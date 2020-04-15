@@ -14,20 +14,16 @@ public class Block {
         try {
             Scanner s = new Scanner(new File(file));
             BlockSet blockSet = new BlockSet();
-
             int blockID = 0;
             while(s.hasNextLine()) {
-                try {
-                    Stats stats = new Stats(s);
-                    blockSet.addBlock(new Block(stats, blockID));
-                    blockID++;
-                } catch(IllegalArgumentException e) {
-                    return blockSet;
-                }
+                Stats stats = new Stats(s);
+                System.out.println(stats);
+                blockSet.addBlock(new Block(stats, blockID));
+                blockID++;
             }
             return blockSet;           
         } catch (IOException e) {
-            return null;
+            throw new IllegalArgumentException();
         }
     }
 
@@ -46,10 +42,16 @@ public class Block {
         }
 
         public Block getBlock(int ID) {
+            if(!blockIDtoBlock.containsKey(ID)) {
+                throw new IllegalArgumentException("that block doesn't exist!");
+            }
             return blockIDtoBlock.get(ID);
         }
 
         public Block getBlock(String name) {
+            if(!nameToBlock.containsKey(name)) {
+                throw new IllegalArgumentException("that block doesn't exist!");
+            }
             return nameToBlock.get(name);
         }
     }

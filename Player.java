@@ -1,12 +1,13 @@
 import java.io.*;
 import java.util.*;
 
-class Player {
+public class Player {
     public static String playerRep = "\033[33m++\033[0m";
     public static final int DEFAULT_HEALTH = 10;
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
     public static final int DEFAULT_XP = 0;
+    public static final int DEFAULT_VIEW = 5;
     public static final int XP_MULTIPLIER = 100;
 
     private int x;
@@ -18,7 +19,7 @@ class Player {
     public Player(int x, int y, String statsSave, String inventorySave) throws Exception {
         moveTo(x, y);
         baseStats = new Stats(new Scanner(new File(statsSave)));
-        inventory = new Stats(new Scanner(new File(statsSave)));
+        inventory = new Stats(new Scanner(new File(inventorySave)));
         stats = baseStats.clone();
     }
 
@@ -28,6 +29,7 @@ class Player {
         baseStats.set("health", DEFAULT_HEALTH);
         baseStats.set("dmg", DEFAULT_DMG);
         baseStats.set("speed", DEFAULT_SPEED);
+        baseStats.set("view", DEFAULT_VIEW);
         baseStats.set("xp", DEFAULT_XP);
         stats = baseStats.clone();
         inventory = new Stats();
