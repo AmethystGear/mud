@@ -197,6 +197,10 @@ public class Mud {
             if(action.equals("quit")) {
                 break;
             }
+            if(action.equals("map")) {
+                System.out.print(map(worldMap, blocks, 30, player));
+                continue;
+            }
             if(action.equals("tp")) {
                 isFightingMob = false;
                 System.out.print("Enter x: ");
@@ -378,6 +382,48 @@ public class Mud {
             
         }
         in.close();
+    }
+
+    private static StringBuilder map(int[][] worldMap, Block.BlockSet blocks, int chunkSize, Player player) {
+        StringBuilder s = new StringBuilder();
+        for(int y = 0; y < MAP_SIZE; y += chunkSize) {
+            s.append("|");
+            for(int x = 0; x < MAP_SIZE; x += chunkSize) {
+                if(player.x() >= x && player.x() < x + chunkSize && player.y() > y && player.y() <= y + chunkSize) {
+                    s.append(Player.playerRep);
+                } else {
+                    int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize, blocks, worldMap);
+                    int asciiColor = (Integer)blocks.getBlock(majorityBlock).STATS.get("display");
+                    if(asciiColor == -1) {
+                        s.append("  ");
+                    } else {
+                        s.append("\033[48;5;" + asciiColor + "m  \033[0m");
+                    }
+                }
+            }
+            s.append("|\n");
+        }
+        return s;
+    }
+
+    private static int getMajorityBlockInChunk(int xOrigin, int yOrigin, int chunkSize, Block.BlockSet b, int[][] worldMap) {
+        ArrayList<Integer> blocks = new ArrayList<Integer>();
+        for(int x = xOrigin; x < xOrigin + chunkSize; x++) {
+            for(int y = yOrigin; y < yOrigin + chunkSize; y++) {
+                int blockID = worldMap[x][y];
+                while(blocks.size() <= blockID) {
+                    blocks.add(0);
+                }
+                blocks.set(blockID, blocks.get(blockID) + 1);
+            }
+        }
+        int maxIndex = 0;
+        for(int i = 1; i < blocks.size(); i++) {
+            if(blocks.get(i) > blocks.get(maxIndex) || maxIndex == b.getBlock("empty").BLOCK_ID) {
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
     }
 
     private static StringBuilder display(int dist, int xView, int yView, int[][] worldMap, Block.BlockSet blocks) {
