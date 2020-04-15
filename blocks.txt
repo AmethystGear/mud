@@ -34,4 +34,5 @@ boolean solid true
 String name surveyor
 int display 55
 boolean solid false
+int spawn-chance 1
 /end/

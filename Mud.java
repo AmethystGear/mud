@@ -61,11 +61,16 @@ public class Mud {
     private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
         int floor = blocks.getBlock("village floor").BLOCK_ID;
         int wall = blocks.getBlock("village wall").BLOCK_ID;
+        int surveyor = blocks.getBlock("surveyor").BLOCK_ID;
+        int surveyorSpawnChance = (Integer)blocks.getBlock("surveyor").STATS.get("spawn-chance");
         size = size * 2 + 1;
         for(int x = xOrigin; x < xOrigin + size; x++) {
             for(int y = yOrigin; y < yOrigin + size; y++) {
                 worldMap[x][y] = floor;
                 mobMap[x][y] = 0;
+                if(RandUtils.rand(0, 99) < surveyorSpawnChance) {
+                    worldMap[x][y] = surveyor;
+                }
             }
         }
         for(int x = xOrigin; x < xOrigin + size; x++) {

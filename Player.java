@@ -7,7 +7,7 @@ public class Player {
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
     public static final int DEFAULT_XP = 0;
-    public static final int DEFAULT_VIEW = 5;
+    public static final int DEFAULT_VIEW = 7;
     public static final int XP_MULTIPLIER = 100;
 
     private int x;
