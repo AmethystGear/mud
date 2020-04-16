@@ -13,6 +13,7 @@ String[] drops  "rusty-sword" "broken-armor" "missspelled-incantation"
 int drop-max  3
 int drop-min  0
 int speed 6
+
 /end/
 img:
                    _.--.    .--._
@@ -47,7 +48,7 @@ int health  20
 int aggression  90
 int dmg  1
 int xp  100
-String[] drops  "pugenum"
+String[] drops  "pugenum" "gravitino-balls"
 int drop-max  20
 int drop-min  5
 int speed 3
@@ -339,7 +340,6 @@ img:
   \______(_______;;;)__;;;)
 
 /begin/
-
 String name  Snagget the Hagget
 String[] entrance  "myhfs-has-done-well"
 String[] attack  *Communal-bathrooms!* *Tiny-Corridors!!!*
@@ -378,7 +378,6 @@ img:
 .|//\............/...........\........../../\\\
 
 /begin/
-
 String name  The Game of Life
 String[] entrance  "Now-you-can't-leave!!!!"
 String[] attack  *Mine!!!* *Mine-Mine-Mine!*
@@ -406,7 +405,6 @@ img:
 ||                    ||  ----------------------- ||          \ || --------------------------
 
 /begin/
-
 String name Linux
 String[] entrance  "Complicated-Setup-Jargon" "COMMUNISM-WINS!!!"
 String[] attack  *not-recognized* *Permission-Denied* "COMMUNISM-WINS!!!"
@@ -466,3 +464,4 @@ img:
   `+sso+ -`                 `.-/+oso 
  `++ .                           `-/+/
  .`                                 `
+

@@ -104,6 +104,7 @@ class Stats {
             writer.append(types.get(e.getKey()));
             writer.append(" ");
             writer.append(e.getKey().replace(' ', '-'));
+            writer.append(" ");
             writer.append(getStringRep(e.getValue(), true));
             writer.append("\n");
         }
@@ -151,7 +152,6 @@ class Stats {
         if(!isValidType(value)) {
             throw new IllegalArgumentException("the type provided is invalid!");
         }
-        types.put(name, value.getClass().getName());
         stats.put(name, value);
     }
 

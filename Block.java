@@ -17,7 +17,6 @@ public class Block {
             int blockID = 0;
             while(s.hasNextLine()) {
                 Stats stats = new Stats(s);
-                System.out.println(stats);
                 blockSet.addBlock(new Block(stats, blockID));
                 blockID++;
             }

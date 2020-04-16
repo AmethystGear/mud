@@ -3,29 +3,39 @@ import java.util.*;
 
 public class Mud {
     private static final int MAP_SIZE = 3000;
-    private static final int MOB_SPAWN_CHANCE = 1;
-    private static final int MOB_SPAWN_CHANCE_GRASS = 10;
-    private static final int GRASS_BLOCK_SPAWN_CHANCE = 10;
-    private static final int GRASS_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 65;
-    private static final int FILLED_BLOCK_SPAWN_CHANCE = 5;
-    private static final int FILLED_BLOCK_SPAWN_CHANCE_IF_NEIGHBOR = 50;
-
     private static final String MOB_FILE = "mobs.txt";
     private static final String BLOCKS_FILE = "blocks.txt";
     private static final String STATS_SAVE = "stats-save.txt";
+    private static final String WORLD_SAVE = "world-map-save.txt";
+    private static final String MOB_SAVE = "mob-map-save.txt";
     private static final String INVENTORY_SAVE = "inventory-save.txt";
 
     private static int NUM_MOB_TYPES = 0;
 
-    private static boolean hasNeighbor(int x, int y, int type, int[][] worldMap) {
-        return worldMap[min(MAP_SIZE - 1, x + 1)][y] == type || worldMap[x][min(MAP_SIZE - 1, y + 1)] == type
-                || worldMap[x][max(0, y - 1)] == type || worldMap[max(0, x - 1)][y] == type;
+
+    public static void saveMap(String file, int[][] map) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)));
+        for(int y = 0; y < MAP_SIZE; y++) {
+            for(int x = 0; x < MAP_SIZE; x++) {
+                writer.write(map[x][y] + " ");
+            }
+        }
+        writer.close();
+    }
+
+    public static void readFileToMap(String file, int[][] map) throws FileNotFoundException {
+        Scanner scan = new Scanner(new File(file));
+        for(int y = 0; y < MAP_SIZE; y++) {
+            for(int x = 0; x < MAP_SIZE; x++) {
+                map[x][y] = scan.nextInt();
+            }
+        }
+        scan.close();
     }
 
     private static boolean fileExists(String file) {
         return new File(file).exists() && !new File(file).isDirectory();
     }
-
 
     private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
         int floor = blocks.getBlock("village floor").BLOCK_ID;
@@ -96,7 +106,10 @@ public class Mud {
                 NUM_MOB_TYPES++;
             } else {
                 Scanner tok = new Scanner(line);
-                if(tok.hasNext() && tok.next().equals("drops:")) {
+                if(tok.hasNext()) {
+                    tok.next();
+                }
+                if(tok.hasNext() && tok.next().equals("drops")) {
                     String[] drops = ScannerUtils.getRemainingInputAsStringArray(tok);
                     for(String drop : drops) {
                         set.add(drop);
@@ -112,7 +125,17 @@ public class Mud {
         }
 
         Block.BlockSet blocks = Block.getBlocksFromFile(BLOCKS_FILE);
-        
+
+        boolean makeNewWorld;
+        Scanner in = new Scanner(System.in);
+        System.out.print("Do you want to load your saved world, or create a new one?(load/create): ");
+        String inp = in.nextLine();
+        while(!inp.equals("load") && !inp.equals("create")) {
+            System.out.print("Please type load or create: ");
+            inp = in.nextLine();
+        }
+        makeNewWorld = inp.equals("create");
+
         int[][] worldMap = new int[MAP_SIZE][];
         for(int i = 0; i < MAP_SIZE; i++) {
             worldMap[i] = new int[MAP_SIZE];
@@ -123,62 +146,70 @@ public class Mud {
             mobMap[i] = new int[MAP_SIZE];
         }
 
-        Random rand = new Random(RandUtils.rand(0, 99));
-        float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
-        float waterLevel = 0.5f;
-        float sandLevel = 0.53f;
-        float grassLevel = 0.8f;
-        float tallGrassLevel = 0.82f;
-        // create map
-        for(int x = 0; x < MAP_SIZE; x++) {
-            for(int y = 0; y < MAP_SIZE; y++) {
-                int water = blocks.getBlock("water").BLOCK_ID;
-                int sand = blocks.getBlock("sand").BLOCK_ID;
-                int grass = blocks.getBlock("grass").BLOCK_ID;
-                int tallGrass = blocks.getBlock("tall grass").BLOCK_ID;
-                int rock = blocks.getBlock("rock").BLOCK_ID;
-                int block = 0;
-                if(perlinNoise[x][y] < waterLevel) {
-                    block = water;
-                } else if (perlinNoise[x][y] >= waterLevel && perlinNoise[x][y] < sandLevel) {
-                    block = sand;
-                } else if  (perlinNoise[x][y] >= sandLevel && perlinNoise[x][y] < grassLevel) {
-                    block = grass;
-                } else if  (perlinNoise[x][y] >= grassLevel && perlinNoise[x][y] < tallGrassLevel){
-                    block = tallGrass;
-                } else {
-                    block = rock;
+        if (makeNewWorld) {
+            int seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
+            System.out.println(seed);
+            Random rand = new Random(seed);
+            float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
+            float waterLevel = 0.5f;
+            float sandLevel = 0.53f;
+            float grassLevel = 0.8f;
+            float tallGrassLevel = 0.82f;
+            // create map
+            for(int x = 0; x < MAP_SIZE; x++) {
+                for(int y = 0; y < MAP_SIZE; y++) {
+                    int water = blocks.getBlock("water").BLOCK_ID;
+                    int sand = blocks.getBlock("sand").BLOCK_ID;
+                    int grass = blocks.getBlock("grass").BLOCK_ID;
+                    int tallGrass = blocks.getBlock("tall grass").BLOCK_ID;
+                    int rock = blocks.getBlock("rock").BLOCK_ID;
+                    int block = 0;
+                    if(perlinNoise[x][y] < waterLevel) {
+                        block = water;
+                    } else if (perlinNoise[x][y] >= waterLevel && perlinNoise[x][y] < sandLevel) {
+                        block = sand;
+                    } else if  (perlinNoise[x][y] >= sandLevel && perlinNoise[x][y] < grassLevel) {
+                        block = grass;
+                    } else if  (perlinNoise[x][y] >= grassLevel && perlinNoise[x][y] < tallGrassLevel){
+                        block = tallGrass;
+                    } else {
+                        block = rock;
+                    }
+                    worldMap[x][y] = block;
                 }
-                worldMap[x][y] = block;
             }
-        }
 
-        int numVillages = RandUtils.rand(300, 400);
-        for(int i = 0; i < numVillages; i++) {
-            int x = RandUtils.rand(500, 2500);
-            int y = RandUtils.rand(500, 2500);
-            System.out.println(x + ", " + y);
-            spawnVillage(x, y, worldMap, mobMap, blocks);
-        }
+            int numVillages = RandUtils.rand(300, 400);
+            for(int i = 0; i < numVillages; i++) {
+                int x = RandUtils.rand(500, 2500);
+                int y = RandUtils.rand(500, 2500);
+                spawnVillage(x, y, worldMap, mobMap, blocks);
+            }
 
-        for(int x = 0; x < MAP_SIZE; x++) {
-            for(int y = 0; y < MAP_SIZE; y++) {
-                Block currentBlock = blocks.getBlock(worldMap[x][y]);
-                if(!(Boolean)currentBlock.STATS.get("solid")) {
-                    if(currentBlock.STATS.hasVariable("mob-spawn-chance")) {
-                        int mobSpawnChance = (Integer)currentBlock.STATS.get("mob-spawn-chance");
-                        if(RandUtils.rand(0, 99) < mobSpawnChance) {
-                            mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
+            for(int x = 0; x < MAP_SIZE; x++) {
+                for(int y = 0; y < MAP_SIZE; y++) {
+                    Block currentBlock = blocks.getBlock(worldMap[x][y]);
+                    if(!(Boolean)currentBlock.STATS.get("solid")) {
+                        if(currentBlock.STATS.hasVariable("mob-spawn-chance")) {
+                            int mobSpawnChance = (Integer)currentBlock.STATS.get("mob-spawn-chance");
+                            if(RandUtils.rand(0, 99) < mobSpawnChance) {
+                                mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
+                            }
                         }
                     }
                 }
             }
+        } else {
+            readFileToMap(WORLD_SAVE, worldMap);
+            readFileToMap(MOB_SAVE, mobMap);
+            System.out.print(map(worldMap, blocks, 30, new Player(0, 0)));
+            System.out.println("??");
         }
         
         // assign spawn location to a place that is open and doesn't have a mob.
         int spawnX = RandUtils.rand(0, MAP_SIZE - 1);
         int spawnY = RandUtils.rand(0, MAP_SIZE - 1);
-        while(worldMap[spawnX][spawnY] == 2|| mobMap[spawnX][spawnY] != 0) {
+        while(worldMap[spawnX][spawnY] == 2 || mobMap[spawnX][spawnY] != 0) {
             spawnX = RandUtils.rand(0, MAP_SIZE - 1);
             spawnY = RandUtils.rand(0, MAP_SIZE - 1);
         }
@@ -189,7 +220,6 @@ public class Mud {
         } else {
             player = new Player(spawnX, spawnY);
         }
-        Scanner in = new Scanner(System.in);
 
         Mob mobToFight = null;
         boolean isFightingMob = false;
@@ -222,6 +252,8 @@ public class Mud {
                 player.updateXP();
                 player.getBaseStats().saveTo(STATS_SAVE);
                 player.getInventory().saveTo(INVENTORY_SAVE);
+                saveMap(MOB_SAVE, mobMap);
+                saveMap(WORLD_SAVE, worldMap);
                 continue;
             }
             if(action.equals("stat")){
