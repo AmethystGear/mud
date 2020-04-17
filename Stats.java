@@ -153,6 +153,17 @@ class Stats {
             throw new IllegalArgumentException("the type provided is invalid!");
         }
         stats.put(name, value);
+        if(value instanceof Boolean) {
+            types.put(name, "boolean");
+        } else if(value instanceof Integer) {
+            types.put(name, "int");
+        } else if(value instanceof String) {
+            types.put(name, "String");
+        } else if(value instanceof int[]) {
+            types.put(name, "int[]");
+        } else {
+            types.put(name, "String[]");
+        }
     }
 
     // check if provided object is one of the types we can parse.

@@ -8,7 +8,7 @@ int map-weight 0
 
 /begin/
 String name grass
-int display 149
+int display 35
 boolean solid false
 int mob-spawn-chance 1
 /end/
@@ -56,7 +56,7 @@ int map-weight 2
 
 /begin/
 String name tall-grass
-int display 107
+int display 22
 boolean solid false
 int mob-spawn-chance 75
 int map-weight 5

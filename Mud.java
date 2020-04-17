@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Mud {
-    private static final int MAP_SIZE = 3000;
+    
 
     //files that you can use to configure the game
     private static final String MOB_FILE = "mobs.txt";
@@ -159,8 +159,8 @@ public class Mud {
             float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
             float waterLevel = 0.5f;
             float sandLevel = 0.53f;
-            float grassLevel = 0.8f;
-            float tallGrassLevel = 0.82f;
+            float grassLevel = 0.75f;
+            float tallGrassLevel = 0.85f;
             // create map
             for(int x = 0; x < MAP_SIZE; x++) {
                 for(int y = 0; y < MAP_SIZE; y++) {
@@ -346,16 +346,16 @@ public class Mud {
                         String[] trades = new String[numItems];
                         for(int i = 0; i < trades.length; i++) {
                             trades[i] = allDrops[XYRand.nextInt(allDrops.length)];
-                            System.out.println((i + 1) + ". " + trades[i]);
+                            System.out.println((i + 1) + ". " + trades[i].replace(' ', '-'));
                         }
                         System.out.print("Enter which # item you wish to trade: ");
                         int itemNum = Integer.parseInt(in.nextLine()) - 1;
                         try {
-                            int amount = (Integer)player.getInventory().get(trades[itemNum]);
+                            int amount = (Integer)player.getInventory().get(trades[itemNum].replace(' ', '-'));
                             System.out.print("You have " + amount + " of that item. How many do you wish to trade? ");
                             int numToTrade = Integer.parseInt(in.nextLine());
                             try {
-                                player.removeFromInventory(trades[itemNum], numToTrade);
+                                player.removeFromInventory(trades[itemNum].replace(' ', '-'), numToTrade);
                                 player.changeStat("xp", xp * numToTrade);
                             } catch(IllegalArgumentException e) {
                                 System.out.println("You don't have enough of that item!");
@@ -511,8 +511,7 @@ public class Mud {
                         }
                     } else {
                         if(!hideMob && mobMap[x][y] != 0) {
-                            int display = b.STATS.hasVariable("mob-display") ? (Integer)b.STATS.get("mob-display") : 0;
-                            s.append("\033[38;5;" + display + ";48;5;" + asciiColor + "m??\033[0m");
+                            s.append("\033[;48;5;" + asciiColor + "m??\033[0m");
                         } else {
                             s.append("\033[48;5;" + asciiColor + "m  \033[0m");
                         }
