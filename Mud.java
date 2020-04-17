@@ -3,12 +3,18 @@ import java.util.*;
 
 public class Mud {
     private static final int MAP_SIZE = 3000;
+
+    //files that you can use to configure the game
     private static final String MOB_FILE = "mobs.txt";
     private static final String BLOCKS_FILE = "blocks.txt";
+
+    // player save files
     private static final String STATS_SAVE = "stats-save.txt";
+    private static final String INVENTORY_SAVE = "inventory-save.txt";
+
+    // world save files
     private static final String WORLD_SAVE = "world-map-save.txt";
     private static final String MOB_SAVE = "mob-map-save.txt";
-    private static final String INVENTORY_SAVE = "inventory-save.txt";
 
     private static int NUM_MOB_TYPES = 0;
 
@@ -179,11 +185,13 @@ public class Mud {
                 }
             }
 
-            int numVillages = RandUtils.rand(300, 400);
+            int numVillages = RandUtils.rand(50, 100);
             for(int i = 0; i < numVillages; i++) {
                 int x = RandUtils.rand(500, 2500);
                 int y = RandUtils.rand(500, 2500);
-                spawnVillage(x, y, worldMap, mobMap, blocks);
+                if(!((String)blocks.getBlock(worldMap[x][y]).STATS.get("name")).contains("water")) {
+                    spawnVillage(x, y, worldMap, mobMap, blocks);
+                }
             }
 
             for(int x = 0; x < MAP_SIZE; x++) {
@@ -203,15 +211,16 @@ public class Mud {
             readFileToMap(WORLD_SAVE, worldMap);
             readFileToMap(MOB_SAVE, mobMap);
             System.out.print(map(worldMap, blocks, 30, new Player(0, 0)));
-            System.out.println("??");
         }
         
         // assign spawn location to a place that is open and doesn't have a mob.
         int spawnX = RandUtils.rand(0, MAP_SIZE - 1);
         int spawnY = RandUtils.rand(0, MAP_SIZE - 1);
-        while(worldMap[spawnX][spawnY] == 2 || mobMap[spawnX][spawnY] != 0) {
+        Block b = blocks.getBlock(worldMap[spawnX][spawnY]);
+        while((Boolean)b.STATS.get("solid") || ((String)b.STATS.get("name")).contains("water")) {
             spawnX = RandUtils.rand(0, MAP_SIZE - 1);
             spawnY = RandUtils.rand(0, MAP_SIZE - 1);
+            b = blocks.getBlock(worldMap[spawnX][spawnY]);
         }
 
         Player player;

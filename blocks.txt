@@ -17,13 +17,13 @@ int mob-spawn-chance 1
 String name village-floor
 int display 136
 boolean solid false
-int map-weight 2
 /end/
 
 /begin/
 String name village-wall
 int display 94
 boolean solid true
+int map-weight 10
 /end/
 
 /begin/
