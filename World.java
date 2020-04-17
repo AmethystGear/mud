@@ -8,7 +8,7 @@ public class World {
     private Block.BlockSet blocks;
     private int seed;
 
-    public World(String saveFile, Block.Blockset blocks) {
+    public World(String saveFile, int numMobs, Block.BlockSet blocks) throws FileNotFoundException {
         this.blocks = blocks;
         Scanner scan = new Scanner(new File(saveFile));
         seed = scan.nextInt();
@@ -17,7 +17,7 @@ public class World {
         scan.close();
     }
 
-    public World(int seed, int numMobs, Block.Blockset blocks) {
+    public World(int seed, int numMobs, Block.BlockSet blocks) {
         this.blocks = blocks;
         worldMap = new int[MAP_SIZE][];
         mobMap = new int[MAP_SIZE][];
@@ -26,7 +26,7 @@ public class World {
             mobMap[i] = new int[MAP_SIZE];
         }
 
-        int seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
+        seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
         Random rand = new Random(seed);
         float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
         float waterLevel = 0.5f;
@@ -130,7 +130,6 @@ public class World {
         for(int x = xOrigin; x < xOrigin + villageLength; x++) {
             for(int y = yOrigin; y < yOrigin + pathSize; y++) {
                 worldMap[x][y] = floor;
-                mobMap[x][y] = 0;
             }
         }
         boolean generateUp = false;
@@ -141,12 +140,12 @@ public class World {
                 for(int y = yOrigin; y > yOrigin - pathlen; y--) {
                     worldMap[x][y] = floor;
                 }
-                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, mobMap, blocks);
+                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, rand, blocks);
             } else {
                 for(int y = yOrigin + pathSize; y < yOrigin + pathlen + pathSize; y++) {
                     worldMap[x][y] = floor;
                 }
-                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, mobMap, blocks);
+                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, rand, blocks);
             }
             generateUp = !generateUp;
         }

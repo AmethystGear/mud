@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Player {
-    public static String playerRep = "\033[33m++\033[0m";
+    public String playerRep = "\033[33m++\033[0m";
     public static final int DEFAULT_HEALTH = 10;
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
