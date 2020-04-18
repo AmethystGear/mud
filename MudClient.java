@@ -42,7 +42,7 @@ public class MudClient {
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         while(true) {
-            System.out.println("Enter a command: ");
+            System.out.print("Enter a command: ");
             String command = inFromUser.readLine();
             if(command.equals("quit")) {
                 clientSocket.close();
