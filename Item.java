@@ -1,10 +1,10 @@
-public class Block implements ValueType<Block>{
+public class Item implements ValueType<Item>{
     private int ID;
     private ReadOnlyStats stats;
 
-    public Block(){}
+    public Item(){}
 
-    public Block(int ID, ReadOnlyStats stats) {
+    public Item(int ID, ReadOnlyStats stats) {
         this.ID = ID;
         this.stats = stats;
     }
@@ -20,7 +20,7 @@ public class Block implements ValueType<Block>{
     }
 
     @Override
-    public Block create(int ID, ReadOnlyStats stats) {
-        return new Block(ID, stats);
+    public Item create(int ID, ReadOnlyStats stats) {
+        return new Item(ID, stats);
     }
 }

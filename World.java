@@ -5,10 +5,10 @@ public class World {
     public static final int MAP_SIZE = 3000;
     private int[][] worldMap;
     private int[][] mobMap;
-    private Block.BlockSet blocks;
+    private Value.ValueSet<Block> blocks;
     private int seed;
 
-    public World(String saveFile, int numMobs, Block.BlockSet blocks) throws FileNotFoundException {
+    public World(String saveFile, int numMobs, Value.ValueSet<Block> blocks) throws FileNotFoundException {
         this.blocks = blocks;
         Scanner scan = new Scanner(new File(saveFile));
         seed = scan.nextInt();
@@ -17,7 +17,7 @@ public class World {
         scan.close();
     }
 
-    public World(int seed, int numMobs, Block.BlockSet blocks) {
+    public World(int seed, int numMobs, Value.ValueSet<Block> blocks) {
         this.blocks = blocks;
         worldMap = new int[MAP_SIZE][];
         mobMap = new int[MAP_SIZE][];
@@ -36,11 +36,11 @@ public class World {
         // create map
         for(int x = 0; x < MAP_SIZE; x++) {
             for(int y = 0; y < MAP_SIZE; y++) {
-                int water = blocks.getBlock("water").BLOCK_ID;
-                int sand = blocks.getBlock("sand").BLOCK_ID;
-                int grass = blocks.getBlock("grass").BLOCK_ID;
-                int tallGrass = blocks.getBlock("tall grass").BLOCK_ID;
-                int rock = blocks.getBlock("rock").BLOCK_ID;
+                int water = blocks.get("water").getID();
+                int sand = blocks.get("sand").getID();
+                int grass = blocks.get("grass").getID();
+                int tallGrass = blocks.get("tall grass").getID();
+                int rock = blocks.get("rock").getID();
                 int block = 0;
                 if(perlinNoise[x][y] < waterLevel) {
                     block = water;
@@ -61,17 +61,17 @@ public class World {
         for(int i = 0; i < numVillages; i++) {
             int x = rand.nextInt(2000) + 500;
             int y = rand.nextInt(2000) + 500;
-            if(!((String)blocks.getBlock(worldMap[x][y]).STATS.get("name")).contains("water")) {
+            if(!((String)blocks.get(worldMap[x][y]).getStats().get("name")).contains("water")) {
                 spawnVillage(x, y, worldMap, rand, blocks);
             }
         }
 
         for(int x = 0; x < MAP_SIZE; x++) {
             for(int y = 0; y < MAP_SIZE; y++) {
-                Block currentBlock = blocks.getBlock(worldMap[x][y]);
-                if(!(Boolean)currentBlock.STATS.get("solid")) {
-                    if(currentBlock.STATS.hasVariable("mob-spawn-chance")) {
-                        int mobSpawnChance = (Integer)currentBlock.STATS.get("mob-spawn-chance");
+                Block currentBlock = blocks.get(worldMap[x][y]);
+                if(!(Boolean)currentBlock.getStats().get("solid")) {
+                    if(currentBlock.getStats().hasVariable("mob-spawn-chance")) {
+                        int mobSpawnChance = (Integer)currentBlock.getStats().get("mob-spawn-chance");
                         if(rand.nextInt(100) < mobSpawnChance) {
                             mobMap[x][y] = rand.nextInt(numMobs) + 1;
                         }
@@ -112,7 +112,7 @@ public class World {
     }
 
     public Block getBlock(int x, int y) {
-        return blocks.getBlock(worldMap[x][y]);
+        return blocks.get(worldMap[x][y]);
     }
 
     public Mob getMob(int x, int y, String mobFile) {
@@ -127,8 +127,12 @@ public class World {
         return mobMap[x][y] != 0;
     }
 
-    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, Random rand, Block.BlockSet blocks) {
-        int floor = blocks.getBlock("village floor").BLOCK_ID;
+    public void removeMob(int x, int y) {
+        mobMap[x][y] = 0;
+    }
+
+    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, Random rand, Value.ValueSet<Block> blocks) {
+        int floor = blocks.get("village floor").getID();
         int villageLength = rand.nextInt(100) + 20;
         int pathSize = rand.nextInt(2) + 3;
         for(int x = xOrigin; x < xOrigin + villageLength; x++) {
@@ -155,11 +159,11 @@ public class World {
         }
     }
 
-    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, Random rand, Block.BlockSet blocks) {
-        int floor = blocks.getBlock("village floor").BLOCK_ID;
-        int wall = blocks.getBlock("village wall").BLOCK_ID;
-        int surveyor = blocks.getBlock("surveyor").BLOCK_ID;
-        int surveyorSpawnChance = (Integer)blocks.getBlock("surveyor").STATS.get("spawn-chance");
+    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, Random rand, Value.ValueSet<Block> blocks) {
+        int floor = blocks.get("village floor").getID();
+        int wall = blocks.get("village wall").getID();
+        int surveyor = blocks.get("surveyor").getID();
+        int surveyorSpawnChance = (Integer)blocks.get("surveyor").getStats().get("spawn-chance");
         size = size * 2 + 1;
         for(int x = xOrigin; x < xOrigin + size; x++) {
             for(int y = yOrigin; y < yOrigin + size; y++) {

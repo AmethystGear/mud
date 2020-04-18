@@ -6,14 +6,16 @@ public class MudServer {
     // configuration files
     private static final String MOB_FILE = "mobs.txt";
     private static final String BLOCKS_FILE = "blocks.txt";
+    private static final String ITEMS_FILE = "blocks.txt";
 
     // world save file
     private static final String WORLD_SAVE = "world-save.txt";
 
-    private static int NUM_MOB_TYPES = 0;
-    
+    private static int NUM_MOB_TYPES = 0;    
     private static World world;
-    private static Block.BlockSet blocks;
+    private static Value.ValueSet<Block> blocks;
+    private static Value.ValueSet<Item> items;
+    private static String[] allDrops;
     private static Accept accept;
 
     public static void main(String[] args) {
@@ -44,14 +46,15 @@ public class MudServer {
                 }
             }
         }
-        String [] allDrops = new String[set.size()];
+        allDrops = new String[set.size()];
         int j = 0;
         for(String s : set) {
             allDrops[j] = s;
             j++;
         }
 
-        blocks = Block.getBlocksFromFile(BLOCKS_FILE);
+        blocks = Value.getValueFromFile(BLOCKS_FILE, new Block());
+        items = Value.getValueFromFile(ITEMS_FILE, new Item());
 
         boolean makeNewWorld;
         Scanner in = new Scanner(System.in);
@@ -132,7 +135,7 @@ public class MudServer {
         if(xAxis) {
             int bounded = bound(xOrigin + numUnits, 0, World.MAP_SIZE - 1);
             for(int x = xOrigin + sign(numUnits); x != bounded; x += sign(numUnits)) {
-                if((Boolean)world.getBlock(x, yOrigin).STATS.get("solid")) {
+                if((Boolean)world.getBlock(x, yOrigin).getStats().get("solid")) {
                     return x - sign(numUnits);
                 } else if(world.hasMob(x, yOrigin)) {
                     Mob m = world.getMob(x, yOrigin, MOB_FILE);
@@ -142,12 +145,12 @@ public class MudServer {
                     }
                 }
             }
-            boolean solid = (Boolean)world.getBlock(bounded, yOrigin).STATS.get("solid");
+            boolean solid = (Boolean)world.getBlock(bounded, yOrigin).getStats().get("solid");
             return solid ? bounded - sign(numUnits) : bounded;
         } else {
             int bounded = bound(yOrigin + numUnits, 0, World.MAP_SIZE - 1);
             for(int y = yOrigin + sign(numUnits); y != bounded; y += sign(numUnits)) {
-                if((Boolean)world.getBlock(xOrigin, y).STATS.get("solid")) {
+                if((Boolean)world.getBlock(xOrigin, y).getStats().get("solid")) {
                     return y - sign(numUnits);
                 } else if(world.hasMob(xOrigin, y)) {
                     Mob m = world.getMob(xOrigin, y, MOB_FILE);
@@ -157,7 +160,7 @@ public class MudServer {
                     }
                 }
             }
-            boolean solid = (Boolean)world.getBlock(xOrigin, bounded).STATS.get("solid");
+            boolean solid = (Boolean)world.getBlock(xOrigin, bounded).getStats().get("solid");
             return solid ? bounded - sign(numUnits) : bounded;
         }
     }
@@ -187,7 +190,7 @@ public class MudServer {
                 }
                 if(!hasPlayer) {
                     int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize);
-                    int asciiColor = (Integer)blocks.getBlock(majorityBlock).STATS.get("display");
+                    int asciiColor = (Integer)blocks.get(majorityBlock).getStats().get("display");
                     if(asciiColor == -1) {
                         s.append("  ");
                     } else {
@@ -205,16 +208,16 @@ public class MudServer {
         for(int x = xOrigin; x < xOrigin + chunkSize; x++) {
             for(int y = yOrigin; y < yOrigin + chunkSize; y++) {
                 Block b = world.getBlock(x, y);
-                while(blockList.size() <= b.BLOCK_ID) {
+                while(blockList.size() <= b.getID()) {
                     blockList.add(0);
                 }
                 int mapWeight;
-                if(b.STATS.hasVariable("map-weight")) {
-                    mapWeight = (Integer)b.STATS.get("map-weight");
+                if(b.getStats().hasVariable("map-weight")) {
+                    mapWeight = (Integer)b.getStats().get("map-weight");
                 } else {
                     mapWeight = 1;
                 }
-                blockList.set(b.BLOCK_ID, blockList.get(b.BLOCK_ID) + mapWeight);
+                blockList.set(b.getID(), blockList.get(b.getID()) + mapWeight);
             }
         }
         int maxIndex = 0;
@@ -241,8 +244,8 @@ public class MudServer {
                 }
                 if(!hasPlayer) {
                     Block b = world.getBlock(x, y);
-                    int asciiColor = (Integer)b.STATS.get("display");
-                    boolean hideMob = b.STATS.hasVariable("hide-mobs") && (Boolean)b.STATS.get("hide-mobs");
+                    int asciiColor = (Integer)b.getStats().get("display");
+                    boolean hideMob = b.getStats().hasVariable("hide-mobs") && (Boolean)b.getStats().get("hide-mobs");
                     if(asciiColor == -1) {
                         if(!hideMob && world.hasMob(x, y)) {
                             s.append("??");
@@ -263,6 +266,39 @@ public class MudServer {
         return s;
     }
 
+    private static StringBuilder playerGive(String command, Player player) {
+        StringBuilder out = new StringBuilder("");
+        Scanner scan = new Scanner(command);
+        scan.next();
+        int id = scan.nextInt();
+        String item = scan.next();
+        int amount = scan.nextInt();
+        scan.close();
+        if(id < 0 || id >= accept.players().size()) {
+            out.append("That player doesn't exist!");
+            return out;
+        }
+        Player recipient = accept.players().get(id);
+        if(!player.getInventory().hasVariable(item)) {
+            out.append("You don't have that item!");
+            return out;
+        }
+        if(amount < 0) {
+            out.append("Nice try, but you can't give negative donations.");
+            return out;
+        }
+        if((Integer)player.getInventory().get(item) < amount) {
+            out.append("You have ");
+            out.append((Integer)player.getInventory().get(item) + "");
+            out.append(" of that item, not ");
+            out.append(amount + ".");
+            return out;
+        }
+        recipient.addToInventory(item, amount);
+        player.removeFromInventory(item, amount);
+        return out;
+    }
+
     private static int min(int a, int b) {
         return a < b ? a : b;
     }
@@ -275,6 +311,56 @@ public class MudServer {
         return max(min, min(max, a));
     }
 
+    private static void respawn(Player player) {
+        player.clearInventory();
+        player.resetToBaseStats();
+        player.mob = null;
+        
+        int spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
+        int spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
+        Block b = world.getBlock(spawnX, spawnY);
+        while((Boolean)b.getStats().get("solid") || ((String)b.getStats().get("name")).contains("water") || world.hasMob(spawnX, spawnY)) {
+            spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
+            spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
+            b = world.getBlock(spawnX, spawnY);
+        }
+    }
+
+    private static StringBuilder mobAttack(Mob mob, Player player) {
+        StringBuilder out = new StringBuilder("");
+        out.append(mob.getBaseStats().get("name") + ": " + mob.getQuote("attack") + "\n");
+        out.append(mob.getBaseStats().get("name") + " attacked you and dealt " + mob.getBaseStats().get("dmg") + " damage.\n");
+        player.changeStat("health", -(Integer)mob.getStats().get("dmg"));
+        if(player.isDead()) {
+            out.append(mob.getBaseStats().get("name") + ": " + mob.getQuote("mob-victory") + "\n");
+            out.append("You were killed by " + mob.getBaseStats().get("name") + "\n");
+            respawn(player);
+            out.append("Respawning at " + player.x() + ", " + player.y() + "\n");
+        }
+        return out;
+    }
+
+    private static StringBuilder playerAttack(Mob mob, Player player) {
+        StringBuilder out = new StringBuilder("");
+        out.append("You attacked " + mob.getBaseStats().get("name") + " and dealt " + player.getBaseStats().get("dmg") + " damage.\n");
+        mob.changeStat("health", -(Integer)player.getBaseStats().get("dmg"));
+        if(mob.isDead()) {
+            out.append(mob.getBaseStats().get("name") + ": " + mob.getQuote("player-victory") + "\n");
+            out.append("You murdered " + mob.getBaseStats().get("name") + "\n");
+
+            out.append("You got " + mob.getBaseStats().get("xp") + " xp.\n");
+            player.changeStat("xp", (Integer)mob.getBaseStats().get("xp"));
+
+            String[] drops = mob.getDrops();
+            for(String drop : drops) {
+                out.append("You got " + drop + "\n");
+                player.addToInventory(drop, 1);
+            }
+            player.mob = null;
+        }
+        return out;
+    }
+
     public static StringBuilder handleCommand(String command, Player player) {
         StringBuilder out = new StringBuilder("");
         if(command.equals("")) {
@@ -283,10 +369,94 @@ public class MudServer {
             player.lastCommand = command;
         }
 
+        if(command.startsWith("eat")) {
+            Scanner scan = new Scanner(command);
+            scan.next();
+            String item = scan.next();
+            int amount = scan.nextInt();
+            scan.close();
+            if(!player.getInventory().hasVariable(item)) {
+                out.append("You don't have that item!");
+                return out;
+            }
+            if((Integer)player.getInventory().get(item) < amount) {
+                out.append("You have only " + ((Integer)player.getInventory().get(item)) + " of that item.");
+                return out;
+            }
+            int healthGain = 0;
+            try {
+                healthGain = (Integer)items.get(item).getStats().get("health-gain");
+            } catch (IllegalArgumentException e) {
+                out.append("You can't eat that!");
+                return out;
+            }
+            player.removeFromInventory(item, amount);
+            player.changeStat("health", amount * healthGain);
+            out.append("You got " + (amount * healthGain) + " health.");
+            return out;
+        }
+
+        if(player.mob != null) {
+            if(command.equals("attack")) {
+                out.append(playerAttack(player.mob, player));
+                if(player.mob != null) {
+                    out.append(mobAttack(player.mob, player));
+                }
+            } else if(command.equals("trade")) {
+                try {
+                    int numItems = (Integer)player.mob.getBaseStats().get("trade");
+                    int xp = (Integer)player.mob.getBaseStats().get("trade-xp");
+                    Random XYRand = world.getXYRand(player.x(), player.y());
+                    out.append("I can trade " + xp + " xp for each: \n");
+                    String[] trades = new String[numItems];
+                    for(int i = 0; i < trades.length; i++) {
+                        trades[i] = allDrops[XYRand.nextInt(allDrops.length)];
+                        out.append((i + 1) + ". " + trades[i].replace(' ', '-') + "\n");
+                    }
+                    out.append("use 'trade <item#> <amount>' to trade.\n");
+                } catch(IllegalArgumentException e) {
+                    out.append("You can't trade with " + (String)player.mob.getStats().get("name") + "!");
+                }
+            } else if(command.startsWith("trade")) {
+                try {
+                    int numItems = (Integer)player.mob.getBaseStats().get("trade");
+                    int xp = (Integer)player.mob.getBaseStats().get("trade-xp");
+                    Random XYRand = world.getXYRand(player.x(), player.y());
+                    String[] trades = new String[numItems];
+                    for(int i = 0; i < trades.length; i++) {
+                        trades[i] = allDrops[XYRand.nextInt(allDrops.length)];
+                    }
+                    Scanner scan = new Scanner(command);
+                    scan.next();
+                    int itemNumber = scan.nextInt();
+                    int numToTrade = scan.nextInt();
+                    scan.close();
+                    String drop = trades[itemNumber].replace(' ', '-');
+                    if(!player.getInventory().hasVariable(drop)) {
+                        out.append("You don't have that item!");
+                        return out;
+                    }
+                    if((Integer)player.getInventory().get(drop) < numToTrade) {
+                        out.append("You have only " + ((Integer)player.getInventory().get(drop)) + " of that item.");
+                        return out;
+                    }
+                    player.removeFromInventory(drop, numToTrade);
+                    player.changeStat("xp", xp * numToTrade);
+                } catch(IllegalArgumentException e) {
+                    out.append("You can't trade with " + (String)player.mob.getStats().get("name") + "!");
+                }
+            } else if(command.equals("run")) {
+
+            }
+            return out;
+        }
+
         if(command.equals("map")) {
             out.append(map(30));
         } else if(command.equals("disp")) {
             out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
+        } else if(command.startsWith("give")) {
+            out.append(playerGive(command, player));
         } else if(command.charAt(0) == 'w' || command.charAt(0) == 'a' || command.charAt(0) == 's' || command.charAt(0) == 'd') { // movement
             int dist;
             if(command.length() > 1) {
@@ -294,11 +464,10 @@ public class MudServer {
                     dist = Integer.parseInt(command.substring(1, command.length()));
                     if(dist > (Integer)player.getStats().get("speed")) {
                         out.append("You can't move that far! Upgrade your speed stat to go farther each turn.");
-                        out.append("\n/end/\n");
                         return out;
                     }
-                } catch (Exception e) {
-                    out.append("\n/end/\n");
+                } catch (NumberFormatException e) {
+                    out.append("You didn't type a number after the movement character.");
                     return out;
                 }
             } else {
@@ -317,9 +486,24 @@ public class MudServer {
                 int actualPosn = move(player.x(), player.y(), true, dist);
                 player.moveTo(actualPosn, player.y());
             }
-            out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
+
+            if(!world.hasMob(player.x(), player.y())) {
+                out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
+            } else {
+                Mob mob = world.getMob(player.x(), player.y(), MOB_FILE);
+
+                // mob entrance
+                out.append("You encountered " + mob.getBaseStats().get("name") + "\n");
+                out.append(mob.getBaseStats().get("name") + ": " + mob.getQuote("entrance"));
+                out.append(mob.getImg());
+
+                player.mob = mob;
+
+                if((Integer)mob.getStats().get("speed") > (Integer)player.getStats().get("speed")) {
+                    mobAttack(mob, player);
+                }
+            }
         }
-        out.append("\n/end/\n");
         return out;
     }
 }
@@ -380,17 +564,25 @@ class PlayerThread extends Thread {
         while(continueRun) {
             try {
                 String command = inFromClient.readLine();
-                System.out.println(command);
-                StringBuilder output = MudServer.handleCommand(command, player);
-                
-                Scanner scan = new Scanner(output.toString());
-                while(scan.hasNextLine()) {
-                    String line = scan.nextLine();
-                    outToClient.writeUTF(line + "\n");
-                    System.out.println(line);
+                try {
+                    StringBuilder output = MudServer.handleCommand(command, player);                    
+                    output.append("\n/end/\n");                                   
+                    Scanner scan = new Scanner(output.toString());
+                    while(scan.hasNextLine()) {
+                        String line = scan.nextLine();
+                        outToClient.writeUTF(line + "\n");
+                        System.out.println(line);
+                    }
+                } 
+                // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
+                // also, notify the player that the action they tried to do didn't work.
+                catch(Exception e) {
+                    outToClient.writeUTF("That action didn't work. Check your syntax.\n/end/\n");
+                    System.out.println(e);
+                    e.printStackTrace();
                 }
             } catch(IOException e) {
-                // 
+                //ignore errors
             }
         }
     }

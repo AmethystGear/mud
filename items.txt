@@ -1,0 +1,14 @@
+/begin/
+String name "disgusting-slime"
+int health-gain 1
+/end/
+
+/begin/
+String name "viscous-fluids"
+int health-gain -2
+/end/
+
+/begin/
+String name "rusty-sword"
+int health-gain -5
+/end/

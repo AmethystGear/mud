@@ -4,6 +4,8 @@ import java.util.*;
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
     public String lastCommand = "";
+    public Mob mob;
+
     public static final int DEFAULT_HEALTH = 10;
     public static final int DEFAULT_DMG = 1;
     public static final int DEFAULT_SPEED = 5;
@@ -36,6 +38,10 @@ public class Player {
         inventory = new Stats();
     }
 
+    public void resetToBaseStats() {
+        stats = baseStats.clone();
+    }
+
     public void moveTo(int x, int y) {
         this.x = x;
         this.y = y;
@@ -62,11 +68,18 @@ public class Player {
     }
 
     public void removeFromInventory(String item, int count) {
+        if(count < 0 || !inventory.hasVariable(item)) {
+            throw new IllegalArgumentException();
+        }
         int numItemInInventory = (Integer)inventory.get(item);
         if(numItemInInventory - count < 0) {
             throw new IllegalArgumentException();
         }
-        inventory.set(item, numItemInInventory - count);
+        if(numItemInInventory - count == 0) {
+            inventory.removeVariable(item);
+        } else {
+            inventory.set(item, numItemInInventory - count);
+        }
     }
 
     public void upgradeBaseStat(String stat) {
@@ -86,7 +99,7 @@ public class Player {
 
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer)stats.get(stat);
-        stats.set(stat, currentAmount + amount);
+        stats.set(stat, Math.min(currentAmount + amount, (Integer)baseStats.get("health")));
         updateXP();
     }
 
@@ -98,13 +111,20 @@ public class Player {
         return (Integer)stats.get("health") <= 0;
     }
 
-    public void addToInventory(String item) {
-        try {
-            int amount = (Integer)inventory.get(item);
-            inventory.set(item, amount + 1);
-        } catch(IllegalArgumentException e) {
-            inventory.set(item, 1);
+    public void addToInventory(String item, int count) {
+        if(count < 0 || !inventory.hasVariable(item)) {
+            throw new IllegalArgumentException();
         }
+        if(inventory.hasVariable(item)) {
+            int amount = (Integer)inventory.get(item);
+            inventory.set(item, amount + count);
+        } else {
+            inventory.set(item, count);
+        }
+    }
+
+    public void clearInventory() {
+        inventory = new Stats();
     }
 
     public String toString() {

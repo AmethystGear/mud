@@ -166,6 +166,14 @@ class Stats {
         }
     }
 
+    public void removeVariable(String name) {
+        if(!types.containsKey(name)) {
+            throw new IllegalArgumentException("That variable doesn't exist!");
+        }
+        types.remove(name);
+        stats.remove(name);
+    }
+
     // check if provided object is one of the types we can parse.
     private boolean isValidType(Object o) {
         return o instanceof Boolean || 
