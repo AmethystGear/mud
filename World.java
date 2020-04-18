@@ -124,7 +124,7 @@ public class World {
     }
 
     public boolean hasMob(int x, int y) {
-        return worldMap[x][y] == 0;
+        return mobMap[x][y] != 0;
     }
 
     private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, Random rand, Block.BlockSet blocks) {

@@ -49,8 +49,8 @@ public class MudClient {
             } else {
                 outToServer.writeBytes(command + '\n');
                 String line = inFromServer.readLine();
-                while(!line.equals("/end/")) {
-                    System.out.println(line);
+                while(!line.contains("/end/")) {
+                    System.out.println(line.substring(1, line.length()));
                     line = inFromServer.readLine();
                 }
             }

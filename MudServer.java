@@ -120,7 +120,59 @@ public class MudServer {
         in.close();
     }
 
-    private static String map(int chunkSize) {
+    // calculates the actual move position given the origin, direction to move in, distance to attempt to travel,
+    // the mob map, and the world map.
+    private static int move(int xOrigin, int yOrigin, boolean xAxis, int numUnits) {
+        if(numUnits == 0 && xAxis) {
+            return xOrigin;
+        } else if (numUnits == 0 && !xAxis) {
+            return yOrigin;
+        }
+
+        if(xAxis) {
+            int bounded = bound(xOrigin + numUnits, 0, World.MAP_SIZE - 1);
+            for(int x = xOrigin + sign(numUnits); x != bounded; x += sign(numUnits)) {
+                if((Boolean)world.getBlock(x, yOrigin).STATS.get("solid")) {
+                    return x - sign(numUnits);
+                } else if(world.hasMob(x, yOrigin)) {
+                    Mob m = world.getMob(x, yOrigin, MOB_FILE);
+                    if(RandUtils.rand(0, 99) < (Integer)m.getBaseStats().get("aggression")) {
+                        System.out.println("you were blocked by a mob!");
+                        return x;
+                    }
+                }
+            }
+            boolean solid = (Boolean)world.getBlock(bounded, yOrigin).STATS.get("solid");
+            return solid ? bounded - sign(numUnits) : bounded;
+        } else {
+            int bounded = bound(yOrigin + numUnits, 0, World.MAP_SIZE - 1);
+            for(int y = yOrigin + sign(numUnits); y != bounded; y += sign(numUnits)) {
+                if((Boolean)world.getBlock(xOrigin, y).STATS.get("solid")) {
+                    return y - sign(numUnits);
+                } else if(world.hasMob(xOrigin, y)) {
+                    Mob m = world.getMob(xOrigin, y, MOB_FILE);
+                    if(RandUtils.rand(0, 99) < (Integer)m.getBaseStats().get("aggression")) {
+                        System.out.println("you were blocked by a mob!");
+                        return y;
+                    }
+                }
+            }
+            boolean solid = (Boolean)world.getBlock(xOrigin, bounded).STATS.get("solid");
+            return solid ? bounded - sign(numUnits) : bounded;
+        }
+    }
+
+    private static int sign(int a) {
+        if(a > 0) {
+            return 1;
+        } else if (a == 0) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    private static StringBuilder map(int chunkSize) {
         StringBuilder s = new StringBuilder();
         for(int y = 0; y < World.MAP_SIZE; y += chunkSize) {
             s.append("|");
@@ -128,7 +180,7 @@ public class MudServer {
                 boolean hasPlayer = false;
                 for(Player player : accept.players()) {
                     if(player.x() >= x && player.x() < x + chunkSize && player.y() > y && player.y() <= y + chunkSize) {
-                        s.append(player.playerRep);
+                        s.append("\033[0m" + player.playerRep);
                         hasPlayer = true;
                         break;
                     }
@@ -139,13 +191,13 @@ public class MudServer {
                     if(asciiColor == -1) {
                         s.append("  ");
                     } else {
-                        s.append("\033[48;5;" + asciiColor + "m__\033[0m");
+                        s.append("\033[48;5;" + asciiColor + "m  ");
                     }
                 }
             }
-            s.append("|\n");
+            s.append("\033[0m|\n");
         }
-        return s.toString();
+        return s;
     }
 
     private static int getMajorityBlockInChunk(int xOrigin, int yOrigin, int chunkSize) {
@@ -174,15 +226,15 @@ public class MudServer {
         return maxIndex;
     }
 
-    private static String display(int dist, int xView, int yView) {
+    private static StringBuilder display(int dist, int xView, int yView) {
         StringBuilder s = new StringBuilder();
         for(int y = max(0,yView - dist); y < min(World.MAP_SIZE, yView + dist + 1); y++) {
-            s.append("\033[0m|");
+            s.append("|");
             for(int x = max(0,xView - dist); x < min(World.MAP_SIZE, xView + dist + 1); x++) {
                 boolean hasPlayer = false;
                 for(Player player : accept.players()) {
                     if(player.x() == x && player.y() == y) {
-                        s.append(player.playerRep);
+                        s.append("\033[0m" + player.playerRep);
                         hasPlayer = true;
                         break;
                     }
@@ -203,13 +255,12 @@ public class MudServer {
                         } else {
                             s.append("\033[48;5;" + asciiColor + "m  ");
                         }
-                        
                     }
                 }
             }
             s.append("\033[0m|\n");
         }
-        return s.toString();
+        return s;
     }
 
     private static int min(int a, int b) {
@@ -224,15 +275,52 @@ public class MudServer {
         return max(min, min(max, a));
     }
 
-    public static String handleCommand(String command, Player player) {
+    public static StringBuilder handleCommand(String command, Player player) {
         StringBuilder out = new StringBuilder("");
+        if(command.equals("")) {
+            command = player.lastCommand;
+        } else {
+            player.lastCommand = command;
+        }
+
         if(command.equals("map")) {
             out.append(map(30));
         } else if(command.equals("disp")) {
-            out.append(display(10, player.x(), player.y()));
+            out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
+        } else if(command.charAt(0) == 'w' || command.charAt(0) == 'a' || command.charAt(0) == 's' || command.charAt(0) == 'd') { // movement
+            int dist;
+            if(command.length() > 1) {
+                try {
+                    dist = Integer.parseInt(command.substring(1, command.length()));
+                    if(dist > (Integer)player.getStats().get("speed")) {
+                        out.append("You can't move that far! Upgrade your speed stat to go farther each turn.");
+                        out.append("\n/end/\n");
+                        return out;
+                    }
+                } catch (Exception e) {
+                    out.append("\n/end/\n");
+                    return out;
+                }
+            } else {
+                dist = (Integer)player.getStats().get("speed");
+            }
+            if(command.charAt(0) == 'w') {
+                int actualPosn = move(player.x(), player.y(), false, -dist);
+                player.moveTo(player.x(), actualPosn);
+            } else if (command.charAt(0) == 'a') {
+                int actualPosn = move(player.x(), player.y(), true, -dist);
+                player.moveTo(actualPosn, player.y());
+            } else if (command.charAt(0) == 's') {
+                int actualPosn = move(player.x(), player.y(), false, dist);
+                player.moveTo(player.x(), actualPosn);
+            } else if (command.charAt(0) == 'd') {
+                int actualPosn = move(player.x(), player.y(), true, dist);
+                player.moveTo(actualPosn, player.y());
+            }
+            out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
         }
         out.append("\n/end/\n");
-        return out.toString();
+        return out;
     }
 }
 
@@ -249,10 +337,11 @@ class Accept extends Thread {
     public void run() {
         while(continueRun) {
             try {
-                PlayerThread p = new PlayerThread(server.accept(), ID);               
+                PlayerThread p = new PlayerThread(server.accept(), ID);
+                System.out.println("connected!");
                 players.add(p);
                 ID++;
-                p.run();
+                p.start();
             } catch (IOException e) {
                 System.out.println("client connection failed!");
             }
@@ -283,7 +372,7 @@ class PlayerThread extends Thread {
     public PlayerThread(Socket conn, int ID) throws IOException {
         inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         outToClient = new DataOutputStream(conn.getOutputStream());
-        player = new Player(0, 0);
+        player = new Player(500, 500);
         player.playerRep = ID + "" + ID;
     }
 
@@ -292,11 +381,16 @@ class PlayerThread extends Thread {
             try {
                 String command = inFromClient.readLine();
                 System.out.println(command);
-                String output = MudServer.handleCommand(command, player);
-                System.out.println(output);
-                outToClient.writeUTF(output);
+                StringBuilder output = MudServer.handleCommand(command, player);
+                
+                Scanner scan = new Scanner(output.toString());
+                while(scan.hasNextLine()) {
+                    String line = scan.nextLine();
+                    outToClient.writeUTF(line + "\n");
+                    System.out.println(line);
+                }
             } catch(IOException e) {
-                System.out.println("command failed!");
+                // 
             }
         }
     }
