@@ -2,25 +2,19 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandUtils {
-    // get seedless random value.
+
+    //seedless random value
     public static int rand(int minInc, int maxInc) {
         return ThreadLocalRandom.current().nextInt(minInc, maxInc + 1);
     }
 
+    //seedless random selection from array
     public static String getRandom(String[] array) {
         return array[rand(0, array.length - 1)];
     }
 
     public static int getRandom(int[] array) {
         return array[rand(0, array.length - 1)];
-    }
-
-    public static Random getXYRand(int x, int y) {
-        if(x < 0 || y < 0) {
-            throw new IllegalArgumentException();
-        }
-        long hash = x * (int)Math.pow(10, (x + "").length()) + y; 
-        return new Random(hash);
     }
 
     public static float[][] generatePerlinNoise(int width, int height, Random random, int octaveCount)

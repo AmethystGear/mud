@@ -13,92 +13,12 @@ public class Mud {
     private static final String INVENTORY_SAVE = "inventory-save.txt";
 
     // world save files
-    private static final String WORLD_SAVE = "world-map-save.txt";
-    private static final String MOB_SAVE = "mob-map-save.txt";
+    private static final String WORLD_SAVE = "world-save.txt";
 
     private static int NUM_MOB_TYPES = 0;
 
-
-    public static void saveMap(String file, int[][] map) throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)));
-        for(int y = 0; y < MAP_SIZE; y++) {
-            for(int x = 0; x < MAP_SIZE; x++) {
-                writer.write(map[x][y] + " ");
-            }
-        }
-        writer.close();
-    }
-
-    public static void readFileToMap(String file, int[][] map) throws FileNotFoundException {
-        Scanner scan = new Scanner(new File(file));
-        for(int y = 0; y < MAP_SIZE; y++) {
-            for(int x = 0; x < MAP_SIZE; x++) {
-                map[x][y] = scan.nextInt();
-            }
-        }
-        scan.close();
-    }
-
     private static boolean fileExists(String file) {
         return new File(file).exists() && !new File(file).isDirectory();
-    }
-
-    private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
-        int floor = blocks.getBlock("village floor").BLOCK_ID;
-        int villageLength = RandUtils.rand(4, 15) * 5;
-        int pathSize = RandUtils.rand(3, 5);
-        for(int x = xOrigin; x < xOrigin + villageLength; x++) {
-            for(int y = yOrigin; y < yOrigin + pathSize; y++) {
-                worldMap[x][y] = floor;
-                mobMap[x][y] = 0;
-            }
-        }
-        boolean generateUp = false;
-        for(int x = xOrigin + RandUtils.rand(2, 5); x < xOrigin + villageLength; x+= RandUtils.rand(5, 10)) {
-            int pathlen = RandUtils.rand(3, 10);
-            int hutSize = RandUtils.rand(2, 4);
-            if(generateUp) {
-                for(int y = yOrigin; y > yOrigin - pathlen; y--) {
-                    worldMap[x][y] = floor;
-                    mobMap[x][y] = 0;
-                }
-                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, worldMap, mobMap, blocks);
-            } else {
-                for(int y = yOrigin + pathSize; y < yOrigin + pathlen + pathSize; y++) {
-                    worldMap[x][y] = floor;
-                    mobMap[x][y] = 0;
-                }
-                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, worldMap, mobMap, blocks);
-            }
-            generateUp = !generateUp;
-        }
-    }
-
-    private static void spawnHut(int xOrigin, int yOrigin, int size, int [][] worldMap, int[][] mobMap, Block.BlockSet blocks) {
-        int floor = blocks.getBlock("village floor").BLOCK_ID;
-        int wall = blocks.getBlock("village wall").BLOCK_ID;
-        int surveyor = blocks.getBlock("surveyor").BLOCK_ID;
-        int surveyorSpawnChance = (Integer)blocks.getBlock("surveyor").STATS.get("spawn-chance");
-        size = size * 2 + 1;
-        for(int x = xOrigin; x < xOrigin + size; x++) {
-            for(int y = yOrigin; y < yOrigin + size; y++) {
-                worldMap[x][y] = floor;
-                mobMap[x][y] = 0;
-                if(RandUtils.rand(0, 99) < surveyorSpawnChance) {
-                    worldMap[x][y] = surveyor;
-                }
-            }
-        }
-        for(int x = xOrigin; x < xOrigin + size; x++) {
-            if(x - xOrigin != size/2) {
-                worldMap[x][yOrigin] = wall;
-                worldMap[x][yOrigin + size - 1] = wall;
-            }
-        }
-        for(int y = yOrigin; y < yOrigin + size; y++) {
-            worldMap[xOrigin][y] = wall;
-            worldMap[xOrigin + size - 1][y] = wall;
-        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -141,86 +61,22 @@ public class Mud {
             inp = in.nextLine();
         }
         makeNewWorld = inp.equals("create");
-
-        int[][] worldMap = new int[MAP_SIZE][];
-        for(int i = 0; i < MAP_SIZE; i++) {
-            worldMap[i] = new int[MAP_SIZE];
-        }
-
-        int[][] mobMap = new int[MAP_SIZE][];
-        for(int i = 0; i < MAP_SIZE; i++) {
-            mobMap[i] = new int[MAP_SIZE];
-        }
-
+        
+        World world;
         if (makeNewWorld) {
-            int seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
-            System.out.println(seed);
-            Random rand = new Random(seed);
-            float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
-            float waterLevel = 0.5f;
-            float sandLevel = 0.53f;
-            float grassLevel = 0.75f;
-            float tallGrassLevel = 0.85f;
-            // create map
-            for(int x = 0; x < MAP_SIZE; x++) {
-                for(int y = 0; y < MAP_SIZE; y++) {
-                    int water = blocks.getBlock("water").BLOCK_ID;
-                    int sand = blocks.getBlock("sand").BLOCK_ID;
-                    int grass = blocks.getBlock("grass").BLOCK_ID;
-                    int tallGrass = blocks.getBlock("tall grass").BLOCK_ID;
-                    int rock = blocks.getBlock("rock").BLOCK_ID;
-                    int block = 0;
-                    if(perlinNoise[x][y] < waterLevel) {
-                        block = water;
-                    } else if (perlinNoise[x][y] >= waterLevel && perlinNoise[x][y] < sandLevel) {
-                        block = sand;
-                    } else if  (perlinNoise[x][y] >= sandLevel && perlinNoise[x][y] < grassLevel) {
-                        block = grass;
-                    } else if  (perlinNoise[x][y] >= grassLevel && perlinNoise[x][y] < tallGrassLevel){
-                        block = tallGrass;
-                    } else {
-                        block = rock;
-                    }
-                    worldMap[x][y] = block;
-                }
-            }
-
-            int numVillages = RandUtils.rand(50, 100);
-            for(int i = 0; i < numVillages; i++) {
-                int x = RandUtils.rand(500, 2500);
-                int y = RandUtils.rand(500, 2500);
-                if(!((String)blocks.getBlock(worldMap[x][y]).STATS.get("name")).contains("water")) {
-                    spawnVillage(x, y, worldMap, mobMap, blocks);
-                }
-            }
-
-            for(int x = 0; x < MAP_SIZE; x++) {
-                for(int y = 0; y < MAP_SIZE; y++) {
-                    Block currentBlock = blocks.getBlock(worldMap[x][y]);
-                    if(!(Boolean)currentBlock.STATS.get("solid")) {
-                        if(currentBlock.STATS.hasVariable("mob-spawn-chance")) {
-                            int mobSpawnChance = (Integer)currentBlock.STATS.get("mob-spawn-chance");
-                            if(RandUtils.rand(0, 99) < mobSpawnChance) {
-                                mobMap[x][y] = RandUtils.rand(1, NUM_MOB_TYPES);
-                            }
-                        }
-                    }
-                }
-            }
+            world = new World(RandUtils.rand(0, Integer.MAX_VALUE - 1), NUM_MOB_TYPES, blocks);
         } else {
-            readFileToMap(WORLD_SAVE, worldMap);
-            readFileToMap(MOB_SAVE, mobMap);
-            System.out.print(map(worldMap, blocks, 30, new Player(0, 0)));
+            world = new World(WORLD_SAVE, NUM_MOB_TYPES, blocks);
         }
         
         // assign spawn location to a place that is open and doesn't have a mob.
         int spawnX = RandUtils.rand(0, MAP_SIZE - 1);
         int spawnY = RandUtils.rand(0, MAP_SIZE - 1);
-        Block b = blocks.getBlock(worldMap[spawnX][spawnY]);
+        Block b = world.getBlock(spawnX, spawnY);
         while((Boolean)b.STATS.get("solid") || ((String)b.STATS.get("name")).contains("water")) {
             spawnX = RandUtils.rand(0, MAP_SIZE - 1);
             spawnY = RandUtils.rand(0, MAP_SIZE - 1);
-            b = blocks.getBlock(worldMap[spawnX][spawnY]);
+            b = world.getBlock(spawnX, spawnY);
         }
 
         Player player;
