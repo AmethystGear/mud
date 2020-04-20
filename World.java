@@ -28,7 +28,18 @@ public class World {
 
         seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
         Random rand = new Random(seed);
-        float[][] perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
+        float[][] baseHeightMap = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
+        float[][] secondLayerHeightMap = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, rand.nextInt(3) + 3);
+        float[][] perlinNoise = new float[MAP_SIZE][];
+
+        float secondaryWeight = 0.2f;
+        for(int i = 0; i < MAP_SIZE; i++) {
+            perlinNoise[i] = new float[MAP_SIZE];
+            for(int j = 0; j < MAP_SIZE; j++) {
+                perlinNoise[i][j] = (baseHeightMap[i][j] + secondLayerHeightMap[i][j] * secondaryWeight);
+            }
+        }
+
         float waterLevel = 0.5f;
         float sandLevel = 0.53f;
         float grassLevel = 0.75f;

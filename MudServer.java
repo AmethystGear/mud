@@ -10,6 +10,8 @@ public class MudServer {
 
     // world save file
     private static final String WORLD_SAVE = "world-save.txt";
+    private static final String INVENTORY_SAVE = "inventory-save.txt";
+    private static final String STATS_SAVE = "stats-save.txt";
 
     private static int NUM_MOB_TYPES = 0;    
     private static World world;
@@ -109,8 +111,20 @@ public class MudServer {
 
         boolean quit = false;
         while(!quit) {
-            if(in.nextLine().equals("quit")) {
+            String line = in.nextLine();
+            if(line.equals("quit")) {
                 quit = true;
+            }
+            if(line.equals("save")) {
+                try {
+                    world.saveTo(WORLD_SAVE);
+                    for(Player p : accept.players()) {
+                        p.getBaseStats().saveTo(STATS_SAVE);
+                        p.getInventory().saveTo(INVENTORY_SAVE);
+                    }
+                } catch (FileNotFoundException e) {
+                    System.out.println("There is no file named " + WORLD_SAVE + " in the current directory.");
+                }
             }
         }
 
@@ -315,7 +329,7 @@ public class MudServer {
         player.clearInventory();
         player.resetToBaseStats();
         player.mob = null;
-        
+
         int spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
         int spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
         Block b = world.getBlock(spawnX, spawnY);
@@ -356,6 +370,7 @@ public class MudServer {
                 out.append("You got " + drop + "\n");
                 player.addToInventory(drop, 1);
             }
+            world.removeMob(player.x(), player.y());
             player.mob = null;
         }
         return out;
@@ -445,8 +460,10 @@ public class MudServer {
                 } catch(IllegalArgumentException e) {
                     out.append("You can't trade with " + (String)player.mob.getStats().get("name") + "!");
                 }
-            } else if(command.equals("run")) {
-
+            } else if(command.equals("run")) {       
+                out.append(player.mob.getBaseStats().get("name") + ": " + player.mob.getQuote("player-run") + "\n");
+                out.append("You ran away from " + player.mob.getBaseStats().get("name") + ".\n");
+                player.mob = null;
             }
             return out;
         }
@@ -565,13 +582,12 @@ class PlayerThread extends Thread {
             try {
                 String command = inFromClient.readLine();
                 try {
-                    StringBuilder output = MudServer.handleCommand(command, player);                    
+                    StringBuilder output = MudServer.handleCommand(command, player);             
                     output.append("\n/end/\n");                                   
                     Scanner scan = new Scanner(output.toString());
                     while(scan.hasNextLine()) {
                         String line = scan.nextLine();
-                        outToClient.writeUTF(line + "\n");
-                        System.out.println(line);
+                        outToClient.writeUTF("/begin/" + line + "\n");
                     }
                 } 
                 // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.

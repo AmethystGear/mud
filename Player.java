@@ -112,7 +112,7 @@ public class Player {
     }
 
     public void addToInventory(String item, int count) {
-        if(count < 0 || !inventory.hasVariable(item)) {
+        if(count < 0) {
             throw new IllegalArgumentException();
         }
         if(inventory.hasVariable(item)) {

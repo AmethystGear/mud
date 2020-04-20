@@ -26,7 +26,11 @@ class Stats {
         types = new HashMap<>();
         stats = new HashMap<>();
         while(scan.hasNextLine()) {
-            Scanner lineScan = new Scanner(scan.nextLine());
+            String line = scan.nextLine();
+            if(line.startsWith("#")) { //ignore comments
+                continue;
+            }
+            Scanner lineScan = new Scanner(line);
             if(lineScan.hasNext()) {
                 String type = lineScan.next();
                 if(type.equals("/begin/")) {
@@ -65,6 +69,12 @@ class Stats {
                     value = ScannerUtils.getRemainingInputAsString(lineScan);
                 } else if (type.equals("String[]")) {
                     value = ScannerUtils.getRemainingInputAsStringArray(lineScan);
+                } else if (type.equals("double")) {
+                    if(!lineScan.hasNextDouble()) {
+                        lineScan.close();
+                        throw new IllegalArgumentException("variable of type double does not contain a double!");
+                    }
+                    value = lineScan.nextDouble();
                 } else {
                     lineScan.close();
                     System.out.println(type);
@@ -161,8 +171,10 @@ class Stats {
             types.put(name, "String");
         } else if(value instanceof int[]) {
             types.put(name, "int[]");
-        } else {
+        } else if (value instanceof String[]) {
             types.put(name, "String[]");
+        } else {
+            types.put(name, "double");
         }
     }
 
@@ -180,7 +192,8 @@ class Stats {
                o instanceof Integer ||
                o instanceof String ||
                o instanceof int[] ||
-               o instanceof String[];
+               o instanceof String[] ||
+               o instanceof Double;
     }
 
     // string rep of a value. 

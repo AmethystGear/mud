@@ -51,11 +51,11 @@ String name sand
 int display 178
 boolean solid false
 int mob-spawn-chance 5
-int map-weight 2
+int map-weight 4
 /end/
 
 /begin/
-String name tall-grass
+String name forest
 int display 22
 boolean solid false
 int mob-spawn-chance 75

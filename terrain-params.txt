@@ -1,0 +1,19 @@
+/begin/
+# the number of octaves determines how 'steep' terrain inclines can be.
+# a small number for base-octaves would make the terrain 'spiky'.
+# if the water level was set to, for example, 0.5, this spiky terrain would produce lots of mountainous islands.
+int base-octaves 10
+# this is an additional variance added on top of the base terrain.
+int secondaryOctaves 3
+# how big should biomes be? The bigger the octave, the bigger the average biome size.
+int biomesOctaves 10
+#how big should the random rock outcroppings be?
+int rockOctaves 3
+# this is how much the secondary veriance is weighted.
+double secondaryWeight 0.3
+double waterLevel 0.5
+double sandLevel 0.55
+double grassLevel 0.75
+double forestLevel 0.85
+# anything higher than forestLevel is assumed to be rocks.
+/end/
