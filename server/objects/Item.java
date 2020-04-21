@@ -1,10 +1,12 @@
+package server.objects;
+
 public class Item implements ValueType<Item>{
     private int ID;
-    private ReadOnlyStats stats;
+    private Stats.ReadOnlyStats stats;
 
     public Item(){}
 
-    public Item(int ID, ReadOnlyStats stats) {
+    public Item(int ID, Stats.ReadOnlyStats stats) {
         this.ID = ID;
         this.stats = stats;
     }
@@ -15,12 +17,12 @@ public class Item implements ValueType<Item>{
     }
 
     @Override
-    public ReadOnlyStats getStats() {
+    public Stats.ReadOnlyStats getStats() {
         return stats;
     }
 
     @Override
-    public Item create(int ID, ReadOnlyStats stats) {
+    public Item create(int ID, Stats.ReadOnlyStats stats) {
         return new Item(ID, stats);
     }
 }

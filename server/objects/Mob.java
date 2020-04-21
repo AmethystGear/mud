@@ -1,5 +1,8 @@
+package server.objects;
+
 import java.io.*;
 import java.util.*;
+import server.utils.RandUtils;
 
 public class Mob {
     private Stats baseStats;
@@ -41,12 +44,12 @@ public class Mob {
         stats = baseStats.clone();
     }
 
-    public ReadOnlyStats getBaseStats() {
-        return new ReadOnlyStats(stats);
+    public Stats.ReadOnlyStats getBaseStats() {
+        return new Stats.ReadOnlyStats(stats);
     }
 
-    public ReadOnlyStats getStats() {
-        return new ReadOnlyStats(stats);
+    public Stats.ReadOnlyStats getStats() {
+        return new Stats.ReadOnlyStats(stats);
     }
 
     public void changeStat(String stat, int amount) {

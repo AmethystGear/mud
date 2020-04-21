@@ -1,10 +1,12 @@
+package server.objects;
+
 public class Block implements ValueType<Block>{
     private int ID;
-    private ReadOnlyStats stats;
+    private Stats.ReadOnlyStats stats;
 
     public Block(){}
 
-    public Block(int ID, ReadOnlyStats stats) {
+    public Block(int ID, Stats.ReadOnlyStats stats) {
         this.ID = ID;
         this.stats = stats;
     }
@@ -15,12 +17,12 @@ public class Block implements ValueType<Block>{
     }
 
     @Override
-    public ReadOnlyStats getStats() {
+    public Stats.ReadOnlyStats getStats() {
         return stats;
     }
 
     @Override
-    public Block create(int ID, ReadOnlyStats stats) {
+    public Block create(int ID, Stats.ReadOnlyStats stats) {
         return new Block(ID, stats);
     }
 }

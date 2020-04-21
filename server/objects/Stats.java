@@ -1,5 +1,15 @@
-import java.io.*;
-import java.util.*;
+package server.objects;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.File;
+
+import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import server.utils.ScannerUtils;
 
 // class that essentially holds a map from Strings -> Objects
 // allows storing and reading of files.
@@ -45,6 +55,7 @@ class Stats {
                 // properties are a special case because they don't have values         
                 if(type.equals("prop")) {
                     if(!lineScan.hasNext()) {
+                        lineScan.close();
                         throw new IllegalArgumentException("property doesn't have a name!");
                     }
                     properties.add(lineScan.next().replace('-', ' ').replace('_', ' '));
@@ -52,6 +63,7 @@ class Stats {
                 }
 
                 if(!lineScan.hasNext()) {
+                    lineScan.close();
                     throw new IllegalArgumentException("variable doesn't have a name!");
                 }
 
@@ -142,7 +154,7 @@ class Stats {
         StringBuilder longString = null;
         for(Map.Entry<String, Object> e : stats.entrySet()) {
             if(types.get(e.getKey()).equals("LongString")) {
-                longString = e.getValue();
+                longString = (StringBuilder)e.getValue();
                 longStringVarName = e.getKey();
                 continue;
             }

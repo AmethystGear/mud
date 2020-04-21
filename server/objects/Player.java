@@ -1,3 +1,5 @@
+package server.objects;
+
 import java.io.*;
 import java.util.*;
 
@@ -56,12 +58,12 @@ public class Player {
         return y;
     }
 
-    public ReadOnlyStats getBaseStats() {
-        return new ReadOnlyStats(baseStats);
+    public Stats.ReadOnlyStats getBaseStats() {
+        return new Stats.ReadOnlyStats(baseStats);
     }
 
-    public ReadOnlyStats getStats() {
-        return new ReadOnlyStats(stats);
+    public Stats.ReadOnlyStats getStats() {
+        return new Stats.ReadOnlyStats(stats);
     }
 
     public Mob getMob() {
@@ -72,16 +74,16 @@ public class Player {
         mob = m;
     }
 
-    public Item getItem() {
-        return item;
+    public Item getTool() {
+        return equippedTool;
     }
 
-    public void setItem(Item i) {
-        item = i;
+    public void setTool(Item i) {
+        equippedTool = i;
     }
 
-    public ReadOnlyStats getInventory() {
-        return new ReadOnlyStats(inventory);
+    public Stats.ReadOnlyStats getInventory() {
+        return new Stats.ReadOnlyStats(inventory);
     }
 
     public void removeFromInventory(String item, int count) {
@@ -159,30 +161,30 @@ public class Player {
         }
 
         public int x() {
-            return x;
+            return player.x();
         }
 
         public int y() {
-            return y;
+            return player.y();
         }
         
         public Mob getMob() {
             return player.getMob();
         }
 
-        public Item getItem() {
-            return player.getItem();
+        public Item getTool() {
+            return player.getTool();
         }
 
-        public ReadOnlyStats getBaseStats() {
+        public Stats.ReadOnlyStats getBaseStats() {
             return player.getBaseStats();
         }
 
-        public ReadOnlyStats getStats() {
+        public Stats.ReadOnlyStats getStats() {
             return player.getStats();
         }
 
-        public ReadOnlyStats getInventory() {
+        public Stats.ReadOnlyStats getInventory() {
             return player.getInventory();
         }
     }      

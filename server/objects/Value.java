@@ -1,5 +1,8 @@
-import java.io.*;
-import java.util.*;
+package server.objects;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Value {
     public static <T extends ValueType<T>> ValueSet<T> getValueFromFile(String file, T value) {
@@ -9,7 +12,7 @@ public class Value {
             int ID = 0;
             while(s.hasNextLine()) {
                 Stats stats = new Stats(s);
-                valueSet.add(value.create(ID, new ReadOnlyStats(stats)));
+                valueSet.add(value.create(ID, new Stats.ReadOnlyStats(stats)));
                 ID++;
             }
             return valueSet;           
@@ -33,10 +36,10 @@ public class Value {
         }
     
         public U get(int ID) {
-            if(!blockIDtoValue.containsKey(ID)) {
+            if(!IDtoValue.containsKey(ID)) {
                 throw new IllegalArgumentException("that value doesn't exist: " + ID);
             }
-            return blockIDtoValue.get(ID);
+            return IDtoValue.get(ID);
         }
     
         public U get(String name) {
