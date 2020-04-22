@@ -4,7 +4,8 @@ import java.util.*;
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
     public String lastCommand = "";
-    public Mob mob;
+    private Mob mob;
+    private Item equippedTool = null;
 
     public static final int DEFAULT_HEALTH = 10;
     public static final int DEFAULT_DMG = 1;
@@ -61,6 +62,22 @@ public class Player {
 
     public ReadOnlyStats getStats() {
         return new ReadOnlyStats(stats);
+    }
+
+    public Mob getMob() {
+        return mob;
+    }
+
+    public void setMob(Mob m) {
+        mob = m;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item i) {
+        item = i;
     }
 
     public ReadOnlyStats getInventory() {
@@ -129,5 +146,44 @@ public class Player {
 
     public String toString() {
         return playerRep;
-    }        
+    }
+
+    public static class ReadOnlyPlayer {
+        private Player player;
+        public ReadOnlyPlayer(Player player) {
+            this.player = player;
+        }
+
+        public boolean isDead() {
+            return player.isDead();
+        }
+
+        public int x() {
+            return x;
+        }
+
+        public int y() {
+            return y;
+        }
+        
+        public Mob getMob() {
+            return player.getMob();
+        }
+
+        public Item getItem() {
+            return player.getItem();
+        }
+
+        public ReadOnlyStats getBaseStats() {
+            return player.getBaseStats();
+        }
+
+        public ReadOnlyStats getStats() {
+            return player.getStats();
+        }
+
+        public ReadOnlyStats getInventory() {
+            return player.getInventory();
+        }
+    }      
 }

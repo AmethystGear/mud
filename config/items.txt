@@ -1,14 +1,23 @@
 /begin/
 String name "disgusting-slime"
+prop edible
 int health-gain 1
+int base-value 10
 /end/
 
 /begin/
 String name "viscous-fluids"
+prop edible
 int health-gain -2
+int base-value 30
 /end/
 
 /begin/
 String name "rusty-sword"
+prop edible
 int health-gain -5
+prop equipable
+prop weapon
+int dmg 1
+int base-value 5
 /end/

@@ -26,4 +26,17 @@ public class ScannerUtils {
             return "";
         }
     }
+
+    public static StringBuilder getInputTillEnd(Scanner s) {
+        StrinBuilder s = new StringBuilder();
+        while(s.hasNextLine()) {
+            String line = s.nextLine();
+            s.append(line);
+            s.append("\n");
+            if(line.contains("/end/")) {
+                return s;
+            }
+        }
+        return s;
+    }
 }

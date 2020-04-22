@@ -179,107 +179,6 @@ public class MudServer {
         }
     }
 
-    private static int sign(int a) {
-        if(a > 0) {
-            return 1;
-        } else if (a == 0) {
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-
-    private static StringBuilder map(int chunkSize) {
-        StringBuilder s = new StringBuilder();
-        for(int y = 0; y < World.MAP_SIZE; y += chunkSize) {
-            s.append("|");
-            for(int x = 0; x < World.MAP_SIZE; x += chunkSize) {
-                boolean hasPlayer = false;
-                for(Player player : accept.players()) {
-                    if(player.x() >= x && player.x() < x + chunkSize && player.y() > y && player.y() <= y + chunkSize) {
-                        s.append("\033[0m" + player.playerRep);
-                        hasPlayer = true;
-                        break;
-                    }
-                }
-                if(!hasPlayer) {
-                    int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize);
-                    int asciiColor = (Integer)blocks.get(majorityBlock).getStats().get("display");
-                    if(asciiColor == -1) {
-                        s.append("  ");
-                    } else {
-                        s.append("\033[48;5;" + asciiColor + "m  ");
-                    }
-                }
-            }
-            s.append("\033[0m|\n");
-        }
-        return s;
-    }
-
-    private static int getMajorityBlockInChunk(int xOrigin, int yOrigin, int chunkSize) {
-        ArrayList<Integer> blockList = new ArrayList<Integer>();
-        for(int x = xOrigin; x < xOrigin + chunkSize; x++) {
-            for(int y = yOrigin; y < yOrigin + chunkSize; y++) {
-                Block b = world.getBlock(x, y);
-                while(blockList.size() <= b.getID()) {
-                    blockList.add(0);
-                }
-                int mapWeight;
-                if(b.getStats().hasVariable("map-weight")) {
-                    mapWeight = (Integer)b.getStats().get("map-weight");
-                } else {
-                    mapWeight = 1;
-                }
-                blockList.set(b.getID(), blockList.get(b.getID()) + mapWeight);
-            }
-        }
-        int maxIndex = 0;
-        for(int i = 1; i < blockList.size(); i++) {
-            if(blockList.get(i) > blockList.get(maxIndex)) {
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
-
-    private static StringBuilder display(int dist, int xView, int yView) {
-        StringBuilder s = new StringBuilder();
-        for(int y = max(0,yView - dist); y < min(World.MAP_SIZE, yView + dist + 1); y++) {
-            s.append("|");
-            for(int x = max(0,xView - dist); x < min(World.MAP_SIZE, xView + dist + 1); x++) {
-                boolean hasPlayer = false;
-                for(Player player : accept.players()) {
-                    if(player.x() == x && player.y() == y) {
-                        s.append("\033[0m" + player.playerRep);
-                        hasPlayer = true;
-                        break;
-                    }
-                }
-                if(!hasPlayer) {
-                    Block b = world.getBlock(x, y);
-                    int asciiColor = (Integer)b.getStats().get("display");
-                    boolean hideMob = b.getStats().hasVariable("hide-mobs") && (Boolean)b.getStats().get("hide-mobs");
-                    if(asciiColor == -1) {
-                        if(!hideMob && world.hasMob(x, y)) {
-                            s.append("??");
-                        } else {
-                            s.append("  ");
-                        }
-                    } else {
-                        if(!hideMob && world.hasMob(x, y)) {
-                            s.append("\033[48;5;" + asciiColor + "m??");
-                        } else {
-                            s.append("\033[48;5;" + asciiColor + "m  ");
-                        }
-                    }
-                }
-            }
-            s.append("\033[0m|\n");
-        }
-        return s;
-    }
-
     private static StringBuilder playerGive(String command, Player player) {
         StringBuilder out = new StringBuilder("");
         Scanner scan = new Scanner(command);
@@ -311,18 +210,6 @@ public class MudServer {
         recipient.addToInventory(item, amount);
         player.removeFromInventory(item, amount);
         return out;
-    }
-
-    private static int min(int a, int b) {
-        return a < b ? a : b;
-    }
-
-    private static int max(int a, int b) {
-        return a > b ? a : b;
-    }
-
-    private static int bound(int a, int min, int max) {
-        return max(min, min(max, a));
     }
 
     private static void respawn(Player player) {
@@ -469,9 +356,41 @@ public class MudServer {
         }
 
         if(command.equals("map")) {
-            out.append(map(30));
+            out.append(DisplayUtils.map(30, accept.players(), world));
         } else if(command.equals("disp")) {
-            out.append(display((Integer)player.getBaseStats().get("view"), player.x(), player.y()));
+            if(world.getBlock(player.x(), player.y()).getStats().hasProperty("survey")) {
+                out.append("You're standing on a block that has the property 'survey'. Use disp <#view distance> <w/a/s/d>.");
+            } else {                
+                int viewDist = (Integer)player.getBaseStats().get("view");
+                out.append(display(viewDist, player.x(), player.y(), accept.players(), world, true));
+            }
+        } else if(command.startsWith("disp")) {
+            if(!world.getBlock(player.x(), player.y()).getStats().hasProperty("survey")) {
+                out.append("You're not standing on a block that has the property 'survey'");
+            else {
+                Scanner scan = new Scanner(command);
+                command.next();
+                int dist = scan.nextInt();
+                String dir = "";
+                if(scan.hasNext()) {
+                    dir = scan.next();
+                }
+                int viewX = player.x();
+                int viewY = player.y();
+                if(dir.contains("w")) {
+                    viewY -= dist;
+                }
+                if(dir.contains("a")) {
+                    viewX -= dist;
+                }
+                if(dir.contains("s")) {
+                    viewY += dist;
+                }
+                if(dir.contains("d")) {
+                    viewZ += dist;
+                }
+                
+            }
         } else if(command.startsWith("give")) {
             out.append(playerGive(command, player));
         } else if(command.charAt(0) == 'w' || command.charAt(0) == 'a' || command.charAt(0) == 's' || command.charAt(0) == 'd') { // movement

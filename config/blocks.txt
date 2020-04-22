@@ -1,64 +1,58 @@
 /begin/
 String name empty
 int display -1
-boolean solid false
-int mob-spawn-chance 5
 int map-weight 0
 /end/
 
 /begin/
 String name grass
 int display 35
-boolean solid false
-int mob-spawn-chance 1
+double mob-spawn-chance 0.002
 /end/
 
 /begin/
 String name village-floor
 int display 136
-boolean solid false
 /end/
 
 /begin/
 String name village-wall
 int display 94
-boolean solid true
 int map-weight 10
+prop solid
 /end/
 
 /begin/
 String name rock
 int display 245
-boolean solid true
+prop solid
 int map-weight 3
 /end/
 
 /begin/
 String name surveyor
 int display 55
-boolean solid false
 int spawn-chance 1
 /end/
 
 /begin/
 String name water
 int display 45
-boolean solid false
 /end/
 
 /begin/
 String name sand
 int display 178
-boolean solid false
 int mob-spawn-chance 5
 int map-weight 4
+double mob-spawn-chance 0.05
 /end/
 
 /begin/
 String name forest
 int display 22
-boolean solid false
-int mob-spawn-chance 75
+double mob-spawn-chance 0.5
 int map-weight 5
-boolean hide-mobs true
+prop hide-mobs
+int mob-view-dist 2
 /end/

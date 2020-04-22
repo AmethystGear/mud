@@ -13,11 +13,13 @@ import java.util.*;
 class Stats {
     private HashMap<String, String> types;
     private HashMap<String, Object> stats;
+    private HashSet<String> properties;
 
     // create a Stats object with nothing in it.
     public Stats() {
         types = new HashMap<String, String>();
         stats = new HashMap<String, Object>();
+        properties = new HashSet<String>();
     }
 
     // creates a new stats class from a Scanner.
@@ -39,15 +41,23 @@ class Stats {
                 if(type.equals("/end/")) {
                     break;
                 }
+
+                // properties are a special case because they don't have values         
+                if(type.equals("prop")) {
+                    if(!lineScan.hasNext()) {
+                        throw new IllegalArgumentException("property doesn't have a name!");
+                    }
+                    properties.add(lineScan.next().replace('-', ' ').replace('_', ' '));
+                    continue;
+                }
+
+                if(!lineScan.hasNext()) {
+                    throw new IllegalArgumentException("variable doesn't have a name!");
+                }
+
                 String varname = lineScan.next();
                 Object value;
-                if (type.equals("boolean")) {
-                    if(!lineScan.hasNextBoolean()) {
-                        lineScan.close();
-                        throw new IllegalArgumentException("variable of type boolean does not contain a boolean!");
-                    }
-                    value = lineScan.nextBoolean();
-                } else if (type.equals("int")) {
+                if (type.equals("int")) {
                     if(!lineScan.hasNextInt()) {
                         lineScan.close();
                         throw new IllegalArgumentException("variable of type int does not contain an int!");
@@ -69,6 +79,11 @@ class Stats {
                     value = ScannerUtils.getRemainingInputAsString(lineScan);
                 } else if (type.equals("String[]")) {
                     value = ScannerUtils.getRemainingInputAsStringArray(lineScan);
+                } else if (type.equals("LongString")) {
+                    value = ScannerUtils.getInputTillEnd(scan);
+                    types.put(varname.replace('-', ' '), type);
+                    stats.put(varname.replace('-', ' '), value);
+                    break;
                 } else if (type.equals("double")) {
                     if(!lineScan.hasNextDouble()) {
                         lineScan.close();
@@ -80,8 +95,8 @@ class Stats {
                     System.out.println(type);
                     throw new IllegalArgumentException("type not recognized!");
                 }
-                types.put(varname, type);
-                stats.put(varname, value);
+                types.put(varname.replace('-', ' '), type);
+                stats.put(varname.replace('-', ' '), value);
             }
             lineScan.close();
         }
@@ -106,17 +121,43 @@ class Stats {
         return new Stats(typesCopy, statsCopy);
     }
 
+    public boolean hasProperty(String prop) {
+        return properties.contains(prop);
+    }
+
+    public void addProperty(String prop) {
+        properties.add(prop);
+    }
+
     // save this stats class to a file by appending it to the end of that file.
     public void saveTo(String file) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)), true);
         writer.append("\n/begin/\n");
+        for(String prop : properties) {
+            writer.append("prop ");
+            writer.append(prop.replace(' ', '-'));
+            writer.append("\n");
+        }
+        String longStringVarName = null;
+        StringBuilder longString = null;
         for(Map.Entry<String, Object> e : stats.entrySet()) {
+            if(types.get(e.getKey()).equals("LongString")) {
+                longString = e.getValue();
+                longStringVarName = e.getKey();
+                continue;
+            }
             writer.append(types.get(e.getKey()));
             writer.append(" ");
             writer.append(e.getKey().replace(' ', '-'));
             writer.append(" ");
             writer.append(getStringRep(e.getValue(), true));
             writer.append("\n");
+        }
+        if(longString != null) {
+            writer.append("LongString ");
+            writer.append(longStringVarName);
+            writer.append("\n");
+            writer.append(longString.toString());
         }
         writer.append("/end/\n");
         writer.close();
@@ -163,9 +204,7 @@ class Stats {
             throw new IllegalArgumentException("the type provided is invalid!");
         }
         stats.put(name, value);
-        if(value instanceof Boolean) {
-            types.put(name, "boolean");
-        } else if(value instanceof Integer) {
+        if(value instanceof Integer) {
             types.put(name, "int");
         } else if(value instanceof String) {
             types.put(name, "String");
@@ -173,6 +212,8 @@ class Stats {
             types.put(name, "int[]");
         } else if (value instanceof String[]) {
             types.put(name, "String[]");
+        } else if (value instanceof StringBuilder) {
+            types.put(name, "LongString");
         } else {
             types.put(name, "double");
         }
@@ -188,11 +229,11 @@ class Stats {
 
     // check if provided object is one of the types we can parse.
     private boolean isValidType(Object o) {
-        return o instanceof Boolean || 
-               o instanceof Integer ||
+        return o instanceof Integer ||
                o instanceof String ||
                o instanceof int[] ||
                o instanceof String[] ||
+               o instanceof StringBuilder ||
                o instanceof Double;
     }
 
@@ -217,7 +258,7 @@ class Stats {
             }
             return s.toString();
         } else {
-            if(replaceSpaces) {
+            if(replaceSpaces && !(o instanceof StringBuilder)) {
                 return o.toString().replace(' ', '-');
             } else {
                 return o.toString();
@@ -227,7 +268,11 @@ class Stats {
 
     // string rep of all the stats.
     public String toString() {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder();        
+        for(String prop : properties) {
+            s.append(prop);
+            s.append("\n");
+        }
         for(Map.Entry<String, Object> e : stats.entrySet()) {
             s.append(e.getKey());
             s.append(": ");
@@ -235,5 +280,27 @@ class Stats {
             s.append("\n");
         }
         return s.toString();
+    }
+
+    public static class ReadOnlyStats {
+        private Stats stats;
+        public ReadOnlyStats(Stats stats) {
+            this.stats = stats;
+        }
+        public boolean hasVariable(String stat) {
+            return stats.hasVariable(stat);
+        }
+        public Object get(String stat) {
+            return stats.get(stat);
+        }
+        public boolean hasProperty(String property) {
+            return stats.hasProperty(property);
+        }
+        public String toString() {
+            return stats.toString();
+        }
+        public void saveTo(String file) throws FileNotFoundException {
+            stats.saveTo(file);
+        }
     }
 }
