@@ -121,25 +121,44 @@ public class MudServer {
     }
 
     public static StringBuilder handleCommand(String command, Player player) {
-        if(command.equals("") && player.lastAction != null) {
-            return player.lastAction.run(player, accept.players(), world);
+        List<Player.ReadOnlyPlayer> players = new ArrayList<>();
+        for (Player p : accept.players()) {
+            players.add(new Player.ReadOnlyPlayer(p));
         }
+
+        if(command.equals("") && player.lastAction != null) {
+            StringBuilder error = new StringBuilder("");
+            Action newAction;
+            try {
+                // create new instance of whatever action that we have.
+                newAction = player.lastAction.getClass().getConstructor().newInstance();
+            } catch (Exception e) {
+                // We should never be in this state. If we are, there's a bug.
+                throw new RuntimeException("couldn't create new instance of last player's action!");
+            }
+            if(newAction.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
+                return newAction.run(player, accept.players(), world);
+            } else {
+                error.append("\n");
+                return error;
+            }
+        } else if (command.equals("")) {
+            return new StringBuilder("You have no commands in your history!");
+        }
+
         List<Action> actions = new ArrayList<Action>();
         actions.add(new Move());
-        actions.add(new Attack());
-        actions.add(new Run());
         actions.add(new Display());
         actions.add(new ShowMap());
+        actions.add(new Attack());
+        actions.add(new Run());
         System.out.println(command);
         for (Action a : actions) {
             if (a.matchCommand(command)) {
                 try {
-                    List<Player.ReadOnlyPlayer> players = new ArrayList<>();
-                    for (Player p : accept.players()) {
-                        players.add(new Player.ReadOnlyPlayer(p));
-                    }
                     StringBuilder error = new StringBuilder("");
                     if (a.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
+                        player.lastCommand = command;
                         player.lastAction = a;
                         return a.run(player, accept.players(), world);
                     } else {

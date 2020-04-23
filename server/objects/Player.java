@@ -9,6 +9,7 @@ import server.actions.Action;
 
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
+    public String lastCommand = null;
     public Action lastAction = null;
     private Mob mob;
     private Item equippedTool = null;

@@ -1,7 +1,5 @@
 package server.objects;
-import java.io.File;
 import java.io.PrintWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Collection;

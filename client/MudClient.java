@@ -1,6 +1,6 @@
- package client;
+package client;
  
- import java.io.*;
+import java.io.*;
 import java.net.*;
 public class MudClient {
     public static void main(String[] args) throws Exception {
