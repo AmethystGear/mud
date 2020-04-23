@@ -24,6 +24,9 @@ public class MudServer {
         actions.add(new Run());
         actions.add(new Eat());
         actions.add(new Give());
+        actions.add(new ShowInventory());
+        actions.add(new Upgrade());
+        actions.add(new ShowStats());
 
         List<Player.ReadOnlyPlayer> players = new ArrayList<>();
         for (Player p : accept.players()) {
