@@ -1,3 +1,5 @@
+package server.utils;
+
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 

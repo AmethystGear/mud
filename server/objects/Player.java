@@ -3,9 +3,13 @@ package server.objects;
 import java.io.*;
 import java.util.*;
 
+import server.main.World;
+import server.utils.RandUtils;
+import server.actions.Action;
+
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
-    public String lastCommand = "";
+    public Action lastAction = null;
     private Mob mob;
     private Item equippedTool = null;
 
@@ -148,6 +152,22 @@ public class Player {
 
     public String toString() {
         return playerRep;
+    }
+
+    public void respawn(World world) {
+        clearInventory();
+        resetToBaseStats();
+        mob = null;
+
+        int spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
+        int spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
+        Block b = world.getBlock(spawnX, spawnY);
+        while(b.getStats().hasProperty("solid") || ((String)b.getStats().get("name")).contains("water") || world.hasMob(spawnX, spawnY)) {
+            spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
+            spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
+            b = world.getBlock(spawnX, spawnY);
+        }
+        moveTo(spawnX, spawnY);
     }
 
     public static class ReadOnlyPlayer {

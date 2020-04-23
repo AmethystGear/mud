@@ -1,3 +1,5 @@
+package server.utils;
+
 public class MathUtils {
     public static int manhattan(int x1, int y1, int x2, int y2) {
         return abs(x1 - x2) + abs(x2 - y2);

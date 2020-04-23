@@ -37,6 +37,7 @@ class Stats {
     public Stats (Scanner scan) throws IllegalArgumentException {
         types = new HashMap<>();
         stats = new HashMap<>();
+        properties = new HashSet<String>();
         while(scan.hasNextLine()) {
             String line = scan.nextLine();
             if(line.startsWith("#")) { //ignore comments
@@ -58,7 +59,7 @@ class Stats {
                         lineScan.close();
                         throw new IllegalArgumentException("property doesn't have a name!");
                     }
-                    properties.add(lineScan.next().replace('-', ' ').replace('_', ' '));
+                    properties.add((lineScan.next()).replace('-', ' ').replace('_', ' '));
                     continue;
                 }
 
@@ -142,8 +143,7 @@ class Stats {
     }
 
     // save this stats class to a file by appending it to the end of that file.
-    public void saveTo(String file) throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)), true);
+    public void saveTo(PrintWriter writer) {
         writer.append("\n/begin/\n");
         for(String prop : properties) {
             writer.append("prop ");
@@ -184,7 +184,7 @@ class Stats {
     public Object get(String name) {
         if(!stats.containsKey(name)) {
 
-            throw new IllegalArgumentException("that variable doesn't exist: " + name);
+            throw new IllegalArgumentException("that variable doesn't exist <" + name + ">");
         }
         Object val = stats.get(name);
         // return a copy if returning an array.
@@ -311,8 +311,11 @@ class Stats {
         public String toString() {
             return stats.toString();
         }
-        public void saveTo(String file) throws FileNotFoundException {
-            stats.saveTo(file);
+        public void saveTo(PrintWriter writer) {
+            stats.saveTo(writer);
+        }
+        public Stats clone() {
+            return stats.clone();
         }
     }
 }

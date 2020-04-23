@@ -1,6 +1,15 @@
+package server.utils;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import server.main.World;
+import server.objects.Block;
+import server.objects.Player;
+
 public class DisplayUtils {
 
-    public static StringBuilder map(int chunkSize, World world, List<Player> players) {
+    public static StringBuilder map(int chunkSize, List<Player> players, World world) {
         StringBuilder s = new StringBuilder();
         for(int y = 0; y < World.MAP_SIZE; y += chunkSize) {
             s.append("|");
@@ -14,8 +23,8 @@ public class DisplayUtils {
                     }
                 }
                 if(!hasPlayer) {
-                    int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize);
-                    int asciiColor = (Integer)blocks.get(majorityBlock).getStats().get("display");
+                    int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize, world);
+                    int asciiColor = (Integer)world.blocks.get(majorityBlock).getStats().get("display");
                     if(asciiColor == -1) {
                         s.append("  ");
                     } else {
@@ -56,12 +65,12 @@ public class DisplayUtils {
 
     public static StringBuilder display(int dist, int xView, int yView, List<Player> players, World world, boolean showMobs) {
         StringBuilder s = new StringBuilder();
-        for(int y = max(0,yView - dist); y < min(World.MAP_SIZE, yView + dist + 1); y++) {
+        for(int y = MathUtils.max(0,yView - dist); y < MathUtils.min(World.MAP_SIZE, yView + dist + 1); y++) {
             s.append("|");
-            for(int x = max(0,xView - dist); x < min(World.MAP_SIZE, xView + dist + 1); x++) {
+            for(int x = MathUtils.max(0,xView - dist); x < MathUtils.min(World.MAP_SIZE, xView + dist + 1); x++) {
                 int leastDist = Integer.MAX_VALUE;
                 boolean hasPlayer = false;
-                for(Player player : accept.players()) {
+                for(Player player : players) {
                     int manhattanDist = MathUtils.manhattan(x, y, player.x(), player.y());
                     if(manhattanDist < leastDist) {
                         leastDist = manhattanDist;
@@ -75,12 +84,7 @@ public class DisplayUtils {
                 if(!hasPlayer) {
                     Block b = world.getBlock(x, y);
                     int asciiColor = (Integer)b.getStats().get("display");
-                    boolean hideMob = b.getStats().hasProperty("hide mobs");
-                    int viewDist = 0;
-                    if(hideMob) {
-                        viewDist = (Integer)b.getStats().get("view dist");
-                    }
-                    if((!hideMob || leastDist <= viewDist) && world.hasMob(x, y) && showMobs) {
+                    if(world.hasMob(x, y) && showMobs) {
                         s.append("\033[48;5;" + asciiColor + "m??");
                     } else {
                         s.append("\033[48;5;" + asciiColor + "m  ");

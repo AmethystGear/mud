@@ -3,7 +3,7 @@ package server.actions;
 import java.util.List;
 import java.util.Scanner;
 
-import server.World;
+import server.main.World;
 import server.objects.Player;
 import server.utils.ScannerUtils;
 

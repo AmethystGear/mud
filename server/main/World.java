@@ -1,24 +1,48 @@
+package server.main;
+
 import java.io.*;
 import java.util.*;
+
+import server.objects.Mob;
+import server.objects.Item;
+import server.objects.Block;
+import server.objects.Value;
+
+import server.utils.RandUtils;
 
 public class World {
     public static final int MAP_SIZE = 3000;
     private int[][] worldMap;
     private int[][] mobMap;
-    private Value.ValueSet<Block> blocks;
+
+    public final Value.ValueSet<Mob.ReadOnlyMob> mobs;
+    private final String mobsEndString = "/mobs/";
+    public final Value.ValueSet<Item> items;
+    private final String itemsEndString = "/items/";
+    public final Value.ValueSet<Block> blocks;
+    private final String blocksEndString = "/blocks/";
+
+    private final String pathToMobsConfig = "config/mobs.txt";
+    private final String pathToItemsConfig = "config/items.txt";
+    private final String pathToBlocksConfig = "config/blocks.txt";
+
     private int seed;
 
-    public World(String saveFile, int numMobs, Value.ValueSet<Block> blocks) throws FileNotFoundException {
-        this.blocks = blocks;
+    public World(String saveFile) throws FileNotFoundException {
         Scanner scan = new Scanner(new File(saveFile));
         seed = scan.nextInt();
         readMap(scan, worldMap);
         readMap(scan, mobMap);
+        mobs = Value.getValuesFromFile(saveFile, mobsEndString, new Mob.ReadOnlyMob(new Mob()));
+        items = Value.getValuesFromFile(saveFile, itemsEndString, new Item());
+        blocks = Value.getValuesFromFile(saveFile, blocksEndString, new Block());
         scan.close();
     }
 
-    public World(int seed, int numMobs, Value.ValueSet<Block> blocks) {
-        this.blocks = blocks;
+    public World(int seed) {
+        mobs = Value.getValuesFromFile(pathToMobsConfig, new Mob.ReadOnlyMob(new Mob()));
+        items = Value.getValuesFromFile(pathToItemsConfig, new Item());
+        blocks = Value.getValuesFromFile(pathToBlocksConfig, new Block());
         worldMap = new int[MAP_SIZE][];
         mobMap = new int[MAP_SIZE][];
         for(int i = 0; i < MAP_SIZE; i++) {
@@ -50,7 +74,7 @@ public class World {
                 int water = blocks.get("water").getID();
                 int sand = blocks.get("sand").getID();
                 int grass = blocks.get("grass").getID();
-                int tallGrass = blocks.get("tall grass").getID();
+                int tallGrass = blocks.get("forest").getID();
                 int rock = blocks.get("rock").getID();
                 int block = 0;
                 if(perlinNoise[x][y] < waterLevel) {
@@ -79,12 +103,13 @@ public class World {
 
         for(int x = 0; x < MAP_SIZE; x++) {
             for(int y = 0; y < MAP_SIZE; y++) {
+                mobMap[x][y] = -1;
                 Block currentBlock = blocks.get(worldMap[x][y]);
-                if(!(Boolean)currentBlock.getStats().get("solid")) {
-                    if(currentBlock.getStats().hasVariable("mob-spawn-chance")) {
-                        int mobSpawnChance = (Integer)currentBlock.getStats().get("mob-spawn-chance");
-                        if(rand.nextInt(100) < mobSpawnChance) {
-                            mobMap[x][y] = rand.nextInt(numMobs) + 1;
+                if(!currentBlock.getStats().hasProperty("solid")) {
+                    if(currentBlock.getStats().hasVariable("mob spawn chance")) {
+                        double mobSpawnChance = (Double)currentBlock.getStats().get("mob spawn chance");
+                        if(rand.nextDouble() < mobSpawnChance) {
+                            mobMap[x][y] = rand.nextInt(mobs.size());
                         }
                     }
                 }
@@ -92,11 +117,30 @@ public class World {
         }
     }
 
-    public void saveTo(String file) throws FileNotFoundException {        
+    public void saveTo(String file) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)));
         writer.write(seed + " ");
         saveMap(writer, worldMap);
         saveMap(writer, mobMap);
+        writer.write("\n");
+        for(Mob.ReadOnlyMob m : mobs.values()) {
+            m.getBaseStats().saveTo(writer);
+            writer.write("\n");
+        }
+        writer.write(mobsEndString);
+        writer.write("\n");
+        for(Item i : items.values()) {
+            i.getStats().saveTo(writer);
+            writer.write("\n");
+        }
+        writer.write(itemsEndString);
+        writer.write("\n");
+        for(Block b : blocks.values()) {
+            b.getStats().saveTo(writer);
+            writer.write("\n");
+        }
+        writer.write(blocksEndString);
+        writer.write("\n");
         writer.close();
     }
 
@@ -126,20 +170,22 @@ public class World {
         return blocks.get(worldMap[x][y]);
     }
 
-    public Mob getMob(int x, int y, String mobFile) {
-        if(mobMap[x][y] == 0) {
+    public Mob getMob(int x, int y) {
+        if(mobMap[x][y] == -1) {
             return null;
         } else {
-            return new Mob(mobMap[x][y], mobFile);
+            // make a new mob with exactly the same properties as the read only mob, and return it.
+            Mob.ReadOnlyMob baseMob = mobs.get(mobMap[x][y]);
+            return baseMob.clone();
         }
     }
 
     public boolean hasMob(int x, int y) {
-        return mobMap[x][y] != 0;
+        return mobMap[x][y] != -1;
     }
 
     public void removeMob(int x, int y) {
-        mobMap[x][y] = 0;
+        mobMap[x][y] = -1;
     }
 
     private static void spawnVillage(int xOrigin, int yOrigin, int [][] worldMap, Random rand, Value.ValueSet<Block> blocks) {
@@ -174,7 +220,7 @@ public class World {
         int floor = blocks.get("village floor").getID();
         int wall = blocks.get("village wall").getID();
         int surveyor = blocks.get("surveyor").getID();
-        int surveyorSpawnChance = (Integer)blocks.get("surveyor").getStats().get("spawn-chance");
+        int surveyorSpawnChance = 0;
         size = size * 2 + 1;
         for(int x = xOrigin; x < xOrigin + size; x++) {
             for(int y = yOrigin; y < yOrigin + size; y++) {

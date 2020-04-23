@@ -1,3 +1,5 @@
+package server.utils;
+
 import java.util.*;
 
 public class ScannerUtils {
@@ -28,15 +30,15 @@ public class ScannerUtils {
     }
 
     public static StringBuilder getInputTillEnd(Scanner s) {
-        StrinBuilder s = new StringBuilder();
+        StringBuilder str = new StringBuilder();
         while(s.hasNextLine()) {
             String line = s.nextLine();
-            s.append(line);
-            s.append("\n");
             if(line.contains("/end/")) {
-                return s;
+                return str;
             }
+            str.append(line);
+            str.append("\n");
         }
-        return s;
+        return str;
     }
 }

@@ -1,6 +1,6 @@
 package server.actions;
 
-import server.World;
+import server.main.World;
 import server.objects.Player;
 
 import java.util.List;

@@ -14,8 +14,8 @@ int drop-max  3
 int drop-min  0
 int speed 6
 
-/end/
-img:
+
+LongString img
                    _.--.    .--._
                  ."  ."      ".  ".
                 ;  ."    /\    ".  ;
@@ -34,7 +34,7 @@ img:
  ,"  \  \  \   \      "-'--'-"      /   /  /  /  ".
 !     \  \  \   \                  /   /  /  /     !
        \  \  \   \                /   /  /  /      TK
-
+/end/
 
 
 /begin/
@@ -52,8 +52,7 @@ String[] drops  "pugenum" "gravitino-balls"
 int drop-max  20
 int drop-min  5
 int speed 3
-/end/
-img:
+LongString img
                             @#**/**/#/#       
                         (** .. (*/ *@@    
                         ((.,,,,,,%.  ,*/((.#&    
@@ -73,6 +72,8 @@ img:
                         @#.*,/&@     @@,/ &@    
                                 @/.*@@@       
                                 @#*(@
+/end/
+
 /begin/
 String name  Donald Trump
 String[] entrance  "I_am_the_best_at_fighting_ever._Trust_me._I'm_the_best._People_tell_me_how_good_I_am"
@@ -85,8 +86,7 @@ int aggression  100
 int dmg  1
 int xp  200
 int speed 7
-/end/
-img:
+LongString img
 
 &&&&&&&@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&@@&&&&@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 &&&&&&&@@@@@@@@@@@@@@@@&@@&&%%%##((((((////////#%&&&&&&&@@&&@@@@@@@@@@@&@@@@@@@@
@@ -117,6 +117,8 @@ img:
 &&&&&&&&&&&&&&%(##%&&/    .(////*/(////*//*//((#((####,...,@%%%&&&&&&&&&&&&&&&&&
 &&&&&&&%(######%%%&&&,      .%@@%(((#%%%%%%%%%###(#/...... *%%&%&%#%&&&&&&&&&&&&
 ((#####%%%#####%%%&&&*     /&&&&&#%&&&&@%%%%%###*.......  .*%&&&%%%%%%%#%%&&&&&&
+/end/
+
 
 /begin/
 String name  Coronavirus
@@ -130,8 +132,7 @@ int aggression  50
 int dmg  100
 int xp  3000
 int speed 1
-/end/
-img:
+LongString img
                      (#        ((       *(#                                    
                      (((#      (((#      (((#       ((                          
             #(       ((((      ((((./##(*(((#      (((#                         
@@ -160,6 +161,7 @@ img:
                          #(((   ((((     (((( ((((,   .(((.                     
                           ((    ((((     ((((  (((.                             
                                 #((.     #((       
+/end/
 
 /begin/
 String name  Depressed Slime
@@ -176,8 +178,7 @@ String[] drops  "disgusting-slime" "viscous-fluids"
 int drop-min  3
 int drop-max  17
 int speed 2
-/end/
-img:
+LongString img
                                                @*//////.@                       
                                            @**//*,*////,*//@                    
                                          @/****,*.*,,***,,,**,@                 
@@ -197,6 +198,7 @@ img:
           @@@@..*,,..(*. ..*,*. //////**,..    .** .                    @       
       @@@@.***.... */.. //*,. .////*/*, .       . .                      @      
   @@@@/*/,,.     *,,..///.,   (/(*/*, ,@@@@@@@@@@,.  .#@@(    /@@@@@@@@@@@
+/end/
 
 /begin/
 String name  Existential Anxiety
@@ -223,8 +225,8 @@ int dmg  0
 int xp  -100
 int health  0
 int speed 20
-/end/
-img:
+LongString img
+
                                           ,*/((#%%%&&&@@&&&%%(/,.                                                                                                       
                             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@.                                                                   
                           @@@@@                        @@@@@          .@@@@@@@                    @@@@@@@@@@@@@@                                                         
@@ -269,6 +271,7 @@ img:
                                                             @@@@@@@/                                                           @@@@                                     
                                                                   @@@@@@@@@@@@                                                @@@@                                       
                                                                                                         @@@@@@@@@@@@@@@     
+/end/
 
 /begin/
 String name  Honour Mage
@@ -287,8 +290,7 @@ int drop-max  1
 int trade  5
 int trade-xp  100
 int speed 1
-/end/
-img:
+LongString img
 
                        .
 
@@ -307,6 +309,7 @@ img:
        |    l  I   \.     ,/
      _/j  L l\_!  _//^---^\\_   
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/end/
 
 /begin/
 String name  Ben - the Dragon at the End
@@ -323,8 +326,7 @@ String[] drops  "Dragon-scales" "Dragon-heart" "Eternal-embers"
 int drop-min  0
 int drop-max  3
 int speed 8
-/end/
-img:
+LongString img
              __.-/|
              \`o_O'
               =( )=  +-----+
@@ -338,6 +340,7 @@ img:
  ||      /    \)___)\
  | \____(      )___) )____
   \______(_______;;;)__;;;)
+/end/
 
 /begin/
 String name  Snagget the Hagget
@@ -351,8 +354,7 @@ int dmg  1
 int xp  -100
 int health  30
 int speed 1
-/end/
-img:
+LongString img
 
                            o                    
                        _---|         _ _ _ _ _ 
@@ -376,6 +378,7 @@ img:
    |      . _||||| |   |   | ||||.|| |     | |
 ../|' v . | .|||||/____|____\|||| /|. . | . ./
 .|//\............/...........\........../../\\\
+/end/
 
 /begin/
 String name  The Game of Life
@@ -389,8 +392,7 @@ int dmg  10
 int xp  4010
 int health  100
 int speed 4
-/end/
-img:
+LongString img
 
 ||\                  /||  ----------------------- ||\           || -------------------------
 || \                / ||             ||           || \          || ||
@@ -403,6 +405,7 @@ img:
 ||        \  /        ||             ||           ||        \   || ||
 ||         \/         ||             ||           ||         \  || ||
 ||                    ||  ----------------------- ||          \ || --------------------------
+/end/
 
 /begin/
 String name Linux
@@ -416,8 +419,7 @@ int dmg  5
 int xp  500
 int health  10
 int speed 25
-/end/
-img:
+LongString img
                                                                  #####
                                                                 #######
                    #                                            ##O#O##
@@ -430,6 +432,7 @@ img:
     ##       # ###     ##     ##  ##     ##     ## ##    QQQQQQ#       #QQQQQQ
     ##      ## ### #   ##     ##  ###   ###    ##   ##   QQQQQQQ#     #QQQQQQQ
   ############  ###   ####   ####   #### ### ##### #####   QQQQQ#######QQQQQ
+/end/
 
 /begin/
 String name  ARCH Linux
@@ -443,8 +446,7 @@ int dmg  10
 int xp  1000
 int health 20
 int speed 50
-/end/
-img:
+LongString img
                    -`
                   .o+`
                  `ooo/
@@ -464,4 +466,4 @@ img:
   `+sso+ -`                 `.-/+oso 
  `++ .                           `-/+/
  .`                                 `
-
+/end/
