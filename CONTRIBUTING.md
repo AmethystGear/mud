@@ -44,9 +44,9 @@ The one exception to this is the `LongString img` type. You can only have one `L
 
 you don't have to have every property listed above. The game can make assumptions for most of the values. For example, you could just not write any quotes and not have an image for your mob.
 the basic minimum requirements for a mob are:
-name
-dmg
-xp
-health
-speed
+-name
+-dmg
+-xp
+-health
+-speed
 if you have at least these, you're good!
