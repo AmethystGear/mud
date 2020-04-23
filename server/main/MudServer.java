@@ -152,6 +152,7 @@ public class MudServer {
         actions.add(new ShowMap());
         actions.add(new Attack());
         actions.add(new Run());
+        actions.add(new Eat());
         System.out.println(command);
         for (Action a : actions) {
             if (a.matchCommand(command)) {

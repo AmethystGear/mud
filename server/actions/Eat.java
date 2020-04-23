@@ -6,12 +6,12 @@ import java.util.Scanner;
 import server.main.World;
 import server.objects.Player;
 import server.utils.ScannerUtils;
+import server.objects.Item;
 
 public class Eat implements Action {
-
     // parameters
     private int numToEat;
-    private String item;
+    private Item item;
 
     @Override
     public boolean matchCommand(String command) {
@@ -30,17 +30,40 @@ public class Eat implements Action {
             error.append("you need to specify the amount you are going to eat!");
             return false;
         }
-        int numToEat = scan.nextInt();
-        String item = ScannerUtils.getRemainingInputAsString(scan).replace('-', ' ');
-        
+        numToEat = scan.nextInt();
+        String itemName = ScannerUtils.getRemainingInputAsString(scan).replace('-', ' ');
+        if(!player.getInventory().hasVariable(itemName)) {
+            error.append("you don't have that item!");
+            return false;
+        }
+
+        try {
+            item = world.items.get(itemName);
+            if(!item.getStats().hasProperty("edible")) {
+                error.append("you can't eat that item!");
+                return false;
+            }
+        } catch (IllegalArgumentException e) {
+            error.append("you can't eat that item!");
+            return false;
+        }
+
+        if(numToEat < 0) {
+            error.append("you can't eat a negative number of items!");
+            return false;
+        }
+        if(numToEat > (Integer)player.getInventory().get(itemName)) {
+            error.append("you only have " + ((Integer)player.getInventory().get(itemName)) + " of that item!");
+            return false;
+        }
         scan.close();
         return true;
     }
 
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
-        // TODO Auto-generated method stub
-        return null;
+        player.removeFromInventory((String)item.getStats().get("name"), numToEat);
+        player.changeStat("health", numToEat * (Integer)item.getStats().get("health gain"));
+        return new StringBuilder("you got " + (numToEat * (Integer)item.getStats().get("health gain")) + " health.");
     }
-
 }
