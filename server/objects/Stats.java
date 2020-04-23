@@ -1,10 +1,6 @@
 package server.objects;
 
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.io.FileOutputStream;
-import java.io.File;
-
 import java.util.Scanner;
 import java.util.Map;
 import java.util.HashMap;

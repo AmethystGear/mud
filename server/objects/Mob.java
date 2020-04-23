@@ -1,6 +1,5 @@
 package server.objects;
 
-import server.objects.Stats.ReadOnlyStats;
 import server.utils.RandUtils;
 import server.main.World;
 

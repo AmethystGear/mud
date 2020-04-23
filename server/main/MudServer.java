@@ -15,6 +15,64 @@ public class MudServer {
     private static World world;
     private static Accept accept;
 
+    public static StringBuilder handleCommand(String command, Player player) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Move());
+        actions.add(new Display());
+        actions.add(new ShowMap());
+        actions.add(new Attack());
+        actions.add(new Run());
+        actions.add(new Eat());
+        actions.add(new Give());
+
+        List<Player.ReadOnlyPlayer> players = new ArrayList<>();
+        for (Player p : accept.players()) {
+            players.add(new Player.ReadOnlyPlayer(p));
+        }
+
+        if(command.equals("") && player.lastAction != null) {
+            StringBuilder error = new StringBuilder("");
+            Action newAction;
+            try {
+                // create new instance of whatever action that we have.
+                newAction = player.lastAction.getClass().getConstructor().newInstance();
+            } catch (Exception e) {
+                // We should never be in this state. If we are, there's a bug.
+                throw new RuntimeException("couldn't create new instance of last player's action!");
+            }
+            if(newAction.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
+                return newAction.run(player, accept.players(), world);
+            } else {
+                error.append("\n");
+                return error;
+            }
+        } else if (command.equals("")) {
+            return new StringBuilder("You have no commands in your history!");
+        }
+
+        System.out.println(command);
+        for (Action a : actions) {
+            if (a.matchCommand(command)) {
+                try {
+                    StringBuilder error = new StringBuilder("");
+                    if (a.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
+                        player.lastCommand = command;
+                        player.lastAction = a;
+                        return a.run(player, accept.players(), world);
+                    } else {
+                        error.append("\n");
+                        return error;
+                    }
+                } catch (Exception e) {
+                    System.out.println("action parse failed.");
+                    System.out.println(e);
+                    e.printStackTrace();
+                }
+            }
+        }
+        return new StringBuilder("no action matches your input!");
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         boolean makeNewWorld;
         Scanner in = new Scanner(System.in);
@@ -85,95 +143,6 @@ public class MudServer {
             // don't care, we're exiting anyways.
         }
         in.close();
-    }
-
-    private static StringBuilder playerGive(String command, Player player) {
-        StringBuilder out = new StringBuilder("");
-        Scanner scan = new Scanner(command);
-        scan.next();
-        int id = scan.nextInt();
-        String item = scan.next();
-        int amount = scan.nextInt();
-        scan.close();
-        if(id < 0 || id >= accept.players().size()) {
-            out.append("That player doesn't exist!");
-            return out;
-        }
-        Player recipient = accept.players().get(id);
-        if(!player.getInventory().hasVariable(item)) {
-            out.append("You don't have that item!");
-            return out;
-        }
-        if(amount < 0) {
-            out.append("Nice try, but you can't give negative donations.");
-            return out;
-        }
-        if((Integer)player.getInventory().get(item) < amount) {
-            out.append("You have ");
-            out.append((Integer)player.getInventory().get(item) + "");
-            out.append(" of that item, not ");
-            out.append(amount + ".");
-            return out;
-        }
-        recipient.addToInventory(item, amount);
-        player.removeFromInventory(item, amount);
-        return out;
-    }
-
-    public static StringBuilder handleCommand(String command, Player player) {
-        List<Player.ReadOnlyPlayer> players = new ArrayList<>();
-        for (Player p : accept.players()) {
-            players.add(new Player.ReadOnlyPlayer(p));
-        }
-
-        if(command.equals("") && player.lastAction != null) {
-            StringBuilder error = new StringBuilder("");
-            Action newAction;
-            try {
-                // create new instance of whatever action that we have.
-                newAction = player.lastAction.getClass().getConstructor().newInstance();
-            } catch (Exception e) {
-                // We should never be in this state. If we are, there's a bug.
-                throw new RuntimeException("couldn't create new instance of last player's action!");
-            }
-            if(newAction.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
-                return newAction.run(player, accept.players(), world);
-            } else {
-                error.append("\n");
-                return error;
-            }
-        } else if (command.equals("")) {
-            return new StringBuilder("You have no commands in your history!");
-        }
-
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new Move());
-        actions.add(new Display());
-        actions.add(new ShowMap());
-        actions.add(new Attack());
-        actions.add(new Run());
-        actions.add(new Eat());
-        System.out.println(command);
-        for (Action a : actions) {
-            if (a.matchCommand(command)) {
-                try {
-                    StringBuilder error = new StringBuilder("");
-                    if (a.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
-                        player.lastCommand = command;
-                        player.lastAction = a;
-                        return a.run(player, accept.players(), world);
-                    } else {
-                        error.append("\n");
-                        return error;
-                    }
-                } catch (Exception e) {
-                    System.out.println("action parse failed.");
-                    System.out.println(e);
-                    e.printStackTrace();
-                }
-            }
-        }
-        return new StringBuilder("no action matches your input!");
     }
 }
 
