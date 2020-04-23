@@ -103,7 +103,14 @@ public class Move implements Action {
                     return x - MathUtils.sign(numUnits);
                 } else if(world.hasMob(x, yOrigin)) {
                     Mob m = world.getMob(x, yOrigin);
-                    if(RandUtils.rand(0, 99) < (Integer)m.getBaseStats().get("aggression")) {
+                    int agg;
+                    if(!m.getBaseStats().hasVariable("aggression")) {
+                        agg = 0;
+                    } else {
+                        agg = (Integer)m.getBaseStats().get("aggression");
+                    }
+
+                    if(RandUtils.rand(0, 99) < agg) {
                         System.out.println("you were blocked by a mob!");
                         return x;
                     }
@@ -118,7 +125,15 @@ public class Move implements Action {
                     return y - MathUtils.sign(numUnits);
                 } else if(world.hasMob(xOrigin, y)) {
                     Mob m = world.getMob(xOrigin, y);
-                    if(RandUtils.rand(0, 99) < (Integer)m.getBaseStats().get("aggression")) {
+
+                    int agg;
+                    if(!m.getBaseStats().hasVariable("aggression")) {
+                        agg = 0;
+                    } else {
+                        agg = (Integer)m.getBaseStats().get("aggression");
+                    }
+                    
+                    if(RandUtils.rand(0, 99) < agg) {
                         System.out.println("you were blocked by a mob!");
                         return y;
                     }
