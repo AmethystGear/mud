@@ -13,8 +13,9 @@ public class Run implements Action {
     }
 
     @Override
-    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world, StringBuilder error) {
-        if(player.getMob() == null) {
+    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world,
+            StringBuilder error) {
+        if (player.getMob() == null) {
             error.append("you can't run because you aren't currently fighting a mob!");
         }
         return player.getMob() != null;

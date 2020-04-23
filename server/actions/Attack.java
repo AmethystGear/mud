@@ -14,8 +14,9 @@ public class Attack implements Action {
     }
 
     @Override
-    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world, StringBuilder error) {
-        if(player.getMob() == null) {
+    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world,
+            StringBuilder error) {
+        if (player.getMob() == null) {
             error.append("you're not currenty fighting a mob!");
         }
         return player.getMob() != null;
@@ -24,17 +25,19 @@ public class Attack implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         StringBuilder out = new StringBuilder("");
-        out.append("You attacked " + player.getMob().getBaseStats().get("name") + " and dealt " + player.getBaseStats().get("dmg") + " damage.\n");
-        player.getMob().changeStat("health", -(Integer)player.getBaseStats().get("dmg"));
-        if(player.getMob().isDead()) {
-            out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player-victory") + "\n");
+        out.append("You attacked " + player.getMob().getBaseStats().get("name") + " and dealt "
+                + player.getBaseStats().get("dmg") + " damage.\n");
+        player.getMob().changeStat("health", -(Integer) player.getBaseStats().get("dmg"));
+        if (player.getMob().isDead()) {
+            out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player-victory")
+                    + "\n");
             out.append("You murdered " + player.getMob().getBaseStats().get("name") + "\n");
 
             out.append("You got " + player.getMob().getBaseStats().get("xp") + " xp.\n");
-            player.changeStat("xp", (Integer)player.getMob().getBaseStats().get("xp"));
+            player.changeStat("xp", (Integer) player.getMob().getBaseStats().get("xp"));
 
             String[] drops = player.getMob().getDrops();
-            for(String drop : drops) {
+            for (String drop : drops) {
                 out.append("You got " + drop + "\n");
                 player.addToInventory(drop, 1);
             }

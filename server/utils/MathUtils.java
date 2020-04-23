@@ -10,7 +10,7 @@ public class MathUtils {
     }
 
     public static int sign(int a) {
-        if(a > 0) {
+        if (a > 0) {
             return 1;
         } else if (a == 0) {
             return 0;

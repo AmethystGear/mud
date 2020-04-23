@@ -18,7 +18,8 @@ public class ShowMap implements Action {
     }
 
     @Override
-    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world, StringBuilder error) {
+    public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world,
+            StringBuilder error) {
         return true;
     }
 
