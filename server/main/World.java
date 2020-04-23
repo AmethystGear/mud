@@ -29,20 +29,26 @@ public class World {
     private int seed;
 
     public World(String saveFile) throws FileNotFoundException {
+        worldMap = new int[MAP_SIZE][];
+        mobMap = new int[MAP_SIZE][];
+        for(int i = 0; i < MAP_SIZE; i++) {
+            worldMap[i] = new int[MAP_SIZE];
+            mobMap[i] = new int[MAP_SIZE];
+        }
         Scanner scan = new Scanner(new File(saveFile));
         seed = scan.nextInt();
+        System.out.println(seed);
         readMap(scan, worldMap);
         readMap(scan, mobMap);
-        mobs = Value.getValuesFromFile(saveFile, mobsEndString, new Mob.ReadOnlyMob(new Mob()));
-        items = Value.getValuesFromFile(saveFile, itemsEndString, new Item());
-        blocks = Value.getValuesFromFile(saveFile, blocksEndString, new Block());
+        scan.nextLine();
+        mobs = Value.getValuesFromScanner(scan, mobsEndString, new Mob.ReadOnlyMob(new Mob()));
+        items = Value.getValuesFromScanner(scan, itemsEndString, new Item());
+        blocks = Value.getValuesFromScanner(scan, blocksEndString, new Block());
         scan.close();
     }
 
-    public World(int seed) {
-        mobs = Value.getValuesFromFile(pathToMobsConfig, new Mob.ReadOnlyMob(new Mob()));
-        items = Value.getValuesFromFile(pathToItemsConfig, new Item());
-        blocks = Value.getValuesFromFile(pathToBlocksConfig, new Block());
+    public World(int seed) throws FileNotFoundException {
+        this.seed = seed;
         worldMap = new int[MAP_SIZE][];
         mobMap = new int[MAP_SIZE][];
         for(int i = 0; i < MAP_SIZE; i++) {
@@ -50,7 +56,12 @@ public class World {
             mobMap[i] = new int[MAP_SIZE];
         }
 
-        seed = RandUtils.rand(0, Integer.MAX_VALUE - 1);
+        mobs = Value.getValuesFromScanner(new Scanner(new File(pathToMobsConfig)), new Mob.ReadOnlyMob(new Mob()));
+        items = Value.getValuesFromScanner(new Scanner(new File(pathToItemsConfig)), new Item());
+        blocks = Value.getValuesFromScanner(new Scanner(new File(pathToBlocksConfig)), new Block());
+
+
+
         Random rand = new Random(seed);
         float[][] baseHeightMap = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
         float[][] secondLayerHeightMap = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, rand.nextInt(3) + 3);
@@ -145,16 +156,16 @@ public class World {
     }
 
     private static void saveMap(PrintWriter writer, int[][] map) {
-        for(int y = 0; y < MAP_SIZE; y++) {
-            for(int x = 0; x < MAP_SIZE; x++) {
+        for(int x = 0; x < MAP_SIZE; x++) {
+            for(int y = 0; y < MAP_SIZE; y++) {
                 writer.write(map[x][y] + " ");
             }
         }
     }
 
     private static void readMap(Scanner scan, int[][] map) {
-        for(int y = 0; y < MAP_SIZE; y++) {
-            for(int x = 0; x < MAP_SIZE; x++) {
+        for(int x = 0; x < MAP_SIZE; x++) {
+            for(int y = 0; y < MAP_SIZE; y++) {
                 map[x][y] = scan.nextInt();
             }
         }

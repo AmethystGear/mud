@@ -15,7 +15,7 @@ public class MudServer {
     private static World world;
     private static Accept accept;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         boolean makeNewWorld;
         Scanner in = new Scanner(System.in);
         System.out.print("Do you want to load your saved world, or create a new one?(load/create): ");
@@ -74,11 +74,7 @@ public class MudServer {
                 quit = true;
             }
             if(line.equals("save")) {
-                try {
-                    world.saveTo(WORLD_SAVE);
-                } catch (FileNotFoundException e) {
-                    System.out.println("There is no file named " + WORLD_SAVE + " in the current directory.");
-                }
+                world.saveTo(WORLD_SAVE);
             }
         }
 

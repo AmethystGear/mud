@@ -116,9 +116,10 @@ class Stats {
     }
 
     // this constructor is for the clone method only, otherwise our RI could be violated by bad inputs.
-    private Stats (HashMap<String, String> types, HashMap<String, Object> stats) {
+    private Stats (HashMap<String, String> types, HashMap<String, Object> stats, HashSet<String> props) {
         this.types = types;
         this.stats = stats;
+        this.properties = props;
     }
 
     // create a deep copy of this stats object and return it.
@@ -131,7 +132,11 @@ class Stats {
         for(String key : stats.keySet()) {
             statsCopy.put(key, get(key));
         }
-        return new Stats(typesCopy, statsCopy);
+        HashSet<String> propsCopy = new HashSet<>();
+        for(String s : properties) {
+            propsCopy.add(s);
+        }
+        return new Stats(typesCopy, statsCopy, propsCopy);
     }
 
     public boolean hasProperty(String prop) {
@@ -143,12 +148,12 @@ class Stats {
     }
 
     // save this stats class to a file by appending it to the end of that file.
-    public void saveTo(PrintWriter writer) {
-        writer.append("\n/begin/\n");
+    public void saveTo(PrintWriter writer) {        
+        writer.write("\n/begin/\n");
         for(String prop : properties) {
-            writer.append("prop ");
-            writer.append(prop.replace(' ', '-'));
-            writer.append("\n");
+            writer.write("prop ");
+            writer.write(prop.replace(' ', '-'));
+            writer.write("\n");
         }
         String longStringVarName = null;
         StringBuilder longString = null;
@@ -158,21 +163,20 @@ class Stats {
                 longStringVarName = e.getKey();
                 continue;
             }
-            writer.append(types.get(e.getKey()));
-            writer.append(" ");
-            writer.append(e.getKey().replace(' ', '-'));
-            writer.append(" ");
-            writer.append(getStringRep(e.getValue(), true));
-            writer.append("\n");
+            writer.write(types.get(e.getKey()));
+            writer.write(" ");
+            writer.write(e.getKey().replace(' ', '-'));
+            writer.write(" ");
+            writer.write(getStringRep(e.getValue(), true));
+            writer.write("\n");
         }
         if(longString != null) {
-            writer.append("LongString ");
-            writer.append(longStringVarName);
-            writer.append("\n");
-            writer.append(longString.toString());
+            writer.write("LongString ");
+            writer.write(longStringVarName);
+            writer.write("\n");
+            writer.write(longString.toString());
         }
-        writer.append("/end/\n");
-        writer.close();
+        writer.write("/end/\n");
     }
 
     // check if this stat has a variable with the given name.
