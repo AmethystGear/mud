@@ -22,24 +22,25 @@ public class Eat implements Action {
     }
 
     @Override
-    public boolean parseCommand(String command, Player.ReadOnlyPlayer player, List<Player.ReadOnlyPlayer> players, World world, StringBuilder error) {
+    public boolean parseCommand(String command, Player.ReadOnlyPlayer player, List<Player.ReadOnlyPlayer> players,
+            World world, StringBuilder error) {
         Scanner scan = new Scanner(command);
         scan.next();
-        if(!scan.hasNextInt()) {
+        if (!scan.hasNextInt()) {
             scan.close();
             error.append("you need to specify the amount you are going to eat!");
             return false;
         }
         numToEat = scan.nextInt();
         String itemName = ScannerUtils.getRemainingInputAsString(scan).replace('-', ' ');
-        if(!player.getInventory().hasVariable(itemName)) {
+        if (!player.getInventory().hasVariable(itemName)) {
             error.append("you don't have that item!");
             return false;
         }
 
         try {
             item = world.items.get(itemName);
-            if(!item.getStats().hasProperty("edible")) {
+            if (!item.getStats().hasProperty("edible")) {
                 error.append("you can't eat that item!");
                 return false;
             }
@@ -48,12 +49,12 @@ public class Eat implements Action {
             return false;
         }
 
-        if(numToEat < 0) {
+        if (numToEat < 0) {
             error.append("you can't eat a negative number of items!");
             return false;
         }
-        if(numToEat > (Integer)player.getInventory().get(itemName)) {
-            error.append("you only have " + ((Integer)player.getInventory().get(itemName)) + " of that item!");
+        if (numToEat > (Integer) player.getInventory().get(itemName)) {
+            error.append("you only have " + ((Integer) player.getInventory().get(itemName)) + " of that item!");
             return false;
         }
         scan.close();
@@ -62,8 +63,8 @@ public class Eat implements Action {
 
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
-        player.removeFromInventory((String)item.getStats().get("name"), numToEat);
-        player.changeStat("health", numToEat * (Integer)item.getStats().get("health gain"));
-        return new StringBuilder("you got " + (numToEat * (Integer)item.getStats().get("health gain")) + " health.");
+        player.removeFromInventory((String) item.getStats().get("name"), numToEat);
+        player.changeStat("health", numToEat * (Integer) item.getStats().get("health gain"));
+        return new StringBuilder("you got " + (numToEat * (Integer) item.getStats().get("health gain")) + " health.");
     }
 }

@@ -1,6 +1,5 @@
 package server.objects;
 
-import server.objects.Stats.ReadOnlyStats;
 import server.utils.RandUtils;
 import server.main.World;
 
@@ -66,7 +65,7 @@ public class Mob implements ValueType<Mob> {
     public String getImg() {
         return baseStats.hasVariable("img") ? ((StringBuilder) baseStats.get("img")).toString() : "\n";
     }
-    
+
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer) stats.get(stat);
         stats.set(stat, currentAmount + amount);
@@ -74,21 +73,22 @@ public class Mob implements ValueType<Mob> {
 
     public StringBuilder attack(Player player, World world) {
         StringBuilder out = new StringBuilder("");
-        int playerSpeed = (Integer)player.getStats().get("speed");
-        int mobSpeed = (Integer)stats.get("speed");
+        int playerSpeed = (Integer) player.getStats().get("speed");
+        int mobSpeed = (Integer) stats.get("speed");
         int numTurns = mobSpeed / playerSpeed == 0 ? 1 : mobSpeed / playerSpeed;
-        for(int i = 0; i < numTurns; i++) {
+        for (int i = 0; i < numTurns; i++) {
             out.append(getBaseStats().get("name") + ": " + getQuote("attack") + "\n");
-            out.append(getBaseStats().get("name") + " attacked you and dealt " + getBaseStats().get("dmg") + " damage.\n");
-            player.changeStat("health", -(Integer)getStats().get("dmg"));
-            if(player.isDead()) {
+            out.append(
+                    getBaseStats().get("name") + " attacked you and dealt " + getBaseStats().get("dmg") + " damage.\n");
+            player.changeStat("health", -(Integer) getStats().get("dmg"));
+            if (player.isDead()) {
                 out.append(getBaseStats().get("name") + ": " + getQuote("mob-victory") + "\n");
                 out.append("You were killed by " + getBaseStats().get("name") + "\n");
                 player.respawn(world);
                 out.append("Respawning at " + player.x() + ", " + player.y() + "\n");
                 return out;
             }
-            if(i < numTurns - 1) {
+            if (i < numTurns - 1) {
                 out.append(stats.get("name") + " is faster than you, and takes another turn.\n");
             }
         }
@@ -97,46 +97,46 @@ public class Mob implements ValueType<Mob> {
 
     public static class ReadOnlyMob implements ValueType<ReadOnlyMob> {
         private Mob m;
-    
+
         public ReadOnlyMob(Mob m) {
             this.m = m;
         }
-    
+
         @Override
         public int getID() {
             return m.getID();
         }
-    
+
         @Override
         public Stats.ReadOnlyStats getStats() {
             return m.getStats();
         }
-    
+
         @Override
         public ReadOnlyMob create(int ID, Stats.ReadOnlyStats stats) {
             return new ReadOnlyMob(m.create(ID, stats));
         }
-    
+
         public Mob clone() {
             return m.create(m.getID(), m.getBaseStats());
         }
-        
+
         public Stats.ReadOnlyStats getBaseStats() {
             return m.getBaseStats();
         }
-    
+
         public boolean isDead() {
             return m.isDead();
         }
-    
+
         public String[] getDrops() {
             return m.getDrops();
         }
-    
+
         public String getQuote(String quoteType) {
             return m.getQuote(quoteType);
         }
-    
+
         public String getImg() {
             return m.getImg();
         }

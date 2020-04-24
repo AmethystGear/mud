@@ -1,10 +1,11 @@
 package server.objects;
 
-public class Item implements ValueType<Item>{
+public class Item implements ValueType<Item> {
     private int ID;
     private Stats.ReadOnlyStats stats;
 
-    public Item(){}
+    public Item() {
+    }
 
     public Item(int ID, Stats.ReadOnlyStats stats) {
         this.ID = ID;

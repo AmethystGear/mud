@@ -92,14 +92,14 @@ public class Player {
     }
 
     public void removeFromInventory(String item, int count) {
-        if(count < 0 || !inventory.hasVariable(item)) {
+        if (count < 0 || !inventory.hasVariable(item)) {
             throw new IllegalArgumentException();
         }
-        int numItemInInventory = (Integer)inventory.get(item);
-        if(numItemInInventory - count < 0) {
+        int numItemInInventory = (Integer) inventory.get(item);
+        if (numItemInInventory - count < 0) {
             throw new IllegalArgumentException();
         }
-        if(numItemInInventory - count == 0) {
+        if (numItemInInventory - count == 0) {
             inventory.removeVariable(item);
         } else {
             inventory.set(item, numItemInInventory - count);
@@ -107,9 +107,9 @@ public class Player {
     }
 
     public void upgradeBaseStat(String stat) {
-        int statLvl = (Integer)baseStats.get(stat);
-        int xp = (Integer)stats.get("xp");
-        if(stat.equals("xp")) {
+        int statLvl = (Integer) baseStats.get(stat);
+        int xp = (Integer) stats.get("xp");
+        if (stat.equals("xp")) {
             System.out.println("You can't upgrade your XP!");
         } else if (statLvl * XP_MULTIPLIER <= xp) {
             baseStats.set(stat, statLvl + 1);
@@ -122,8 +122,8 @@ public class Player {
     }
 
     public void changeStat(String stat, int amount) {
-        int currentAmount = (Integer)stats.get(stat);
-        stats.set(stat, Math.min(currentAmount + amount, (Integer)baseStats.get("health")));
+        int currentAmount = (Integer) stats.get(stat);
+        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get("health")));
         updateXP();
     }
 
@@ -132,15 +132,15 @@ public class Player {
     }
 
     public boolean isDead() {
-        return (Integer)stats.get("health") <= 0;
+        return (Integer) stats.get("health") <= 0;
     }
 
     public void addToInventory(String item, int count) {
-        if(count < 0) {
+        if (count < 0) {
             throw new IllegalArgumentException();
         }
-        if(inventory.hasVariable(item)) {
-            int amount = (Integer)inventory.get(item);
+        if (inventory.hasVariable(item)) {
+            int amount = (Integer) inventory.get(item);
             inventory.set(item, amount + count);
         } else {
             inventory.set(item, count);
@@ -163,7 +163,8 @@ public class Player {
         int spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
         int spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
         Block b = world.getBlock(spawnX, spawnY);
-        while(b.getStats().hasProperty("solid") || ((String)b.getStats().get("name")).contains("water") || world.hasMob(spawnX, spawnY)) {
+        while (b.getStats().hasProperty("solid") || ((String) b.getStats().get("name")).contains("water")
+                || world.hasMob(spawnX, spawnY)) {
             spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
             spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
             b = world.getBlock(spawnX, spawnY);
@@ -173,6 +174,7 @@ public class Player {
 
     public static class ReadOnlyPlayer {
         private Player player;
+
         public ReadOnlyPlayer(Player player) {
             this.player = player;
         }
@@ -188,7 +190,7 @@ public class Player {
         public int y() {
             return player.y();
         }
-        
+
         public Mob getMob() {
             return player.getMob();
         }
@@ -208,5 +210,5 @@ public class Player {
         public Stats.ReadOnlyStats getInventory() {
             return player.getInventory();
         }
-    }      
+    }
 }
