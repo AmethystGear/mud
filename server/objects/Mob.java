@@ -2,6 +2,7 @@ package server.objects;
 
 import server.utils.RandUtils;
 import server.main.World;
+import java.util.Random;
 
 public class Mob implements ValueType<Mob> {
     private int ID;
@@ -117,8 +118,8 @@ public class Mob implements ValueType<Mob> {
             return new ReadOnlyMob(m.create(ID, stats));
         }
 
-        public Mob clone() {
-            return m.create(m.getID(), m.getBaseStats());
+        public Mob instantiateClone() {
+            return new Mob(m.getID(), m.getBaseStats());
         }
 
         public Stats.ReadOnlyStats getBaseStats() {

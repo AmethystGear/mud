@@ -27,6 +27,7 @@ public class MudServer {
         actions.add(new ShowInventory());
         actions.add(new Upgrade());
         actions.add(new ShowStats());
+        actions.add(new Trade());
 
         List<Player.ReadOnlyPlayer> players = new ArrayList<>();
         for (Player p : accept.players()) {
@@ -40,8 +41,8 @@ public class MudServer {
                 // create new instance of whatever action that we have.
                 newAction = player.lastAction.getClass().getConstructor().newInstance();
             } catch (Exception e) {
-                // We should never be in this state. If we are, there's a bug.
-                throw new RuntimeException("couldn't create new instance of last player's action!");
+                // we should never be in this state. If we are, there's a bug.
+                throw new RuntimeException("couldn't create new instance of player's last action!");
             }
             if(newAction.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
                 return newAction.run(player, accept.players(), world);
@@ -67,6 +68,7 @@ public class MudServer {
                         return error;
                     }
                 } catch (Exception e) {
+                    // We should never be in this state. If we are, there's a bug.
                     System.out.println("action parse failed.");
                     System.out.println(e);
                     e.printStackTrace();
@@ -217,7 +219,7 @@ class PlayerThread extends Thread {
                 // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
                 // also, notify the player that the action they tried to do didn't work.
                 catch(Exception e) {
-                    outToClient.writeUTF("That action didn't work. Check your syntax.\n/end/\n");
+                    outToClient.writeUTF("That action didn't work. \n/end/\n");
                     System.out.println(e);
                     e.printStackTrace();
                 }

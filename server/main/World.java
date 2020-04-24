@@ -187,7 +187,7 @@ public class World {
         } else {
             // make a new mob with exactly the same properties as the read only mob, and return it.
             Mob.ReadOnlyMob baseMob = mobs.get(mobMap[x][y]);
-            return baseMob.clone();
+            return baseMob.instantiateClone();
         }
     }
 

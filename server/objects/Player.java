@@ -123,7 +123,7 @@ public class Player {
 
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer) stats.get(stat);
-        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get("health")));
+        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));
         updateXP();
     }
 
