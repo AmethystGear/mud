@@ -2,7 +2,6 @@ package server.objects;
 
 import server.utils.RandUtils;
 import server.main.World;
-import java.util.Random;
 
 public class Mob implements ValueType<Mob> {
     private int ID;

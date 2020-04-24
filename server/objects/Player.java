@@ -1,6 +1,5 @@
 package server.objects;
 
-import java.io.*;
 import java.util.*;
 
 import server.main.World;
@@ -11,6 +10,7 @@ public class Player {
     public String playerRep = "\033[33m++\033[0m";
     public String lastCommand = null;
     public Action lastAction = null;
+
     private Mob mob;
     private Item equippedTool = null;
 
@@ -27,10 +27,10 @@ public class Player {
     private Stats stats;
     private Stats inventory;
 
-    public Player(int x, int y, String statsSave, String inventorySave) throws Exception {
+    public Player(int x, int y, Scanner save) throws Exception {
         moveTo(x, y);
-        baseStats = new Stats(new Scanner(new File(statsSave)));
-        inventory = new Stats(new Scanner(new File(inventorySave)));
+        baseStats = new Stats(save);
+        inventory = new Stats(save);
         stats = baseStats.clone();
     }
 

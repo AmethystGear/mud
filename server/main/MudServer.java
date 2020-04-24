@@ -149,87 +149,89 @@ public class MudServer {
         }
         in.close();
     }
-}
 
-class Accept extends Thread {
-    private ServerSocket server;
-    private ArrayList<PlayerThread> players;
-    int ID = 0;
-    private boolean continueRun = true;
-    public Accept(ServerSocket server) {
-        this.server = server;
-        this.players = new ArrayList<PlayerThread>();
-    }
-
-    public void run() {
-        while(continueRun) {
-            try {
-                PlayerThread p = new PlayerThread(server.accept(), ID);
-                System.out.println("connected!");
-                players.add(p);
-                ID++;
-                p.start();
-            } catch (IOException e) {
-                System.out.println("client connection failed!");
-            }
+    private static class Accept extends Thread {
+        private ServerSocket server;
+        private ArrayList<PlayerThread> players;
+        int ID = 0;
+        private boolean continueRun = true;
+        public Accept(ServerSocket server) {
+            this.server = server;
+            this.players = new ArrayList<PlayerThread>();
         }
-    }
-
-    public void end() {
-        for(PlayerThread t : players) {
-            t.end();
-        }
-        continueRun = false;
-    }
-
-    public List<Player> players() {
-        List<Player> p = new ArrayList<Player>();
-        for(PlayerThread t : players) {
-            p.add(t.player);
-        }
-        return p;
-    }
-}
-
-class PlayerThread extends Thread {
-    private BufferedReader inFromClient;
-    private DataOutputStream outToClient;
-    public final Player player;
-    private boolean continueRun = true;
-    public PlayerThread(Socket conn, int ID) throws IOException {
-        inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        outToClient = new DataOutputStream(conn.getOutputStream());
-        player = new Player(500, 500);
-        player.playerRep = ID + "" + ID;
-    }
-
-    public void run() {
-        while(continueRun) {
-            try {
-                String command = inFromClient.readLine();
+    
+        public void run() {
+            while(continueRun) {
                 try {
-                    StringBuilder output = MudServer.handleCommand(command, player);             
-                    output.append("\n/end/\n");                                   
-                    Scanner scan = new Scanner(output.toString());
-                    while(scan.hasNextLine()) {
-                        String line = scan.nextLine();
-                        outToClient.writeUTF("/begin/" + line + "\n");
-                    }
-                } 
-                // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
-                // also, notify the player that the action they tried to do didn't work.
-                catch(Exception e) {
-                    outToClient.writeUTF("That action didn't work. \n/end/\n");
-                    System.out.println(e);
-                    e.printStackTrace();
+                    PlayerThread p = new PlayerThread(server.accept(), ID);
+                    System.out.println("connected!");
+                    players.add(p);
+                    ID++;
+                    p.start();
+                } catch (IOException e) {
+                    System.out.println("client connection failed!");
                 }
-            } catch(IOException e) {
-                //ignore errors
             }
         }
+    
+        public void end() {
+            for(PlayerThread t : players) {
+                t.end();
+            }
+            continueRun = false;
+        }
+    
+        public List<Player> players() {
+            List<Player> p = new ArrayList<Player>();
+            for(PlayerThread t : players) {
+                p.add(t.player);
+            }
+            return p;
+        }
     }
-
-    public void end() {
-        continueRun = false;
+    
+    private static class PlayerThread extends Thread {
+        private BufferedReader inFromClient;
+        private DataOutputStream outToClient;
+        public final Player player;
+        private boolean continueRun = true;
+        public PlayerThread(Socket conn, int ID) throws IOException {
+            inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            outToClient = new DataOutputStream(conn.getOutputStream());
+            player = new Player(0, 0);
+            player.playerRep = ID + "" + ID;
+            player.respawn(MudServer.world);
+        }
+    
+        public void run() {
+            while(continueRun) {
+                try {
+                    String command = inFromClient.readLine();
+                    try {
+                        StringBuilder output = MudServer.handleCommand(command, player);             
+                        output.append("\n/end/\n");                                   
+                        Scanner scan = new Scanner(output.toString());
+                        while(scan.hasNextLine()) {
+                            String line = scan.nextLine();
+                            outToClient.writeUTF("/begin/" + line + "\n");
+                        }
+                    } 
+                    // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
+                    // also, notify the player that the action they tried to do didn't work.
+                    catch(Exception e) {
+                        outToClient.writeUTF("That action didn't work. \n/end/\n");
+                        System.out.println(e);
+                        e.printStackTrace();
+                    }
+                } catch(IOException e) {
+                    //ignore errors
+                }
+            }
+        }
+    
+        public void end() {
+            continueRun = false;
+        }
     }
 }
+
