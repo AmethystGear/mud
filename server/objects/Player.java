@@ -1,13 +1,14 @@
 package server.objects;
 
-import java.util.*;
-
 import server.main.World;
 import server.utils.RandUtils;
 import server.actions.Action;
+import server.objects.Stats.ReadOnlyStats;
+import server.objects.Position.ReadOnlyPosition;
 
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
+    private String name;
     public String lastCommand = null;
     public Action lastAction = null;
 
@@ -21,21 +22,12 @@ public class Player {
     public static final int DEFAULT_VIEW = 7;
     public static final int XP_MULTIPLIER = 100;
 
-    private int x;
-    private int y;
+    private Position posn;
     private Stats baseStats;
     private Stats stats;
     private Stats inventory;
 
-    public Player(int x, int y, Scanner save) throws Exception {
-        moveTo(x, y);
-        baseStats = new Stats(save);
-        inventory = new Stats(save);
-        stats = baseStats.clone();
-    }
-
     public Player(int x, int y) {
-        moveTo(x, y);
         baseStats = new Stats();
         baseStats.set("health", DEFAULT_HEALTH);
         baseStats.set("dmg", DEFAULT_DMG);
@@ -44,6 +36,20 @@ public class Player {
         baseStats.set("xp", DEFAULT_XP);
         stats = baseStats.clone();
         inventory = new Stats();
+        name = null;
+        posn = new Position(x, y);
+    }
+
+    public void login(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn) {
+        this.name = name;
+        this.inventory = inventory.clone();
+        this.baseStats = stats.clone();
+        this.stats = stats.clone();
+        this.posn = new Position(posn.x(), posn.y());
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void resetToBaseStats() {
@@ -51,16 +57,19 @@ public class Player {
     }
 
     public void moveTo(int x, int y) {
-        this.x = x;
-        this.y = y;
+        posn.moveTo(x, y);
     }
 
     public int x() {
-        return x;
+        return posn.x();
     }
 
     public int y() {
-        return y;
+        return posn.y();
+    }
+
+    public Position.ReadOnlyPosition getPosn() {
+        return new Position.ReadOnlyPosition(posn);
     }
 
     public Stats.ReadOnlyStats getBaseStats() {
@@ -118,17 +127,15 @@ public class Player {
         } else {
             System.out.println("Not enough XP to upgrade stat. You need " + (statLvl + 1) * XP_MULTIPLIER + " xp.");
         }
-        updateXP();
     }
 
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer) stats.get(stat);
-        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));
-        updateXP();
-    }
-
-    public void updateXP() {
-        baseStats.set("xp", stats.get("xp"));
+        if(stat.equals("xp")) {
+            stats.set(stat, currentAmount + amount);
+        } else {
+            stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));
+        }
     }
 
     public boolean isDead() {

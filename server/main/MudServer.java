@@ -11,6 +11,8 @@ import java.util.*;
 public class MudServer {
     // world save file
     private static final String WORLD_SAVE = "save/world-save.txt";
+    // player save file
+    private static final String PLAYER_SAVE = "save/player-save.txt";
   
     private static World world;
     private static Accept accept;
@@ -28,6 +30,8 @@ public class MudServer {
         actions.add(new Upgrade());
         actions.add(new ShowStats());
         actions.add(new Trade());
+        actions.add(new Login());
+        actions.add(new CreateAccount());
 
         List<Player.ReadOnlyPlayer> players = new ArrayList<>();
         for (Player p : accept.players()) {
@@ -79,6 +83,9 @@ public class MudServer {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        // load all the player accounts.
+        Accounts.load(new Scanner(new File(PLAYER_SAVE)));
+
         boolean makeNewWorld;
         Scanner in = new Scanner(System.in);
         System.out.print("Do you want to load your saved world, or create a new one?(load/create): ");
@@ -107,8 +114,10 @@ public class MudServer {
         while(notParseable) {
             try {
                 port = Integer.parseInt(portStr);
-                if(port > 65535 || port < 0) {
-                    throw new NumberFormatException();
+                if(port > 65535 || port < 0) {                    
+                    System.out.println("That port was invalid.");
+                    System.out.print("Enter a port: ");
+                    portStr = in.nextLine();
                 } else {
                     notParseable = false;
                 }
@@ -138,6 +147,7 @@ public class MudServer {
             }
             if(line.equals("save")) {
                 world.saveTo(WORLD_SAVE);
+                Accounts.save(new PrintWriter(new File(PLAYER_SAVE)));
             }
         }
 

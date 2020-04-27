@@ -29,7 +29,7 @@ public class Attack implements Action {
                 + player.getBaseStats().get("dmg") + " damage.\n");
         player.getMob().changeStat("health", -(Integer) player.getBaseStats().get("dmg"));
         if (player.getMob().isDead()) {
-            out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player-victory")
+            out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player victory")
                     + "\n");
             out.append("You murdered " + player.getMob().getBaseStats().get("name") + "\n");
 

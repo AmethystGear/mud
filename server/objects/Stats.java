@@ -16,7 +16,7 @@ import server.utils.ScannerUtils;
 // .
 // /end/
 // for each Stats object that will be parsed from the file.
-class Stats {
+public class Stats {
     private HashMap<String, String> types;
     private HashMap<String, Object> stats;
     private HashSet<String> properties;
