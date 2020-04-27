@@ -18,6 +18,7 @@ if you're using mac/linux, you can use wildcard paths to compile the server:
 if you're using windows, wildcards won't work as expected. Instead there is a small python script you can use. To run it, do:
 ```python3 compile_server.py```
 
+once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
 If you're on mac/linux, do:
 ```java server/main/MudServer```
@@ -26,7 +27,7 @@ If you're on windows, it's the same except you need to change the slashes:
 ```java server\main\MudServer```
 
 ### running the client
-There's only one file for the client, so no need to do any compilation.
+There's only one file for the client, so we can compile and run at the same time.
 
 If you're on mac/linux, do:
 ```java server/main/MudClient.java```
