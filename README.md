@@ -26,7 +26,7 @@ If you're on windows, it's the same except you need to change the slashes:
 ```java server\main\MudServer```
 
 ### running the client
-There's only one file for the client, so no need to do any compilation.
+There's only one file for the client, so we can compile and run at the same time.
 
 If you're on mac/linux, do:
 ```java server/main/MudClient.java```
