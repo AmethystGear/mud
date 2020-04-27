@@ -1,5 +1,6 @@
 /begin/
 String name "disgusting-slime"
+String description "It smells disgusting, but perhaps it is edible..."
 prop edible
 int health-gain 1
 int base-value 10
@@ -7,6 +8,7 @@ int base-value 10
 
 /begin/
 String name "viscous-fluids"
+String description "An unnaturally thick liquid of dubious colour. Its origins are impossible to fathom. Appears to have some mild magnetic properties." 
 prop edible
 int health-gain -2
 int base-value 30
@@ -14,6 +16,7 @@ int base-value 30
 
 /begin/
 String name "rusty-sword"
+String description "Basically the worst weapon you can have. But it's better than nothing... right?"
 prop edible
 int health-gain -5
 prop equipable

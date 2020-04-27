@@ -23,4 +23,8 @@ public interface Action {
     // legal in this function because
     // you should have verified them during parseCommand.
     public StringBuilder run(Player player, List<Player> players, World world);
+
+    // return a string with a description of this action. Should return the expected format of the action
+    // as well as a general description of what the action does.
+    public String description();
 }
