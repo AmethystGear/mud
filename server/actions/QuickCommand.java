@@ -42,8 +42,12 @@ public class QuickCommand implements Action {
                 return false;
             }
             shortCommand = scan.next();
+            if(commandMap.keySet().contains(shortCommand)) {
+                commandMap.remove(shortCommand);
+                actionMap.remove(shortCommand);
+            }
             for(Action a : Actions.actions) {
-                if(a.matchCommand(shortCommand)) {
+                if(matchCommand(shortCommand)) {
                     scan.close();
                     String fullActionName = a.getClass().getName();
                     int index = fullActionName.lastIndexOf('.');
@@ -85,6 +89,8 @@ public class QuickCommand implements Action {
             actionMap.put(shortCommand, action);
             return new StringBuilder("mapped " + shortCommand + " to " + mappedCommand + " successfully.");
         } else {
+            player.lastAction = action;
+            player.lastCommand = mappedCommand;
             return action.run(player, players, world);
         }
     }
