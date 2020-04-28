@@ -33,7 +33,7 @@ public class MudServer {
                 // we should never be in this state. If we are, there's a bug.
                 throw new RuntimeException("couldn't create new instance of player's last action!");
             }
-            if(newAction.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
+            if(newAction.parseCommand(player.lastCommand, new Player.ReadOnlyPlayer(player), players, world, error)) {
                 return newAction.run(player, accept.players(), world);
             } else {
                 error.append("\n");
