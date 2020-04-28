@@ -31,9 +31,9 @@ public class Upgrade implements Action {
             error.append("you don't have that stat!");
             return false;
         }
-        int xp = (Integer)player.getStats().get("xp");
+        int xp = player.xp().get();
         int statLevel = (Integer)player.getStats().get(stat);
-        int xpToLevel = (statLevel + 1) * Player.XP_MULTIPLIER;
+        int xpToLevel = statLevel * Player.XP_MULTIPLIER;
         if(xp < xpToLevel) {
             error.append("you need " + xpToLevel + " xp to level up this stat. You only have " + xp + " xp.");
             return false;

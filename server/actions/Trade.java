@@ -96,7 +96,7 @@ public class Trade implements Action {
         } else {
             player.removeFromInventory((String)itemsToTrade[tradeNumber].getStats().get("name"), numToTrade);
             int baseValue = (Integer)itemsToTrade[tradeNumber].getStats().get("base value");
-            player.changeStat("xp", numToTrade * (baseValue + baseValueBonus[tradeNumber]));
+            player.changeXP(numToTrade * (baseValue + baseValueBonus[tradeNumber]));
             out.append("you got " + (numToTrade * (baseValue + baseValueBonus[tradeNumber])) + " xp.\n");
         }
         return out;

@@ -34,7 +34,7 @@ public class Attack implements Action {
             out.append("You murdered " + player.getMob().getBaseStats().get("name") + "\n");
 
             out.append("You got " + player.getMob().getBaseStats().get("xp") + " xp.\n");
-            player.changeStat("xp", (Integer) player.getMob().getBaseStats().get("xp"));
+            player.changeXP((Integer) player.getMob().getBaseStats().get("xp"));
 
             String[] drops = player.getMob().getDrops();
             for (String drop : drops) {
