@@ -39,7 +39,7 @@ public class Accounts {
         if(accounts.keySet().contains(name)) {
             throw new IllegalArgumentException();
         }
-        Account newAcc = new Account(name, player.getInventory(), player.getBaseStats(), player.getPosn());
+        Account newAcc = new Account(name, player.getInventory(), player.getBaseStats(), player.getPosn(), player.xp());
         accounts.put(name, newAcc);
     }
 
@@ -81,11 +81,12 @@ public class Accounts {
             stats = new ReadOnlyStats(new Stats(scan));
         }
 
-        public Account(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn) {
+        public Account(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn, ReadOnlyInt xp) {
             this.name = name;
             this.inventory = inventory;
             this.stats = stats;
             this.posn = posn;
+            this.xp = xp;
         }
 
         public String getName() {

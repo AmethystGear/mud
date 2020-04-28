@@ -39,6 +39,7 @@ public class Player {
         inventory = new Stats();
         name = null;
         posn = new Position(x, y);
+        xp = new Int(DEFAULT_XP);
     }
 
     public void login(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn, ReadOnlyInt xp) {
