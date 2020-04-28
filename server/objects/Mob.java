@@ -59,6 +59,7 @@ public class Mob implements ValueType<Mob> {
         if (!stats.hasVariable(quoteType)) {
             return "";
         }
+        quoteType = quoteType.replace('-', ' ');
         return RandUtils.getRandom((String[]) stats.get(quoteType));
     }
 
@@ -82,7 +83,7 @@ public class Mob implements ValueType<Mob> {
                     getBaseStats().get("name") + " attacked you and dealt " + getBaseStats().get("dmg") + " damage.\n");
             player.changeStat("health", -(Integer) getStats().get("dmg"));
             if (player.isDead()) {
-                out.append(getBaseStats().get("name") + ": " + getQuote("mob-victory") + "\n");
+                out.append(getBaseStats().get("name") + ": " + getQuote("mob victory") + "\n");
                 out.append("You were killed by " + getBaseStats().get("name") + "\n");
                 player.respawn(world);
                 out.append("Respawning at " + player.x() + ", " + player.y() + "\n");

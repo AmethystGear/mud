@@ -24,7 +24,7 @@ public class Run implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         StringBuilder out = new StringBuilder("");
-        out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player-run") + "\n");
+        out.append(player.getMob().getBaseStats().get("name") + ": " + player.getMob().getQuote("player run") + "\n");
         out.append("You ran away from " + player.getMob().getBaseStats().get("name") + ".\n");
         player.setMob(null);
         return out;

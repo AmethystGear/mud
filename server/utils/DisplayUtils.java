@@ -47,8 +47,8 @@ public class DisplayUtils {
                     blockList.add(0);
                 }
                 int mapWeight;
-                if (b.getStats().hasVariable("map-weight")) {
-                    mapWeight = (Integer) b.getStats().get("map-weight");
+                if (b.getStats().hasVariable("map weight")) {
+                    mapWeight = (Integer) b.getStats().get("map weight");
                 } else {
                     mapWeight = 1;
                 }
