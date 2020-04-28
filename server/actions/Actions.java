@@ -18,6 +18,7 @@ public class Actions {
         new ShowStats(),
         new Trade(),
         new Upgrade(),
-        new ShowXP()
+        new ShowXP(),
+        new QuickCommand()
     };
 }

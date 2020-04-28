@@ -44,13 +44,22 @@ public class MudServer {
         }
 
         System.out.println(command);
-        for (Action a : Actions.actions) {
+        for (Action ac : Actions.actions) {
+            Action a;
+            try {
+                a = ac.getClass().getConstructor().newInstance();
+            } catch(Exception e) {
+                // we should never be in this state. If we are, it is a bug.
+                e.printStackTrace();
+                throw new RuntimeException("can't create instance of action class!");
+            }
             if (a.matchCommand(command)) {
                 try {
                     StringBuilder error = new StringBuilder("");
                     if (a.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
                         player.lastCommand = command;
                         player.lastAction = a;
+
                         return a.run(player, accept.players(), world);
                     } else {
                         error.append("\n");

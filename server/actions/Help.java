@@ -81,13 +81,4 @@ public class Help implements Action {
         return "the help command.\n" +
                "usage: help";
     }
-
-    private boolean arrayContains(String[] arr, String s) {
-        for(String a : arr) {
-            if((a == null && s == null) || (a != null && a.equals(s))) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
