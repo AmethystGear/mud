@@ -48,4 +48,11 @@ public class Attack implements Action {
         }
         return out;
     }
+
+    @Override
+    public String description() {
+        return "attack the mob you are currently interacting with.\n" +
+               "usage: attack\n";
+    }
+
 }

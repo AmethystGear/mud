@@ -67,4 +67,10 @@ public class Eat implements Action {
         player.changeStat("health", numToEat * (Integer) item.getStats().get("health gain"));
         return new StringBuilder("you got " + (numToEat * (Integer) item.getStats().get("health gain")) + " health.");
     }
+
+    @Override
+    public String description() {
+        return "eat items in your inventory.\n" +
+               "usage: eat <number of items> <name of item>\n";
+    }
 }

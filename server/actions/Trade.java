@@ -102,4 +102,12 @@ public class Trade implements Action {
         return out;
     }
 
+    @Override
+    public String description() {
+        return "trade with the mob you are currently interacting with.\n" +
+               "usage: trade | trade <trade number> <amount to trade>\n" +
+               "example: trade (this would list all the trades the mob can make)\n" +
+               "example: trade 1 5 (this would do 5 of the first trade)\n";
+    }
+
 }

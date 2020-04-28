@@ -41,4 +41,10 @@ public class Login implements Action {
         }
     }
 
+    @Override
+    public String description() {
+        return "login to an account.\n" +
+               "usage: login <account name>\n";
+    }
+
 }

@@ -47,4 +47,10 @@ public class Upgrade implements Action {
         return new StringBuilder("Your " + stat + " was increased by 1.");
     }
 
+    @Override
+    public String description() {
+        return "upgrade one of your stats.\n" +
+               "usage: upgrade <stat name>\n";
+    }
+
 }

@@ -29,4 +29,11 @@ public class Run implements Action {
         player.setMob(null);
         return out;
     }
+
+    @Override
+    public String description() {
+        return "run away from the mob you are currently interacting with.\n" +
+               "usage: run\n";
+    }
+
 }

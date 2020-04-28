@@ -10,6 +10,8 @@ import server.objects.Stats.ReadOnlyStats;
 import server.objects.Position;
 import server.objects.Position.ReadOnlyPosition;
 import server.objects.Player;
+import server.objects.Int;
+import server.objects.Int.ReadOnlyInt;
 
 public class Accounts {
     private static HashMap<String, Account> accounts = new HashMap<String, Account>();
@@ -43,7 +45,7 @@ public class Accounts {
 
     public static void login(String name, Player player) {
         Account playerAccount = getAccount(name);
-        player.login(name, playerAccount.getInventory(), playerAccount.getStats(), playerAccount.getPosn());
+        player.login(name, playerAccount.getInventory(), playerAccount.getStats(), playerAccount.getPosn(), playerAccount.getXP());
         accounts.remove(name);
         createAccount(name, player);
     }
@@ -60,6 +62,7 @@ public class Accounts {
         private ReadOnlyPosition posn;
         private ReadOnlyStats inventory;
         private ReadOnlyStats stats;
+        private ReadOnlyInt xp;
 
         public Account(Scanner scan) {
             String nextLine = scan.nextLine();
@@ -70,7 +73,9 @@ public class Accounts {
             Scanner lineScan = new Scanner(scan.nextLine());
             int x = lineScan.nextInt();
             int y = lineScan.nextInt();
+            int xpNum = lineScan.nextInt();
             posn = new ReadOnlyPosition(new Position(x, y));
+            xp = new ReadOnlyInt(new Int(xpNum));
             inventory = new ReadOnlyStats(new Stats(scan));
             scan.nextLine();
             stats = new ReadOnlyStats(new Stats(scan));
@@ -99,9 +104,13 @@ public class Accounts {
             return posn;
         }
 
+        public ReadOnlyInt getXP() {
+            return xp;
+        }
+
         public void save(PrintWriter file) {
             file.write(name + "\n");
-            file.write(posn.x() + " " + posn.y() + "\n");
+            file.write(posn.x() + " " + posn.y() + " " + xp.get() + "\n");
             inventory.saveTo(file);
             stats.saveTo(file);
             file.write("\n");

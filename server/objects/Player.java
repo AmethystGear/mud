@@ -5,6 +5,7 @@ import server.utils.RandUtils;
 import server.actions.Action;
 import server.objects.Stats.ReadOnlyStats;
 import server.objects.Position.ReadOnlyPosition;
+import server.objects.Int.ReadOnlyInt;
 
 public class Player {
     public String playerRep = "\033[33m++\033[0m";
@@ -26,6 +27,7 @@ public class Player {
     private Stats baseStats;
     private Stats stats;
     private Stats inventory;
+    private Int xp;
 
     public Player(int x, int y) {
         baseStats = new Stats();
@@ -33,31 +35,27 @@ public class Player {
         baseStats.set("dmg", DEFAULT_DMG);
         baseStats.set("speed", DEFAULT_SPEED);
         baseStats.set("view", DEFAULT_VIEW);
-        baseStats.set("xp", DEFAULT_XP);
         stats = baseStats.clone();
         inventory = new Stats();
         name = null;
         posn = new Position(x, y);
     }
 
-    public void login(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn) {
+    public void login(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn, ReadOnlyInt xp) {
         this.name = name;
         this.inventory = inventory.clone();
         this.baseStats = stats.clone();
         this.stats = stats.clone();
         this.posn = new Position(posn.x(), posn.y());
+        this.xp = new Int(xp.get());
+    }
+
+    public ReadOnlyInt xp() {
+        return new ReadOnlyInt(xp);
     }
 
     public String getName() {
         return name;
-    }
-
-    public void resetToBaseStats() {
-        stats = baseStats.clone();
-    }
-
-    public void moveTo(int x, int y) {
-        posn.moveTo(x, y);
     }
 
     public int x() {
@@ -84,20 +82,34 @@ public class Player {
         return mob;
     }
 
-    public void setMob(Mob m) {
-        mob = m;
-    }
-
     public Item getTool() {
         return equippedTool;
     }
 
-    public void setTool(Item i) {
-        equippedTool = i;
-    }
-
     public Stats.ReadOnlyStats getInventory() {
         return new Stats.ReadOnlyStats(inventory);
+    }
+
+    public boolean isDead() {
+        return (Integer) stats.get("health") <= 0;
+    }
+
+
+    
+    public void resetToBaseStats() {
+        stats = baseStats.clone();
+    }
+
+    public void moveTo(int x, int y) {
+        posn.moveTo(x, y);
+    }
+
+    public void setMob(Mob m) {
+        mob = m;
+    }
+
+    public void setTool(Item i) {
+        equippedTool = i;
     }
 
     public void removeFromInventory(String item, int count) {
@@ -117,29 +129,18 @@ public class Player {
 
     public void upgradeBaseStat(String stat) {
         int statLvl = (Integer) baseStats.get(stat);
-        int xp = (Integer) stats.get("xp");
-        if (stat.equals("xp")) {
-            System.out.println("You can't upgrade your XP!");
-        } else if (statLvl * XP_MULTIPLIER <= xp) {
-            baseStats.set(stat, statLvl + 1);
-            stats.set("xp", xp - statLvl * XP_MULTIPLIER);
-            stats.set(stat, baseStats.get(stat));
-        } else {
-            System.out.println("Not enough XP to upgrade stat. You need " + (statLvl + 1) * XP_MULTIPLIER + " xp.");
-        }
+        baseStats.set(stat, statLvl + 1);
+        xp.set(xp.get() - statLvl * XP_MULTIPLIER);
+        stats.set(stat, baseStats.get(stat));
+    }
+
+    public void changeXP(int delta) {
+        xp.set(xp.get() + delta);
     }
 
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer) stats.get(stat);
-        if(stat.equals("xp")) {
-            stats.set(stat, currentAmount + amount);
-        } else {
-            stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));
-        }
-    }
-
-    public boolean isDead() {
-        return (Integer) stats.get("health") <= 0;
+        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));        
     }
 
     public void addToInventory(String item, int count) {
@@ -186,36 +187,48 @@ public class Player {
             this.player = player;
         }
 
-        public boolean isDead() {
-            return player.isDead();
+        public ReadOnlyInt xp() {
+            return player.xp();
         }
-
+    
+        public String getName() {
+            return player.getName();
+        }
+    
         public int x() {
             return player.x();
         }
-
+    
         public int y() {
             return player.y();
         }
-
-        public Mob getMob() {
-            return player.getMob();
+    
+        public Position.ReadOnlyPosition getPosn() {
+            return player.getPosn();
         }
-
-        public Item getTool() {
-            return player.getTool();
-        }
-
+    
         public Stats.ReadOnlyStats getBaseStats() {
             return player.getBaseStats();
         }
-
+    
         public Stats.ReadOnlyStats getStats() {
             return player.getStats();
         }
-
+    
+        public Mob getMob() {
+            return player.getMob();
+        }
+    
+        public Item getTool() {
+            return player.getTool();
+        }
+    
         public Stats.ReadOnlyStats getInventory() {
             return player.getInventory();
+        }
+    
+        public boolean isDead() {
+            return player.isDead();
         }
     }
 }

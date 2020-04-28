@@ -26,4 +26,10 @@ public class Display implements Action {
         int viewDist = (Integer) player.getBaseStats().get("view");
         return DisplayUtils.display(viewDist, player.x(), player.y(), players, world, true);
     }
+
+    @Override
+    public String description() {
+        return "display your surrounings.\n" +
+               "usage: disp\n";
+    }
 }

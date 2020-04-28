@@ -144,4 +144,12 @@ public class Move implements Action {
             return solid ? bounded - MathUtils.sign(numUnits) : bounded;
         }
     }
+
+    @Override
+    public String description() {
+        return "move in the world.\n" +
+               "usage: w/a/s/d<optional distance>\n" +
+               "example: d1\n" +
+               "example: w\n";
+    }
 }

@@ -42,4 +42,10 @@ public class CreateAccount implements Action {
         }
     }
 
+    @Override
+    public String description() {
+        return "creates a new account with the provided name.\n" +
+               "usage: createAccount <name>\n";
+    }
+
 }

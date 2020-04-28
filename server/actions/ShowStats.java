@@ -28,5 +28,11 @@ public class ShowStats implements Action {
         out.append(player.getBaseStats().toString());
         return out;
     }
+
+    @Override
+    public String description() {
+        return "display your stats.\n" +
+               "usage: stat";
+    }
     
 }

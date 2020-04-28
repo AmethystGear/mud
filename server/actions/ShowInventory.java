@@ -22,4 +22,10 @@ public class ShowInventory implements Action {
     public StringBuilder run(Player player, List<Player> players, World world) {
         return new StringBuilder(player.getInventory().toString());
     }
+
+    @Override
+    public String description() {
+        return "display your inventory.\n" +
+               "usage: inv\n";
+    }
 }

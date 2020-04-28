@@ -27,4 +27,10 @@ public class ShowMap implements Action {
     public StringBuilder run(Player player, List<Player> players, World world) {
         return DisplayUtils.map(CHUNK_SIZE, players, world);
     }
+
+    @Override
+    public String description() {
+        return "displays the world map.\n" +
+               "usage: map\n";
+    }
 }

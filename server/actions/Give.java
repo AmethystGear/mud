@@ -69,4 +69,10 @@ public class Give implements Action {
         player.removeFromInventory(item, amount);
         return new StringBuilder("gave " + amount + " " + item + " to player with id " + recipientId);
     }
+
+    @Override
+    public String description() {
+        return "give items in your inventory to another player.\n" +
+               "usage: give <player-id> <item> <number of item>\n";
+    }
 }

@@ -18,21 +18,6 @@ public class MudServer {
     private static Accept accept;
 
     public static StringBuilder handleCommand(String command, Player player) {
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new Move());
-        actions.add(new Display());
-        actions.add(new ShowMap());
-        actions.add(new Attack());
-        actions.add(new Run());
-        actions.add(new Eat());
-        actions.add(new Give());
-        actions.add(new ShowInventory());
-        actions.add(new Upgrade());
-        actions.add(new ShowStats());
-        actions.add(new Trade());
-        actions.add(new Login());
-        actions.add(new CreateAccount());
-
         List<Player.ReadOnlyPlayer> players = new ArrayList<>();
         for (Player p : accept.players()) {
             players.add(new Player.ReadOnlyPlayer(p));
@@ -59,7 +44,7 @@ public class MudServer {
         }
 
         System.out.println(command);
-        for (Action a : actions) {
+        for (Action a : Actions.actions) {
             if (a.matchCommand(command)) {
                 try {
                     StringBuilder error = new StringBuilder("");
