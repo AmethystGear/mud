@@ -288,7 +288,7 @@ String[] drops  "Mage's-Staff" "missspelled-incantation"
 int drop-min  0
 int drop-max  1
 int trade  5
-int trade-xp  100
+prop trade
 int speed 1
 LongString img
 

@@ -25,3 +25,8 @@ int dmg 1
 int base-value 5
 /end/
 
+/begin/
+String name "missspelled-incantation"
+String description "it would bee yousful if it was sspeled corectlly"
+int base-value 0
+/end/

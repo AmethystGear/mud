@@ -6,6 +6,7 @@ import java.util.Scanner;
 import server.main.World;
 import server.objects.Player;
 import server.objects.Player.ReadOnlyPlayer;
+import server.utils.ScannerUtils;
 import server.objects.Item;
 
 public class DescribeItem implements Action {
@@ -27,7 +28,7 @@ public class DescribeItem implements Action {
             error.append("you need to type the name of the item!");
             return false;
         } else {
-            itemStr = scan.next();
+            itemStr = ScannerUtils.getRemainingInputAsString(scan);
         }
         scan.close();
         try {

@@ -8,7 +8,6 @@ import server.objects.Player;
 import server.objects.Player.ReadOnlyPlayer;
 
 public class Help implements Action {
-    private static String[] validHelp = new String[] {null, "action", "stat"};
     private String help;
 
     @Override
@@ -27,10 +26,6 @@ public class Help implements Action {
             help = scan.next();
         }
         scan.close();
-        if(!arrayContains(validHelp, help)) {
-            error.append("that help option doesn't exist. Please type 'help' to see all the help options.");
-            return false;
-        }
         return true;
     }
 
@@ -41,12 +36,13 @@ public class Help implements Action {
             out.append("welcome to the help menu!\n");
             out.append("type 'help action' to learn more about stuff you can do!\n");
             out.append("type 'help stat' to learn more about stats!\n");
+            out.append("or type 'help <x>' and i'll try to guess what you want to know about!\n");
         } else if(help.equals("action")) {
             out.append("here's a list of all the actions, and what they are used for:\n");
             for (Action a : Actions.actions) {
                 String fullActionName = a.getClass().getName();
                 int index = fullActionName.lastIndexOf('.');
-                String actionName = fullActionName.substring(index == -1 ? 0 : index, fullActionName.length());
+                String actionName = fullActionName.substring(index == -1 ? 0 : index + 1, fullActionName.length());
                 out.append("\n");
                 out.append(actionName + ":\n");
                 out.append(a.description());
@@ -60,22 +56,35 @@ public class Help implements Action {
             out.append(" that means your current health is 7, and your max health is 10.\n");
             out.append("Stat Descriptions:\n");
             out.append("health --> health (duh). If this reaches 0, you die, your inventory is cleared, and you are respawned.\n");
-            out.append("speed --> determines how many units you can move per turn, and whether you go first/how many turns you or your opponent takes in a battle.");
+            out.append("speed --> determines how many units you can move per turn, and whether you go first/how many turns you or your opponent takes in a battle.\n");
             out.append("dmg --> the base damage you can deal per turn in a battle.\n");
             out.append("view --> the distance that you can see. If you increase view, your 'disp' command will show a larger area.\n");
+        } else {
+            out.append("did you mean: \n");
+            for (Action a : Actions.actions) {
+                String fullActionName = a.getClass().getName();
+                int index = fullActionName.lastIndexOf('.');
+                String actionName = fullActionName.substring(index == -1 ? 0 : index + 1, fullActionName.length());
+                if(actionName.toLowerCase().contains(help)) {
+                    out.append("\n");
+                    out.append(actionName + ":\n");
+                    out.append(a.description());
+                    out.append("\n");
+                }
+            }
         }
         return out;
     }
 
     @Override
     public String description() {
-        // TODO Auto-generated method stub
-        return null;
+        return "the help command.\n" +
+               "usage: help";
     }
 
     private boolean arrayContains(String[] arr, String s) {
         for(String a : arr) {
-            if((a == null && s == null) || a.equals(s)) {
+            if((a == null && s == null) || (a != null && a.equals(s))) {
                 return true;
             }
         }
