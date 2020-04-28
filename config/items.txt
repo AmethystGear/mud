@@ -24,3 +24,4 @@ prop weapon
 int dmg 1
 int base-value 5
 /end/
+

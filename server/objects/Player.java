@@ -95,8 +95,6 @@ public class Player {
         return (Integer) stats.get("health") <= 0;
     }
 
-
-    
     public void resetToBaseStats() {
         stats = baseStats.clone();
     }

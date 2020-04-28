@@ -17,6 +17,7 @@ public class Actions {
         new ShowMap(),
         new ShowStats(),
         new Trade(),
-        new Upgrade()
+        new Upgrade(),
+        new ShowXP()
     };
 }
