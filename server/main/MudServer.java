@@ -53,7 +53,7 @@ public class MudServer {
                 e.printStackTrace();
                 throw new RuntimeException("can't create instance of action class!");
             }
-            if (a.matchCommand(command)) {
+            if (a.matchCommand(command, player.ID())) {
                 try {
                     StringBuilder error = new StringBuilder("");
                     if (a.parseCommand(command, new Player.ReadOnlyPlayer(player), players, world, error)) {
