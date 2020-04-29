@@ -6,6 +6,8 @@ import server.utils.RandUtils;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class MudServer {
@@ -13,7 +15,7 @@ public class MudServer {
     private static final String WORLD_SAVE = "save/world-save.txt";
     // player save file
     private static final String PLAYER_SAVE = "save/player-save.txt";
-  
+
     private static World world;
     private static Accept accept;
 
@@ -23,7 +25,7 @@ public class MudServer {
             players.add(new Player.ReadOnlyPlayer(p));
         }
 
-        if(command.equals("") && player.lastAction != null) {
+        if (command.equals("") && player.lastAction != null) {
             StringBuilder error = new StringBuilder("");
             Action newAction;
             try {
@@ -33,7 +35,7 @@ public class MudServer {
                 // we should never be in this state. If we are, there's a bug.
                 throw new RuntimeException("couldn't create new instance of player's last action!");
             }
-            if(newAction.parseCommand(player.lastCommand, new Player.ReadOnlyPlayer(player), players, world, error)) {
+            if (newAction.parseCommand(player.lastCommand, new Player.ReadOnlyPlayer(player), players, world, error)) {
                 return newAction.run(player, accept.players(), world);
             } else {
                 error.append("\n");
@@ -48,7 +50,7 @@ public class MudServer {
             Action a;
             try {
                 a = ac.getClass().getConstructor().newInstance();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // we should never be in this state. If we are, it is a bug.
                 e.printStackTrace();
                 throw new RuntimeException("can't create instance of action class!");
@@ -77,6 +79,18 @@ public class MudServer {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        try {
+            Files.createDirectories(Paths.get("save"));
+        } catch (IOException e) {
+            throw new RuntimeException("could not create save folder!");
+        }
+        try {
+            new File(PLAYER_SAVE).createNewFile();
+            new File(WORLD_SAVE).createNewFile();
+        } catch(IOException e) {
+            throw new RuntimeException("could not create save files!");
+        }
+
         // load all the player accounts.
         Accounts.load(new Scanner(new File(PLAYER_SAVE)));
 
