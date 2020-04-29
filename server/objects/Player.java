@@ -164,7 +164,7 @@ public class Player {
     }
 
     public String toString() {
-        return ID + " " + ID;
+        return ID + "" + ID;
     }
 
     public void respawn(World world) {
