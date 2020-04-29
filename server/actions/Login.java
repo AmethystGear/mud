@@ -9,10 +9,10 @@ import server.objects.Player.ReadOnlyPlayer;
 import server.main.Accounts;
 
 public class Login implements Action {
-    String name;
+    private String name;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("login");
     }
 

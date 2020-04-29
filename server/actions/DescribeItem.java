@@ -10,10 +10,10 @@ import server.utils.ScannerUtils;
 import server.objects.Item;
 
 public class DescribeItem implements Action {
-    Item item;
+    private Item item;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("descr");
     }
 

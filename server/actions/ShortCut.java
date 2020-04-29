@@ -9,29 +9,34 @@ import server.objects.Player;
 import server.objects.Player.ReadOnlyPlayer;
 import server.utils.ScannerUtils;
 
-public class QuickCommand implements Action {
+public class ShortCut implements Action {
 
-    String shortCommand;
-    String mappedCommand;
-    Action action;
+    private static HashMap<Integer, HashMap<String, String>> commandMap = new HashMap<>();
+    private static HashMap<Integer, HashMap<String, Action>> actionMap = new HashMap<>();
 
-    private static HashMap<String, String> commandMap = new HashMap<String, String>();
-    private static HashMap<String, Action> actionMap = new HashMap<String, Action>();
+    private String shortCommand;
+    private String mappedCommand;
+    private Action action;
 
     @Override
-    public boolean matchCommand(String command) {
-        if(command.startsWith("quick")) {
+    public boolean matchCommand(String command, int playerID) {
+        if(command.startsWith("short")) {
             return true;
         }
-        return commandMap.keySet().contains(command);
+        if(!commandMap.keySet().contains(playerID)) {
+            commandMap.put(playerID, new HashMap<>());
+            actionMap.put(playerID, new HashMap<>());
+        }
+        return commandMap.get(playerID).keySet().contains(command);
     }
 
     @Override
     public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world,
             StringBuilder error) {
-        if(!command.startsWith("quick")) {
-            action = actionMap.get(command);
-            mappedCommand = commandMap.get(command);
+        
+        if(!command.startsWith("short")) {
+            action = actionMap.get(player.ID()).get(command);
+            mappedCommand = commandMap.get(player.ID()).get(command);
             return action.parseCommand(mappedCommand, player, players, world, error);
         } else {
             Scanner scan = new Scanner(command);
@@ -42,12 +47,12 @@ public class QuickCommand implements Action {
                 return false;
             }
             shortCommand = scan.next();
-            if(commandMap.keySet().contains(shortCommand)) {
-                commandMap.remove(shortCommand);
-                actionMap.remove(shortCommand);
+            if(commandMap.get(player.ID()).keySet().contains(shortCommand)) {
+                commandMap.get(player.ID()).remove(shortCommand);
+                actionMap.get(player.ID()).remove(shortCommand);
             }
             for(Action a : Actions.actions) {
-                if(matchCommand(shortCommand)) {
+                if(a.matchCommand(shortCommand, player.ID())) {
                     scan.close();
                     String fullActionName = a.getClass().getName();
                     int index = fullActionName.lastIndexOf('.');
@@ -65,7 +70,7 @@ public class QuickCommand implements Action {
             scan.close();
 
             for(Action a : Actions.actions) {
-                if(a.matchCommand(mappedCommand)) {
+                if(a.matchCommand(mappedCommand, player.ID())) {
                     try {
                         action = a.getClass().getConstructor().newInstance();
                     } catch (Exception e) {
@@ -85,8 +90,8 @@ public class QuickCommand implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         if(shortCommand != null) {
-            commandMap.put(shortCommand, mappedCommand);
-            actionMap.put(shortCommand, action);
+            commandMap.get(player.ID()).put(shortCommand, mappedCommand);
+            actionMap.get(player.ID()).put(shortCommand, action);
             return new StringBuilder("mapped " + shortCommand + " to " + mappedCommand + " successfully.");
         } else {
             player.lastAction = action;
@@ -98,10 +103,10 @@ public class QuickCommand implements Action {
     @Override
     public String description() {
         return "allows mapping of shorter commands to longer commands.\n" +
-               "for example, quick 1 descr \"pugenum\" maps '1' to 'descr \"pugenum\"'.\n'" +
+               "for example, short 1 descr \"pugenum\" maps '1' to 'descr \"pugenum\"'.\n'" +
                "that means when you type 1, the game will run the command 'descr \"pugenum\"'\n" +
                "this is handy for typing long commands quickly.\n" +
-               "usage: quick <shortcut name> <command> (note that your shortcut name cannot have any spaces, but the command you are mapping to can have spaces)\n";
+               "usage: short <shortcut name> <command> (note that your shortcut name cannot have any spaces, but the command you are mapping to can have spaces)\n";
     }
 
 }

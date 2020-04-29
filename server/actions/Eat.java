@@ -14,7 +14,7 @@ public class Eat implements Action {
     private Item item;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         Scanner scan = new Scanner(command);
         boolean result = scan.hasNext() && scan.next().equals("eat");
         scan.close();

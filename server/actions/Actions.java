@@ -19,7 +19,7 @@ public class Actions {
         new Trade(),
         new Upgrade(),
         new ShowXP(),
-        new QuickCommand(),
+        new ShortCut(),
         new Mark()
     };
 }

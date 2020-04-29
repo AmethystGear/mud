@@ -9,7 +9,7 @@ import server.objects.Player.ReadOnlyPlayer;
 public class Attack implements Action {
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.equals("attack");
     }
 

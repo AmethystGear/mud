@@ -13,10 +13,10 @@ import server.utils.ScannerUtils;
 public class Mark implements Action {
     private static HashMap<Integer, ArrayList<Marker>> markers = new HashMap<>();
 
-    String descr;
+    private String descr;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         if(command.equals("markers")) {
             return true;
         }

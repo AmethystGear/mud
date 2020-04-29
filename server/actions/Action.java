@@ -9,7 +9,7 @@ public interface Action {
     // quick check to see if the command is referring to this action.
     // do the minimum work required to determine whether the player wants to run
     // this action specifically or not.
-    public boolean matchCommand(String command);
+    public boolean matchCommand(String command, int playerID);
 
     // actually parse and store the command parameters in your class.
     // if the player is in some kind of state where they shouldn't be able to run

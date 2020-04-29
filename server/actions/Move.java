@@ -17,7 +17,7 @@ public class Move implements Action {
     private int numUnits;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         boolean hasWasd = command.charAt(0) == 'w' || command.charAt(0) == 'a' || command.charAt(0) == 's'
                 || command.charAt(0) == 'd';
         if (!hasWasd) {

@@ -13,7 +13,7 @@ public class Give implements Action {
     private int recipientId;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("give");
     }
 

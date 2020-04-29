@@ -8,10 +8,10 @@ import server.objects.Player;
 import server.objects.Player.ReadOnlyPlayer;
 
 public class Upgrade implements Action {
-    String stat;
+    private String stat;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("upgrade");
     }
 

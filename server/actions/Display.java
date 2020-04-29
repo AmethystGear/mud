@@ -11,7 +11,7 @@ import server.utils.DisplayUtils;
 public class Display implements Action {
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.equals("disp");
     }
 

@@ -8,7 +8,7 @@ import server.objects.Player.ReadOnlyPlayer;
 
 public class Run implements Action {
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.equals("run");
     }
 

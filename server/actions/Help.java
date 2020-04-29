@@ -11,7 +11,7 @@ public class Help implements Action {
     private String help;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("help");
     }
 
@@ -34,9 +34,9 @@ public class Help implements Action {
         StringBuilder out = new StringBuilder();
         if(help == null) {
             out.append("welcome to the help menu!\n");
-            out.append("type 'help action' to learn more about stuff you can do!\n");
+            out.append("type 'help action' to list all the stuff you can do!\n");
             out.append("type 'help stat' to learn more about stats!\n");
-            out.append("or type 'help <x>' and i'll try to guess what you want to know about!\n");
+            out.append("or type 'help <x>' and i'll try to search for an action that matches your query!\n");
         } else if(help.equals("action")) {
             out.append("here's a list of all the actions, and what they are used for:\n");
             for (Action a : Actions.actions) {
@@ -60,16 +60,24 @@ public class Help implements Action {
             out.append("dmg --> the base damage you can deal per turn in a battle.\n");
             out.append("view --> the distance that you can see. If you increase view, your 'disp' command will show a larger area.\n");
         } else {
-            out.append("did you mean: \n");
+            boolean found = false;
             for (Action a : Actions.actions) {
                 String fullActionName = a.getClass().getName();
                 int index = fullActionName.lastIndexOf('.');
                 String actionName = fullActionName.substring(index == -1 ? 0 : index + 1, fullActionName.length());
                 if(actionName.toLowerCase().contains(help)) {
+                    if(!found) {                        
+                        out.append("did you mean: \n");
+                        found = true;
+                    }
                     out.append("\n");
                     out.append(actionName + ":\n");
                     out.append(a.description());
                     out.append("\n");
+                }
+
+                if(!found) {
+                    out.append("could not find any action that matches your query.");
                 }
             }
         }

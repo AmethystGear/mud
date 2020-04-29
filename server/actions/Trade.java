@@ -11,11 +11,11 @@ import server.objects.Item;
 
 public class Trade implements Action {
 
-    int numToTrade;
-    int tradeNumber;
+    private int numToTrade;
+    private int tradeNumber;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.startsWith("trade");
     }
 

@@ -13,7 +13,7 @@ public class ShowMap implements Action {
     public static final int CHUNK_SIZE = 30;
 
     @Override
-    public boolean matchCommand(String command) {
+    public boolean matchCommand(String command, int playerID) {
         return command.equals("map");
     }
 
