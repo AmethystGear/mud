@@ -202,8 +202,7 @@ public class MudServer {
         public PlayerThread(Socket conn, int ID) throws IOException {
             inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             outToClient = new DataOutputStream(conn.getOutputStream());
-            player = new Player(0, 0);
-            player.playerRep = ID + "" + ID;
+            player = new Player(0, 0, ID);
             player.respawn(MudServer.world);
         }
     

@@ -18,7 +18,7 @@ public class DisplayUtils {
                 for (Player player : players) {
                     if (player.x() >= x && player.x() < x + chunkSize && player.y() > y
                             && player.y() <= y + chunkSize) {
-                        s.append("\033[0m" + player.playerRep);
+                        s.append("\033[0m" + player.toString());
                         hasPlayer = true;
                         break;
                     }
@@ -78,7 +78,7 @@ public class DisplayUtils {
                         leastDist = manhattanDist;
                     }
                     if (player.x() == x && player.y() == y) {
-                        s.append("\033[0m" + player.playerRep);
+                        s.append("\033[0m" + player.toString());
                         hasPlayer = true;
                         break;
                     }
