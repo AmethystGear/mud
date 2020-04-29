@@ -67,6 +67,7 @@ public class Move implements Action {
             player.moveTo(player.x(), newPosn);
         }
         int viewDist = (Integer) player.getStats().get("view");
+        s.append(player.getPosn().toString() + "\n");
         s.append(DisplayUtils.display(viewDist, player.x(), player.y(), players, world, true));
         s.append("\n");
 

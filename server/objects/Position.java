@@ -22,6 +22,10 @@ public class Position {
         return y;
     }
 
+    public String toString() {
+        return "position: " + x + ", " + y;
+    }
+
     public static class ReadOnlyPosition {
         Position posn;
         public ReadOnlyPosition(Position posn) {
@@ -34,6 +38,10 @@ public class Position {
 
         public int y() {
             return posn.y();
+        }
+
+        public String toString() {
+            return posn.toString();
         }
     }
 }
