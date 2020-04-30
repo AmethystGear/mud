@@ -52,10 +52,16 @@ public class MudClient {
             } else {
                 outToServer.writeBytes(command + '\n');
                 String line = inFromServer.readLine();
+                boolean first = true;
                 while (!line.contains("/end/")) {
-                    int index = line.indexOf("/begin/");
-                    if (index != -1) {
-                        System.out.println(line.substring(index + 7, line.length()));
+                    if (first) {
+                        int index = line.indexOf("/begin/");
+                        if(index != -1) {
+                            System.out.println(line.substring(index + 7, line.length()));
+                            first = false;
+                        }
+                    } else {
+                        System.out.println(line);
                     }
                     line = inFromServer.readLine();
                 }

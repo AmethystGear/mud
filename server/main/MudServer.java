@@ -225,13 +225,10 @@ public class MudServer {
                 try {
                     String command = inFromClient.readLine();
                     try {
-                        StringBuilder output = MudServer.handleCommand(command, player);             
-                        output.append("\n/end/\n");                                   
-                        Scanner scan = new Scanner(output.toString());
-                        while(scan.hasNextLine()) {
-                            String line = scan.nextLine();
-                            outToClient.writeUTF("/begin/" + line + "\n");
-                        }
+                        StringBuilder output = new StringBuilder("/begin/");
+                        output.append(MudServer.handleCommand(command, player));            
+                        output.append("\n/end/\n");  
+                        outToClient.writeUTF(output.toString());
                     } 
                     // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
                     // also, notify the player that the action they tried to do didn't work.

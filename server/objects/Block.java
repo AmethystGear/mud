@@ -26,4 +26,8 @@ public class Block implements ValueType<Block> {
     public Block create(int ID, Stats.ReadOnlyStats stats) {
         return new Block(ID, stats);
     }
+
+    public int display() {
+        return (Integer)stats.get("display");
+    }
 }

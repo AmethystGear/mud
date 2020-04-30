@@ -13,12 +13,14 @@ public class DisplayUtils {
         StringBuilder s = new StringBuilder();
         for (int y = 0; y < World.MAP_SIZE; y += chunkSize) {
             s.append("|");
+            int prevAscii = -1;
             for (int x = 0; x < World.MAP_SIZE; x += chunkSize) {
                 boolean hasPlayer = false;
                 for (Player player : players) {
                     if (player.x() >= x && player.x() < x + chunkSize && player.y() > y
                             && player.y() <= y + chunkSize) {
                         s.append("\033[0m" + player.toString());
+                        prevAscii = -1;
                         hasPlayer = true;
                         break;
                     }
@@ -26,11 +28,11 @@ public class DisplayUtils {
                 if (!hasPlayer) {
                     int majorityBlock = getMajorityBlockInChunk(x, y, chunkSize, world);
                     int asciiColor = (Integer) world.blocks.get(majorityBlock).getStats().get("display");
-                    if (asciiColor == -1) {
-                        s.append("  ");
-                    } else {
-                        s.append("\033[48;5;" + asciiColor + "m  ");
+                    if (asciiColor != -1 && asciiColor != prevAscii) {
+                        s.append("\033[48;5;" + asciiColor + "m");
                     }
+                    s.append("  ");
+                    prevAscii = asciiColor;
                 }
             }
             s.append("\033[0m|\n");
@@ -69,6 +71,7 @@ public class DisplayUtils {
         StringBuilder s = new StringBuilder();
         for (int y = MathUtils.max(0, yView - dist); y < MathUtils.min(World.MAP_SIZE, yView + dist + 1); y++) {
             s.append("|");
+            int prevAscii = -1;
             for (int x = MathUtils.max(0, xView - dist); x < MathUtils.min(World.MAP_SIZE, xView + dist + 1); x++) {
                 int leastDist = Integer.MAX_VALUE;
                 boolean hasPlayer = false;
@@ -79,18 +82,22 @@ public class DisplayUtils {
                     }
                     if (player.x() == x && player.y() == y) {
                         s.append("\033[0m" + player.toString());
+                        prevAscii = -1;
                         hasPlayer = true;
                         break;
                     }
                 }
                 if (!hasPlayer) {
                     Block b = world.getBlock(x, y);
-                    int asciiColor = (Integer) b.getStats().get("display");
-                    if (world.hasMob(x, y) && showMobs) {
-                        s.append("\033[48;5;" + asciiColor + "m??");
-                    } else {
-                        s.append("\033[48;5;" + asciiColor + "m  ");
+                    if(b.display() != prevAscii) {
+                        s.append("\033[48;5;" + b.display() + "m");
                     }
+                    if (world.hasMob(x, y) && showMobs) {
+                        s.append("??");
+                    } else {
+                        s.append("  ");
+                    }
+                    prevAscii = b.display();
                 }
             }
             s.append("\033[0m|\n");
