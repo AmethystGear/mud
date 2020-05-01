@@ -2,7 +2,14 @@ package server.utils;
 
 import java.util.*;
 
+// contains static methods used to get values from scanners.
 public class ScannerUtils {
+    
+    /**
+     * return the tokens remaining in s as a String[], replacing all '_' and '-' with spaces.
+     * @param s scanner that we will convert to String []
+     * @return String[] containing the remaining input, where each token is an element in the array.
+     */
     public static String[] getRemainingInputAsStringArray(Scanner s) {
         ArrayList<String> a = new ArrayList<>();
         while (s.hasNext()) {
@@ -15,6 +22,13 @@ public class ScannerUtils {
         return arr;
     }
 
+
+    /**
+     * return String containing all the remaining tokens, with a space between each token.
+     * all '_' and '-' in the original input are replaced with spaces.
+     * @param s scanner that we will convert to String
+     * @return String containing the rest of the input.
+     */
     public static String getRemainingInputAsString(Scanner s) {
         String[] input = getRemainingInputAsStringArray(s);
         if (input.length > 0) {
@@ -29,6 +43,11 @@ public class ScannerUtils {
         }
     }
 
+    /**
+     * return StringBuilder containing scanner input till "/end/"
+     * @param s scanner that we will convert to StringBuilder
+     * @return StringBuilder containing each line of input up till a line that contains the string "/end/"
+     */
     public static StringBuilder getInputTillEnd(Scanner s) {
         StringBuilder str = new StringBuilder();
         while (s.hasNextLine()) {

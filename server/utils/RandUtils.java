@@ -3,22 +3,36 @@ package server.utils;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+//contins static methods used to generate randomness.
 public class RandUtils {
 
-    // seedless random value
+    /**
+     * generate random number without a seed.
+     * @param minInc minimum number that can be generated, inclusive
+     * @param maxInc maximum number that can be generated, inclusive
+     * @return random number bewteen minInc and maxInc, inclusive.
+     */
     public static int rand(int minInc, int maxInc) {
         return ThreadLocalRandom.current().nextInt(minInc, maxInc + 1);
     }
 
-    // seedless random selection from array
-    public static String getRandom(String[] array) {
+    /**
+     * randomly choose element of array without using a seed, and return it.
+     * @param array the provided array
+     * @return random element of array
+     */
+    public static <T> T getRandom(T[] array) {
         return array[rand(0, array.length - 1)];
     }
 
-    public static int getRandom(int[] array) {
-        return array[rand(0, array.length - 1)];
-    }
-
+    /**
+     * create perlin noise with provided width, height, and octaveCount, using the random number generator provided.
+     * @param width 
+     * @param height 
+     * @param random random number generator used to create the noise, to change the perlin noise, change this.
+     * @param octaveCount roughly corresponds to the 'spikyness' of the perlin noise. The higher this is, the smoother the perlin noise.
+     * @return float[][] of width and height provided, containing perlin noise ranging from 0 to 1.
+     */
     public static float[][] generatePerlinNoise(int width, int height, Random random, int octaveCount) {
         float[][] whiteNoise = new float[width][height];
         float[][][] totalNoise = new float[octaveCount][][];
