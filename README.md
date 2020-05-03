@@ -21,10 +21,9 @@ if you're using windows, wildcards won't work as expected. Instead there is a sm
 
 once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
-do:
-```java server/main/MudServer```
+do:```java server/main/MudServer```
 
 ### running the client
 There's only one file for the client, so we can compile and run at the same time.
-do:
-```java server/main/MudClient.java```
+
+do:```java server/main/MudClient.java```
