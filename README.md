@@ -21,17 +21,10 @@ if you're using windows, wildcards won't work as expected. Instead there is a sm
 
 once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
-If you're on mac/linux, do:
+do:
 ```java server/main/MudServer```
-
-If you're on windows, it's the same except you need to change the slashes:
-```java server\main\MudServer```
 
 ### running the client
 There's only one file for the client, so we can compile and run at the same time.
-
-If you're on mac/linux, do:
+do:
 ```java server/main/MudClient.java```
-
-If you're on windows, it's the same except you need to change the slashes:
-```java server\main\MudClient.java```
