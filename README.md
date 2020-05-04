@@ -1,11 +1,11 @@
-# mud
+# mirae
 A terminal-based multiplayer game where you explore a randomly generated world and fight monsters!
 This takes inspiration from the original Rougelike games, but uses a more open world setting.
 
 mud is 100% text based, but it uses 256-color (https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit) to display 'images' by printing out sequences of characters.
 If your terminal doesn't support 256-color, then either get another terminal, or alternatively download vscode, which comes with a dedicated terminal that supports 256-color. vscode should work for mac, linux, and windows for the purposes of this game.
 
-## using mud
+## using mirae
 All the following commands should be run from the main directory.
 
 ## requirements:
@@ -21,9 +21,9 @@ if you're using windows, wildcards won't work as expected. Instead there is a sm
 
 once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
-do:```java server/main/MudServer```
+do:```java server/main/Server```
 
 ### running the client
 There's only one file for the client, so we can compile and run at the same time.
 
-do:```java server/main/MudClient.java```
+do:```java server/main/Client.java```
