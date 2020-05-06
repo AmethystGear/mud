@@ -52,23 +52,32 @@ public class Client {
             String command = inFromUser.readLine();
             if (command.equals("quit")) {
                 clientSocket.close();
+                outToServer.close();
                 break;
             } else {
                 outToServer.writeBytes(command + '\n');
             }
         }
 
-        s.interrupt();
+        s.exit();
     }
 
+    // this class prints everything it recieves from the server.
     private static class ServerPrinter extends Thread {
+        private volatile boolean exit = false;
         BufferedReader inFromServer;
+
         public ServerPrinter (BufferedReader inFromServer) {
             this.inFromServer = inFromServer;
         }
 
+        public void exit() throws IOException {
+            inFromServer.close();
+            exit = true;
+        }
+
         public void run() {
-            while(true) {
+            while(!exit) {
                 String line;
                 try {
                     line = inFromServer.readLine();
