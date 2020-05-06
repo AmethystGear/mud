@@ -26,4 +26,4 @@ do:```java server/main/Server```
 ### running the client
 There's only one file for the client, so we can compile and run at the same time.
 
-do:```java server/main/Client.java```
+do:```java client/Client.java```
