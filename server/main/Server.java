@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class MudServer {
+public class Server {
     // world save file
     private static final String WORLD_SAVE = "save/world-save.txt";
     // player save file
@@ -217,7 +217,7 @@ public class MudServer {
             inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             outToClient = new DataOutputStream(conn.getOutputStream());
             player = new Player(0, 0, ID);
-            player.respawn(MudServer.world);
+            player.respawn(Server.world);
         }
     
         public void run() {
@@ -226,7 +226,7 @@ public class MudServer {
                     String command = inFromClient.readLine();
                     try {
                         StringBuilder output = new StringBuilder("/begin/");
-                        output.append(MudServer.handleCommand(command, player));            
+                        output.append(Server.handleCommand(command, player));            
                         output.append("\n/end/\n");  
                         outToClient.writeUTF(output.toString());
                     } 

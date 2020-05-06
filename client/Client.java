@@ -3,7 +3,7 @@ package client;
 import java.io.*;
 import java.net.*;
 
-public class MudClient {
+public class Client {
     public static void main(String[] args) throws Exception {
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Enter the ip address you want to connect to: ");
@@ -28,6 +28,7 @@ public class MudClient {
         while (notParseable) {
             try {
                 port = Integer.parseInt(portStr);
+                
                 if (port > 65535 || port < 0) {
                     throw new NumberFormatException();
                 } else {
