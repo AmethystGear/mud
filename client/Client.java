@@ -28,7 +28,6 @@ public class Client {
         while (notParseable) {
             try {
                 port = Integer.parseInt(portStr);
-                
                 if (port > 65535 || port < 0) {
                     throw new NumberFormatException();
                 } else {
@@ -45,17 +44,40 @@ public class Client {
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+        ServerPrinter s = new ServerPrinter(inFromServer);
+        s.start();
+
         while (true) {
             System.out.print("Enter a command: ");
             String command = inFromUser.readLine();
             if (command.equals("quit")) {
                 clientSocket.close();
+                break;
             } else {
                 outToServer.writeBytes(command + '\n');
-                String line = inFromServer.readLine();
+            }
+        }
+
+        s.interrupt();
+    }
+
+    private static class ServerPrinter extends Thread {
+        BufferedReader inFromServer;
+        public ServerPrinter (BufferedReader inFromServer) {
+            this.inFromServer = inFromServer;
+        }
+
+        public void run() {
+            while(true) {
+                String line;
+                try {
+                    line = inFromServer.readLine();
+                } catch (IOException e) {
+                    continue;
+                }
                 boolean first = true;
-                while (!line.contains("/end/")) {
-                    if (first) {
+                while(!line.contains("/end/")) {
+                    if(first) {
                         int index = line.indexOf("/begin/");
                         if(index != -1) {
                             System.out.println(line.substring(index + 7, line.length()));
@@ -64,7 +86,11 @@ public class Client {
                     } else {
                         System.out.println(line);
                     }
-                    line = inFromServer.readLine();
+                    try {
+                        line = inFromServer.readLine();
+                    } catch(IOException e) {
+                        break;
+                    }
                 }
             }
         }
