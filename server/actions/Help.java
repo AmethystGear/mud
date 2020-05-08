@@ -32,6 +32,10 @@ public class Help implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         StringBuilder out = new StringBuilder();
+        if (help != null) {
+            help = help.toLowerCase();
+        }
+
         if(help == null) {
             out.append("welcome to the help menu!\n");
             out.append("type 'help action' to list all the stuff you can do!\n");
@@ -65,8 +69,8 @@ public class Help implements Action {
                 String fullActionName = a.getClass().getName();
                 int index = fullActionName.lastIndexOf('.');
                 String actionName = fullActionName.substring(index == -1 ? 0 : index + 1, fullActionName.length());
-                if(actionName.toLowerCase().contains(help)) {
-                    if(!found) {                        
+                if (actionName.toLowerCase().contains(help) || a.description().toLowerCase().contains(help)) {
+                    if (!found) {
                         out.append("did you mean: \n");
                         found = true;
                     }
@@ -75,10 +79,10 @@ public class Help implements Action {
                     out.append(a.description());
                     out.append("\n");
                 }
+            }
 
-                if(!found) {
-                    out.append("could not find any action that matches your query.");
-                }
+            if(!found) {
+                out.append("There is no action related to '" + help + "'. type 'help action' for a list of all the actions.");
             }
         }
         return out;
