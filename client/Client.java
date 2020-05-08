@@ -48,7 +48,6 @@ public class Client {
         s.start();
 
         while (true) {
-            System.out.print("Enter a command: ");
             String command = inFromUser.readLine();
             if (command.equals("quit")) {
                 clientSocket.close();
