@@ -32,7 +32,10 @@ public class Help implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         StringBuilder out = new StringBuilder();
-        help = help.toLowerCase();
+        if (help != null) {
+            help = help.toLowerCase();
+        }
+
         if(help == null) {
             out.append("welcome to the help menu!\n");
             out.append("type 'help action' to list all the stuff you can do!\n");
