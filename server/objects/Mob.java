@@ -7,6 +7,7 @@ public class Mob implements ValueType<Mob> {
     private int ID;
     private Stats stats;
     private Stats baseStats;
+    private int accumSpeed;
 
     public Mob() {
     }
@@ -15,6 +16,7 @@ public class Mob implements ValueType<Mob> {
         this.ID = ID;
         this.stats = stats.clone();
         this.baseStats = stats.clone();
+        this.accumSpeed = (Integer) stats.get("speed");
     }
 
     @Override
@@ -76,21 +78,28 @@ public class Mob implements ValueType<Mob> {
         StringBuilder out = new StringBuilder("");
         int playerSpeed = (Integer) player.getStats().get("speed");
         int mobSpeed = (Integer) stats.get("speed");
-        int numTurns = mobSpeed / playerSpeed == 0 ? 1 : mobSpeed / playerSpeed;
-        for (int i = 0; i < numTurns; i++) {
-            out.append(getBaseStats().get("name") + ": " + getQuote("attack") + "\n");
-            out.append(
-                    getBaseStats().get("name") + " attacked you and dealt " + getBaseStats().get("dmg") + " damage.\n");
-            player.changeStat("health", -(Integer) getStats().get("dmg"));
-            if (player.isDead()) {
-                out.append(getBaseStats().get("name") + ": " + getQuote("mob victory") + "\n");
-                out.append("You were killed by " + getBaseStats().get("name") + "\n");
-                player.respawn(world);
-                out.append("Respawning at " + player.x() + ", " + player.y() + "\n");
-                return out;
-            }
-            if (i < numTurns - 1) {
-                out.append(stats.get("name") + " is faster than you, and takes another turn.\n");
+
+        accumSpeed += mobSpeed;
+        if(accumSpeed < playerSpeed) {
+            out.append(stats.get("name") + " is too slow. You take another turn.\n");
+        } else {
+            accumSpeed = 0;
+            for(int speed = 0; speed < mobSpeed; speed += playerSpeed) {
+                out.append(getBaseStats().get("name") + ": " + getQuote("attack") + "\n");
+                out.append(getBaseStats().get("name") + " attacked you and dealt " + getBaseStats().get("dmg") + " damage.\n");
+                player.changeStat("health", -(Integer) getStats().get("dmg"));
+                if (player.isDead()) {
+                    out.append(getBaseStats().get("name") + ": " + getQuote("mob victory") + "\n");
+                    out.append("You were killed by " + getBaseStats().get("name") + "\n");
+                    player.respawn(world);
+                    out.append("Respawning at " + player.x() + ", " + player.y() + "\n");
+                }
+                if(player.isDead()) {
+                    return out;
+                }
+                if(speed + playerSpeed <= mobSpeed) {
+                     out.append(stats.get("name") + " is faster than you, and takes another turn.\n");
+                }
             }
         }
         return out;
