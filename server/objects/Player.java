@@ -1,11 +1,16 @@
 package server.objects;
 
 import server.main.World;
+import server.main.PlayerOutput;
 import server.utils.RandUtils;
+
+import java.io.IOException;
+
 import server.actions.Action;
 import server.objects.Stats.ReadOnlyStats;
 import server.objects.Position.ReadOnlyPosition;
 import server.objects.Int.ReadOnlyInt;
+
 
 public class Player {
     private int ID;
@@ -13,6 +18,7 @@ public class Player {
     public String lastCommand = null;
     public Action lastAction = null;
 
+    private Player player;
     private Mob mob;
     private Item equippedTool = null;
 
@@ -29,7 +35,9 @@ public class Player {
     private Stats inventory;
     private Int xp;
 
-    public Player(int x, int y, int ID) {
+    private PlayerOutput o;
+
+    public Player(int x, int y, int ID, PlayerOutput o) {
         baseStats = new Stats();
         baseStats.set("health", DEFAULT_HEALTH);
         baseStats.set("dmg", DEFAULT_DMG);
@@ -41,6 +49,7 @@ public class Player {
         posn = new Position(x, y);
         xp = new Int(DEFAULT_XP);
         this.ID = ID;
+        this.o = o;
     }
 
     public void login(String name, ReadOnlyStats inventory, ReadOnlyStats stats, ReadOnlyPosition posn, ReadOnlyInt xp) {
@@ -50,6 +59,10 @@ public class Player {
         this.stats = stats.clone();
         this.posn = new Position(posn.x(), posn.y());
         this.xp = new Int(xp.get());
+    }
+
+    public void send(String s) throws IOException {
+        o.send(s);
     }
 
     public int ID() {
@@ -88,6 +101,10 @@ public class Player {
         return mob;
     }
 
+    public Player getPlayerToFight() {
+        return player;
+    }
+
     public Item getTool() {
         return equippedTool;
     }
@@ -110,6 +127,10 @@ public class Player {
 
     public void setMob(Mob m) {
         mob = m;
+    }
+
+    public void setPlayerToFight(Player p) {
+        player = p;
     }
 
     public void setTool(Item i) {
@@ -144,7 +165,7 @@ public class Player {
 
     public void changeStat(String stat, int amount) {
         int currentAmount = (Integer) stats.get(stat);
-        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));        
+        stats.set(stat, Math.min(currentAmount + amount, (Integer) baseStats.get(stat)));
     }
 
     public void addToInventory(String item, int count) {
@@ -194,45 +215,49 @@ public class Player {
         public ReadOnlyInt xp() {
             return player.xp();
         }
-    
+
         public String getName() {
             return player.getName();
         }
-    
+
         public int x() {
             return player.x();
         }
-    
+
         public int y() {
             return player.y();
         }
-    
+
         public Position.ReadOnlyPosition getPosn() {
             return player.getPosn();
         }
-    
+
         public Stats.ReadOnlyStats getBaseStats() {
             return player.getBaseStats();
         }
-    
+
         public Stats.ReadOnlyStats getStats() {
             return player.getStats();
         }
-    
+
         public Mob getMob() {
             return player.getMob();
         }
-    
+
         public Item getTool() {
             return player.getTool();
         }
-    
+
         public Stats.ReadOnlyStats getInventory() {
             return player.getInventory();
         }
-    
+
         public boolean isDead() {
             return player.isDead();
+        }
+
+        public Player getPlayerToFight() {
+            return player.getPlayerToFight();
         }
 
         public int ID() {

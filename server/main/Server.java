@@ -122,12 +122,13 @@ public class Server {
         while(notParseable) {
             try {
                 port = Integer.parseInt(portStr);
-                if(port > 65535 || port < 0) {                    
+                if(port > 65535 || port < 0) {
                     System.out.println("That port was invalid.");
                     System.out.print("Enter a port: ");
                     portStr = in.nextLine();
                 } else {
                     notParseable = false;
+
                 }
             } catch(NumberFormatException e) {
                 System.out.println("That port was invalid.");
@@ -177,7 +178,7 @@ public class Server {
             this.server = server;
             this.players = new ArrayList<PlayerThread>();
         }
-    
+
         public void run() {
             while(continueRun) {
                 try {
@@ -191,14 +192,14 @@ public class Server {
                 }
             }
         }
-    
+
         public void end() {
             for(PlayerThread t : players) {
                 t.end();
             }
             continueRun = false;
         }
-    
+
         public List<Player> players() {
             List<Player> p = new ArrayList<Player>();
             for(PlayerThread t : players) {
@@ -207,33 +208,30 @@ public class Server {
             return p;
         }
     }
-    
+
     private static class PlayerThread extends Thread {
         private BufferedReader inFromClient;
-        private DataOutputStream outToClient;
+        private PlayerOutput outToClient;
         public final Player player;
         private boolean continueRun = true;
         public PlayerThread(Socket conn, int ID) throws IOException {
             inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            outToClient = new DataOutputStream(conn.getOutputStream());
-            player = new Player(0, 0, ID);
+            outToClient = new PlayerOutput(new DataOutputStream(conn.getOutputStream()));
+            player = new Player(0, 0, ID, outToClient);
             player.respawn(Server.world);
         }
-    
+
         public void run() {
             while(continueRun) {
                 try {
                     String command = inFromClient.readLine();
                     try {
-                        StringBuilder output = new StringBuilder("/begin/");
-                        output.append(Server.handleCommand(command, player));            
-                        output.append("\n/end/\n");  
-                        outToClient.writeUTF(output.toString());
-                    } 
+                        outToClient.send(Server.handleCommand(command, player));
+                    }
                     // if MudServer.handleCommand breaks in some way, print the error, but don't crash the players session.
                     // also, notify the player that the action they tried to do didn't work.
                     catch(Exception e) {
-                        outToClient.writeUTF("That action didn't work. \n/end/\n");
+                        outToClient.send("That action didn't work.");
                         System.out.println(e);
                         e.printStackTrace();
                     }
@@ -242,7 +240,7 @@ public class Server {
                 }
             }
         }
-    
+
         public void end() {
             continueRun = false;
         }
