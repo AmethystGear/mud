@@ -2,7 +2,7 @@ import os
 import glob
 
 # remove all .class files in server
-classfiles = glob.glob('server/*.class', recursive=True)
+classfiles = glob.glob('server/**/*.class', recursive=True)
 for file in classfiles:
     os.remove(file)
 
