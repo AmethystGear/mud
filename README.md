@@ -9,14 +9,10 @@ If your terminal doesn't support 256-color, then either get another terminal, or
 All the following commands should be run from the main directory.
 
 ## requirements:
-If you're on mac/linux, you just need java. If you're on windows, you need java and python 3.
+if you want to run the server, you need java and python3. If you just want to run the client, you just need java.
 
 ### compiling the server
-
-if you're using mac/linux, you can use wildcard paths to compile the server:
-```javac server/*/*.java```
-
-if you're using windows, wildcards won't work as expected. Instead there is a small python script you can use. To run it, do:
+do:
 ```python3 compile_server.py```
 
 once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
