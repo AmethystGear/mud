@@ -11,13 +11,14 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class Server {
-    // world save file
     private static final String WORLD_SAVE = "save/world-save.txt";
-    // player save file
     private static final String PLAYER_SAVE = "save/player-save.txt";
 
     private static World world;
     private static Accept accept;
+
+    private static final int MAX_PORT = 65355;
+    private static final int MIN_PORT = 1024;
 
     public static StringBuilder handleCommand(String command, Player player) {
         List<Player.ReadOnlyPlayer> players = new ArrayList<>();
@@ -116,26 +117,43 @@ public class Server {
         }
 
         int port = -1;
-        System.out.print("Enter a port: ");
-        String portStr = in.nextLine();
-        boolean notParseable = true;
-        while(notParseable) {
-            try {
-                port = Integer.parseInt(portStr);
-                if(port > 65535 || port < 0) {
+        if(args.length == 0) {
+            System.out.print("Enter a port: ");
+            String portStr = in.nextLine();
+            boolean notParseable = true;
+            while (notParseable) {
+                try {
+                    port = Integer.parseInt(portStr);
+                    if (port > MAX_PORT || port < MIN_PORT) {
+                        System.out.println("That port was invalid.");
+                        System.out.print("Enter a port: ");
+                        portStr = in.nextLine();
+                    } else {
+                        notParseable = false;
+
+                    }
+                } catch (NumberFormatException e) {
                     System.out.println("That port was invalid.");
                     System.out.print("Enter a port: ");
                     portStr = in.nextLine();
-                } else {
-                    notParseable = false;
-
+                }
+            }
+        } else {
+            if(args.length > 1) {
+                System.out.println("ERROR: expected only one argument; the port number.");
+            }
+            try {
+                port = Integer.parseInt(args[0]);
+                if(port > MAX_PORT || port < MIN_PORT) {
+                    System.out.println("ERROR: port should be between " + MAX_PORT + " and " + MIN_PORT);
                 }
             } catch(NumberFormatException e) {
-                System.out.println("That port was invalid.");
-                System.out.print("Enter a port: ");
-                portStr = in.nextLine();
+                System.out.println("ERROR: that port isn't a number!");
+                in.close();
+                return;
             }
         }
+
         ServerSocket server = null;
         try {
             server = new ServerSocket(port);
@@ -246,4 +264,3 @@ public class Server {
         }
     }
 }
-
