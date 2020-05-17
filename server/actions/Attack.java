@@ -41,7 +41,7 @@ public class Attack implements Action {
                 out.append("You got " + drop + "\n");
                 player.addToInventory(drop, 1);
             }
-            world.removeMob(player.x(), player.y());
+            world.removeEntity(player.x(), player.y());
             player.setMob(null);
         } else {
             out.append(player.getMob().attack(player, world));

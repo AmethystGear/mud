@@ -24,7 +24,7 @@ public class Display implements Action {
     @Override
     public StringBuilder run(Player player, List<Player> players, World world) {
         int viewDist = (Integer) player.getBaseStats().get("view");
-        return DisplayUtils.display(viewDist, player.x(), player.y(), players, world, true);
+        return DisplayUtils.display(viewDist, player.x(), player.y(), players, world);
     }
 
     @Override

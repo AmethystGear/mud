@@ -3,10 +3,13 @@ package server.main;
 import java.io.*;
 import java.util.*;
 
-import server.objects.Mob;
-import server.objects.Item;
-import server.objects.Block;
-import server.objects.Value;
+import server.objects.instantiables.Block;
+import server.objects.Entity;
+import server.objects.Instantiable;
+import server.objects.Instantiables;
+import server.objects.Spawnable;
+import server.objects.Entity.EntitySet;
+import server.objects.Stats;
 import server.utils.MultiDimensionalFloatArray;
 import server.utils.MultiDimensionalIntArray;
 import server.utils.RandUtils;
@@ -14,45 +17,46 @@ import server.utils.RandUtils;
 public class World {
     public static final int MAP_SIZE = 3000;
     private MultiDimensionalIntArray worldMap;
-    private MultiDimensionalIntArray mobMap;
+    private MultiDimensionalIntArray entityMap;
 
-    public final Value.ValueSet<Mob.ReadOnlyMob> mobs;
-    private final String mobsEndString = "/mobs/";
-    public final Value.ValueSet<Item> items;
-    private final String itemsEndString = "/items/";
-    public final Value.ValueSet<Block> blocks;
-    private final String blocksEndString = "/blocks/";
+    public final EntitySet entities;
 
-    private final String pathToMobsConfig = "config/mobs.txt";
-    private final String pathToItemsConfig = "config/items.txt";
-    private final String pathToBlocksConfig = "config/blocks.txt";
+    private final String instantiablesConfigDirectory = "config/instantiables/";
 
     private int seed;
 
     public World(String saveFile) throws FileNotFoundException {
         worldMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
-        mobMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
+        entityMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
 
         Scanner scan = new Scanner(new File(saveFile));
         seed = scan.nextInt();
         System.out.println(seed);
         readMap(scan, worldMap);
-        readMap(scan, mobMap);
+        readMap(scan, entityMap);
         scan.nextLine();
-        mobs = Value.getValuesFromScanner(scan, mobsEndString, new Mob.ReadOnlyMob(new Mob()));
-        items = Value.getValuesFromScanner(scan, itemsEndString, new Item());
-        blocks = Value.getValuesFromScanner(scan, blocksEndString, new Block());
+        entities = new Entity.EntitySet();
+        entities.add(scan);
         scan.close();
     }
 
     public World(int seed) throws FileNotFoundException {
         this.seed = seed;
         worldMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
-        mobMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
+        entityMap = new MultiDimensionalIntArray(MAP_SIZE, MAP_SIZE);
 
-        mobs = Value.getValuesFromScanner(new Scanner(new File(pathToMobsConfig)), new Mob.ReadOnlyMob(new Mob()));
-        items = Value.getValuesFromScanner(new Scanner(new File(pathToItemsConfig)), new Item());
-        blocks = Value.getValuesFromScanner(new Scanner(new File(pathToBlocksConfig)), new Block());
+        entities = new Entity.EntitySet();
+
+        File configDir = new File(instantiablesConfigDirectory);
+        File[] directoryListing = configDir.listFiles();
+        for(File configFile : directoryListing) {
+            Stats stat = new Stats();
+            String fName = configFile.getName().split("\\.")[0];
+            if(!fName.equals("misc")) {
+                stat.set("entity type", fName);
+            }
+            entities.add(new Scanner(configFile), stat);
+        }
 
         Random rand = new Random(seed);
         MultiDimensionalFloatArray perlinNoise = RandUtils.generatePerlinNoise(MAP_SIZE, MAP_SIZE, rand, 10);
@@ -63,11 +67,11 @@ public class World {
         float tallGrassLevel = 0.85f;
         // create map
         for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
-            int water = blocks.get("water").getID();
-            int sand = blocks.get("sand").getID();
-            int grass = blocks.get("grass").getID();
-            int tallGrass = blocks.get("forest").getID();
-            int rock = blocks.get("rock").getID();
+            int water = entities.get("water").ID();
+            int sand = entities.get("sand").ID();
+            int grass = entities.get("grass").ID();
+            int tallGrass = entities.get("forest").ID();
+            int rock = entities.get("rock").ID();
             int block = 0;
             float height = perlinNoise.get(i);
             if (height < waterLevel) {
@@ -81,26 +85,26 @@ public class World {
             } else {
                 block = rock;
             }
-            worldMap.set(i, block);
+            worldMap.set(block, i);
         }
 
         int numVillages = rand.nextInt(50) + 50;
         for (int i = 0; i < numVillages; i++) {
             int x = rand.nextInt(2000) + 500;
             int y = rand.nextInt(2000) + 500;
-            if (!((String) blocks.get(worldMap.get(x, y)).getStats().get("name")).contains("water")) {
-                spawnVillage(x, y, rand, blocks);
+            if (!((String) entities.get(worldMap.get(x, y)).getStats().get("name")).contains("water")) {
+                spawnVillage(x, y, rand);
             }
         }
 
         for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
-            Block currentBlock = blocks.get(worldMap.get(i));
-            mobMap.set(-1, i);
-            if (!currentBlock.getStats().hasProperty("solid")) {
-                if (currentBlock.getStats().hasVariable("mob spawn chance")) {
-                    double mobSpawnChance = (Double) currentBlock.getStats().get("mob spawn chance");
+            Entity block = entities.get(worldMap.get(i));
+            entityMap.set(-1, i);
+            if (!block.getStats().hasProperty("solid")) {
+                if (block.getStats().hasVariable("mob spawn chance")) {
+                    double mobSpawnChance = (Double)block.getStats().get("mob spawn chance");
                     if (rand.nextDouble() < mobSpawnChance) {
-                        mobMap.set(rand.nextInt(mobs.size()), i);
+                        entityMap.set(rand.nextInt(entities.size()), i);
                     }
                 }
             }
@@ -111,26 +115,9 @@ public class World {
         PrintWriter writer = new PrintWriter(new FileOutputStream(new File(file)));
         writer.write(seed + " ");
         saveMap(writer, worldMap);
-        saveMap(writer, mobMap);
+        saveMap(writer, entityMap);
         writer.write("\n");
-        for (Mob.ReadOnlyMob m : mobs.values()) {
-            m.getBaseStats().saveTo(writer);
-            writer.write("\n");
-        }
-        writer.write(mobsEndString);
-        writer.write("\n");
-        for (Item i : items.values()) {
-            i.getStats().saveTo(writer);
-            writer.write("\n");
-        }
-        writer.write(itemsEndString);
-        writer.write("\n");
-        for (Block b : blocks.values()) {
-            b.getStats().saveTo(writer);
-            writer.write("\n");
-        }
-        writer.write(blocksEndString);
-        writer.write("\n");
+        entities.saveTo(writer);
         writer.close();
     }
 
@@ -153,29 +140,38 @@ public class World {
     }
 
     public Block getBlock(int x, int y) {
-        return blocks.get(worldMap.get(x, y));
+        return (Block)clone(getBlockEntity(x, y));
     }
 
-    public Mob getMob(int x, int y) {
-        if (mobMap.get(x, y) == -1) {
-            return null;
-        } else {
-            // make a new mob with exactly the same properties as the read only mob, and return it.
-            Mob.ReadOnlyMob baseMob = mobs.get(mobMap.get(x, y));
-            return baseMob.instantiateClone();
-        }
+    public Entity getBlockEntity(int x, int y) {
+        return entities.get(worldMap.get(x, y));
     }
 
-    public boolean hasMob(int x, int y) {
-        return mobMap.get(x, y) != -1;
+    public Entity getSpawnableEntity(int x, int y) {
+        return entities.get(entityMap.get(x, y));
     }
 
-    public void removeMob(int x, int y) {
-        mobMap.set(-1, x, y);
+    public Spawnable getSpawnable(int x, int y) {
+        return (Spawnable)clone(getSpawnableEntity(x, y));
     }
 
-    private void spawnVillage(int xOrigin, int yOrigin, Random rand, Value.ValueSet<Block> blocks) {
-        int floor = blocks.get("village floor").getID();
+    private Object clone(Entity e) {
+        String entityType = (String)e.getStats().get("entity type");
+        System.out.println(e.getStats());
+        Instantiable i = (Instantiable)Instantiables.instantiables.get(entityType);
+        return i.create(e);
+    }
+
+    public boolean hasEntity(int x, int y) {
+        return entityMap.get(x, y) != -1;
+    }
+
+    public void removeEntity(int x, int y) {
+        entityMap.set(-1, x, y);
+    }
+
+    private void spawnVillage(int xOrigin, int yOrigin, Random rand) {
+        int floor = entities.get("village floor").ID();
         int villageLength = rand.nextInt(100) + 20;
         int pathSize = rand.nextInt(2) + 3;
         for (int x = xOrigin; x < xOrigin + villageLength; x++) {
@@ -191,20 +187,20 @@ public class World {
                 for (int y = yOrigin; y > yOrigin - pathlen; y--) {
                     worldMap.set(floor, x, y);
                 }
-                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, rand, blocks);
+                spawnHut(x - hutSize, yOrigin - pathlen - hutSize * 2 + 1, hutSize, rand);
             } else {
                 for (int y = yOrigin + pathSize; y < yOrigin + pathlen + pathSize; y++) {
                     worldMap.set(floor, x, y);
                 }
-                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, rand, blocks);
+                spawnHut(x - hutSize, yOrigin + pathlen + pathSize, hutSize, rand);
             }
             generateUp = !generateUp;
         }
     }
 
-    private void spawnHut(int xOrigin, int yOrigin, int size, Random rand, Value.ValueSet<Block> blocks) {
-        int floor = blocks.get("village floor").getID();
-        int wall = blocks.get("village wall").getID();
+    private void spawnHut(int xOrigin, int yOrigin, int size, Random rand) {
+        int floor = entities.get("village floor").ID();
+        int wall = entities.get("village wall").ID();
         size = size * 2 + 1;
         for (int x = xOrigin; x < xOrigin + size; x++) {
             for (int y = yOrigin; y < yOrigin + size; y++) {

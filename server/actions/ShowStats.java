@@ -34,5 +34,4 @@ public class ShowStats implements Action {
         return "display your stats.\n" +
                "usage: stat";
     }
-    
 }

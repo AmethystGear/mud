@@ -58,7 +58,7 @@ public class RandUtils {
             }
         }
         for (int i = 0; i < width * height; i++) {
-            perlinNoise.set(perlinNoise.get(i) / totalAmplitude);
+            perlinNoise.set(perlinNoise.get(i) / totalAmplitude, i);
         }
         return perlinNoise;
     }

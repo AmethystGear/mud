@@ -11,6 +11,7 @@ import server.objects.Stats.ReadOnlyStats;
 import server.objects.Position.ReadOnlyPosition;
 import server.objects.Int.ReadOnlyInt;
 
+import server.objects.instantiables.*;
 
 public class Player {
     private int ID;
@@ -197,7 +198,7 @@ public class Player {
         int spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
         Block b = world.getBlock(spawnX, spawnY);
         while (b.getStats().hasProperty("solid") || ((String) b.getStats().get("name")).contains("water")
-                || world.hasMob(spawnX, spawnY)) {
+                || world.hasEntity(spawnX, spawnY)) {
             spawnX = RandUtils.rand(0, World.MAP_SIZE - 1);
             spawnY = RandUtils.rand(0, World.MAP_SIZE - 1);
             b = world.getBlock(spawnX, spawnY);

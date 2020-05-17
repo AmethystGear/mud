@@ -16,7 +16,6 @@ public class MultiDimensionalIntArray {
 
     private int getIndex(int... dim) {
         if (dim.length != dimensions.length) {
-
             throw new IllegalArgumentException();
         }
         int index = 0;

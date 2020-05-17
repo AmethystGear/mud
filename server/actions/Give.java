@@ -64,7 +64,7 @@ public class Give implements Action {
     }
 
     @Override
-    public StringBuilder run(Player player, List<Player> players, World world) {        
+    public StringBuilder run(Player player, List<Player> players, World world) {
         players.get(recipientId).addToInventory(item, amount);
         player.removeFromInventory(item, amount);
         return new StringBuilder("gave " + amount + " " + item + " to player with id " + recipientId);

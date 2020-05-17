@@ -71,7 +71,6 @@ public class Mark implements Action {
         private int x;
         private int y;
         private String description;
-        
         public Marker(int x, int y, String description) {
             this.x = x;
             this.y = x;

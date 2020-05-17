@@ -1,6 +1,10 @@
-package server.objects;
+package server.objects.instantiables;
 
-public class Block implements ValueType<Block> {
+import server.objects.Entity;
+import server.objects.Instantiable;
+import server.objects.Stats;
+
+public class Block implements Instantiable<Block> {
     private int ID;
     private Stats.ReadOnlyStats stats;
 
@@ -12,22 +16,16 @@ public class Block implements ValueType<Block> {
         this.stats = stats;
     }
 
-    @Override
     public int getID() {
         return ID;
     }
 
-    @Override
     public Stats.ReadOnlyStats getStats() {
         return stats;
     }
 
     @Override
-    public Block create(int ID, Stats.ReadOnlyStats stats) {
-        return new Block(ID, stats);
-    }
-
-    public int display() {
-        return (Integer)stats.get("display");
+    public Block create(Entity e) {
+        return new Block(e.ID(), e.getStats());
     }
 }

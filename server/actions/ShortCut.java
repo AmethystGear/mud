@@ -33,7 +33,7 @@ public class ShortCut implements Action {
     @Override
     public boolean parseCommand(String command, ReadOnlyPlayer player, List<ReadOnlyPlayer> players, World world,
             StringBuilder error) {
-        
+
         if(!command.startsWith("short")) {
             action = actionMap.get(player.ID()).get(command);
             mappedCommand = commandMap.get(player.ID()).get(command);

@@ -5,8 +5,9 @@ import java.util.Scanner;
 
 import server.main.World;
 import server.objects.Player;
+import server.objects.Spawnable;
 import server.objects.Player.ReadOnlyPlayer;
-import server.objects.Mob;
+import server.objects.instantiables.Mob;
 import server.utils.MathUtils;
 import server.utils.RandUtils;
 import server.utils.DisplayUtils;
@@ -68,22 +69,12 @@ public class Move implements Action {
         }
         int viewDist = (Integer) player.getStats().get("view");
         s.append(player.getPosn().toString() + "\n");
-        s.append(DisplayUtils.display(viewDist, player.x(), player.y(), players, world, true));
+        s.append(DisplayUtils.display(viewDist, player.x(), player.y(), players, world));
         s.append("\n");
 
-        if (world.hasMob(player.x(), player.y())) {
-            Mob mob = world.getMob(player.x(), player.y());
-            s.append("You encountered: ");
-            s.append(mob.getBaseStats().get("name") + "\n");
-            player.setMob(mob);
-            s.append(mob.getImg() + "\n");
-            s.append(mob.getQuote("entrance") + "\n");
-            int playerSpeed = (Integer) player.getStats().get("speed");
-            int mobSpeed = (Integer) mob.getStats().get("speed");
-            if (playerSpeed < mobSpeed) {
-                s.append(mob.attack(player, world));
-                s.append("\n");
-            }
+        Spawnable thing = world.getSpawnable(player.x(), player.y());
+        if (thing != null) {
+            s.append(thing.interact(player, players, world));
         }
         return s;
     }
@@ -103,8 +94,8 @@ public class Move implements Action {
             for (int x = xOrigin + MathUtils.sign(numUnits); x != bounded; x += MathUtils.sign(numUnits)) {
                 if (world.getBlock(x, yOrigin).getStats().hasProperty("solid")) {
                     return x - MathUtils.sign(numUnits);
-                } else if (world.hasMob(x, yOrigin)) {
-                    Mob m = world.getMob(x, yOrigin);
+                } else if (world.getSpawnable(x, yOrigin) instanceof Mob) {
+                    Mob m = (Mob)world.getSpawnable(x, yOrigin);
                     int agg;
                     if (!m.getBaseStats().hasVariable("aggression")) {
                         agg = 0;
@@ -125,9 +116,8 @@ public class Move implements Action {
             for (int y = yOrigin + MathUtils.sign(numUnits); y != bounded; y += MathUtils.sign(numUnits)) {
                 if (world.getBlock(xOrigin, y).getStats().hasProperty("solid")) {
                     return y - MathUtils.sign(numUnits);
-                } else if (world.hasMob(xOrigin, y)) {
-                    Mob m = world.getMob(xOrigin, y);
-
+                } else if (world.getSpawnable(xOrigin, y) instanceof Mob) {
+                    Mob m = (Mob)world.getSpawnable(xOrigin, y);
                     int agg;
                     if (!m.getBaseStats().hasVariable("aggression")) {
                         agg = 0;

@@ -18,7 +18,6 @@ public class Actions {
 		new Give(),
 		new Help(),
 		new DescribeItem(),
-		new Trade(),
 		new Mark(),
 		new ShowInventory(),
 		new Eat(),

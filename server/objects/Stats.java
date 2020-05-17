@@ -111,6 +111,25 @@ public class Stats {
         }
     }
 
+    public void add(Stats stat) {
+        for(String s : stat.properties) {
+            if(hasProperty(s)) {
+                throw new IllegalArgumentException("this stats object already has the property " + s);
+            } else {
+                addProperty(s);
+            }
+        }
+
+        for(String varName : stat.stats.keySet()) {
+            if(stats.keySet().contains(varName)) {
+                throw new IllegalArgumentException("this stats object already has the property " + varName);
+            } else {
+                stats.put(varName, stat.stats.get(varName));
+                types.put(varName, stat.types.get(varName));
+            }
+        }
+    }
+
     // this constructor is for the clone method only, otherwise our RI could be
     // violated by bad inputs.
     private Stats(HashMap<String, String> types, HashMap<String, Object> stats, HashSet<String> props) {

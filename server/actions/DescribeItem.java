@@ -3,14 +3,15 @@ package server.actions;
 import java.util.List;
 import java.util.Scanner;
 
+import server.objects.Entity;
+
 import server.main.World;
 import server.objects.Player;
 import server.objects.Player.ReadOnlyPlayer;
 import server.utils.ScannerUtils;
-import server.objects.Item;
 
 public class DescribeItem implements Action {
-    private Item item;
+    private Entity item;
 
     @Override
     public boolean matchCommand(String command, int playerID) {
@@ -32,7 +33,7 @@ public class DescribeItem implements Action {
         }
         scan.close();
         try {
-            item = world.items.get(itemStr);
+            item = world.entities.get(itemStr);
             if(!item.getStats().hasVariable("description")) {
                 throw new RuntimeException();
             }

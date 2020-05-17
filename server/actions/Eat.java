@@ -6,12 +6,12 @@ import java.util.Scanner;
 import server.main.World;
 import server.objects.Player;
 import server.utils.ScannerUtils;
-import server.objects.Item;
+import server.objects.Entity;
 
 public class Eat implements Action {
     // parameters
     private int numToEat;
-    private Item item;
+    private Entity item;
 
     @Override
     public boolean matchCommand(String command, int playerID) {
@@ -39,7 +39,7 @@ public class Eat implements Action {
         }
 
         try {
-            item = world.items.get(itemName);
+            item = world.entities.get(itemName);
             if (!item.getStats().hasProperty("edible")) {
                 error.append("you can't eat that item!");
                 return false;
