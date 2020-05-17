@@ -13,7 +13,7 @@ if you want to run the server, you need java and python3. If you just want to ru
 
 ### compiling the server
 do:
-```python3 compile_server.py```
+```python3 build_server.py```
 
 once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
