@@ -1,0 +1,7 @@
+{
+    int speed 1
+    int view 5
+    int dmg 1
+    int health 10
+    int energy 1
+}

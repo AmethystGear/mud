@@ -1,0 +1,44 @@
+{
+    Box blocks
+    {
+        Box grass
+        {
+            int display 35
+            float mob_spawn_chance 0.002
+        }
+
+        Box rock
+        {
+            int display 245
+            prop solid
+            int map_weight 3
+        }
+        
+        Box water
+        {
+            int display 45
+        }
+        
+        Box forest
+        {
+            int display 22
+            float mob_spawn_chance 0.35
+        }
+        
+        Box sand
+        {
+            int display 178
+            float mob_spawn_chance 0.05
+        }
+    }
+
+    Box terrain_parameters
+    {
+        int octaves 10
+        Box height_map
+        {
+            string[] blocks "water" "sand" "grass" "forest" "rock"
+            float[] heights 0.45 0.55 0.8 0.9
+        }
+    }
+}

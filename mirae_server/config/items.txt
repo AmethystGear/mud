@@ -1,0 +1,34 @@
+{
+    Box obsidian_staff
+    {
+        prop edible
+        prop equipable
+        int xp 0
+        int health_gain 0
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box staff_throw
+            {
+                int physical_dmg 5
+                int energy_cost 1
+                prop destroys_item
+            }
+            Box fireball
+            {
+                int magic_dmg 20
+                int energy_cost 5
+            }
+        } 
+    }
+}

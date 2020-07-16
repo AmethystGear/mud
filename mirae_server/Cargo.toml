@@ -1,0 +1,11 @@
+[package]
+name = "mirae_server"
+version = "0.1.0"
+authors = ["AmethystGear <shivenbhatt@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+rstring-builder = "0.1.4"
+char_stream = "*"
+rand = "0.7.3"
+ansi_term = "0.12"
