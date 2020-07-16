@@ -9,19 +9,20 @@ If your terminal doesn't support 256-color, then either get another terminal, or
 All the following commands should be run from the main directory.
 
 ## requirements:
-if you want to run the server, you need java and python3. If you just want to run the client, you just need java.
+if you want to run the server, you need rust. If you want to run the client, you need java.
 
 ### compiling the server
 do:
-```python3 build_server.py```
+```cargo build release```
+in the `mirae_server/` folder.
 
-once you compile the server, you don't need to compile it again unless you delete any .class files or change the server code.
 ### running the server
-do:```java server/main/Server```
+do:
+```cargo run```
+in the `mirae_server/` folder.
 
 ### running the client
-There's only one file for the client, so we can compile and run at the same time.
-
+There's only one java file for the client, so we can compile and run at the same time.
 do:```java client/Client.java```
 
 the client should look something like this if you're doing it right:
