@@ -434,7 +434,7 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
         println!("{}, {}",  cumulative_player_speed, entity_speed);
         let attack_quote = get_random_quote(entity, "attack");
         out.append(format!("{}: {}\n", entity.name(), attack_quote));
-        player::change_stat(player, "health", -base_dmg, world);
+        player::change_stat(player, "health", -base_dmg);
         out.append(format!("{} did {} damage to you.\n", entity.name(), base_dmg));
         let weapons = stats::get_var_names(&stats::get(&entity.data(), "weapons").unwrap().as_box());
         if weapons.is_empty() {
@@ -457,7 +457,7 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
             if stats::has_var(&ability, "magic_dmg") {
                 magic_dmg = stats::get(&ability, "magic_dmg").unwrap().as_int();
             }
-            player::change_stat(player, "health", -(physical_dmg + magic_dmg), world);
+            player::change_stat(player, "health", -(physical_dmg + magic_dmg));
             out.append(format!("{} used {} and dealt {} damage.\n", entity.name(), ability_name, (physical_dmg + magic_dmg)));
         } else {
             out.append(format!("{} chose to use {}, which has no abilities. Lucky you.\n", entity.name(), weapon_name));

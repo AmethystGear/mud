@@ -116,7 +116,7 @@ pub fn send(player : &Player, string : String) {
     player.sender.send((string, None)).unwrap();
 }
 
-pub fn change_stat(player : &mut Player, stat : &str, delta: i64, world : &World) {
+pub fn change_stat(player : &mut Player, stat : &str, delta: i64) {
     let stat_val = get_stat(player, stat);
     let mut stats = stats::get(player.data(), "stats").unwrap().as_box();
     let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
@@ -130,9 +130,6 @@ pub fn change_stat(player : &mut Player, stat : &str, delta: i64, world : &World
     let stat_max = ((stats::get(&base_stats, stat).unwrap().as_int() as f64) * buff) as i64;
     stats::set(&mut stats, stat, Value::Int(std::cmp::min(stat_max, std::cmp::max(0, stat_val + delta))));
     stats::set(&mut player.data, "stats", Value::Box(stats));
-    if get_stat(player, "health") == 0 {
-        respawn(player, world);
-    }
 }
 
 pub fn reset_to_base_with_buffs(player: &mut Player) {

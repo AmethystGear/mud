@@ -431,7 +431,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
         }
     }
     if player::get_stat(&player, "energy") >= energy_cost {
-        player::change_stat(&mut player, "energy", -energy_cost, world);
+        player::change_stat(&mut player, "energy", -energy_cost);
         if player.opponent().is_none() { // fighting entity
             if !entities::has_entity(spawned_entities, player::x(player), player::y(player)) {
                 return Err("you aren't fighting anything!".to_string());
@@ -483,7 +483,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
             }
             let mut opponent = opponent.unwrap();
             player::send(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
-            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg), world);
+            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg));
             if player::is_dead(&opponent) {
                 let mut out = StringBuilder::new();
                 out.append("Congrats for murdering your opponent!!!!\n");
@@ -641,8 +641,8 @@ fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<
         let item = stats::get_or_else(&world.items, item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box();
         let health_gain = stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int();
         let energy_gain = stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int();
-        player::change_stat(player, "health", health_gain, world);
-        player::change_stat(player, "energy", energy_gain, world);
+        player::change_stat(player, "health", health_gain);
+        player::change_stat(player, "energy", energy_gain);
         let mut out = StringBuilder::new();
         out.append(format!("you got {} health, and {} energy\n", health_gain, energy_gain));
         return Ok(out);
