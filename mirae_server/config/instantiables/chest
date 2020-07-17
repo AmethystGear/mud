@@ -4,4 +4,19 @@
         int items_min 0
         int items_max 2
     }
+    Box awesome_chest
+    {
+        int items_min 5
+        int items_max 10
+    }
+    Box decent_chest
+    {
+        int items_min 1
+        int items_max 1
+    }
+    Box chesteroooo
+    {
+        int items_min 0
+        int items_max 0
+    }
 }
