@@ -7,7 +7,7 @@ pub struct Scanner {
     chars : Vec<char>,
     whitespace : Vec<char>
 }
-
+#[derive(Clone)]
 pub enum Param {
     Int(i64),
     Float(f64),
@@ -92,6 +92,10 @@ fn update_token(scan : &mut Scanner) {
         scan.chars.push(next.unwrap());
         next = scan.input_stream.next();
     }
+    if peek_next(scan).is_none() {
+        return;
+    }
+    println!("next {}", peek_next(scan).unwrap());
 }
 
 fn update_line(scan : &mut Scanner) {
@@ -153,9 +157,8 @@ pub fn get_next_string(scan: &mut Scanner) -> Option<String> {
             s.append(nxt);
             break;
         }
-        let whitespace : String = scan.whitespace.iter().collect();
-        s.append(whitespace);
         s.append(nxt);
+        s.append(" ");
     }
 
     return Some(s.string()[1..(s.string().len()-1)].to_string());

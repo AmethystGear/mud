@@ -20,6 +20,7 @@ pub struct Player {
     opponent : Option<u8>,
     equip : Option<Stats>,
     sender : Sender<(String, Option<u8>)>,
+    cumulative_speed : i64,
     interact : bool,
     turn : bool
 }
@@ -56,6 +57,18 @@ impl Player {
     pub fn interact(&self) -> bool {
         return self.interact;
     }
+
+    pub fn zero_entity_cumulative_speed(&mut self) {
+        self.cumulative_speed = 0;
+    }
+
+    pub fn entity_cumulative_speed(&self) -> i64 {
+        return self.cumulative_speed;
+    }
+
+    pub fn add_entity_cumulative_speed(&mut self, add : i64) {
+        self.cumulative_speed += add;
+    }
 }
 
 pub fn from(x : u16, y : u16, id : u8, sender: Sender<(String, Option<u8>)>) -> Player {
@@ -73,7 +86,7 @@ pub fn from(x : u16, y : u16, id : u8, sender: Sender<(String, Option<u8>)>) -> 
     stats::set(&mut data, "stats", Value::Box(defaults.clone()));
     stats::set(&mut data, "posn", Value::Box(posn));
     stats::set(&mut data, "xp", Value::Int(0));
-    return Player { data : data, sender : sender , opponent : None, equip : None, turn : false, interact: false };
+    return Player { data : data, sender : sender , opponent : None, equip : None, turn : false, interact: false, cumulative_speed : 0};
 }
 
 pub fn login(player : &mut Player, save : File) {
@@ -96,13 +109,14 @@ pub fn respawn(player : &mut Player, world : &World) {
         y = rng.gen_range(0, world::MAP_SIZE);
     }
     set_posn(player, x, y);
+    reset_to_base_with_buffs(player);
 }
 
 pub fn send(player : &Player, string : String) {
     player.sender.send((string, None)).unwrap();
 }
 
-pub fn change_stat(player : &mut Player, stat : &str, delta: i64) {
+pub fn change_stat(player : &mut Player, stat : &str, delta: i64, world : &World) {
     let stat_val = get_stat(player, stat);
     let mut stats = stats::get(player.data(), "stats").unwrap().as_box();
     let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
@@ -116,20 +130,21 @@ pub fn change_stat(player : &mut Player, stat : &str, delta: i64) {
     let stat_max = ((stats::get(&base_stats, stat).unwrap().as_int() as f64) * buff) as i64;
     stats::set(&mut stats, stat, Value::Int(std::cmp::min(stat_max, std::cmp::max(0, stat_val + delta))));
     stats::set(&mut player.data, "stats", Value::Box(stats));
+    if get_stat(player, "health") == 0 {
+        respawn(player, world);
+    }
 }
 
 pub fn reset_to_base_with_buffs(player: &mut Player) {
     let mut stats = stats::get(player.data(), "stats").unwrap().as_box();
     let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
     let stat_names = stats::get_var_names(&stats);
-    let mut buffs = None;
+    let buffs;
     if player.equip.is_some() {
-        buffs = Some(stats::get(player.equip().unwrap(), "buffs").unwrap().as_box());
+        buffs = stats::get(player.equip().unwrap(), "buffs").unwrap().as_box();
+    } else {
+        buffs = Stats::new();
     }
-    if buffs.is_none() {
-        return;
-    }
-    let buffs = buffs.unwrap();
     for stat in stat_names {
         let mut base_stat = stats::get(&base_stats, stat.as_str()).unwrap().as_int();
         if stats::has_var(&buffs, stat.as_str()) {
@@ -203,10 +218,39 @@ pub fn add_items_to_inventory(player : &mut Player, stats : Stats) {
     stats::set(&mut player.data, "inventory", Value::Box(new_inventory));
 }
 
+pub fn remove_item_from_inventory(player : &mut Player, item : &str) {
+    let mut inv = stats::get(player.data(), "inventory").unwrap().as_box();
+    if stats::has_var(&inv, item) {
+        let m = stats::get(&mut inv, item).unwrap().as_int();
+        stats::set(&mut inv, item, Value::Int(m - 1));
+        if stats::get(&mut inv, item).unwrap().as_int() == 0 {
+            stats::rm(&mut inv, item);
+        }
+    }
+    stats::set(&mut player.data, "inventory", Value::Box(inv));
+}
+
+pub fn get_inventory(player : &Player) -> Stats {
+    return stats::get(player.data(), "inventory").unwrap().as_box();
+}
+
 pub fn turn(player : &Player) -> bool {
     return player.turn;
 }
 
 pub fn set_turn(player : &mut Player, val : bool) {
     player.turn = val;
+}
+
+pub fn upgrade_stat(player : &mut Player, stat : &str) -> Result<(), String> {
+    let mut base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
+    let val = stats::get(&base_stats, stat).unwrap().as_int();
+    let xp_cost = val * 100;
+    if xp_cost > xp(player) {
+        return Err(format!("you need {} xp to upgrade this stat, but you only have {} xp.", xp_cost, xp(player)));
+    }
+    change_xp(player, -xp_cost);
+    stats::set(&mut base_stats, stat, Value::Int(val + 1));
+    stats::set(&mut player.data, "base_stats", Value::Box(base_stats));
+    return Ok(());
 }

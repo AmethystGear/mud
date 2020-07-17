@@ -65,11 +65,17 @@ fn handle_connection(stream: TcpStream, channel : Sender<(String, Vec<Param>, Ac
             writer.flush().unwrap();
         }
     });
-
+    let mut last_res = Err("no last command to run!".to_string());
     loop {
         let mut line = String::new();
         reader.read_line(&mut line).unwrap();
-        let action_res = action::get_action_and_params(&action_map, line);
+        let action_res;
+        if line.trim() == "" {
+            action_res = last_res.clone();
+        } else {
+            action_res = action::get_action_and_params(&action_map, line.clone());
+            last_res = action::get_action_and_params(&action_map, line);
+        }
         if action_res.is_ok() {
             let (keyword, params, action) = action_res.unwrap();
             let res = channel.send((keyword, params, action, None, Some(id)));

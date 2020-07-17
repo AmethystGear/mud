@@ -31,4 +31,593 @@
             }
         } 
     }
+    Box oxford_dictionary
+    {
+        prop ediblestat 
+        int health_gain -3
+        int xp 2000
+    }
+    Box physics_homework
+    {
+        prop edible
+        int health_gain -10
+        int xp 100
+    }
+    Box honour
+    {
+        prop edible
+        int health_gain 0
+        int energy_gain 100
+        int xp 100
+    }
+    Box dragons_blood
+    {
+        int xp 100
+    }
+    Box the_journey_was_the_prize
+    {
+        int xp 100
+    }
+    Box robot_brain
+    {
+        int xp 100
+    }
+    Box robot_heart
+    {
+        int xp 2
+    }
+    Box robot_soul
+    {
+        int xp 2
+    }
+    Box robot
+    {
+        int xp 50
+    }
+    Box newtons_laws
+    {
+        int xp 100
+    }
+    Box the_meaning_of_the_universe
+    {
+        prop edible
+        int health_gain -1000
+        int xp -200
+    }
+    Box F
+    {
+        int xp 0
+    }
+    Box D+
+    {
+        int xp 100
+    }
+    Box C-
+    {
+        int xp 200
+    }
+    Box B+
+    {
+        int xp 500
+    }
+    Box A+
+    {
+        int xp 1000
+    }
+    Box sins_of_humanity
+    {
+        prop edible
+        int health_gain 100
+        int energy_gain 100
+        int xp 1
+    }
+    Box sonic_chops
+    {
+        prop edible
+        int health_gain 10
+        int energy_gain 10
+        int xp 1000
+    }
+    Box heghead
+    {
+        prop edible
+        int health_gain -20
+        int energy_gain 30
+        int xp 200
+    }
+    Box fest_boots
+    {
+        prop edible
+        prop wearable
+        int health_gain 1
+        int xp 200
+        Box buffs 
+        {
+            float speed 2.5
+            float health 0.9
+        }
+    }
+    Box orange
+    {
+        prop edible
+        prop equipable
+        int health_gain 1
+        int xp 17
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.002
+            float magic_dmg 0.999
+            float magic_def 1.3
+        }
+        Box abilities
+        {
+            Box orange_throw
+            {
+                int physical_dmg 6
+                int energy_cost 1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box trumps_orange
+    {
+        prop edible
+        prop equipable
+        int health_gain -20
+        int xp 17
+        Box buffs
+        {
+            float health 0.3
+            float speed 1.0
+            float dmg 1.2
+            float view 0.2
+            float physical_dmg 0.1
+            float physical_def 0.3
+            float magic_dmg 0.3
+            float magic_def 0.2
+        }
+        Box abilities
+        {
+            Box suck_my_oranges
+            {
+                int physical_dmg -6
+                int energy_cost 1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box bigly_wall_staff
+    {
+        prop edible
+        prop equipable
+        int health_gain -100
+        int xp 1
+        Box buffs
+        {
+            float health 1.0
+            float speed 0.7
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.1
+            float magic_dmg 1.2
+            float magic_def 1.1
+        }
+        Box abilities
+        {
+            Box shoot_a_wall
+            {
+                int physical_dmg 1
+                int energy_cost 5
+            }
+            Box block
+            {
+                int stun 1
+                int energy_cost 2
+            }
+        }
+        
+    }
+    Box wall_armor
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 1.0
+            float speed 0.6
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 2.3
+            float magic_dmg 1.0
+            float magic_def 1.4
+        }
+
+    }
+    Box wings
+    {
+        prop equipable
+        int xp 1
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.4
+            float dmg 1.0
+            float view 3.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.1
+        }
+        Box abilities
+        {
+            Box fly
+            {
+                int stun 2
+                int energy_cost 10
+            }
+            Box angelic_wall_flight
+            {
+                int stun 5
+                int physical_dmg -200
+                int energy_cost 1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box microsoft_edge
+    {
+        prop equipable
+        int xp 1
+        Box buffs
+        {
+            float health 1.0
+            float speed 0.6
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box bing
+            {
+                int magic_dmg 5
+                int energy_cost 10
+            }
+            Box google
+            {
+                int physical_dmg 5
+                int energy_cost 1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box internet_explorer
+    {
+        prop equipable
+        int xp 200
+        prop edible
+        int health_gain -2
+        Box buffs
+        {
+            float health 1.0
+            float speed 0.1
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box explore_the_internet
+            {
+                int magic_dmg 10
+                int energy_cost 10
+            }
+        }
+        
+    }
+    Box rubix_cube
+    {
+        prop equipable
+        int xp 200
+        prop edible
+        int health_gain 2
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box rubix_blast
+            {
+                int magic_dmg 1
+                int energy_cost 1
+            }
+            Box rubix_pew
+            {
+                int magic_dmg 2
+                int energy_cost 2
+            }
+            Box rubix_bomb
+            {
+                int magic_dmg 10
+                int energy_cost 20
+                prop destroys_item
+            }
+            Box rubix_stun
+            {
+                int magic_dmg 1
+                int energy_cost 4
+                int stun 1
+            }
+                Box rubix_superstorm
+            {
+                int magic_dmg -5
+                int energy_cost 10
+                int stun 2			
+            }
+                Box rubix_charge
+            {
+                int magic_dmg -1
+                int energy_cost -10			
+            }
+            
+        }
+        
+    }
+    Box living_train
+    {
+        prop edible
+        int health_gain -100
+        int xp 500
+    }
+    Box oil
+    {
+        prop edible
+        int health_gain -10
+        int xp 50
+    }
+    Box trainmail_armor
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.5
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 0.8
+            float magic_dmg 0.8
+            float magic_def 1.0
+        }
+
+    }
+    Box trainmail_shield
+    {
+        prop equipable
+        int xp 1
+        prop edible
+        int health_gain -2
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.5
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 0.7
+        }
+        Box abilities
+        {
+            Box eat_shield
+            {
+                int magic_dmg -1
+                int energy_cost 1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box valient_washingsword
+    {
+        prop equipable
+        int xp 2000
+        prop edible
+        int health_gain 2
+        Box buffs
+        {
+            float health 1.1
+            float speed 1.0
+            float dmg 2.9
+            float view 10.0
+            float physical_dmg 2.0
+            float physical_def 1.0
+            float magic_dmg 2.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box valient_sepuku
+            {
+                int magic_dmg 1000000000000000
+                int energy_cost 500
+            }
+            Box super_heal
+            {
+                int magic_dmg -100
+                int energy_cost -20
+            }
+            Box valient_charge
+            {
+                int magic_dmg 1
+                int energy_cost -500
+            }
+            Box light_of_honour
+            {
+                int magic_dmg 1
+                int energy_cost 50
+                int stun 10
+            }
+                Box stab_of_valor
+            {
+                int magic_dmg 15
+                int energy_cost 10
+                int stun 1		
+            }
+            
+        }
+        
+    }
+    Box never_told_a_lie
+    {
+        prop equipable
+        int xp 1
+        prop edible
+        int health_gain -2
+        Box buffs
+        {
+            float health 1.0
+            float speed 0.1
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box lie
+            {
+                int magic_dmg 100
+                int energy_cost -1
+                prop destroys_item
+            }
+        }
+        
+    }
+    Box wig
+    {
+        prop edible
+        int health_gain 2
+        int xp 500
+    }
+    Box george_washinghead
+    {
+        prop edible
+        int health_gain 100
+        int xp 10000
+    }
+    Box george_washingtons_clothing
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 5.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 5.0
+            float magic_dmg 1.0
+            float magic_def 5.0
+        }
+
+    }
+    Box enigmatic_gun
+    {
+        prop equipable
+        int xp 1000
+        prop edible
+        int health_gain -200000000000
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box squirt
+            {
+                int physical_dmg -1
+                int energy_cost -500
+            }
+            Box freeze
+            {
+                int magic_dmg -2
+                int energy_cost 50
+                int stun 5
+            }
+            Box punch
+            {
+                int physical_dmg 1
+                int energy_cost 5
+            }
+            Box spit
+            {
+                int energy_cost 5
+                int stun 1
+            }
+                Box nuclear_missile
+            {
+                int magic_dmg 50
+                int energy_cost 55
+                int stun 1		
+            }
+                Box annoy
+            {
+                int physical_dmg 1
+                int energy_cost 4	
+            }
+                    Box annoy
+            {
+                int physical_dmg 1
+                int energy_cost 4	
+            }
+            Box pray_to_the_gods_of_17
+            {
+                int physical_dmg -1
+                int energy_cost 40	
+            }
+            Box stick_sword_into_eyeballs
+            {
+                int physical_dmg 6
+                int energy_cost 30
+            }
+        }
+    }
 }

@@ -9,6 +9,7 @@ use crate::stats;
 use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 
+
 // returns the id of the block that is the most prevalent in the region.
 fn get_majority_block_id(world : &World, x : u16, y : u16, square_length : u16) -> u16 {
     let mut blocks = HashMap::new();

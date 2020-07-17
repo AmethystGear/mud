@@ -2,6 +2,6 @@
     Box chest
     {
         int items_min 0
-        int items_max 5
+        int items_max 2
     }
 }

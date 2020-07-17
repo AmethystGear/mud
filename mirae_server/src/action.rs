@@ -23,7 +23,8 @@ pub enum ActionFunc {
     D(fn(u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
     E(fn(&ActionMap, &Vec<scanner::Param>) -> Result<StringBuilder, String>),
     F(fn(&mut SpawnedEntities, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    G(fn(&mut SpawnedEntities, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder,String>)
+    G(fn(&mut SpawnedEntities, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder,String>),
+    H(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>) -> Result<StringBuilder, String>)
 }
 
 pub struct Action {
@@ -45,7 +46,8 @@ impl Action {
             ActionFunc::D(x) => x(player_id.unwrap(), players.unwrap(), world.unwrap()),
             ActionFunc::E(x) => x(a_map.unwrap(), params.unwrap()),
             ActionFunc::F(x) => x(s.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::G(x) => x(s.unwrap(), params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap())
+            ActionFunc::G(x) => x(s.unwrap(), params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
+            ActionFunc::H(x) => x(params.unwrap(), player_id.unwrap(), players.unwrap())
         };
         return result;
     }
@@ -181,6 +183,24 @@ pub fn get_action_map() -> ActionMap {
         usage: "stat|stat opponent|stat <item_name>\n".to_string(),
         keywords: "stats, info".to_string(),
         func: ActionFunc::G(stat.clone())
+    });
+    add_action(&mut m,
+    "upgrade".to_string(),
+    Action {
+        name: "upgrade".to_string(),
+        description: "upgrade a stat.\n".to_string(),
+        usage: "upgrade <x>".to_string(),
+        keywords: "upgrade, level".to_string(),
+        func : ActionFunc::H(upgrade.clone())
+    });
+    add_action(&mut m,
+    "eat".to_string(),
+    Action {
+        name: "eat".to_string(),
+        description: "eat something in your inventory... I mean seriously, do you need an explanation??".to_string(),
+        usage: "eat <x>".to_string(),
+        keywords : "eat, consume".to_string(),
+        func : ActionFunc::C(eat.clone())
     });
     return m;
 }
@@ -411,7 +431,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
         }
     }
     if player::get_stat(&player, "energy") >= energy_cost {
-        player::change_stat(&mut player, "energy", -energy_cost);
+        player::change_stat(&mut player, "energy", -energy_cost, world);
         if player.opponent().is_none() { // fighting entity
             if !entities::has_entity(spawned_entities, player::x(player), player::y(player)) {
                 return Err("you aren't fighting anything!".to_string());
@@ -421,7 +441,41 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                 let entity = entities::get_entity(spawned_entities, player::x(player), player::y(player)).unwrap();
                 return Err(format!("You cannot damage a(n) {}", entity.name()));
             } else {
-                return damage_opponent.unwrap().run(Some(spawned_entities), None, None, Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]), Some(player_id), Some(players), Some(world));
+                let player;
+                let res = damage_opponent.unwrap().run(Some(spawned_entities), None, None,
+                                                       Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
+                                                       Some(player_id), Some(players), Some(world));
+
+                println!("ran dmg");
+
+                player = players[player_id as usize].as_mut().unwrap();
+                if res.is_err() {
+                    return res;
+                } else {
+                    if !entities::has_entity(spawned_entities, player::x(player), player::y(player)) {
+                        return res;
+                    }
+                    let mut out = res.ok().unwrap();
+                    let entity_speed;
+                    {
+                        let entity = entities::get_entity_mut(spawned_entities, player::x(player), player::y(player)).unwrap();
+                        entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int();
+                    }
+                    let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player), player::y(player));
+                    let player_speed = player::get_stat(&player, "speed");
+                    player.add_entity_cumulative_speed(entity_speed);
+                    if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
+                        player.zero_entity_cumulative_speed();
+                        let mob_attack = mob_attack.unwrap();
+                        let res = mob_attack.run(Some(spawned_entities), None, None, None, Some(player_id), Some(players), Some(world));
+                        if res.is_err() {
+                            return res;
+                        } else {
+                            out.append(res.ok().unwrap());
+                        }
+                    }
+                    return Ok(out);
+                }
             }
         } else { // fighting another player
             if !player::turn(&player) {
@@ -429,7 +483,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
             }
             let mut opponent = opponent.unwrap();
             player::send(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
-            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg));
+            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg), world);
             if player::is_dead(&opponent) {
                 let mut out = StringBuilder::new();
                 out.append("Congrats for murdering your opponent!!!!\n");
@@ -569,5 +623,48 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
         }
     }
     return Ok(out);
+}
+
+fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result <StringBuilder, String> {
+    let player = players[player_id as usize].as_mut().unwrap();
+    let inv = player::get_inventory(player);
+    if params.len() != 1 {
+        return Err("expected an item!".to_string());
+    }
+    let item = params[0].as_string();
+    if item.is_none() {
+        return Err("expected an item!".to_string());
+    }
+    let item = item.unwrap();
+    if stats::has_var(&inv, item.as_str()) {
+        player::remove_item_from_inventory(player, item.as_str());
+        let item = stats::get_or_else(&world.items, item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box();
+        let health_gain = stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int();
+        let energy_gain = stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int();
+        player::change_stat(player, "health", health_gain, world);
+        player::change_stat(player, "energy", energy_gain, world);
+        let mut out = StringBuilder::new();
+        out.append(format!("you got {} health, and {} energy\n", health_gain, energy_gain));
+        return Ok(out);
+    } else {
+        return Err("you don't have that item!".to_string());
+    }
+}
+
+fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>) -> Result<StringBuilder, String> {
+    let mut player = players[player_id as usize].as_mut().unwrap();
+    if let scanner::Param::String(s) = &params[0] {
+        let result = player::upgrade_stat(&mut player, s.as_str());
+        if result.is_ok() {
+            player::reset_to_base_with_buffs(&mut player);
+            let mut out = StringBuilder::new();
+            out.append("upgraded stat.");
+            return Ok(out);
+        } else {
+            return Err(result.err().unwrap());
+        }
+    } else {
+        return Err("expected only one parameter, and expected it to be a string!".to_string());
+    }
 }
 

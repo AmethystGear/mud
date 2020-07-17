@@ -214,63 +214,63 @@ Box flying_wall
 
 	LongString img
 	{
-                      Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@BgZhed8#BQ#@@@@@@@@@@@@@@:                         
-                      Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@QEHmIUKKmmeIIqR#@@@@@@@@@@@@:                         
-                      Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#RR6OdMM3KMEgQQQ#@@@@@@@@@@@@:                         
-                      Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#gMPPqORE8QQQQQQ#@@@@@@@@@@@@@:                         
-```    ```    ````   `Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@#QgRMWPGZRgQD$QQQQQQB@@@@@@@@@@@@@@: ```    ````    ```    ``
-```    ```    ````   `Q@@@@@@@@@@@@@@@@#8dmh39QBQdKIIXG9gQQQQQQR0QQQBBBB@@@@@@@@@@@@@@! ```    ````    ```    ``
-   ````   ````    ``` Q@@@@@@@@@@@@@#DMGPPmUIjIs3bORgQQQQQ88g$$gQBBBQQQQ@@@@@@@@@@@@@@~`   ````    ```    ````  
-```    ```    ````   `Q@@@@@@@@@@@@@BE6R9OZGG5O$QQQQQQB#@#9D$ERD$QQQQBQQ@@@@@@@@@@@@@@! ```    ````    ```    ``
-```    ```    ````   `Q@@@@@@@@@@@@BEZqPGER0QQQQQQB#@@@@@#00$DEE$QQQQQQB@@@@@@@@@@@@@@: ```    ````    ```    ``
-   ````   ````    ``` Q@@@@@@@@@@@#DDR0gQQD$QQQQQB#@@@@@@#g88g$0$QQQBBBQR#@@@@@@@@@@@@~`   ````    ```    ````  
-   ````   ````    ``` Q@@@@@@@@@@@#g0$8QQQD0QQBBBB#@@@@@@#DRRD$gQBBQQQQQQ#@@@@@@@@@@@@=`   ````    ```    ````  
-```    ```    ````   `Q@@@@@@@@@@@@@BEggD$gQBBQQQQB@@@@#QRHKKP6E0QQQQQQQ#@@@@@@@@@@@@@: ```    ````    ```    ``
-   ```    ````  `:!=!!B@@@@@@@@@@@@@Q90$RRD$QQQQQQBB$6ZMqGZ9$QQ0$QQQQQQQ@@@@@@@@@@@@@@^'..'''```   ```    ````  
-   ````   ```:=*)?r<=:B@@@@@@@@@@@@@B0$$DEE$QQQQQQ$hIKMDQQQQQQQ$$QQBBBBB@@@@@@@@@@@@@@^.''...-.-_-````    ````  
-```    ```:\Vyuv)*=!::Q@@@@@@@@@@@@@Bgg8g$$$QQBBBBQ08QQQQQ8gg$$gQBBQQQQQ@@@@@@@@@@@@@@^..'.....--,!=!-````    ``
-```    `^c3oycx*==::,_Q@@@@@@@@@@@@@BEORD$gQBBQQQQQQQB##@#RD$EE$gQQQQQQQ@@@@@@@@@@@@@@r.-..--..-.--,!>^:-`    ``
-   ```-raowT}Yr**~!!==Q@@@@@@@@@@@@QRZ53GEE0QQQQQQB#@@@@@#D0$RRR0QQQQQQB@@@@@@@@@@@@@@v:_--.-----'._,,"!_`````  
-    `:jKmIVuu}x^>!=:!!B@@@@@@@@@@@#EER$QQQD$QQQQQB#@@@@@@@BQ8$0E0QQQBB##@@@@@@@@@@@@@@),!-_^:-__----,-_,,=_``   
-``` ,}UUmkywVTxr*^=;~*B@@@@@@@@@@@@Q$0QQQQ$$QQBBBQ#@@@@@@@@@@##QQB##@@@@@@@@@@@@@@@@@@r:^:~~!"___----_--_,".  ``
-   -_*ykKjV}xr\v>~=>:=Q@@@@@@@@@@@@@BR$$$$gQBQQQQQB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L"=_~:!-,_,_.__--__--..`  
-   `-]yhkVT)vLu)?^~=^=B@@@@@@@@@@@@@Q90$RE0gQQQQQQB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@v:<:~~,,,:_!,_'-___-.'``  
-``` :VywT\]*rxv~*;:<x~B@@@@@@@@@@@@@B0$$99R0QQQQQQ#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@r:^!!r=--:.,"_--._"-__  ``
-``.]y(kTLlv~v*)^v*<^*,Q@@@@@@@@@@@@@@#BQg$D0QQBB##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@v>r!,~^::!__-,.-!,,!_!!```
+                                                             BgZhed8#BQ#                                       
+                                                         QEHmIUKKmmeIIqR#                                     
+                                                         #RR6OdMM3KMEgQQQ#                                     
+                                                        #gMPPqORE8QQQQQQ#                                     
+                 `   `Q                            #QgRMWPGZRgQD$QQQQQQB              :           `           ``
+                 `   `Q                #8dmh39QBQdKIIXG9gQQQQQQR0QQQBBBB              !           `           ``
+      `      `        Q             #DMGPPmUIjIs3bORgQQQQQ88g$$gQBBBQQQQ              ~`      `              `  
+                 `   `Q             BE6R9OZGG5O$QQQQQQB# #9D$ERD$QQQQBQQ              !           `           ``
+                 `   `Q            BEZqPGER0QQQQQQB#     #00$DEE$QQQQQQB              :           `           ``
+      `      `        Q           #DDR0gQQD$QQQQQB#      #g88g$0$QQQBBBQR#            ~`      `              `  
+      `      `        Q           #g0$8QQQD0QQBBBB#      #DRRD$gQBBQQQQQQ#            =`      `              `  
+                 `   `Q             BEggD$gQBBQQQQB    #QRHKKP6E0QQQQQQQ#             :           `           ``
+             `  `:!=!!B             Q90$RRD$QQQQQQBB$6ZMqGZ9$QQ0$QQQQQQQ              ^'..'''                `  
+      `      :=*)?r<=:B             B0$$DEE$QQQQQQ$hIKMDQQQQQQQ$$QQBBBBB              ^.''...-.-_-   `       `  
+          :\Vyuv)*=!::Q             Bgg8g$$$QQBBBBQ08QQQQQ8gg$$gQBBQQQQQ              ^..'.....--,!=!-   `    ``
+       `^c3oycx*==::,_Q             BEORD$gQBBQQQQQQQB## #RD$EE$gQQQQQQQ              r.-..--..-.--,!>^:-`    ``
+      -raowT}Yr**~!!==Q            QRZ53GEE0QQQQQQB#     #D0$RRR0QQQQQQB              v:_--.-----'._,,"!_   ``  
+    `:jKmIVuu}x^>!=:!!B           #EER$QQQD$QQQQQB#       BQ8$0E0QQQBB##              ),!-_^:-__----,-_,,=_``   
+    ,}UUmkywVTxr*^=;~*B            Q$0QQQQ$$QQBBBQ#          ##QQB##                  r:^:~~!"___----_--_,".  ``
+   -_*ykKjV}xr\v>~=>:=Q             BR$$$$gQBQQQQQB                                   L"=_~:!-,_,_.__--__--..`  
+   `-]yhkVT)vLu)?^~=^=B             Q90$RE0gQQQQQQB                                   v:<:~~,,,:_!,_'-___-.'``  
+    :VywT\]*rxv~*;:<x~B             B0$$99R0QQQQQQ#                                   r:^!!r=--:.,"_--._"-__  ``
+``.]y(kTLlv~v*)^v*<^*,Q              #BQg$D0QQBB##                                   @v>r!,~^::!__-,.-!,,!_!!   
    .,yiLekvr\virv^!=?!B@@@@@@@@@@@@@@@@@@#BB##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(!\:"*:_,=,!"___~r!,!-._  
-``` uoH3ITvxTx)~r^:!(:Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@v^u~">"-_=._:!,-!~rr~=  ``
-```:oamHa])wx<r<v<!*r:B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@vx}=,::_,:_,-,=_:<=~"~- ``
+    uoH3ITvxTx)~r^:!(:Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@v^u~">"-_=._:!,-!~rr~=  ``
+   :oamHa])wx<r<v<!*r:B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@vx}=,::_,:_,-,=_:<=~"~- ``
    :xe5WV|uXxrL**^^^)~IWObHP5MZZHHMP3PdD0gQQQQ8Q$ddMIzXUUUojDQ8gQBBQQQQBBBQg08890090dM)}Y*:!,:=_-,__=!:~=>-`-`  
-   `")MMLuKuviV*x>=^v^::vr"_:!!~:-":_,!xxLusHGqPjVTir``````*zehIRbqqG3qZd5yuuUY)x}vT^~(Y}<~<=:~__=_-=^^*v~:```  
-``` -GyrPhyLLVu^x~!*x*!^}*=_:!==!_-:::!}}YTVzmIGsmKHWv`   vMqWWGGsU3GZdOdhVuou)))cV}*^)Tu~:~=:~__r!-:;!*:^~   ``
-   `,-`=Hki}Kyu*x~!^v^!vLr~:"::=::-_:!xkTvx}yomaIyhmmI````kM53GMqaPPPqdR6UyXwv?rvyI}r**l};!~:_>:,^r_:=,~` `'``  
-   ````Vhl]oKz}rY|^:*!~vx)<!:!::!"_-,)}l}YYTcwe3XuzW5k ```^M5GMZMGGMbddORMqo}v\|TjyYr;?lxr=~"_~::!^)=<:=' ````  
-```   `ojTsHVkx)\wr:=*;^x)*!!~!:!!--_*LixxYixLzheykmIV`   !MWGM3Pam3qZZdOdRk}xxxuw}\^^}}v\r!,":,::!~xV==:`    ``
-```   :IXsPzcVvr;L|!:x!~ir^!!!~,:~:.-,rvvi)xiTkIahII3u`   -dGWZGo3KmK3MOd6OIuY]]u}xr~vi)v)?<":__!:!!^ov<!`    ``
-   ```:=zImxlVv<~vv=*}~*}<~=:!!!_!^-`',(vxi}}uwUeahIm? ````wGPWMUeaKm5MdddaVucxiwux^*x*~r*x}^!,,:::!~kVx! ````  
-```    `ouT}cVx^<x}*ix^ux^:>:!=::"\=-..=*rxiiXkksqGML.`   ``TG5ZPZ6Z5MZM53ywhTvVki)^x)~=\rvxi~:"!::!!Vku.`    ``
-```    `X^_ywVL*>LVrx**iir::^:=:,!v*=--,>vxiu}(iTTV,```   ``.YZZ5hME5bZMPIwqjxVzux*vx*!=r*)\vr=:~!:!!xxc'`    ``
-   ````   ?zIwYr*xu*Yr<vu)!_*!!:_:~]*~-_vv}}xrxY]L^    ```   `s3mqzMZERORjP3VVzwxYvx\^!>*!rrri^=<~!=!!_}` ````  
-   ````  'KeKwxx*x}\x]~rcx=,=*^=__:<)*~,?uxrr)xTxY-    ```    =aGWaK06EEEehVkIzTYl}v|=!^^!?**xv^*;!~=r'`  ````  
-```    ``\MKKx]Y^xTx\c~*u}<:~r)*:_":(<~vwv<))irxr. ````   ```` ~PdqmM8$Q6ekwHzViVVix*!!*=!)*^vr~v^=*^]r```    ``
-   ````  ~:aKTGu**u}rV*^TV*:*rv\~,,:>^^<!'_vx,!^*``    ```    ``THVGWM*x}mV|Ky}TkLxv~:=*!=r<*)!=rx^)r!=   ````  
-   ````   !33e3w?^}u\uv~}zx=^^xxr!,!_.*'``r*' ~!'``    ```    ``'*v`wZi`_V_`VV}zkixr=!^(!~*^r*:~^vci)-`   ````  
-```    ```_V:~KmYrLw]}}=Ly\>!**uv^!~_```  .````    ````   ````    ``'|5; '``VwkPu}]*=>^v=^*^(;=><ru:^  ```    ``
-```    ```   `HWu?vhYiT=xV]r!;*Li?<~````   ````    ````   ````    ``` .! ```!IKKyVx<~*r=*~~^|=~<^(v   ````    ``
-   ````   ````IPkxvKci}^*}uv;>rv?r^*'   ```    ````    ```    ````   ````   ,m3kcyv~^?*:~=!^r=;^*x)```    ````  
-   ` `    ````~3P}vUsx*i<xyxr=rv,r<^_`  ``             ``     ` `    ``    `!okjyVr^)x~!<!=(*^*^rY~` `    `  `  
-```    ```    `vHj]kZT*xv*cVx~~)!=<<,```    ```    ````   ````    ```    ```:oI(XYr)l):^*~^v*rv<v}.    ```    ``
-   ````   ```` !GqVVdIvxY<xz}r=^r.*~_   ```    ````    ```    ````   ````   `Im,yx)xV~=*r^vxr>)*!` ```    ````  
-   ````   ```` :M}IIdOuv})<uy\;^*`!<,   ```    ````    ```    ````   ````    L"^VixVv~*L*rcYv.:|:  ```    ````  
-```    ```    `'~`|HM*zvux<vIY*=~` :-```    ```    ````   ````    ```    ````  |u}}j*^x}*v^k*  '-``    ```    ``
-```    ```    ````:d)`x}T}r^ykv>~-  ````    ```    ```    ````    ```    ````  }cVwu)vyvr?`!`  ````    ```    ``
-   ````   ````    'V^ !zxzx^xjT*>!``    ```    ````    ```    ````   ````    ``<cVP]vxw)v: ````    ```    ````  
-```    ```    ````   ``IioV)*V^r>=  ````    ```    ````   ````    ```    ````  <cIw]x.Lrx``    ````    ```    ``
-```    ```    ````   ``xyV~}r]:**=  ````    ```    ````   ````    ```    ````  :y3Tx~ |vr``    ````    ```    ``
-   ````   ````    ```  :c}`ux(,-v=``    ```    ````    ```    ````   ````    ```.u}x_`r}_  ````    ```    ````  
-   ```    ````    ```   >>`*T)``:```    ```    ````    ```    ````   ````    ````vL*``-~    ```    ```    ````  
-```    ```    ````   ````  `yv``    ````    ```    ````   ````    ```    ````   `"x,    ```    ````    ```    ``
-   ````   ````    ```    ```:_  ````    ```    ````    ```    ````   ````    ``` `_ ````   ````    ```    ````  
+   `")MMLuKuviV*x>=^v^::vr"_:!!~:-":_,!xxLusHGqPjVTir      *zehIRbqqG3qZd5yuuUY)x}vT^~(Y}<~<=:~__=_-=^^*v~:     
+    -GyrPhyLLVu^x~!*x*!^}*=_:!==!_-:::!}}YTVzmIGsmKHWv`   vMqWWGGsU3GZdOdhVuou)))cV}*^)Tu~:~=:~__r!-:;!*:^~   ``
+   `,-`=Hki}Kyu*x~!^v^!vLr~:"::=::-_:!xkTvx}yomaIyhmmI   `kM53GMqaPPPqdR6UyXwv?rvyI}r**l};!~:_>:,^r_:=,~` `'``  
+      `Vhl]oKz}rY|^:*!~vx)<!:!::!"_-,)}l}YYTcwe3XuzW5k    ^M5GMZMGGMbddORMqo}v\|TjyYr;?lxr=~"_~::!^)=<:='    `  
+      `ojTsHVkx)\wr:=*;^x)*!!~!:!!--_*LixxYixLzheykmIV`   !MWGM3Pam3qZZdOdRk}xxxuw}\^^}}v\r!,":,::!~xV==:`    ``
+      :IXsPzcVvr;L|!:x!~ir^!!!~,:~:.-,rvvi)xiTkIahII3u`   -dGWZGo3KmK3MOd6OIuY]]u}xr~vi)v)?<":__!:!!^ov<!`    ``
+      :=zImxlVv<~vv=*}~*}<~=:!!!_!^-`',(vxi}}uwUeahIm?    `wGPWMUeaKm5MdddaVucxiwux^*x*~r*x}^!,,:::!~kVx!    `  
+       `ouT}cVx^<x}*ix^ux^:>:!=::"\=-..=*rxiiXkksqGML.`   ``TG5ZPZ6Z5MZM53ywhTvVki)^x)~=\rvxi~:"!::!!Vku.`    ``
+       `X^_ywVL*>LVrx**iir::^:=:,!v*=--,>vxiu}(iTTV,      ``.YZZ5hME5bZMPIwqjxVzux*vx*!=r*)\vr=:~!:!!xxc'`    ``
+      `   ?zIwYr*xu*Yr<vu)!_*!!:_:~]*~-_vv}}xrxY]L^          `s3mqzMZERORjP3VVzwxYvx\^!>*!rrri^=<~!=!!_}`    `  
+      `  'KeKwxx*x}\x]~rcx=,=*^=__:<)*~,?uxrr)xTxY-           =aGWaK06EEEehVkIzTYl}v|=!^^!?**xv^*;!~=r'`     `  
+       ``\MKKx]Y^xTx\c~*u}<:~r)*:_":(<~vwv<))irxr.    `      ` ~PdqmM8$Q6ekwHzViVVix*!!*=!)*^vr~v^=*^]r       ``
+      `  ~:aKTGu**u}rV*^TV*:*rv\~,,:>^^<!'_vx,!^*``           ``THVGWM*x}mV|Ky}TkLxv~:=*!=r<*)!=rx^)r!=      `  
+      `   !33e3w?^}u\uv~}zx=^^xxr!,!_.*'``r*' ~!'``           ``'*v`wZi`_V_`VV}zkixr=!^(!~*^r*:~^vci)-`      `  
+          _V:~KmYrLw]}}=Ly\>!**uv^!~_     .   `       `      `    ``'|5; '``VwkPu}]*=>^v=^*^(;=><ru:^         ``
+             `HWu?vhYiT=xV]r!;*Li?<~   `      `       `      `        .!    !IKKyVx<~*r=*~~^|=~<^(v      `    ``
+      `      `IPkxvKci}^*}uv;>rv?r^*'             `              `      `   ,m3kcyv~^?*:~=!^r=;^*x)          `  
+   ` `       `~3P}vUsx*i<xyxr=rv,r<^_`  ``             ``     ` `    ``    `!okjyVr^)x~!<!=(*^*^rY~` `    `  `  
+              `vHj]kZT*xv*cVx~~)!=<<,                 `      `              :oI(XYr)l):^*~^v*rv<v}.           ``
+      `      ` !GqVVdIvxY<xz}r=^r.*~_             `              `      `   `Im,yx)xV~=*r^vxr>)*!`           `  
+      `      ` :M}IIdOuv})<uy\;^*`!<,             `              `      `    L"^VixVv~*L*rcYv.:|:            `  
+              `'~`|HM*zvux<vIY*=~` :-                 `      `              `  |u}}j*^x}*v^k*  '-``           ``
+                 `:d)`x}T}r^ykv>~-     `                     `              `  }cVwu)vyvr?`!`     `           ``
+      `      `    'V^ !zxzx^xjT*>!``              `              `      `    ``<cVP]vxw)v:    `              `  
+                 `   ``IioV)*V^r>=     `              `      `              `  <cIw]x.Lrx``       `           ``
+                 `   ``xyV~}r]:**=     `              `      `              `  :y3Tx~ |vr``       `           ``
+      `      `         :c}`ux(,-v=``              `              `      `       .u}x_`r}_     `              `  
+             `          >>`*T)``:                 `              `      `       `vL*``-~                     `  
+                 `      `  `yv``       `              `      `              `   `"x,              `           ``
+      `      `              :_     `              `              `      `        `_    `      `              `  
 	}
 }
 Box compooter
@@ -314,7 +314,7 @@ Box compooter
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int max_num_items 3		
+		int item_max 2
 	}	
 
 	LongString img
@@ -417,7 +417,7 @@ Box edge
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int max_num_items 3		
+		int item_max 1	
 	}	
 
 	LongString img
@@ -512,7 +512,7 @@ Box internet_explorer
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int max_num_items 3		
+		int item_max 5	
 	}	
 
 	LongString img
@@ -594,7 +594,7 @@ Box rubix_cube_mage
 	{
 		string[] items "rubix_cube"
 		float[] item_prob 1.0
-		int max_num_items 5		
+		int item_max 1	
 	}	
 
 	LongString img
@@ -643,12 +643,12 @@ Box rubix_cube_mage
                                                   
 	}
 }
-Box thomas_the_tank_engine
+Box cursed_thomas_train
 {
 	Box quotes 
 	{
-		string[] entrance  "choooo choooo"
-		string[] attack  "chugga chugga choooo chooo" "CHOOO" "CHOOOOOOOOOOO" "CHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO CHOOO CHOOOOOOO CHOO CHOO CHOO CHOO" "I TRAINed HARD FOR THIS BATTLE"
+		string[] entrance  "*menacing train noises*"
+		string[] attack  "chugga chugga chugga chugga" "Ever wonder what happened to my conductor?" "CHOOOOOOOOOOO" "CHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO CHOOO CHOOOOOOO CHOO CHOO CHOO CHOO" "I TRAINed HARD FOR THIS BATTLE"
 		string[] player_run  "chooooooooooooooooooooooooooooooooo"
 		string[] player_victory  "chooo chooo chooo"
 		string[] mob_victory  "train hard so you can beat me next time"
@@ -674,22 +674,23 @@ Box thomas_the_tank_engine
 	}
 	Box drops
 	{
-		string[] drops "living_train" "trainmail_armor" "trainmail_shield" "oil"
-		float[] drop_prob 0.1 0.1 0.1 0.7
-		int[] drop_per 1 1 1 10
-		int drop_max 4
-		int drop_min 1
+		string[] drops "beating_dark_train_heart" "trainmail_armor" "trainmail_shield" "oil"
+		float[] drop_prob 0.04 0.06 0.1 0.8
+		int[] drop_per 2 1 1 10
+		int drop_max 6
+		int drop_min 3
 	}
 	Box items
 	{
 		string[] items "trainmail_armor" "trainmail_shield"
 		float[] item_prob 0.5 0.5
-		int max_num_items 3		
+		int item_max 3
+		int item_min 1		
 	}	
 
 	LongString img
 	{                                  
-					   !P#####QQ##V_                                                                                  
+					                                                                                    
                                            y@@@@@@#@@@@z                                                                                  
                                             :@@##B0Q##<                                                                                   
                                             .@###BEQ##.                                                                                   
@@ -703,40 +704,40 @@ Box thomas_the_tank_engine
                          ~TLvxxxv?))vvxxxxvr*~!!!!xQ############gMwPIIhsXwVwIh3WK9REE0OQ0D6E6OdOd3KIXoo3qKZbbZ6w3dOQ##as)`                
                         !x}uuuT}]\)(viTVL|(xY?^!!!=*g###############gayyywkwwkzVP$D00$DQ0$RD9OOO05aeUhsPGddbbMdk}}}T0#sIx.                
                       `*x}r!"!vTxr**)vv:-:**!L?<:!==^E################ghXXhmKemmKmhKGMZRODEER6OO6DE6dddOOdddd5OkTVVw0#UImHacv.            
-                      <(x!_vHMhu\*^<*L="}###Wwx^!:!=~r#################BRdddbZZZMMsaqGPKesUKHqMZdOO6OOOOdddddMOkGggQB#hIm3Mde`            
-                     :r)x!x####y*>==*w^~V####Pv^=!=~>>Z##################EOddbbZZZmPPaPG55M5555WP333PGqMZddddsIjKEQBB#hIKbO6X`            
-                     r*)V*^uO$w*<~~^^VVvrvcVYx*<~~~<^^V##################B66ddddbZKH3mmKmKmmmmKK3PGq5qqqqGHPPKmmKeOB#$wsmRDEX`            
+                      <(x!x    u\*^<*L="}    wx^!:!=~r#################BRdddbZZZMMsaqGPKesUKHqMZdOO6OOOOdddddMOkGggQB#hIm3Mde`            
+                     :r)x!x    y*>==*w^~V    Pv^=!=~>>Z##################EOddbbZZZmPPaPG55M5555WP333PGqMZddddsIjKEQBB#hIKbO6X`            
+                     r*)V*xx  x*<~~^^VVvrv  Yx*<~~~<^^V##################B66ddddbZKH3mmKmKmmmmKK3PGq5qqqqGHPPKmmKeOB#$wsmRDEX`            
                     `)^^xcT}Tx*^<~=<^rx}}}](*^<>;>^^^*T###################E9OOdddd3H3mmKKKKKKKKKKKKKKKKKKK3PGqqWWW3GZOKKmmKay`            
-                    _vr**rrv}Lx\)r**vxv|?)r****^^^****V###################$R96OOddGH3mKKKKKKKKKKKKKKKKKKKKKKKKKKKaaa3dGGGGGGz`            
-                    -Yxxv?]lVywwwyuxTTYixxxv\)rrrrr)))b###################$ER9OOOOqGamKKKKKKKKKKKKKKKKKKKKKKKKKKK3aa3OPKKKKKw`            
-                     xT}}TVyVTVVu}xvLcyVu}Yixxvvvvvvv]#################@@#00ER9666MG3KKKKKKKKKKKKKKKKKazaKKKKKKKK3K33OPKKKKKw`            
-                     .TccVVVkyT}}TluVkkuucu}Yixxxxx]LE@@###@#@@@@@#@@@@@#Q$0DERRR6MGPKKKKKKKKKKKKKKKKKhi3KKKKKKKK3aa3OPKKKKKw`            
-                      -}ccullykwyVVc}Y}}TTT}YLiLY}}T$@@@@@@@@@@@@@@@@@@@Qg$$00DEERZPMMMMMMMMWKKKKKKKKK3Y3KKKKKKKK3aa3O3KKKKKw`            
-                       .LuTTTlcVVycTYLLLLLLLY}TucVy8@@@@@@@@@@@@@@@@@@@#QQ888888ggEdZZMM5qWaGKKKKKKKKaaY3aKKKKKKK3333d3KKKKKw`            
-                        `^T}}Yixxxxvvvxxx]LTcyzjXZ#@@@@@@@@@@@@@@@@@@@#################BBQg5GKKKKKKKKKeLeaKKKKKKK3a33OPaaaKKk`            
-                          '~}uTYLiiiLLYTuyXaGMZ$#@@@@@@@@@@@@@@@@@#Q06dZM5H3KehhK33GdgQQ8g$qqKKKKKKKKaKImaaaaa3aa333PO3KKaaak`            
-                            `r3ameemK3G5MdOD8#@@@@@@@@@@@@@@@@@@B06dZMGP3amhXKGH3Ka3GGGDgg$qqaKKKKKKaaaaa33aaKaa3P33POPKKaaak`            
-                           .cddO6REDB#####@@@@@@@@@@@######@@@#$OdZMqGPaKmIUGKhUUssUsmGPd$$WWaaaaaaaaaa3333aaKa33P33POG3aKaak`            
-                          ~PddO6RE08#@@@@@@@@@@@@@@@@#####@@@@0OdZMqWP3KmjsqsUseeesUsemPH6$5qa33KaaKaKKa3aaKKaaaaP33POG333PPz`            
-                         ~ddO6RD$$Q#@@@@@@@@@@@@@@@@@####@@@@0OdZMqWHP3azUqeesUUUsseeemmGH0W53PPHGWq5MMMMMMMMM5M5M3KKZKKmKKaI**r*         
-        ``!"!..`        ^Q####@@@@@@@@@@@@#@@@@@@@@@@##@@@@@Q6OdZMMGGHPIhqPPHGGGGWWW555MMWd5GM5G3msIIIhsmKK33PWqMMZZORE00$$$$$$$M         
-      "kZz=_,":=,!~<^*Vg##@#@#@@@@@#BQ############@####BB##BE9OdbZMMWGHoePPPKeIjkwwkzXhsKaPHGW5MMdOR000$$$$$$$$$$$$$$000$88QQBBQM         
-      xUdbz:=;^rvxyUqg##@@#@#B#Q5yLxx6#########QMD3v\())rrrrrrrrrrrrrrxVs3PGMZO9D0$$$00000000$$0$$$0$00$$$$g88QQQBB#Q$60QB@@@@@BM         
-      ,i3a}x)r)dOk}id@@@@@@@#BIxvv|vZ########ET()gb***^^<<<<<;;~~~~=vH0$$$$$$$$$$$00000000$$$$$8gQQQQ##@##@@@###Q###8$$ER0B#@@@BM         
-       :iuyT^*aEvLcyQ@#@@@@#6#cvv]lc########k\)r*gZ^^^<><<>>;~~~~~>z0$$00$0$000$$$8QQBBBB#########QBQ#@@BQ$EM3UwmB#Q$ggQQQMqZdO0o         
-      `"rvx)^*E5smzyQ@@@@@8uV#c}VVVV#####@g]?rr**$d^^<<<<<<>>;~~~(M000$$gQQQB#B####@@@@@#@##Qgg0ZazMecT}YLiYuz3ZZQBQdPGGIu,               
-:cuuuVVlic}ii}PQyyVVQ##BB6}]w#GyyVVV####@gi(r****gd^^^^^<<<>>>~~vD$00$QB#B#Bg$O6$Q0$$6ZKkuYLY}}}IsG$Gaq0QBBQBQRQQQ8$x                     
-^8888888QQQ8Q88#Q0E66dZMPaKmZdPwwyyy$0ZPzL]v(rrrvQ$r**^^^^<<<>~\D$$$gBQB###acKPsii]xxxxxLczI3WD88EKR$B0QBBBQRRR$QBBD)                     
-088888g8Q8$88QQQ#BQQQQQQQQQQQ88888g8888gg$E6dZqGGMGzyVu}LxYuyo3D$$$$g$#8g#BwcEMM}kK3dQB###Q0#B0ZZbMR0D9QB##QOd6E$B$Z:                     
-#QB#8$$$$Q0QQQQQQ##QQBBQBBQQQQBB#BBQ8888QQQQ888888888888g$0$000000$8Eg##8$#KismVOBB$g@BQBBQER666MZdQBgdZB###OddDg86a`                     
-####BBBBBBBBQQQQQ##B##B##BBQB#######BQ8gg$$ERg8QQ88888888g$$00000$Q8DQ$0$DRRMbbD8$0D$@BQ#BBE9dZ9Od$#gd5rB###$OOED0Z(````                  
+                    _vr**rrv}Lx\)r**vxv|?)  ****^^^****V###################$R96OOddGH3mKKKKKKKKKKKKKKKKKKKKKKKKKKKaaa3dGGGGGGz`            
+                    -Yxxv ]lVywwwyuxTTYYxx v\)r rrr)))b###################$ER9OOOOqGamKKKKKKKKKKKKKKKKKKKKKKKKKKK3aa3OPKKKKKw`            
+                     xT}}T yVTVVu}xvLcYVu Yixxv vvvvv]#################@@#00ER9666MG3KKKKKKKKKKKKKKKKKazaKKKKKKKK3K33OPKKKKKw`            
+                     .TccVV kyT}}TluVYku cu}Yix xxx]LE@@###@#@@@@@#@@@@@#Q$0DERRR6MGPKKKKKKKKKKKKKKKKKhi3KKKKKKKK3aa3OPKKKKKw`            
+                      -}ccull           TTT}YLi Y}}T$@@@@@@@@@@@@@@@@@@@Qg$$00DEERZPMMMMMMMMWKKKKKKKKK3Y3KKKKKKKK3aa3O3KKKKKw`            
+                       .LuTTTl VVycTYL LLLLLY}T cVy8@@@@@@@@@@@@@@@@@@@#QQ888888ggEdZZMM5qWaGKKKKKKKKaaY3aKKKKKKK3333d3KKKKKw`            
+                        `^T}}Y xxxxvvv xx]LTcyz XZ#@@@@@@@@@@@@@@@@@@@#################BBQg5GKKKKKKKKKeLeaKKKKKKK3a33OPaaaKKk`            
+                          '~}u YLiiiLL TuyXaGMZ #@@@@@@@@@@@@@@@@@#Q06dZM5H3KehhK33GdgQQ8g$qqKKKKKKKKaKImaaaaa3aa333PO3KKaaak`            
+                            `r ameemK3 5MdOD8#@ @@@@@@@@@@@@@@@@B06dZMGP3amhXKGH3Ka3GGGDgg$qqaKKKKKKaaaaa33aaKaa3P33POPKKaaak`            
+                           .cd O6REDB# ###@@@@@ @@@@@######@@@#$OdZMqGPaKmIUGKhUUssUsmGPd$$WWaaaaaaaaaa3333aaKa33P33POG3aKaak`            
+                          ~Pdd 6RE08#@ @@@@@@@@ @@@@@#####@@@@0OdZMqWP3KmjsqsUseeesUsemPH6$5qa33KaaKaKKa3aaKKaaaaP33POG333PPz`            
+                         ~ddO6 D$$Q#@@ @@@@@@@@ @@@@@####@@@@0OdZMqWHP3azUqeesUUUsseeemmGH0W53PPHGWq5MMMMMMMMM5M5M3KKZKKmKKaI**r*         
+        ``!"!..`        ^Q#### @@@@@@@#@@@#@@@@ @@@@@##@@@@@Q6OdZMMGGHPIhqPPHGGGGWWW555MMWd5GM5G3msIIIhsmKK33PWqMMZZORE00$$$$$$$M         
+      "kZz=_,":=,!~<^*Vg##@#@# @@@@#BQ######### ##@####BB##BE9OdbZMMWGHoePPPKeIjkwwkzXhsKaPHGW5MMdOR000$$$$$$$$$$$$$$000$88QQBBQM         
+      xUdbz:=;^rvxyUqg##@@#@#B Q5yLxx6######### MD3v\())rrrrrrrrrrrrrrxVs3PGMZO9D0$$$00000000$$0$$$0$00$$$$g88QQQBB#Q$60QB@@@@@BM         
+      ,i3a}x)r)dOk}id@@@@@@@#B xvv|vZ########ET gb***^^<<<<<;;~~~~=vH0$$$$$$$$$$$00000000$$$$$8gQQQQ##@##@@@###Q###8$$ER0B#@@@BM         
+       :iuyT^*aEvLcyQ@#@@@@#6#cvv]lc########k\) *gZ^^^<><<>>;~~~~~>z0$$00$0$000$$$8QQBBBB#########QBQ#@@BQ$EM3UwmB#Q$ggQQQMqZdO0o         
+      `"rvx)^*E5smzyQ@@@@@8uV#c}VVVV#####@g]?rr *$d^^<<<<<<>>;~~~(M000$$gQQQB#B####@@@@@#@##Qgg0ZazMecT}YLiYuz3ZZQBQdPGGIu,               
+:cuuuVVlic}ii}PQyyVVQ##BB6}]w#GyyVVV####@gi(r** *gd^^^^^<<<>>>~~vD$00$QB#B#Bg$O6$Q0$$6ZKkuYLY}}}IsG$Gaq0QBBQBQRQQQ8$x                     
+^8888888QQQ8Q88#Q0E66dZMPaKmZdPwwyyy$0#PzL]v(rr vQ$r**^^^^<<<>~\D$$$gBQB###acKPsii]xxxxxLczI3WD88EKR$B0QBBBQRRR$QBBD)                     
+088888g8Q8$88QQQ#BQQQQQQQQQQQ88888g888#gg$E6dZqGGMGzyVu}LxYuyo3D$$$$g$#8g#BwcEMM}kK3dQB###Q0#B0ZZbMR0D9QB##QOd6E$B$Z:                     
+#QB#8$$$$Q0QQQQQQ##QQBBQBBQQQQBB#BBQ88#8QQQQ888888888888g$0$000000$8Eg##8$#KismVOBB$g@BQBBQER666MZdQBgdZB###OddDg86a`                     
+####BBBBBBBBQQQQQ##B##B##BBQB#######BQ#gg$$ERg8QQ88888888g$$00000$Q8DQ$0$DRRMbbD8$0D$@BQ#BBE9dZ9Od$#gd5rB###$OOED0Z(````                  
 #OXPMO08QBBBBBBBQQB#B#B##B#B#########B#8$gg8QQQQQ88888888g$$0008QQQ80#BQ$dZWdWdQBBQ6$@#Q###$ZOddO0B0D5UrD#@@#RMqMMz__--...'``````         
 ]_--____:!<*(xYuyM####BB###B###########BBBBBBBQQQ888Q8888g$$$08BBBBgd9E66OOWMWE$gQgbE0QB###QddOd6Q8QMZjzGB@@@#gRZu::,,___--...''``````````
-______________,_,~#@@@B@@@#@@#########BBQQQQQQQQQQQQ88888g$$$$QBBBB8R0RdZOEdMED##gdMMm3B####0dOZZZq5ZhwwkzsPKcv>!:",,___--....''``````````
-__________,,,,,,"YI6@##@@@#@@@@#####@@@@@@@@######BB6d90$$9ZGOQB##BQddZOdddRgDBE8DGdekks#@@@#8bMMMZdi=!!!::::",,____---.....''````````````
+______________,_,~#@@@B@@@#@@##########BQQQQQQQQQQQQ88888g$$$$QBBBB8R0RdZOEdMED##gdMMm3B####0dOZZZq5ZhwwkzsPKcv>!:",,___--....''``````````
+__________,,,,,,"YI6@##@@@#@@@@#####@@#@@@@@######BB6d90$$9ZGOQB##BQddZOdddRgDBE8DGdekks#@@@#8bMMMZdi=!!!::::",,____---.....''````````````
 ____,,,,,,,"""":rdw(d#######@@@@@@@@@@@@@@@@@@@@@@@M??\vxL]iYkBB###BRd6db9dR8RB#EMM6bqWGE#@@@@BgRMV*::::,,,____----......''```````````````
 ,,,,,""""":::::~5QB####u}VjzyUGdDgQ#@@@@@@@@@@@@@Qw]LY}}lcVVyz8B####8ddbRdE90DZdMMPzjjoIIUKH3hTv<!:",,____-----......'''``````````````````
-,"""::::::::!!!!!=~=>?$~;<<^^^^***rrYGB@@@@@@@#QZIUmKKa3333PPPMB#####gbdb55GGqMMdo<~~===!!::::",,____-----.......'''''````````````````````
+,"""::::::::!!!!!=~=>?$~;<<^^^^***rrYG@@@@@@@@#QZIUmKKa3333PPPMB#####gbdb55GGqMMdo<~~===!!::::",,____-----.......'''''````````````````````
 ""::::::!!!!!!==~~~><r0^****rrr)?\vvxLTUd0888$R966OOOOdddddbbbZqB##@##86ZMMMMZdO}=!!::::",,,,____-----.......''''`````````````````````````
 ,::!!!!!===~~~><^^^**|0r))|\vvxxiL}uVyLv(r|YczKqZZqIMZbbmMdddMdMOQ#@@@@#Qg0D6mL~!::"",,_____-----.......'''````````````````````````````               
 	}
@@ -746,7 +747,7 @@ Box sir_george_washington_bastion_of_honour
 	Box quotes 
 	{
 		string[] entrance  "I challenge you to a duel of honour!" "are you a trump! Us jayanth knights shall prevail with honour and valor" "yes. the sir means I am a knight"
-		string[] attack  "perish trump!" "feel my magic!" "I fight for peace, honour, and dragons" "I am a knight yes thats right" "your grammar was wrong with that attack" "I am going to beat you like te british" "I am the constitution" "1st president, 1st victor"
+		string[] attack  "perish trump!" "feel my magic!" "I fight for peace, honour, and dragons" "I am a knight yes thats right" "your grammar was wrong with that attack" "I am going to beat you like the british" "I am the constitution" "1st president, 1st victor"
 		string[] player_run  "it is okay. Don't be afraid to run"
 		string[] player_victory  "you have beaten me! Have my honour!"
 		string[] mob_victory  "honour has won again! begone trumper!"
@@ -772,7 +773,7 @@ Box sir_george_washington_bastion_of_honour
 	}
 	Box drops
 	{
-		string[] drops "honour" "valient_washingsword" "never_told_a_lie" "wig" "george_washingtons_clothing" "george_washinghead"
+		string[] drops "honour" "valiant_washingsword" "never_told_a_lie" "wig" "george_washingtons_clothing" "george_washinghead"
 		float[] drop_prob 0.1 0.1 0.2 0.2 0.2 0.2
 		int[] drop_per 20 1 1 10 1 1
 		int drop_max 10
@@ -780,9 +781,10 @@ Box sir_george_washington_bastion_of_honour
 	}
 	Box items
 	{
-		string[] items "valient_washingsword" "george_washingtons_clothing" "never_told_a_lie"
+		string[] items "valiant_washingsword" "george_washingtons_clothing" "never_told_a_lie"
 		float[] item_prob 0.3 0.3 0.4
-		int max_num_items 3		
+		int item_max 3
+		int item_min 1		
 	}	
 
 	LongString img
@@ -851,7 +853,7 @@ Box enigma
 	Box quotes 
 	{
 		string[] entrance  "what am I?" "I am omnipresent" "Hello. I am the mob that killed you in battle approximately... right after this battle"
-		string[] attack  "I am everywhere" "I have foreseen the end of this battle" "I know your future..." "
+		string[] attack  "I am everywhere" "I have foreseen the end of this battle" "I know your future..."
 		string[] player_run  "run"
 		string[] player_victory  "you have beaten me! Have my honour!"
 		string[] mob_victory  "I knew this would happen"
@@ -939,5 +941,765 @@ Box enigma
                            ```````'''.........-_,_-.'''''''`'''```````````              
 	}
 }
+Box literally_jayanth
+{
+	Box quotes 
+	{
+		string[] entrance  "hello sirrrrr" "can we fite later sirrr, I only got three hours of sleep" "Go away I am tired sirrrr"
+		string[] attack  "I fight for HONOUR!" "meh" "drugs are so good... In small quantities" "feel the burn of my slap"
+		string[] player_run  "You have no HONOUR!" "Sirrrrr... you are to fest for me sirrrr" "Alas! Chivalry is dead!"
+		string[] player_victory  "Did you really just win. Atleast I still have my honour You might have won the physical battle, but you lost the mental war. Relativistically speaking this was a loss for you. Listen up, you just have speed. Did you know that sloths used to be fast but now they are slow. Sloths used to be faster than Cheetahs. You are like a Sloth. You will slow down once you realize it is too much work. I bet you didnt even read this whole text. Well, if you did props to you because I wrote it without thinking of anything just plain typing. Oxford dictionary is so great. It provides proper rules and grammar to everything. And those grammar rules state that it is impossible for you to have beaten me, therefore I win so suck my oranges. I am running out of things to type about so I hope you enjoyed my big beautiful dissertation."
+		string[] mob_victory  "I'm going to sleep now ZZZZZZZ"
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 1
+		int energy 10
+		int energy_regen 1
+		float agression 0.01	
+		int physical_dmg 1
+		int magic_dmg 2
+		float physical_def 0.01
+		float magic_def 0.2
+		int max_items_steal 2
+		float looting 0.000001
+		float intelligence 0.9
+		float special 0.99
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "oxford_dictionary" "dragons_blood" "physics_homework" "honour"
+		float[] drop_prob 0.1 0.1 0.799 0.001
+		int[] drop_per 2 2 1 25
+		int drop_max 3
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "oxford_dictionary" "physics_homework" "honour"	
+		float[] item_prob 0.5 0.4 0.1
+		int max_num_items 2		
+	}	
+
+	LongString img
+	{
+$mM3OZgd68QQ8D8QgdQ#@@@@#M$@@@@@@#gGkiyZ8###E###@#@#g#@@@@@####@##@@@@@@@#@
+Bzzm3PBQd#Q8Qgggg8@@@@@#EGQPOQ60c?}Vzix))zMPdRVGKd#$B@@@@@@##@@@###@@##@@@@
+$6bsK50QO#Q$8808###@B#8bIL}vr?((rrxzGmO03UmkvuYvryPZQ#B#@@@##########@@@#@@
+806mxuz#QgE$Q8Eg$g88Mjv=!>*~*TjdOM5KzV#@@@@#BgQOgM9ayPEQ##@@@@@@######@@@BB
+9$9GV0gO6RE88bM0zur^^*u*VO}T8Q#@@@##@B##@@@#@@##BQQ##QOMPRQME@@#@@@@@@#@@RE
+mm$dq$BQDg#BP\?~~<x}X88R$Q$Z@@@@@@B#@##@@@@@@@#@#BBBBBQ88Qg8O9qdg#Q####Bsyd
+mwGQ8#bQQE9y*!!^vOwUR##B@#8#@@#E#@@@@@@@##@@@@@@@@#######BBBB##DOPZy0#8Q$jT
+8QBQQQRQ8x~!!=)i}zhmOM$Z0E#@@@#@@@@@@@@@@@@###@@#@###BB####B#@@#B8OZOQPM##Q
+Q86QgBBdr!~*<!YzvUuIO9$ZuB@@@##@@@@@@@@@@@@@@@@#######BBBBBB#@@###BQDdVXR88
+$Q3M885T=**>xr6$$@#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@@#####B8B@@@@@##BQgM\Yz
+kYVO#bv=~wM3qqOB8##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@#B#@@@@@@##BQgKIV
+0UYyV~,:(ij3OPEB###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#@@#@@@@@@@@@@#QgQ#
+3M}xv*(xxTsyGg####@@@@@@@@@@@@@@@@@@@@@@@@@@##@@@@@@@@@@@@@@@@@@@@@@@@#BQQ#
+3kuYrxukmOMOg8##@@@@@@@@@@@@@@@@@@@@@@###@@#@@@@@@@@@@@@@@@@@@@@@@@@@#@@#BB
+zy}*>)LvTV9MK60Qg88QBB##@@@#######QQ88O60QQQQBB###@@@@@@@@@@@@@@@@@@@@@@#BQ
+80VL)xi^*x"_\yqZMGahXzXIaZ53KaPGG3KmIzyywzsjUXXq6O$8Q#@@@@@@@@@@@@@@@@@@##B
+D8T*xxx^<.```.rI33mIzyyVVuuVVVyyVyycu}uwT}Yi}}}VVyXGd$Q#@####@@@@#@@@#@@##@
+@#zYvTY*.````!uPqqPmIzyVyuuT}}TuuT}}}}uu}LixxiYuY}Vhhb8BBQQB#@@@@@@#B###@@@
+@@#aMP?:'````xhPP3mXkyVVVcuT}T}}}YYY}T}YLixvxxYu}TuVjqb5yK0B##@@@@@@@@@@@@#
+B@@##0c~'```:VaP3KhzwVuuuuTTTT}}}}Y}Tu}Yixxxxxxxxxixi}xv?Tg8Q#@@@@@@@@@@@#Q
+V39#@@@z:'`'.iVXsjzyVu}}}}}YY}}Y}}TTT}xxxxxxxxxxxxxv?rrr*rTM$8QB@@@@@@@@#QQ
+V(}uD##gc=_.'*}ywyyVu}}YYLLiY}TT}}}Lxxv??\)?vvvvvvv?))rr*r(cO8Q####@@@@####
+x)r<xzx}GPXyVmamhXkVcT}YYiiiiiLYY}}xv(rrrrrr)))(()??()))r*rvkgB#B###B#@B##B
+3*~)u)-*E@@#####BQ8$bIVVu}Y}}Yixxix\??)rr(xvvxvxvvv\rrrrr**rT9#@##########Q
+sx!*5=`~m#@###@@@@@@@#gO5kVVVu}YiY}TVjM690$DRE$RORMPyi(***^*\P#@@@#@@@####Q
+GRQgUx*:vOg$06D08Q##@@@#QOPmhwVuckGO$Q#@@@@@##BBQQ$g80Oayx*^^rh#@@@@@##B#gg
+zEQM==^`_a9$$d9$$$g8QQB###Q80OMPM60gQQBQQQ80OZZ5PGOOO6OMGz)<<^r$#@@@@@@@BBB
+ixVwz}x*xO$D98QQgD9Dg8QB#@@@##BBQk5E8QQQQQg0RbMazyyVVyG80Oy*^^rE@##@@#@#BBQ
+yGxvZqszQ@#B8E##B#gOg$$QB#QOj}uUZ}ZDgQB##BQQ8gDMMD95GGmd8Q8zy!>B@@###@@#gsk
+0xxym9u `(d##Q8QBB008##EQQ0Vxr*TgIbOEQ##QGB@##8UG9gQ6GM8zyUbRO3b#@@@@@@BGv)
+$=TVV8r  Y$$QB#BBQQBE5PKQZyxr>!!wOmOO$QBBBBBBQ9GKqdZ3VVELv))vxd@##BQOXUYswk
+8~uyrU~'.idOOMO003ur!<?8EI}\*~!:=hK3a3qO$QQQQQgO55azVYM3v\rrr(ygwxxx(G8M*g@
+#\x}'_"--,^YwzVuxxVUd8#$GVxr^>=!!!IIuzkwkjmaPPP3mXuLvTO(\\))))r*r)r<^yZG(E#
+QZ=i'   '^ucu}Y}zZ9gBB0bPuxr^<~~~=*mqGKy}YTucVyVuT}VUPxr))(?\\(vvGT*<z0Ti5P
+$BEr.  `)yIXycuVymEQMzyvvTx(*<>>^^^<?UgOGPIywyVVVy}i)*r))?\vxx\xTGMu*cO(wMM
+PbZG:`'(3qaXwcVkKg#gsIc..}Lr>~=~~=!::^OEdhVxv)rr******r?vvxxix?r\}mjrwVxuVz
+s3PG)._yDdqKhyymdgQBBB#QZOmYr*rxTcwcxxym$gMzux)rrrrr*r)vxxiLxv?\v}Pu)VvuhXz
+aGqZy."i$$OMGGb$g$D08Q#@@#Q63aMMKzVLvvica$QR5X}xvv\?(\viL}Lxv\xdVvxxTxuGKsh
+GObGP_'*OQ0OO68BQgER9OEg8g8QQ$Gwu}ixv()xVZB#8OKku}YiiYY}}}ixv\c}i(Y}xumKsmP
+GMM5Ov`-LQg9dZ$QBQgROOOEEbGKmUVix\)r**r?iyZ##$O5skcuyyuu}ivvvvx?\vr?yIkmKPM
+Pb555w:`!b89M3GdQ#@@#E09g9EEZGUhyyy}}}VKR8Q8BdayuTcuVV}Lxv?\iUvrr*\zKhhP5OM
+aZMqdm}`"LQ$dPPMdEgQ#6svi^=*^:"~":*")vK9$gQ8EUcTYiTTu}iixv\)M#9yyXKmKmmGP3M
+MMZM6Mg~,LdQ$ZZdMMdOObZzjYvui))x*\irLxv?ihOR5zTYiY}T}Yiiv\((Q#8PGZam3PaPMPP
+dGdb9GQO"?gBQ099OZbddb5Xu}}Yv)r**^^*^^*)vuaMPyTY}T}}}YYLxv?vQQ$PmUammbZGa3G
+dOOOEMQB5,vQB8$$$6dOOO96bObPUkuixvrrr)\vxuhmXVYYTuuu}YYLxv?v$$QGMP5PMdZPGq5
+PEORgOQ#Bd,>POB8$DddOOdddd96dMmyTYxxxiiiYcwyu}}TuVVuTT}Yxv\xd0QPMGMqqqqq5MM
+MEOMg$8##$y~!^)Um5d55MM53szyyyyu}YY}Yxxx}Tuu}uywwyVcuT}Lxvvx:._-":!<uZZ55bO
+ZRED$bQ##$IP*:!_'-=V5MGaju}TTT}LxxiLxxxxi}uucywIjwVcuT}ixvxxxr*^)>`.:V6Od9M
+OE0099Q##$aGbx":'_:idZGmkuVyzyVu}iixLLiiiuVyykjzwyVVVuYxxxxiVMPki_-!==KOZ9u
+0E880EB@#8PMbd3<=_!yBgOqIzsqMPhkVuT}uuTTckIIzXhzkyyyVTYiiiL}}PgQTrr^~=^ruP\
+8EQQOO###QPOOZOV.<xIQ#BgO9DggDObqKmKIzhm3aKmshIjzzyyu}LiLLYTVU$6Yr^^<^^*iY(
+6Gg9}MBRZ8KOdOP,`'=OQBBBQQQQQ88$E6OdbddbMMqKUXjzzzyVu}YY}}TczRB}(*****r**vT
+Mb5MymygbbzMgO~-=-_"I###BBBBBBQQQQg$0EdZ5MMmXzjIzyVVuTTTuuVzD8Vr**rrrr))rrx
+qDXP5mkD$dX6Qu-<T:,_,z###BBQQQQQ8$0D6dMGaKsjjjjjyVcywcuTuVI$6Y)rrrrr)vvv\(vTK	
+	}
+}
+Box bank_vault
+{
+	Box quotes 
+	{
+		string[] entrance  "rob the bank! you can do it"
+		string[] attack  "combination incorrect. Try again"
+		string[] player_run  "police were coming! good decision to run."
+		string[] player_victory  "you got the combination right. It was 17-17-17-17"
+		string[] mob_victory  "you couldnt unlock the safe in time"
+	}
+	Box stats
+	{
+		int health 50
+		int speed 0
+		int dmg 1
+		int energy 10
+		int energy_regen 1
+		float agression 0.01	
+		int physical_dmg 1
+		int magic_dmg 2
+		float physical_def 0.01
+		float magic_def 0.2
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0.9
+		float special 0.99
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "bronze_coin" "silver_coin" "gold_coin" "the_journey_was_the_prize"
+		float[] drop_prob 0.15 0.1 0.05 0.7
+		int[] drop_per 1 3 10 0
+		int drop_max 1
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "bronze_coin" "silver_coin" "gold_coin"	
+		float[] item_prob 0.5 0.4 0.1
+		int max_num_items 2		
+	}	
+
+	LongString img
+	{
+,#((((((##(########################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#.         
+ *//////(################%%&%%%%%%%%&&&&@@@@@@@@@@@@@@@@@&&&&&%%%%%%%%%&%&&&%%& 
+ ////////////*@,,,,***//*///////(/((((((((((((((###########%##%%%%%%%&&&&&&%%%& 
+ ////////////*@***//(###%%&@&@@@@@@@@@@@@@&%%##(((#####%#%%%%%%%%%%%%%%%%%%@%&& 
+ ////////////,@*/*&@//(((((((((((((((((#(((((##########%%& %&&#.,*%/@.,,(,%@%&& 
+ *///////(///*@///@@/(((((((((((((((((((((#(#########%%&%%%%%%%%%%%%%%%%%%%@%&& 
+ ///((((/((((*@/(/&@(((((((((((((((((((#((#############%%%%%%%%%%%%%%%%%%%%@&%& 
+ /(((((((((((*@/((@@(((((((((((((((#((####(#########%##%%%%%%%%%%%%%%%%%%%%@@ .%
+ /(((((((((((/@(((&@((((((((((((((((##(########@@@@%&#%&&%%%%%%%%%%%%%%%%#@@&(% 
+ *(((((((((((/@(((&@((((((((((((############@@@%#/#(##%&&/#%%%%%%%%%%%%%%%@@&(% 
+ *((((((((##((@(((&@((((((##(#######@@@&######(/(**@((%%&&&#%%%%%%%%%%%%%%@@&(% 
+ ,(((((((####(@#((&@(#%%&&&&&%&&%####%%%%%%%#(##@@/&&%&&&@&&#%%%%%%%%%%%&%@@&#% 
+ .((((########@###&@#%@@@#######%%%%%%%%%%%%##/%@@&&&&&%(%&/%%%%%%%%%%%%%%@@@#% 
+ .((##########@###&@#%%&&%%%%%%%%%%%%%%&&&%%#%%/@&@@@%%&&@ &%%%%%%%%%%%%%%@@@#% 
+  ##########%%@###&@##################%@@&&&&&@%#(%%%&./,%%&%&%%&%&%%&&&&%@@@#% 
+  ##########%%@###&@##############%#%#%%%@&&&&&&&&%%%%%%%%%&%&%&%&%&&&%&&&@@@#& 
+  ########%%%%@###&@#############%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&%@@@%& 
+  #######%%%%%@%##&@##%##%%##%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&%@@@%& 
+  ###%#%%%%%%%@%%%&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&&&%@@@%& 
+  %%%%%%%%%%%&@%%%&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&&&&%@@@%& 
+  %%%%%%%%%%%&@%%&&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&&&&&&&@@@%& 
+  %%%%%%%%%%%&@&%%&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&&&&&&&&&&@@&&.
+  %%%%%%%%%%%&@&&&&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&&&&&&&&&&&&&&&&&&&&&&&&&&@@&@ 
+   #&&&&%&%&%&@&&&&@%%%%%%%%%%%%%%%%%%%%%%%&&%&&&&&&&&&&&&&&&&&&&&&&&&&&&&@@@@@ 
+     &&&&&&&&&@&&&@@%&%%%%%%%&%%%&%%%%%%%%&&&&&&&&&&&&&&&&&&&&&&&&&&@&&@@@@@@@@ 
+      &&&&&&&&@&&&@@%%%%%%%%&%%%%&&&%&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@ 
+        &&&&&&@&&&@@%%&&%%%&%%%%%%&&&&%&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@&%&@@@@@@@ 
+         &&&&&@@&&@@&%&&%%&%&&&&&%&&%&&&&&&&&&&@@@@@@&#%&@@@@@&&@@@@@@@@@@@@    
+           &&&@@&&@@&&&&&&&&&&&&@@@@@@((&&&@&&&&&&&&&@@@@@@@%                   
+            &&@@&&&@@@(*%&&&&&&&&&&&&&&@@@@@@(                                  
+             #@@&&&@&@@@@@@@@@*        
+	}
+}
+Box human_person
+{
+	Box quotes 
+	{
+		string[] entrance  "erm please don't harm me. Run away. please :("
+		string[] attack  "MWAHAHHAHAHAHHAHAHAHHAHHA YOU HAVE AWOKEN A GOD" "YOU WILL FACE IMMINENT DEATH" "I AM ACTUALLY A ROBOT HERE TO TAKE OVER THE UNIVERSE"
+		string[] player_run  "thank you for not harming me kind soul."
+		string[] player_victory  "deactivating..."
+		string[] mob_victory  "Beep boop. Soon robots will take over the universe"
+	}
+	Box stats
+	{
+		int health 1000
+		int speed 20
+		int dmg 8
+		int energy 100
+		int energy_regen 10
+		float agression 0.99
+		int physical_dmg 10
+		int magic_dmg 20
+		float physical_def 0.9
+		float magic_def 0.2
+		int max_items_steal 100
+		float looting 0.999999999999999
+		float intelligence 0.9999999
+		float special 0.1
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "robot_brain" "robot_heart" "robot_soul" "robot"
+		float[] drop_prob 0.05 0.05 0.05 0.85
+		int[] drop_per 1000 1000 1000 20
+		int drop_max 2
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "robot_brain" "robot_heart" "robot_soul"	
+		float[] item_prob 0.5 0.4 0.1
+		int max_num_items 2		
+	}	
+
+	LongString img
+	{
+	        (honour is goood)	     
+                    |(O--O)|
+		       ||
+	       (w)-----||-----(w)
+		       ||
+                      |  |
+                    <|    |>
+		(honour is great)
+	}
+}
+Box physics_homework
+{
+	Box quotes 
+	{
+		string[] entrance  "Isaac Newton said that he couldn't solve me"
+		string[] attack  "wrong" "you clearly do not know any physics" "No dude that answer is incorrecto" "jeez this is taking forever what are you jayanth" "you are going so slow. Just finish the problem already JAYANTH!"
+		string[] player_run  "procrastination may be a good short term solution but eventually you will need to solve me"
+		string[] player_victory  "you solved it!"
+		string[] mob_victory  "toooo slowwww the deadline already passed, JAYANTH!"
+	}
+	Box stats
+	{
+		int health 100
+		int speed 1
+		int dmg 1
+		int energy 1
+		int energy_regen 1
+		float agression 0.2
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0.1
+		float magic_def 0.1
+		int max_items_steal 1
+		float looting 0.01
+		float intelligence 0.8
+		float special 0.1
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "newtons_laws" "the_meaning_of_the_universe" "A+" "B+" "C-" "D+" "F"
+		float[] drop_prob 0.1 0.1 0.1 0.1 0.2 0.2 0.2
+		int[] drop_per 1 1 1 1 1 1 0
+		int drop_max 1
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "newtons_laws" "C+" "the_meaning_of_the_universe"	
+		float[] item_prob 0.5 0.4 0.1
+		int max_num_items 2		
+	}	
+
+	LongString img
+	{
+A ball is launched at an angle of 45 degrees above the horizontal with an initial velocity of 1000 m/s. 1 secod after the ball reaches its vertex what is 
+	a. the amount of drag force on the ball
+	b. the remaining time before the ball hits the ground
+	c. the ball's mass
+	d. the meaning of life
+	}
+}
+Box god
+{
+	Box quotes 
+	{
+		string[] entrance  "I am god"
+		string[] attack "NOOOOOOOOOO" "I THOUGHT YOU WOULD RUN!!!!!" "I THOUGHT YOU WOULD FEAR ME!!" "TRUMP IS GOING TO GET YOU BIGLY! YOU BETTER WATCH OUT"
+		string[] player_run  "smart."
+		string[] player_victory  "you are now the true god. All bow down to you"
+		string[] mob_victory  "idk how this happened but if it did you are a dirty dirty hacker"
+	}
+	Box stats
+	{
+		int health 100
+		int speed 0
+		int dmg 1
+		int energy 1
+		int energy_regen 1
+		float agression 0.2
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0.1
+		float magic_def 0.1
+		int max_items_steal 1
+		float looting 0.01
+		float intelligence 0.1
+		float special 0.3
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "sins_of_humanity" "the_meaning_of_the_universe"
+		float[] drop_prob 0.5 0.5
+		int[] drop_per 2 1
+		int drop_max 1
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "sins_of_humanity" "the_meaning_of_the_universe"	
+		float[] item_prob 0.5 0.5
+		int max_num_items 1		
+	}	
+
+	LongString img
+	{
+3P33aKmemKKeshXIhssUUmmUssIm333HqqGGHKKGqMqHWWqGGMWqGWGqM55P5ZMqMMZddddddO6OOddbdZMbZWGGqHPHHGGGPPGGqMMZZMMZZZZddZddddOO66RRR99RRRRRR9EEEDEEEER9R6OOOOddOOdddddbbZZMMMMqWGGGP33aaaKKKmseesUhIIIIX
+3KKmsesKmesmeshIUsIIUsma3KmeaKKa3PGq55GHGHPqWGW55MMZZZMZZZZZdddbZZdbbZMMMZb9Rd5GP3qMq3PGWq5qGMMMMMZZbddOdbdOO6OO6O669RRE9669RR9RR9RED0D0DDDD00ERERRER6OOOOOdddddddbbZMM5qGGHHPPP3a33KmmmesUseUIII
+KKK3PaKKPHWG3hsUsIjesesKPHGGWPPGP3PHP33G3KG5MZdbddbdOZZdZZddZddbdddbZMMMMM5b$Q0dbZMO9ZZZ5WWGPeKUoIIXIUaaUhIUKa3HGGPPGMZbdO9EEEEEEDEDERR99RRE00DDDDDDERR9OOOOOddddddbZMMWGG333PP3a333KmmmmmesUIIoX
+MGqqWGP333amIIa33PG5qqWGMqGG5GGqMMWWMbZMPMMbbdddbZZZR$OZZZZMGMMdOOOORRE0DRDE6609PIzwhwLxxv\)r)rr*****)v?****r)rr((|xxxxTTuyjIjPMMd9RD00g$00ED000DD0000DDEERR6OOOOddddZZMMMMWGH3KmKKa3KmseeemshhII
+dOddZ5GPmKHHGPGGHMZMGP3GMMM5MMMMMMMMMZMMM5MWPG33HMZMMO$g0OdO600$g8g0Ed3skVwcxv|ic}*<^vr=!==!!!::!!!!!=^!::!!=!=!!=<*<~^*rrrvvvx]x}uVVIPWbE0g88QQ88$DDDDDEEDER966OOOdddbZZMMqqGGPP33KKKKmeshIIIIXo
+MMMMMMGGZddMMZZMMMq5MM5qMMMMZZZZMqMZZZddddZdbdOddgQ$RD08BBQ$RbWazyyykVvr**r*~!:!~xV*::~*>:":,___,___,!^"--.-_,,,,:**=!!!=~!;^*^^*|r?xxi}Tckh3MZO90gQQQ8g$00ERRR996dddbbbMMM5WPPPP3KmKKKKmmesssssU
+OdZZdZMZZddddbdZMZddZZZMZbddddbbZdOdbdZZZdddd66R$Q#BQ8$RdZdDdViv|)r*r]Lr~=>=::::!:rw}=!=^~_-..-_-_:,-_:",_.'.___-:^=::,":::!====<****rr))vvvx}uyzmPqM60gQQQ8g$DR6OOOddddZdZZM5qP3P333memmemessUIh
+MMZMWMdZZZZZdOOdbZdZZZbdddZdO9R696OdOdOR66E8QQQQ8$$0R06kLxvviuyL*~~~=>vix)*r!:,:,__!zb\:_!^:.-_-.-__-:,,:"-'-.-_-:)<!"__,,_:!:!!~)(^^^*^rr***rrvviTuwohmMR08QQQQ8g0E66OdZbZbZMMqGPPP3aKaKKKKmmmsh
+MMZZZbZbZZMWPPGPMdOddddddO6REEOE0DDD$g8QBBBQ8$OGezVuwmMqw|***<^vuwV\*<;r*^?V}!,___--!Vdd}!:*r^;_.'.-.!>_,,!,_..-':}?_--__,,,":!=*vr^^;^r^<~;*^^^*r?vxLuyjeXWd608QQQ8g$0E9OddZMMMGGHP333aK333aaKKm
+ZMMMZZZZMMMMM5MddOdddOO666RR6O08QQBBB##BQgRZmyu}ix|)rvuK$Our~!!!=~x}L)**xY)ruIlr^;<<<rymKmY(]Ie)~!:~<~^v*>=!!!"-_*x^:-.--__,,,:>)*<*^*r^^<^>~~~^*^^r*r|viuykwwKGdD$QQQ88g$D9ObZM5qWGHPKKKKKmemKmm
+ZZMMMWMZdZ5MMMddZMZOREEDD96OD$QB####BBQDMIVTLxv)r****^rxlbRGy]*<*^<<*vYxvvcT<~}djuiLxikbRMbQRPM6WUTxwuYxTjir**^^TOkrr*!!::_::!*)^=!r*^^=~==~~^~^*^**rr)^r|xY]iu}yUedDgg888g$0E6ddZMWWP3KKKmmeeesm
+ZZMMZ5MO6O696O69E0$$QBQ888QB####BBBBB806d3}\\?)**^^>;~;vy}?uKMXlx*>~<<>^vLwbRgQQ8BBQg0D0B#QB#BB##BQQ00OdMKzoykdgQ0$MVkui\))rxTi<^r=<r(;!!==!=~><*******^*)))*viLiiYyz3Z600$ggg0EE6dbMMGHPaKKKKaKm
+M5MZbdOOOOO9EE$$ggg8QQBBB#####Q0ZGeXsaZD9dZZOw]r<~!!~*<=*LkY*(K8Q##0MMMR0ddOOQB####BB###@@##BQQB#BBBQQQQ8QBQDR0Q#QBBOdgOaIIk5Pvvcwr^}x~^>=~~~>~~~~>^^^*^***^*r**?\xLi}yhseZ6D$$$$0DR6dZqWHPKKKKKK
+WdO9R99666RD0$$gg8QQQ######BgEZPjV}c}vxLyPO0Q#@g3GWKwlT}}y5bZDPuzZD8#QQB####@@#######@@@@@#@@@@@@@@@@############@@####BBQ$6g6ZdG5mkbjvv|^~=!~~~=~~>^^^*^^*^^^*<*?)vvx]iTcwU3MO9D000DD9ObMqGP3K33
+RR966OREEE0ggggQQBB#####B80QB9O3wwkyTxv|(|r*r|uKOB@@#BB##BQQQ########@@####BB###@@@@@@@@@@@@@@@@@@@@##BQQQ8Bg0BBB####@####@@###BQB0$$D3zkyx)*^>^<~<^>:~~<^******^;*^*v\)vv\}TuyUGZO6DDRRROdZqHH3a
+D0D9R0$gg88g8QQBB#####B$dPIzGEdKkzmMd5PmXXkuTuVyVVjEQB##@@@@@@@@##@###QQgg8QB#@@@@@@@@@@@@@#@@###BB#0Mx)zvTx!rcbbg68BQB#B############B8$ZPjVT]xx\r*r)^^**><*rr**^^^*)*<*r*rrvviL}TwPZd6R996OdMG3m
+6d6E0$$8QQQQQBB#####B$ZKzVTTT}TzaG5mmm988RdZZZZM6gBB##@#@@@@@@@###BQQQg0DgQB#@@@@#@@@#@##@@#######BQP}`x:-:  ,:)w*Yrj$QQQBB###B#########BQgZM55ddmixv?\|)r)()r*^***;<****^<**r*)vxYuVzaqZOO666dMP
+ZOER$888QQQBB###BBQ0O53IcuuT}YLLYu}yHREDQQgQB####@@####Q#@@@@##BBQ8g0Rdd98####@#####@#####BBBBBQBBBQz!!_'     !x,-,^ryR8gQQQQQBBBBBB#####B8EbMRd0Z3ywYx}TTLv)r)**^^^*^^^^^>;;^~^*r((vx}VzKHZddddM
+9D$$ggg8QB##BBBQQ$ZmowwI3mIII3GMdORdGd66Q###@@@##@##QB######BQQ8$ROOZWqb8B########BBQQQQ8$$8B#BQQQBQ]=::-.`` `*:-:":?yR6D$0D0E$QQQBBBBBBBBQ$dqdmdEO6d3IocYYiixv?)rr****^^<^!~=!^^^<~^r)iTcyzmGMZb
+RD00Q#QQB#BBB#BQ8O3jyVkHqKheKKKHMR8B#BQ#@@@@@@BBBB######BQQg09OdMW5GKKM0BBBBBB#BBBQ86KXdDE$88QQQQQ##c)^~!!~!!!~~!!~~^k$0E0D9DdZZMd6D8QQQBBQ$ZMIcmkwmdIzmVVcTx]xxxvv?)r*<==!!!>>=;;>=<*^r)vx}lwhKG
+O60gQ##BQ80OO9DEEgggQQQQggg8QQQQQB#####@@@@@@#######BBQgD6dZqPKesesjXPEQBBQ8QQQQQQ8MyIMO0$g$g8QB#@@#sTiv|)r**^^^^*r|]qg00DR96ZbZq3q6EDg8gg8gDZyxv|vxyPVkZmIIzy}L}Yiv\|)r*^^<~===~!!=~=~<<^<<rxTTk
+0g8Q8$B##QEZZM3ehIM5e35EB####@@@@@@@@@#######@@@##B$R6dMMG3mIjzkkwyVzM$QBBQQg$8g8805b$BBQQ8888Q#@@@@@@@@#############@#Q09dddZqdOOOdO00O9E0E6OKx*>~~>rcu}dKzjIokVYT}]ixv)rr**;^<;~=!!!!:~~!!~^*\x
+g8g0OMDB####BgggR6D#BBB#QQQQB##@@@@####@#@@#@###Qg6M5WHKehjkyyyVcl}TjM8QQBB80D$g8$R6OgQQ$$00$8#@@@@@@@@@@@@@@@@@@@@@@@@BObdOdbbd6R$g6DRbMMMMOZKY*~!:::!*viK6GIzXescyTVcu}]xv)r*^^~~!!":"::!!,:=!;
+D00OdZP3dB##Q$0QQQQ####QB##@@@@@@@@@@@#######BQ8g6MPamhowVcuuuT}LxxYwWE$88$6dZdRg80ZGMdZMMMZOg#@@@@@@@@@@@@@@@@@@@@@@@@BD6OZZddOEDdM3K35WmUhm3ki*=::,,,,,":riY}uyXsKHmmkycT}xx\r**^>=!!____,:::,"
+mUK3Zb6$D33P5ZR8BBB###B##@@@@@@##g8B###@###BQg0D6ZPeIzyVT}}}Lixv\)|xuKdddRbGIkhHddROmPMZGHZO9g#@@@@@@@@@@@@@@@@@@@@@@@@QdZdZW3mKKGahXIshhohoyyTv*!:,_____--__:>*rviTywzXywowVlYLx\)r*^~!:"___,_-"
+ZZdRR00D$Q$g8QQQQQQQQB#@@@@@@@@@@@@@@@@##BBQ80E6ZGmzyVl}YL]xv\)r***)LoO0OddGaeUesKawIZ009dZZMZQ#@@@@@@@@@@@@@@@@@@@@@@#DWH3a3PmhIhsIVulVwkkkyyLr<:,___--------_,:~*vi}ucwwywmauXyl}xrr*<~=!"_,___
+eImGaXzosP6BB#####@#@@@@@@@@@@@@@@@@@###BQQgDERdGmzVTY]xxv|()r**^<^*\uGObZqKIywzwwVVw3dbMPHPPMOQ#@@@@@@@@@@@@@@@@@@@@#$Mq3mqM3okwwwc}uT}ucyzkcx*!"__----......-_,:!~r|xL}ukyymms33IoYxvr*^<~!:_-`
+GG333GMd0Q8ggQQBB#@@@@@@@@@@@@@@@@@###BBQQgEOddMKoV}xv|))r*^^>~~~=~;*xyPdPjVlT}}cucVwmKwVzhe3PHZEQ#@@@@@@####@@@@@@#BdGH3IywmPHPGKkwzTTY}TucVi)~:_--..........--__,:!~*)vL}T}uVzoh3WazyV}vrr<=!"_
+sUmmWd0D0g8g$gQgGO#@@@@@@@@@@#@@@###BQQQ8$EObZWmkc}v)r**^<~==!!!!!!=;*xwKhhkVlYi}cwwjyyWdZKshK3aPPZDQ##@#####@@##BDZsKKPP5ouTVzhkTuVIzlYY}Tl])<:_-.........''''..--_,":=<*r\v}uykyykzwGXP3yY\*<~!
+yXImMbZ6D00$8QBBB####@@@@@@#BBB###BBQQgg$ROZMqmkuYv)*^<;~=!!::::::::!;rLIaIjycTTuyVXmkyGWPMeG3Iha3hsGGM608QggRRMKPXseXyVojwVLY}Lii}}cycLY}}L|^:_-.''```'''````'''.---_,:!=>^*\x}cywwkyyKszskyTvr^
+saZ66RRED$BBQ8$$QBB#######BQDZOQBBQQ8g0DRdMq3IylYx(*^>~=!!:::::"""::!!>rlXUsPIyVwcyVyywzyT}TcTykkVVIIhzXhKIjjykzkIycVyyT}u}xx]xxi}x]iTT}Y}])<:_-..```````````````'..--__,::!=<*v]}T}vTIozzzuyKwl(
+0Q88gDR6OZWmW9$8QQ88QQQBBQg0E66DgQ8g0DR6dMGKoVTLx\r^<~=!!:::",,,,"""::!~rLkaP3eowTlywVkk]\]L}uKWeyjXkjUXyyVzhyL}}T}YiYykVlx|v(r(vii}}LiY}i)~"_.'``````````````````..-______":!~**rr<xT}]]xYLxVVIj
+GmsemmmmsIImPMdOOR0$g8QQQQQQgRdZMZd66OdZqPmIkcTLx)r^>~=!::":",,,,,,,,,::=*vuIGGmzycyuxxL}}TYykVTcPakwjYYuUXIyj}Y}livx}yjIyx(vvxxxiLYTuTYv^!,-.`````````````````````'..--____,:=~;~;r()*^^*rr(vL|x
+zzXheKamhhm5bMPHMOD$g8QQBBBQ809MPmemPWGPmIzwVTLxv)*^<~=!:::,,,,,__,,,,"::!>)LymHMsyzT}}}Y}TyyVuVyjkjVTuulhUj}TT}yyVLxLykahVL}xxYYT}TuTir~"-.```````````````````````''..----_,::!=~<^<~!~><<^*)|x}
+wkzoozkzIaGaseKPPGMZODgQQBBQ88$ObPhwcuucccT}]x|)r**^~=!::::"",___,,___,,,,:!<)LyIKWMjwVcVyukylTVePkVymKhVuycykyyXhjhVuyTyV}xvxLiTuuui?~:_.'`````````````````````'`''''..---_:!!!=~~!!!!~^^^***r((
+yVu}}cXhokkkzjIeK3GMd6RD$0RDgBQOOMUwVTLv)r)))r**^<<~!!::::",,,,___________,":!<)]cI3PKXkzoImkY]YVywyzhhu}uVuyVkokyucTcVL]iiixLTL}uL\^!,-.`````````````````````''''''.--_,::!:::!!=!!!!!~~==!!!:::
+TckzwV}LYTuVywzhm3WZdd6DD6ORD$gdMMGjy}ivrr*^;~~~~=!!!:::"",,,_______________,::!;r]coKPPhIoycTLiTllTwIyuuuTTVTTVyyycywVYiTuyw}}}xr<:,-.'`````````````````'_!!!::=<;~:::::::::::,":::::""",,______
+uTYv))vxxY}uyIKG5MMMMMOEEO9dGIK68O3ycl}x\r^<>~!:::::::",,_____________________,::!~*|Lcje3mokkuTccccyTccykczklTcwyyVwkyLiT}Lx)^;!,_-'````````````'-----,,:-.......'.----.----.....------..'.''...
+rrrrrr)vx}cXmezjIePb6Eg0dMMWPPsywwwVuwwuwx*>~~~~!!::",",_____---------------___,,"":!=^rviTVwzwzIhokV}}yzkwwwcTTclL}TTYv|r^=:,_--____-._:,-_!:~*"..---.-.````''''...``'``'``````````````````````'
+^**rr(\xTVuTluckqORRMWMMGKmKeXIjXzkzUezwMdy*~^^*^r*;~~~!!::::"_____-------------____,,":!=<*)vxi}Tlucuuywyyyu}ivv?*^=:,_..-__",,,~""_--^~:__``_|_```..``'.. `.'.``.'```` ```````` ```````````````
+^^***rvxxxiTckzzheseKKIzzsP3IwyV}ix}lz3GmMObmwV}Thsuvr)^^>=~^!::!:!:"",-____,,__,,,,______,":::!=~~><^^^*^<;::",:!:>vr\!:^:,":"~_.`'-)xr~~^*~:.:.   `````'-.`''''``.'`````````````` ````````````'
+~;>^^*r|vx]L}TlcyyyykzImIwyVccT}}lVzIeIIwwyuz3klVzzkkkhKT}rv}ycL|);=<!!::::::::!!~:!!::!::~<<;!:::!!:!;*\):"":~^:__-'"!xvm?'``_)r),'._::--____~x^..--`...'..`'.``````'```````''``````.```````````
+=~~>^*r)(vxixxLY}TuuwKIwyjzV}TyczyYxi}zZMqeVVuixxiY}YTyoV}}yKwLVPql\|r)xxr(vr~=_"**\}vv?|T]Tvrr)*^~,_,;,,*\,.,!~:,)x_:!~~xL".'._,,<^"-_,,,____-"*=:,--'''''```'`'```..````````''`````''``````````
+!==~<**r)\v\vvxiLL}TcykoIyyIcuLvx]V5bKy}}YLxvxxxv?()kdILv}xxxrruy}xYkx?x|Lwv<^rrcZTvy]Lzwe*rr^^=_,^~^}Vv*)~^:!^:_:!*v~:!!!r}!,,"::,,!=:,:""",____:"_`.`..''..''...'`'.''.'`''``''``````````` ````
+!=~;^^**rrrrr)(\vxxi}KkjwwV]vx}TY3KY))|xxxiiYY}}}ixymVTixx\)r\myr)YPyu}vr|L|*)|;iv=^)r)kvYx*^;>~=!:)x=:!!:::,:!:::!!<x<!!!!^^*^!:,____"::"_-__--'.--__------.''.'''`'.---.''.``'`````````````````
+=~~;<^^^^*****rr(vxxxccLvxchXT]}Tivvv(\vvvxxxix(**vI}v^*)rr*rzuy}yHY*^^~^~=!==~=<Tr*|)*v>)v^!!~<~iLY<~~=!:!!!!!!:::::=*=!:::!!::",",_--.-_________------.------.....--...''`'````````````````````
+=~~~~><^^^^^^***rv|rrrr)|xixvvux|vv\|vvv?|vvrr)))rui^***r*r*)s}(TVrr**^<^<;<>~==*Vx)^^*xrv^r^~~=~rx}*==!!::::::!!!!!:!~!!::_-_.-...-------_--_,___--......-----...-.'...'``'`'`````````'''`` ``
+	}
+}
+Box thornsberry_ap_stats
+{
+	Box quotes 
+	{
+		string[] entrance "welcome to AP statistics"
+		string[] attack  "do your hombie berky" "study for the test" "dont forget your formula sheet" 
+		string[] player_run  "you can run from statistics but you cannot hide!"
+		string[] player_victory  "you got a D. I rounded it up to an A. Enjoy!" "You got a C. I rounded it up to an A. Enjoy!" "You got a B, I rounded it up to an A even though you said you didnt want to get rounded!"
+		string[] mob_victory  "somehow you failed this class. Feel free to take it again any time"
+	}
+	Box stats
+	{
+		int health 50
+		int speed 2
+		int dmg 5
+		int energy 10
+		int energy_regen 1
+		float agression 0.27	
+		int physical_dmg 1
+		int magic_dmg 2
+		float physical_def 0.2
+		float magic_def 0.2
+		int max_items_steal 1
+		float looting 0.05
+		float intelligence 0.6
+		float special 0.1
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "A+"
+		float[] drop_prob 1.0
+		int[] drop_per 1
+		int drop_max 1
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "A+"
+		float[] item_prob 1.0
+		int max_num_items 1		
+	}	
+
+	LongString img
+	{
+          .     .          .     %%%   .          .     .     .           
+        .                .     .      %% %%     .     .          .     .        
+     .     .               ..     .  %%   %%       .     .                .     
+                 .     .  #%#       %%  .  %% .                .     .          
+       %%%%%             %% %%     %%       %(                    .             
+     %%%%%%%%% .        %%   %% . #%  .     *%.        .     .     #%%%         
+     %%%%%%%%%    .     .     %% #%      .   #%.   %%           .  (%%%         
+       %%%%%.              .   %%%.           %%  #%    .         ,.     .      
+             .     .            %.  .     .    %% %* .     .     .              
+     .          ,,,,,..     .          .     .  %%%.          .     .     .     
+        .     ,,,,,,,,,        .   ********,    .%    .                .        
+           .  ,,,,,,,,,           .*********             .        .             
+      .       ,,,,,,,,,.*((((((((, ********* .%%%%%%%%%%%%(          .     .    
+      .     . ,,,,,,,,, (((((((((/ *******%%%,,, ,,,,,,,,,,#%%             .    
+              ,,,,,,,,, (((((((((/.*****#%/,   ,,,,,,,,,,,,,,,%%   .            
+       .      ,,,,,,,,, (((((((((/ ****%%,,  ,,,,,,,,,,,,,,,,,,%%     .         
+    ,///////. ,,,,,,,,, (((((((((/.***(%,,  ,,,,,,,,,,,,,,,,,,,,%%       .      
+    ///////// ,,,,,,,,, (((((((((/ ***%%,,,,,,,,,,,,,,,,,,,,,,,,%%     .        
+    ///////// ,,,,,,,,, (((((((((/.****%/,,,,,,,,,,,,,,,,,,,,,,,%%  .     .     
+    ///////// ,,,,,,,,,.(((((((((/.****(%*,,,,,,,,,,,,,,,,,,,,,%%               
+    ///////// ,,,,,,,,, (((((((((/.******%%,,,,,,,,,,,,,,,,,,%%,  .     .       
+    ///////// ,,,,,,,,, (((((((((/.********%%%,,,,,,,,,,,,%%%%%%%%%     .       
+    ///////// ,,,,,,,,, (((((((((/ *********   *%%%%%%%%( .  %%%%%%%%%          
+    ///////// ,,,,,,,,, (((((((((/.*********.     .            #%%%%%%%%..      
+       .     .                .     .                .     .      %%%%%%%%%     
+     .          .     .                .     .                .     #%%%%%%%%   
+        .                .     .                .     .          .     %%%%%    
+           .                      .                                             
+     
+	}
+}
+Box sonic_knight
+{
+	Box quotes 
+	{
+		string[] entrance "speeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed"
+		string[] attack  "weeeed" "reeee" "Your too slow" "hello sirrrr I am so tired slow and lazy sirrrrrr. JUST KIDDING. I AM FAST!" "SPEEEEEEEED" "SONIC SPEED" 
+		string[] player_run  "umm... you cant outrun me, but lucky for you I gotta go eat chillidogs"
+		string[] player_victory  "cheater. You used performance enhancing gasoline"
+		string[] mob_victory  "You just lost to a manhog" "bye bye eggman"
+	}
+	Box stats
+	{
+		int health 1
+		int speed 10000
+		int dmg 1
+		int energy 10
+		int energy_regen 1
+		float agression 0.99	
+		int physical_dmg 1
+		int magic_dmg 2
+		float physical_def 0.2
+		float magic_def 0.2
+		int max_items_steal 1
+		float looting 0.999
+		float intelligence 0.2
+		float special 0.1
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "heghead" "sonic_chops" "fest_boots"
+		float[] drop_prob 0.5 0.4 0.1
+		int[] drop_per 1 1 1
+		int drop_max 3
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "fest_boots"
+		float[] item_prob 1.0
+		int max_num_items 1		
+	}	
+
+	LongString img
+	{
+                                                                                                          :wdbmycdx                                                        
+                                                                                                        :cdMmzuivKd-                                                       
+                                                                                                      `xbd3XyuYx)cOY                                                       
+                                                                  `__.`                  `._:=^r|vxiL}z6qmjyu}x(*(Md                                                       
+                                                                  :dPsXux*!_`       `-!^\i}TucVVVVVcVIdGskVlLvr^><IE-                                                      
+              `_-`                                                 L3}uoesIwy})~,-!)Y}TuuVVVyyyywwkjImGUV}Lv*~!!:!yO;                                                      
+             'vmq}LcL^'                                            'Ic)v}VzsszV}]L}luccVVyyyyyyywwkzzXhmKIc(!,__,!I6h^:.                                                   
+            -xxx}dxTI0Py)"                                          _HY^^(x}VVLYTucVVVVyyyywwyyyVVyykzzkzzomaz}\)cMD06ZPhVx*!-`                                            
+           :xxxxikTiT8DMXmy,                                         *3v!!~*v}TucVVVVyVyywwkwVVjKMd6REEROdM3memmeMR$g0ROZMG3mhy]^-                                         
+         `^xxxxLvk?Y3QdGZWj*:                                         ^e):>xlccVVVVVVyyywwwywKZR0dzLv?vYyME6dZ5GGMd9DDE6dbMMWGHP3my),                                      
+        `rxxxxY}uvLIDDEZ3G3^*                                          ;owzVVVVVyVVVyyywyyyIMR6x,      ``'~3M5MbdddO6666OdZMMMMMMM5W3}!                                    
+       .)xx]}wu}YyHZOOdRZPHG|`                      ```                 |DEVyyyyyVyyyykwyymdDu'bigly 435 ```.-:IKHMO9666OOOOdddZbbbbddddZ5z<                                  
+      _vxlyywcws5Odd66EDd5KmP!`                `_.`   `'.-`` `..        i6Y']wwwyyyyVyyywsZEx         ``'.-_xhaMOR966OOOOddOddOO666666OdZT-                                
+     !}VwXzeaM6DER9666ddbMGMM<`                `:;!:,`  `-:,` `.-'`'_.  ]m_`,zwkwyyyVVyzeM9l         ```.--,vXaMO9R96OOOOO69REDD000DDDERROH^                               
+    ^ysaW5bR000DDEER9dMMZZdDK>-`          `.`     ```,-     ``````'.-:" ?L'` vjwwwkyyyXPdDk`   !}x-  ``.-__,}I3ZO9966OO669RD$g8gggg$$$$00DEOT`                             
+  `vPZMbR$$$$$00DDER6OOOdZbGv^!,'.         :~=:,-``            ```'.-,=~*x'```]XzkXzIKM6$W`    vQgT```'.-_:*ImMd69R666699RE$QQQQQ888ggg$$$$0EV                             
+  cdZd0gg$$$$$$$00DERREEOdjv)r*^;w(!-```       `-,::.`          ``'.-,=vi}-``  YbWWHb60D}`    `P@@M:``.-,:>wKMdREDDRRRRR9RE0BBBQQQQQ8888gggg$0)                            
+ "6dd0ggg$$$$$$$00DDERRRMVvvvvvxU0wx^_````   `_!:  `_:-`          ````'_=k!--,!x##RdMax_       }#Qv!`'-,:*y3ZOE00DDEEER99996gB#BBQQQQQ888888gg6_                           
+ 'MOdjIKHMZdd66RRR9OZ3w}]xxxxxLK3}x?)=` `  `:*vxx`    -".``    ```` `-!^rkL::$B@@#a^```        ,Yx)-.-_:^VM6ED0$00DDEERR966OOO8BBBBQQQQQQQQQ88gV                           
+  <d6hzzzkkkkwwyyVVcuT}}YYiii}qh}xvx}:`   -^vxcw^      .'`````.'```'!vxr*vo),;j0BB#Q*.....'''''.__,:~r|rr)V$$$$$00DEEER666OOOOdEQBBBQQQQQQQQQQ8D-                          
+   _VbamokkkkkkwwyyyVVulT}}V5EzTxx}V^`` `:rxcsIi    ``''.-_,!~~_-_.!xr,___r|:__,:~xv>!::::::!!!=~^rimB8*)vlEg$$$00DDR966666666OOO8BBQQQQQQQQQQ88)                          
+     <mE0DOZMWP3KmhIojzohMgBDIuLxTk},``'=v]X8$6c~,.._!~;*?xxvr<!!!:*ixv*=:^~!!!==>***^^^^^^^*r)xLTU$B#$^v}k8g$$$$0DE666OO66999666O9dQQQQQQQQQQQ8w                          
+       "x30g$000$000$0000gQZIyTYTojr.`-^xLVQQgEZKIwTL}c\!,`     _=*)?*>\yVxvvr****r))vxL}ykykhHd0QB0mYriujDQ8gg$$0ERR996669RRR9R966L`=vwd8QQQQQQd`                         
+          .=iI33MR$000000$bszyuuwKc:-,^xY}dBQgOqmXzzzjzyx*:.       _<|xvv]*,=LYxvvvxxiYYLYymqMPPKz}?xTVwG8BQQ8g$0DERRRRR9RRRRRRRRRR9v    _*cZQQQg-                         
+                 `._":=~~>^ckyVymhv:=riTTlZ8Q8$9ZMGP3KKmmmmsu)!`             `<}Tl}}YLixxxxxxLYTucVywmZ8BBQQQ8g$00DERREEEREEEEEEEEER6,       -)j0:                         
+                           `:rLTuv*\]lcuuux'`"^xk5RDR6OdZZZMMMMWwr,            !VGWhzwjokyyyyzIKHMO0QQQQQQQQQ8gg$$000DDDDDDEDEEEEDEEEm`                                    
+                                   >xucuL*.       `:r}UO$$0DR96OOdZI)'        !v<,___,:^]e0gQB#####BBQQQQQQQQ888gg$$$000000DDDDDDDDEDD)                                    
+                                                        .=vwEgg$0DERObc!     ~>_---....-_,*KMbO0gQBB##BQQQQQQQQQ8888gg$$$$$00000000DDDM`                                   
+                                                            `!YZgg$0DER6I!  '^",____---__,:vGMMZdODgQQQQQQQBBBQQQ8QQ888gg$$$$$000000000~                                   
+                                                                ,uRg$$00D93*^!!!::,,,,,,::!rWMbMGGd88QQQ5kgQQBBBBBBQQ8Q88ggg$$$0000000$x                                   
+                                                                  `\b$$$$0DK::=~~~=!!!!!!=<}dORM*,=WQQQQQ^_z8QQQQBBBBQQ8888gg$$$000000$u                                   
+                                                            `-___.` `rq$$$0r_,:=<^**^^^^^*)MD$Qe,-_=XQQQQX  -cgQQQBBBBBBQgggg$$$$00000$V                                   
+                                                       `:*l3O6ZeT))*:``^P6P^::::=<**r))(|vPgQQQ$^_-_=mQQQK    ,XQQQBBBBBQV:Ugg$$00D000$}                                   
+                                                   .rkOQ###BQQQQQOVxLx! `Va}~==~~>^*r?vx}M8QQQQk=:_-_~WQQx      ^OQQQBBQE.  >M$000DDD0$?                                   
+                                                `!Ls####$dGKehzwkUKdelTr`!KP}^^***r)vxyW$88g5i,  _:--,*gE.       'VQQQQQ*    `v60DERED$!                                   
+                                             -:,xhK0##E3KKKKa3PP3Ky}u5IVxuI3WKkyywIaZ0$ZoY>-      :_.-:u)          ^8QQM       _zER9RDM`                                   
+                                           >We~uKKKQQ3mmseKGZ9ERdHKmjlozhP5MdRD0MIEQq_            `:-._=:           ,MR-         rZ6RDv                                    
+                                         'wB8)VmmesDWUhIUKZgBBQ80qUkkhmGMd6ERV<.  -y8)             "_.-:<-           `'           -u6d.                                    
+                                        ,DBQO}IUhIImhXoIeG$QQQDKkoe3Gb9D0Dz^`       `~'            ."..,!<`                         ,!                                     
+                                        I0R66UzXjjjjozzoh3MD86eKPWZO0g$Pv.                          ,-._:~:                                                                
+                                        v69669PzzzkkzzkwzImGZddO6EEOz!`                             -_.-,!^`                                                               
+                                         =XRRRDbzwwwwyyyVVVyzImKmzi!                                `:-._:~"                                                               
+                                           '!)}wUwl}Vyyywkcx***~:`                                   .`   ```'.'                                                           
+                                                    '~*=_'                                           ``-,:::!=!.    `--                                                    
+                                                                                                 `',:"-``   `--``  `.,^`          ```                                      
+                                                                                               `-:!-`  `````-___--_:=r^--'````    `-=`                                     
+                                                                                               _!"``..'````-:!!!~<*)x}}Y^_....'''-"=*                                      
+                                                                                               .;__-` ``'`.,=*|vxilVyycL*~~~==~<*)vv=_.``                                  
+                                                                                                `_`   '-_::=*v]YljkVuT}LiLY}}}}TlcVuY)!-`    `-`                           
+                                                                                                      .:!=^r|x]YTuT}}}TuuuluuuuuuuTYv<:-'````.!=                           
+                                                                                             ``  ````._~*)(|vvvxxiLYY}}}}}TTTxr*(}T}xr~!:,,,:~?~,.                         
+                                                                                          ````'-_:~^*r?vvv?*=:,,,:!~<^^^>=:_`     `_:*v}}}}TluYv)^                         
+                                                                                    ``    `'-_:^)vr="-`                                `-~)x}TL\~`                         
+                                                                                    `_,_,"!=^r)=-                                                      
+	}
+}
+Box reges_cs142
+{
+	Box quotes 
+	{
+		string[] entrance "want some drugs, kid"
+		string[] attack  "REEEEEEEEGES" "like all drugs alcohol is soooo good" "enjoy my prerecorded lecture from 1993" "Mac is the superior OS" 
+		string[] player_run  "somebody couldnt pass CS142"
+		string[] player_victory  "You passed CS142... lets see what grade you got..."
+		string[] mob_victory  "You failed CS142 and life"
+	}
+	Box stats
+	{
+		int health 100
+		int speed 1
+		int dmg 1
+		int energy 10
+		int energy_regen 1
+		float agression 0.27	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0.1
+		float magic_def 0.1
+		int max_items_steal 100
+		float looting 0.3
+		float intelligence 0.8
+		float special 0.4
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "A+" "B+" "C-" "D+" "F"
+		float[] drop_prob 0.05 0.4 0.4 0.1 0.05
+		int[] drop_per 1
+		int drop_max 1
+		int drop_min 1
+	}
+	Box items
+	{
+		string[] items "A+"
+		float[] item_prob 1.0
+		int max_num_items 1		
+	}	
+
+	LongString img
+	{
+###############################################################################################################
+###############################################################################################################
+#########@ddMMMZZMMMZMMZZMZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZMZZZZZZZZZZZZZMMZMMZZZMM6@@######
+#########@vv^^^^^*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*<<^**<<^^^x@@######
+#########@rr=||RRdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbddRR(==\@@######
+#########@rr~}}@@TTTT}}TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT@@L==v@@######
+#########@rr=YY##                                                                                @@L==v@@######
+#########@rr=LL##                                              `````                             @@Y==v@@######
+#########@rr=LL##                                   ``,>>|}}VVyzzkwwyycLL)==__                   @@Y==v@@######
+#########@rr=LL##                           ``^yy6##@@@@@@@@##QQQgQQ##@@@@@@@@@BBMMY..           @@L==v@@######
+#########@rr=LL##                         ==IIQ@@@@@@@@@@QMMIIcTT}uuXXbBB@@@@@@@@@@#<<```        @@Y==v@@######
+#########@rr=LL##                    --yy#@@@@@@@@@@BBKLLixxvv)^^~~~!!!~~xQQ@@@@@@@@\\^::..      @@L==v@@######
+#########@))~LL##                   -mm@@@@@@@@@@@##KK}}}L\\**=::_..-----,YY@@@@@@@#}}v<<__`     @@L==v@@######
+#########@rr~LL##                 TT@@@@@@@@@@@@@9ccuu]))=,,``            ``xx@@@@@Zuux^^__`     @@L==v@@######
+#########@rr=LL##              ``0@@@@@@@@@@@@@aac}}||~__`                    B@@##]ii|==--      @@Y==\@@######
+#########@rr=LL##              xx@@@@@@@@@@@@@QVVuxx^^,``                     d@@QQ(vv)!!..      @@Y==v@@######
+#########@rr~LL##            vv@@@@@@@@@@@@@##yTTx<<__`                       `__::~^^=,,``      @@L==v@@######
+#########@rr~LL##            gg@@@@@@@@@@@@@00l}}r!!..                         ``--:::,..``      @@L==v@@######
+#########@rr~LL##           }@@@@@@@@@@@@@##VVT\\!--                               ````          @@L==v@@######
+#########@rr~LL##           #@@@@@@@@@@@@@66uuv^^,``                                             @@L==v@@######
+#########@rr=LL##         ..@@@@@@@@@@@@@@aaTT\~~-``                                             @@L==v@@######
+#########@rr=LL##         **@@@@@@@@@@@@@@yyLL*::'        **}}TTT}TT}}}TT}}}TT}TT}}TTT'          @@L==v@@######
+#########@rr=LL##         vv@@@@@@@@@@@@@#ccii^,,`        RR@@@@@@@@@@@@@@@@@@@@@@@@##-``        @@L==v@@######
+#########@rr=LL##         ??@@@@@@@@@@@@@Bllxx<__`        ..,,~((g@@@@@@@@@@@@@RRVVYrr=!!__`     @@Y==v@@######
+#########@rr=LL##         ^^@@@@@@@@@@@@@BTTvv;--`            .,,3@@@@@@@@@@@@@uuxxvrr^==__`     @@Y==v@@######
+#########@rr~LL##         ``@@@@@@@@@@@@@#ll\\~--              ``B@@@@@@@@@@@@Dcciir~~_''``      @@L==v@@######
+#########@rr=YY##           k@@@@@@@@@@@@@VVvv~--              ^^@@@@@@@@@@@@@wTT??=..           @@L==v@@######
+#########@))=LL##           !@@@@@@@@@@@@@KKvv>__              zz@@@@@@@@@@@##c}}rr:''           @@L==v@@######
+#########@rr~ii##            **@@@@@@@@@@@##TT*""`            '@@@@@@@@@@@@@MMuxx~~_``           @@L==v@@######
+#########H~~=**ss.-------_--_,,ssWZZ@@@@@@@@ddr::.            *@@@@@@@@@@@@@IIT\\==-             @@L==v@@######
+#########:                     `` ^^@@@@@@@@@@#hh^..        ,,B@@@@@@@@@@@QQccL**::`             @@Y==v@@######
+#########!     ``<kkKmmmmaeea  `` ^^,}}ddB@@@@@@@@@@##QQQB##@@@@@@@@##QEE3VV}}(==..`             @@Y==v@@######
+#########!   ``  `^^KssaaeeeK  `` **`__<<lMM00Q#####@@@@@###BBQggRZZGGhuul}}vv^""``              @@L==v@@######
+#########!     ``:VV3KKUUKmmK```` **   ``.__::;**)||vv?rr******rr)??((r**>::__.``                @@Y==v@@######
+#########!     __VaaammKKKaaK```` rr      ``..-""!==;;<^^^^^<<>~~;==!!:__-..``                   @@Y==v@@######
+#########=     IIP33aXX**`^^P```` rr                ````````````````                             @@L==v@@######
+#########=   ``KKPGG3**`````|```` rr                                                             @@L==|@@######
+#########~     ::Gqq|`````````````rrROO6666666999666666666666666666666666666666666666666666ROO966RRv==v@@######
+#########~       `~~r    `````````((******************************************************************L@@######
+#########~,,_____,,,,,,,,",,::::::vvdddddbZZZZddddddddddddddddddddddbbbbbbbbbbbbbbbbbbbbbbbdZZZddbbbddE@@######
+###############################################################################################################
+######################################################################B################BB##########B###########
+#######################BB######BB###B####B##BBB#############BBB##########B#######################BB###B########
+##########################################BB##############BBBBB#####BB#BB######################BB##B##B########
+#############BB########################################################BB#####################B####B##B########
+##################33TBB###oo)iiuul}}:####*--uuuTT,MM######QQ__'gg######oo^TTllTrrBB#**:uuuu=))8################
+#########################d,,uBB@@###X####*!!@@@##^~~######zz~~:TT@####Q__}@@@@#dd###rr?@@@@O--y################
+##################**\@@88`OO@@@##########r==@@@BB;TT@@###g--QQ#__6@@###^^^dd@@######**v@@@@#::u@@###BB#########
+###############BB#rr\@@dd`##@##ddT}}c####*--ccuTTcQQ@@###c>>@@@))v@@###EEx!!uuM#####**v@@@@P--R@@##############
+###############BB#rrx@@00`gg@#####88`BB##r!!@@@||^##@@#33`))VVVxx`zz@@######88x__QQ@rr:uuccz##@################
+##################**v@@@@G__I#####gg'##@@*==@@@@@Y::QQB--z@@@@#@@G''RRBKK###@@O``66@rrv@@@@####################
+##################rrx@@@@#yy!YYlluxxr##@@*!!@@@##8--xxz..Q@@@@###Q..vvB""l}}uu~YY##@rrv@@######################
+#################Q""w@@###########@@@@@#############@@@@@@##########@@@#######@@@##############################
+#################x^^Q@@########################################################################################
+#########################################################B#####################################################
+           .                      .                                             
+     
+	}
+Box astrology
+{
+	Box quotes 
+	{
+		string[] entrance "its astronomy sirrr not astrology" "its not astrology.... sirrrr astrology isnt a science" "SIRRRRRRRRR"
+		string[] attack  "can you use stars to predict the future" "ITS ASTRONOMY SIRRRRRRRR" "That attack was cancer!"
+		string[] player_run  "waaaaaastroluigi"
+		string[] player_victory  "you passed the astrology test. your grade will be decided based on the alignment of the stars"
+		string[] mob_victory  "I predicted you were going to lose because jupiter was greener than usual" "I predicted you were going to lose because the earth was flatter" "I predicted you were going to lose because jaaayanth said so. and he is an astrological expert relativistically speaking"
+	}
+	Box stats
+	{
+		int health 30
+		int speed 1
+		int dmg 1
+		int energy 10
+		int energy_regen 1
+		float agression 0.27	
+		int physical_dmg 1
+		int magic_dmg 5
+		float physical_def 0.1
+		float magic_def 0.1
+		int max_items_steal 100
+		float looting 0.3
+		float intelligence 0.8
+		float special 0.4
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "A+" "B+" "C-" "D+" "F"
+		float[] drop_prob 0.05 0.4 0.4 0.1 0.05
+		int[] drop_per 1
+		int drop_max 1
+		int drop_min 1
+	}
+	Box items
+	{
+		string[] items "A+"
+		float[] item_prob 1.0
+		int max_num_items 1		
+	}	
+
+	LongString img
+	{
+@@'``.--`''.``````'```.`````````-'```'..````....-..--''-,!*vi}LYxvii}lT}v*!_-.--..`''-..-__```````:,,_..-'```'.--`-.``.-
+@@`````.``-_'```'````._'..''`'.'..'````.''`'`.``.'`-_==?LTwkyVcl}iYY}}uuVyVv*:,-''`'`'.-''`..''`.--.'.``.,,,_-.--`.'`--'
+@@````````..'```''```'..`````''''..````-'''``-'.'-!*vccjkyVuTluuT}}}T}TT}}TVyV}^,,-...__.``'.``'_''-'``.-::::_.-..`._---
+@@ `-.```'```''-'`''`````'.....`.--.```''''`-:!^)x}VVTTTVywyTlTu}lVVT}TcuTuulVzyLL)^~!:"_''''''.-'.-.....-'''``-_`'._:"_
+@@``__```'''''''''```''`'_--..```-__..:_--.-:)}wylTVyYY}VVww}V}TulVVV}TuTTuT}VVT}}uyV]r!_'_`'..__.',.'''`````.--.``'.--.
+@@``..``````````.-..``.`'-..'`` `'-.',=!==*vcywVVclVV}}}TVycu}L]}cuulTcu}}}TVjIwVVVyVyVT\!-``..--'-:,_.```''.''`'````'`'
+@@```````'`'```'-'.-_-_.-.''``'``._--"~xuuyyyVwyjkyyTuucVyyVu}}T}ukkyuuVVuucowcVVVVuVywwy}\=_..``.._-''-.-..'.--.`''''..
+@@.``'''`.'``..-:.'__-_.`.'''.-`'.-"^vuwTTucl}cuywwuuVVVVcucuuuVcyzzVl}TuuVyoV}}uucccVwwVTyyx::'',--```'.```-__--''.-_-`
+@@''`````...'```.``'''`-.---'.-.=]VcwyoyVVVuuTV}}LLTTccyVT}uyyyyVuuuYiuuuVyz}luyoojyVyyVccuykwwc):._'``'``...'``':---,:-
+@@``````'```````''``.---.----:^*lwTY}uT}uuVVYll}}}}l}uu}LL}cVowVuVVVTuVvr)xuyzycTTlVyucyyVyVVTTuu?_--..,''..'``'.:",..-'
+@@`....._````..-'''`.__--.,,*YzcTuT}}cT}TTuul}TTTlcVcTT}TuVzIkLLTTccVkl)=!^^^xckyyTuyVVyVVVuuVVVVyL:,,--'`.._.`'_":,'```
+@@``'_,--'```...''`.-___:*YYul}L}YcVVyl}llTTl}}TT}lV}YYuyVux*>^xu}}}lVywVv>::!^?LLycT}TcuVVu}uuylyz}^,..-`''.'`'-!,_.```
+@@```.-.'.` ````'.'_:,:^}wzzyT}}cuuuuVuTlllTVyl}l}}y}llku\~"!xVycuuuT\*r)^_'_.-_!!)wV}}T}TlTuyyyVVczL!'-,.''''``._.-.`'.
+@@''```..'``'''`-:",!*}wyVuucuyyl}TlLLTLTTVVTVVlVVuuyxx)^!~\lccVVVyyu)**~:_,_`':!!,*}}}uuu}TyVVVcu}Vyv:_,.''..'`..`''`'.
+@@`````.'-''-__':,:^xVww}}ccVVVTcVT}l}}}llucTuTiuVu]v!!,^Luv^iVVuykkkoycTTyV;-.,::-_}ucuY}}TVuu}uxL}VV\"-:::"-`.--.``'.-
+@@.``..-____,__-,-rlVuTk}VVVTluTuyycTT}cllullucuVx*~=^^r\v*rxycuuuuuuT]LTu?!-..-__,)ul}}}Y}cu}}L}}YcVjV>':,,_``-_.'```'.
+@@.````'_!":,,,-:xTullTVYTuucu}L}lVu}Y}VccucVyL*^=!!,==!~*]yVLx)^;==!!!!==:_.-"=))xu}}T}TY}lTuu}}}Yculux_'`````...``..'`
+@@`````.__'_:::^cy}TVVT}l}uuyVY}}uu}}}YL}}}}]ir~!!!!=**vlVi^__--.---.'.'-.`'-:*LuuwyVVT}}}TY}}}Y}}TuT}Vw^'``'````,_-.```
+@@` `..'._'_:~~}yVTuycuuwuVVyV}}}}Lix}ycVVv~!*)|*rxlTiiv*;:''``.----.``````'_:,:!!*v?\]TTTulu}}LLTuVVVykV:..-.'``.__.``.
+@@``.-''_,_:!**zcuVyyVy}luVVVuTY}}}LLVwV??!__"~kwuLr~==__:,-'._!!,''``''````_"__!!!:,_:!=:!vTllV}}VuTVwwhT::_-.```'-'``.
+@@``.-'`'-__,^^ylYTucuTx}cyyu}cTll}TVuy*::,,__:>!:_..__.-__-`.___.``'`''_:_'"_=vuu}x\^^<<;*LuVVkyuc}}yyVkm<<".`'-.``''`'
+@@````````''-~~y}}}c}iT}}Vyyu}lVyVVTTuyYvv*~=-'``..``''..--'`..`````'.--,::,==>^;;;*x]xL}uwycVVkyVyVwwVuck**:-`'''-.'```
+@@::-'```''--::uaVV}}uVTTuVVyVy}uT}}Lir;:::!=_`_.`'-```_:!~^r\xvxx))xvx|<"-_!_!rxx}TTv)r*=:*r}}yVzmwyVVuTu]]:```.'..````
+@@__.''..-.-...!zyuTlyyycuyywyVr*r*^rx)^:::!:_-__=*)|xx}TVVuyyyucVuuyVyVc]*:-`.,**VMPwywVTlVVyyVVcwVVTTu}Vyy=``''``---_.
+@@```.-.-___-''`=wVuuVzVu}VVlxx]\|))vLr~~~^rv?vv]}VVyVVwwcVuVlVucVVVlc}TuVyy<'`-__!vLcyuTYVVuTTul}lTT}}lTVjj~..-```.___.
+@@`` `'._::_-```-ikyVyk}}}VV}|r)?v]x?*;v]]uwzyuVu}T}TTTyVVVTVTVVyVuul}Y}TVyyT\!-''.-:xkwuullVVVVTuclTTllucss^-..''.''`'-
+@@--'```'_,_'```.<uT}Vy}lVwwyuTTuyv~~)TzVV}VwV}lyuluVwwVVVuccYcucVyyV}TTlwyTcz}~__'__!izzjVwyyyu}}lu}}Vyyw33<.'`'.`''`',
+@@,__.`.'..-.''-,:LVTTcucVyyV}TcV*,!LKVuVVTluclVyulTcVVcV}iTT}u}}}}}T}l}YuVVVuVV??_:.`=YoyVzzzzcY}uVTTcTlckk!`'--.'..---
+@@!!_.'_`.'._,,_"!xyu}TVucVVcVVs|__?IhuuyyyVucVyVclYcTT}}Y]YVVT}TTLLi}}}x}wwVllIyy^.``-<llTyyVVVu]YVluVlLVTT:'.-.`--.-_'
+@@::_...`.'-"::_::rVwcVyTu}}TuyW^:)VVTuVyywwVu}}uyVuy}}}}iLTu}T}ix]]}}}}LYVycVVVyyl,'-,^l}uVyuuVu}TyTuyycIvv_..``-....--
+@@..--'``'...--_"::]kkuu}}}}T}VG;~}jyVVyVVyVuuT}Tlluu}}TcTLLLil}}}}}VT}}LYcVlu}TyyIL!!|TyVV}TuuT}cyzuTuwyh~~.'`'--'``.-_
+@@``--..`''````.__-=]zucVl}}}}Tz)vVyVVVVuuV}}TlT}Y}ulVVuuV}]}Y}}VVTTcl}lT}cVT}}cVVVVT}Tl}}}iLTTuVuuwcVVVy],,-'``-'````..
+@@`'````'`'````.-`'-^VzTl}LLL}}u}}lTlTcT}}}}}TYLL}}uuVVcuVVu}VlLLYTTVucu}LTT}u}}uuu}cV}}YLLT}}}lVcVl}VyVu!___'``'''`````
+@@`-.````````''..``_!xaTVuuuul}ycuVyyuTVVVTTcTvx}lT}TTT}TluuuTuu}TcccYVV}]}Tlu}}uu}lVy}}lTLL}TTTuVVL}uyc^`''''`.'.`.-'.-
+@@-_-``'```'...'``._"=]hwyVVVyVyVVVzkVcyuu}uuV}}Y}TuV}}}ulYYuVu}}uuu}}VVl}TywVucyyVTTuuucuuYlccuVyTuTyV)-````''.`_'.-``'
+@@''``''`'``'````--''._xzwVVywVwyVTuuVVVTTTuVwcVTuuu}LLYTuT}L}VTTTTTc}}}}lVyyVyyyyV}}lluuuuTuuuuVy}uVc),.'..-.```.``...-
+@@''```..::-.```````.,!:>}zzy}uyycuccwwT}}}l}luVVVVlVTTTuuTYL]LuuTuu}}}lullVTulcVVy}Tu}TluucluuVuVyc\:'```````'.`  `'```
+@@-.`'..-,_-'`` ..``._,:!=vvyyVwVywVlucuTT}TVwV}}lTTwLL}yVTLLLi}}L}}wuTVculuYlyyVVVlcV}}Vc}TuVVyVjT!,-'`..```'--`  `'.``
+@@-``'``.```...`-_...'.=_,"">isawjwuu}}uuuVyVVVTLLTcyLL}T}}}]}L}}}TTY}YTTTlcu}VyuuVuyycluucuzzzV}r_'`.'``.```._,-````''`
+@@___.``''``'..``.--..-_-_,,:!^xzzwcywc}uuuTuuVVTLLTV}}Y]i}}LTuuTuuu}u}}}}c}ulTuVVVkcyV}}lVVyLL^,--.`.---.''...-.'-.`..`
+@@,:_-'`''''...```'_-'-``',,::_.^icywkwcuuwyVuTul}Y}T}}}xL}Yx}T}}}llclL}uVu}lVT}uuVwywy}}cVL*!!_.,```.-.'```.'````..```'
+@@`.'.'```''...''`'-.'.` '---''``_=|ukwzyyykyyVTVVu}xuuT}L}}}}}LiTuu}Vc}TTYY}VVVVVuuVywy}?!.`--:!,` `...``````''`...```.
+@@ `'''```'''``'--'`'-..--''``.``--":^?iVVwzVwVLVyyTLyyVuY}Tlu}TLLll}VVTlllTL}Tcccuwu}r~:-'``..":_''-.'.'.'''``'`'`''`'-
+@@``..'``'``'`` `'```.-.:-`````'`---.--_~~?LTVwokyuuVccwyluu}Vl}L}uuT}}uVcyycywuvvr*!!_.'-.._...``.,:_.`.-'''''.```'``.-
+@@```'''`-'`'````.``-__`-.`````````'.-..--_-_,~|L}}TVyywccVVVVVllyVVuwwyyuVw}\r=--``-,-...`._..''`-.-.```.```..````'``.'
+@@'```'''.''...-'''.__.```'''```````'...--..'``._!>=~^^rr***)*r*rrrr)r\*>~;~!":_..''`'``'.`'----.``''````'```''```'''''.
+
+           .                      .                                             
+     
+	}
+	}
+
+
+
+
 }
 
