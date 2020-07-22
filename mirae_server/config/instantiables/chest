@@ -3,5 +3,6 @@
     {
         int items_min 0
         int items_max 2
+        String display "[]"
     }
 }

@@ -1,4 +1,5 @@
 extern crate rstring_builder;
+
 use crate::entities::Spawnable;
 use crate::entities::SpawnedEntities;
 use crate::world::World;
@@ -14,17 +15,20 @@ use crate::world;
 use crate::player;
 use crate::entities;
 use std::u8;
+use std::error::Error;
+
+type Res = std::result::Result<StringBuilder, Box<dyn Error>>;
 
 #[derive(Clone)]
 pub enum ActionFunc {
-    A(fn(&mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    B(fn(String, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    C(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    D(fn(u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    E(fn(&ActionMap, &Vec<scanner::Param>) -> Result<StringBuilder, String>),
-    F(fn(&mut SpawnedEntities, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder, String>),
-    G(fn(&mut SpawnedEntities, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Result<StringBuilder,String>),
-    H(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>) -> Result<StringBuilder, String>)
+    A(fn(&mut Vec<Option<Player>>, &mut World) -> Res),
+    B(fn(String, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    C(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    D(fn(u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    E(fn(&ActionMap, &Vec<scanner::Param>) -> Res),
+    F(fn(&mut SpawnedEntities, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    G(fn(&mut SpawnedEntities, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    H(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>) -> Res)
 }
 
 pub struct Action {
@@ -38,8 +42,8 @@ pub struct Action {
 impl Action {
     pub fn run(&self, s : Option<&mut SpawnedEntities>, a_map :Option<&ActionMap>, keyword : Option<String>, params : Option<&Vec<scanner::Param>>,
                player_id : Option<u8>, players : Option<&mut Vec<Option<Player>>>, world : Option<&mut World>)
-               -> Result<StringBuilder, String> {
-        let result : Result<StringBuilder, String> = match self.func {
+               -> Res {
+        let result : Res = match self.func {
             ActionFunc::A(x) => x(players.unwrap(), world.unwrap()),
             ActionFunc::B(x) => x(keyword.unwrap(), params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
             ActionFunc::C(x) => x(params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
@@ -87,19 +91,13 @@ impl ActionMap {
     }
 }
 
-pub fn get_action_and_params(map: &ActionMap, s: String) -> Result<(String, Vec<Param>, Action), String> {
+pub fn get_action_and_params(map: &ActionMap, s: String) -> Result<(String, Vec<Param>, Action), Box<dyn Error>> {
     let mut scan = scanner::from(CharStream::from_string(s));
-    let first_word = scanner::peek_next(&scan);
-    if first_word.is_none() {
-        return Err("can't find action and params for empty string!".to_string());
-    }
-    let first_word_uw = first_word.unwrap();
-    if map.command_word_map.contains_key(&first_word_uw) {
-        scanner::next(&mut scan);
-        let params = scanner::get_params(&mut scan);
-        return Ok((first_word_uw.clone(), params, map.command_word_map.get(&first_word_uw).unwrap().clone()));
-    }
-    return Err("the provided string starts with a keyword that doesn't exist.".to_string());
+    let first_word = scanner::peek_next(&scan).ok_or_else(|| "can't find action and params for empty string!".to_string())?;
+    scanner::next(&mut scan);
+    let params = scanner::get_params(&mut scan);
+    let action = map.command_word_map.get(&first_word).ok_or_else(|| "that command doesn't exist!".to_string())?;
+    return Ok((first_word.clone(), params, map.command_word_map.get(&first_word).unwrap().clone()));
 }
 
 pub fn add_action(map: &mut ActionMap, s: String, a: Action) {
@@ -202,6 +200,15 @@ pub fn get_action_map() -> ActionMap {
         keywords : "eat, consume".to_string(),
         func : ActionFunc::C(eat.clone())
     });
+    add_action(&mut m,
+    "wear".to_string(),
+    Action {
+        name: "wear".to_string(),
+        description: "wear an item in your inventory, or unwear all items.".to_string(),
+        usage: "wear <x>|wear".to_string(),
+        keywords : "eat, consume".to_string(),
+        func : ActionFunc::G(wear.clone())
+    });
     return m;
 }
 
@@ -214,11 +221,11 @@ fn action_to_string(action: &Action) -> String {
     out.append("usage:\n");
     out.append(action.usage.clone());
     return out.string();
-}
+} 
 
 fn bind(a : i32, min : i32, max : i32) -> i32 {
     if min > max {
-        panic!("min must be less than max!");
+        panic!("min > max!");
     }
     if a < min {
         return min;
@@ -231,13 +238,13 @@ fn bind(a : i32, min : i32, max : i32) -> i32 {
 
 fn displace(x_origin : i32, y_origin : i32, x_axis : bool, dist : i32) -> (i32, i32) {
     if x_axis {
-        return (bind(x_origin + dist, 0, world::MAP_SIZE as i32), y_origin);
+        return (bind(x_origin + dist, 0, (world::MAP_SIZE-1) as i32), y_origin);
     } else {
-        return (x_origin, bind(y_origin + dist, 0, world::MAP_SIZE as i32));
+        return (x_origin, bind(y_origin + dist, 0, (world::MAP_SIZE-1) as i32));
    }
 }
 
-fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, world : &World) -> (u16, u16) {
+fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, world : &World) -> Result<(u16, u16), Box<dyn Error>> {
     let max = displace(x_origin, y_origin, x_axis, num_units);
     let mut current = displace(x_origin, y_origin, x_axis, num_units.signum());
     let mut backtrack = false;
@@ -250,8 +257,8 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
         }
         if world::has_entity(world, current.0 as u16, current.1 as u16) {
             let properties = world::get_entity_properties(world, current.0 as u16, current.1 as u16).unwrap();
-            let mob_stats = stats::get_or_else(properties, "stats", &stats::Value::Box(stats::Stats::new())).as_box();
-            let agression = stats::get_or_else(&mob_stats, "agression", &stats::Value::Float(0.0f64)).as_flt();
+            let mob_stats = stats::get_or_else(properties, "stats", &stats::Value::Box(stats::Stats::new())).as_box()?;
+            let agression = stats::get_or_else(&mob_stats, "agression", &stats::Value::Float(0.0f64)).as_flt()?;
             let v : f64 = rand::random::<f64>();
             if v < agression {
                 break;
@@ -265,10 +272,10 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
     } else {
         end = current;
     }
-    return (end.0 as u16, end.1 as u16);
+    return Ok((end.0 as u16, end.1 as u16));
 }
 
-fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Result<StringBuilder, String> {
+fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Res {
     let mut out = StringBuilder::new();
     if params.is_empty() {
         out.append("welcome to the help menu!\n");
@@ -308,52 +315,57 @@ fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Result<StringB
                 }
             }
         } else {
-            return Err("was expecting first parameter to be a string".to_string());
+            return Err("was expecting first parameter to be a string".into());
         }
     } else {
-        return Err("was expecting only one parameter".to_string());
+        return Err("was expecting only one parameter".into());
     }
     return Ok(out);
 }
 
-fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut player = players[player_id as usize].as_mut().unwrap();
     let num_units;
     if params.is_empty() {
-        num_units = player::get_stat(&player, "speed");
+        num_units = player::get_stat(&player, "speed")?;
     } else {
-        if params[0].as_int().is_none() {
-            return Err("expected number as first parameter!".to_string());
-        }
-        num_units = params[0].as_int().unwrap();
-        if num_units > player::get_stat(&player, "speed") {
-            return Err(format!("You can only move {} units per turn!", num_units));
+        let num = params[0].as_int();
+        match num {
+            Some(n) => {
+                if n > player::get_stat(&player, "speed")? {
+                    return Err(format!("You can only move {} units per turn!", n).into());
+                } else {
+                    num_units = n;
+                }
+            },
+            None => return Err("expected an integer!".into())
         }
     }
     let new_posn;
     if keyword == "w" {
-        new_posn = get_step(player::x(&player) as i32, player::y(&player) as i32, false, -num_units as i32, world);
+        new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, false, -num_units as i32, world)?;
     } else if keyword == "a" {
-        new_posn = get_step(player::x(&player) as i32, player::y(&player) as i32, true, -num_units as i32, world);
+        new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, true, -num_units as i32, world)?;
     } else if keyword == "s" {
-        new_posn = get_step(player::x(&player) as i32, player::y(&player) as i32, false, num_units as i32, world);
+        new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, false, num_units as i32, world)?;
     } else if keyword == "d" {
-        new_posn = get_step(player::x(&player) as i32, player::y(&player) as i32, true, num_units as i32, world);
+        new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, true, num_units as i32, world)?;
     } else {
         unreachable!();
     }
     player::set_posn(&mut player, new_posn.0, new_posn.1);
     player.set_interact(false);
+    player::reset_to_base(&mut player);
     return disp(player_id, players, world);
 }
 
-fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let p_x = player::x(&player);
-    let p_y = player::y(&player);
+    let p_x = player::x(&player)?;
+    let p_y = player::y(&player)?;
     println!("p_x: {}", p_x);
     println!("p_y: {}", p_y);
-    let view = player::get_stat(&player, "view") as u16;
+    let view = player::get_stat(&player, "view")? as u16;
     let mut out = StringBuilder::new();
     out.append(format!("{},{}\n", p_x, p_y));
     let x;
@@ -368,12 +380,13 @@ fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) 
     } else {
         y = p_y - view;
     }
-    out.append(display::display(world, players, x, y, 2 * view + 1, 1));
+    
+    out.append(display::display(world, players, x, y, std::cmp::min(2 * view + 1, world::MAP_SIZE - x), std::cmp::min(2 * view + 1, world::MAP_SIZE - y), 1)?);
     return Ok(out);
 }
 
-fn map(players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
-    return Ok(display::display(world, players, 0, 0, world::MAP_SIZE, world::MAP_SIZE/100));
+fn map(players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
+    return display::display(world, players, 0, 0, world::MAP_SIZE, world::MAP_SIZE, world::MAP_SIZE/100);
 }
 
 pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> (&mut Player, &mut Player) {
@@ -387,7 +400,7 @@ pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> (&
     }
 }
 
-pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let opponent_id;
     {
         let player = players[player_id as usize].as_ref().unwrap();
@@ -409,37 +422,37 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
     let at_name;
     if params.len() == 0 {
         energy_cost = 0;
-        physical_dmg = player::get_stat(&player, "dmg");
+        physical_dmg = player::get_stat(&player, "dmg")?;
         magic_dmg = 0;
         at_name = "base attack".to_string();
     } else {
         if let Param::String(attack_name) = &params[0] {
             if player.equip().is_none() {
-                return Err("you don't have anything equipped!".to_string());
+                return Err("you don't have anything equipped!".into());
             }
-            let abilities = stats::get_or_else(player.equip().unwrap(), "abilities", &stats::Value::Box(stats::Stats::new())).as_box();
+            let abilities = stats::get_or_else(player.equip().unwrap(), "abilities", &stats::Value::Box(stats::Stats::new())).as_box()?;
             if !stats::has_var(&abilities, attack_name) {
-                return Err("your equipped weapon does not have that ability!".to_string());
+                return Err("your equipped weapon does not have that ability!".into());
             }
-            let ability = stats::get(&abilities, attack_name).unwrap().as_box();
-            energy_cost = stats::get_or_else(&ability, "energy_cost", &stats::Value::Int(0)).as_int();
-            physical_dmg = stats::get_or_else(&ability, "physical_dmg", &stats::Value::Int(0)).as_int();
-            magic_dmg = stats::get_or_else(&ability, "magic_dmg", &stats::Value::Int(0)).as_int();
+            let ability = stats::get(&abilities, attack_name).unwrap().as_box()?;
+            energy_cost = stats::get_or_else(&ability, "energy_cost", &stats::Value::Int(0)).as_int()?;
+            physical_dmg = stats::get_or_else(&ability, "physical_dmg", &stats::Value::Int(0)).as_int()?;
+            magic_dmg = stats::get_or_else(&ability, "magic_dmg", &stats::Value::Int(0)).as_int()?;
             at_name = attack_name.clone();
         } else {
             unreachable!();
         }
     }
-    if player::get_stat(&player, "energy") >= energy_cost {
+    if player::get_stat(&player, "energy")? >= energy_cost {
         player::change_stat(&mut player, "energy", -energy_cost);
         if player.opponent().is_none() { // fighting entity
-            if !entities::has_entity(spawned_entities, player::x(player), player::y(player)) {
-                return Err("you aren't fighting anything!".to_string());
+            if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
+                return Err("you aren't fighting anything!".into());
             }
-            let damage_opponent = entities::get_entity_action(spawned_entities, "dmg".to_string(), player::x(player), player::y(player));
+            let damage_opponent = entities::get_entity_action(spawned_entities, "dmg".to_string(), player::x(player)?, player::y(player)?);
             if damage_opponent.is_none() {
-                let entity = entities::get_entity(spawned_entities, player::x(player), player::y(player)).unwrap();
-                return Err(format!("You cannot damage a(n) {}", entity.name()));
+                let entity = entities::get_entity(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
+                return Err(format!("You cannot damage a(n) {}", entity.name()).into());
             } else {
                 let player;
                 let res = damage_opponent.unwrap().run(Some(spawned_entities), None, None,
@@ -452,17 +465,17 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                 if res.is_err() {
                     return res;
                 } else {
-                    if !entities::has_entity(spawned_entities, player::x(player), player::y(player)) {
+                    if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
                         return res;
                     }
                     let mut out = res.ok().unwrap();
                     let entity_speed;
                     {
-                        let entity = entities::get_entity_mut(spawned_entities, player::x(player), player::y(player)).unwrap();
-                        entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int();
+                        let entity = entities::get_entity_mut(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
+                        entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
                     }
-                    let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player), player::y(player));
-                    let player_speed = player::get_stat(&player, "speed");
+                    let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player)?, player::y(player)?);
+                    let player_speed = player::get_stat(&player, "speed")?;
                     player.add_entity_cumulative_speed(entity_speed);
                     if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
                         player.zero_entity_cumulative_speed();
@@ -479,12 +492,13 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
             }
         } else { // fighting another player
             if !player::turn(&player) {
-                return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\nBe honourable and just wait for your opponent to finish attacking you sirrrrrrrr....".to_string());
+                return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\n\
+                            Be honourable and just wait for your opponent to finish attacking you sirrrrrrrr....".into());
             }
             let mut opponent = opponent.unwrap();
             player::send(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
             player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg));
-            if player::is_dead(&opponent) {
+            if player::is_dead(&opponent)? {
                 let mut out = StringBuilder::new();
                 out.append("Congrats for murdering your opponent!!!!\n");
                 player.set_opponent(None);
@@ -499,19 +513,19 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
             return Ok(out);
         }
     } else {
-        return Err("You don't have enough energy for that ability!".to_string());
+        return Err("You don't have enough energy for that ability!".into());
     }
 }
 
-pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut World) -> Result<StringBuilder, String> {
+pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut World) -> Res {
     let p_x;
     let p_y;
     let view;
     {
         let player = players[player_id as usize].as_ref().unwrap();
-        p_x = player::x(&player);
-        p_y = player::y(&player);
-        view = player::get_stat(&player, "view") as usize;
+        p_x = player::x(&player)?;
+        p_y = player::y(&player)?;
+        view = player::get_stat(&player, "view")? as usize;
     }
 
     let mut least_dist = std::usize::MAX;
@@ -521,8 +535,8 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
             continue;
         }
         let opp = players[i].as_ref().unwrap();
-        let dist_x = (player::x(&opp) as i32 - p_x as i32) as isize;
-        let dist_y = (player::y(&opp) as i32 - p_y as i32) as isize;
+        let dist_x = (player::x(&opp)? as i32 - p_x as i32) as isize;
+        let dist_y = (player::y(&opp)? as i32 - p_y as i32) as isize;
         let dist = (dist_x * dist_x + dist_y * dist_y) as usize;
         if dist < least_dist && dist < (view * view * 2) {
             opponent = Some(i as u8);
@@ -533,7 +547,7 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
     if opponent.is_none() {
         let player = players[player_id as usize].as_mut().unwrap();
         player.set_opponent(None);
-        return Err("no availible players in range!".to_string());
+        return Err("no availible players in range!".into());
     } else {
         let opponent_id = opponent;
         println!("{}, {}", player_id, opponent_id.unwrap());
@@ -543,8 +557,8 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
         player.set_opponent(opponent_id);
         out.append(format!("You are attacking player {}\n", opponent_id.unwrap()));
         opponent.set_opponent(Some(player_id));
-        let player_speed = player::get_stat(&player, "speed");
-        let opponent_speed = player::get_stat(&opponent, "speed");
+        let player_speed = player::get_stat(&player, "speed")?;
+        let opponent_speed = player::get_stat(&opponent, "speed")?;
         if player_speed >= opponent_speed {
             player::set_turn(&mut player, true);
             player::set_turn(&mut opponent, false);
@@ -554,39 +568,43 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
             player::set_turn(&mut player, false);
             player::set_turn(&mut opponent, true);
             out.append("It is your opponent's turn!\n");
-            player::send(&opponent, "Another player is battling you! It is your turn!".to_string());
+            player::send(&opponent, "Another player is battling you! It is your turn!\n".to_string());
         }
         return Ok(out);
     }
 }
 
-pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut out = StringBuilder::new();
     let player = players[player_id as usize].as_mut().unwrap();
     if params.is_empty() {
         out.append("dequipping item.\n");
         player.set_equip(None);
     } else if params.len() == 1 {
-        let inventory = stats::get(player.data(), "inventory").unwrap().as_box();
+        let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
         let items = stats::get_var_names(&inventory);
         let selected_item = params[0].as_string();
         if selected_item.is_none() {
-            return Err("expected string as first parameter!".to_string());
+            return Err("expected string as first parameter!".into());
         }
         let selected_item = selected_item.unwrap();
         if items.contains(&selected_item) {
             out.append("equipping item.\n");
-            player.set_equip(Some(stats::get(&world.items, selected_item.as_str()).unwrap().as_box()));
+            let item = stats::get(&world.items, selected_item.as_str());
+            if item.is_none() {
+                return Err("That item is not defined, and cannot be equipped!".into());
+            }
+            player.set_equip(Some(item.unwrap().as_box()?));
         } else {
-            return Err("You don't have that item!".to_string());
+            return Err("You don't have that item!".into());
         }
     } else {
-        return Err("You can only equip one item!".to_string());
+        return Err("You can only equip one item!".into());
     }
     return Ok(out);
 }
 
-fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut out = StringBuilder::new();
     let player = players[player_id as usize].as_mut().unwrap();
     if params.is_empty() {
@@ -594,12 +612,12 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
     } else {
         let val = params[0].as_string();
         if val.is_none() {
-            return Err("expected string as first parameter!".to_string());
+            return Err("expected string as first parameter!".into());
         }
         let val = val.unwrap();
         if val == "opponent" {
             if player.opponent().is_none() {
-                let entity = entities::get_entity_mut(entities, player::x(player), player::y(player));
+                let entity = entities::get_entity_mut(entities, player::x(player)?, player::y(player)?);
                 if entity.is_none() {
                     out.append("no opponent!\n");
                 } else {
@@ -616,55 +634,97 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
             }
         } else {
             if stats::has_var(&world.items, &val) {
-                out.append(stats::string(&stats::get(&world.items, &val).unwrap().as_box()));
+                out.append(stats::string(&stats::get(&world.items, &val).unwrap().as_box()?));
             } else {
-                return Err("that item doesn't exist!".to_string());
+                return Err("that item doesn't exist!".into());
             }
         }
     }
     return Ok(out);
 }
 
-fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result <StringBuilder, String> {
+fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let inv = player::get_inventory(player);
+    let inv = player::get_inventory(player)?;
     if params.len() != 1 {
-        return Err("expected an item!".to_string());
+        return Err("expected an item!".into());
     }
     let item = params[0].as_string();
     if item.is_none() {
-        return Err("expected an item!".to_string());
+        return Err("expected an item!".into());
     }
     let item = item.unwrap();
     if stats::has_var(&inv, item.as_str()) {
         player::remove_item_from_inventory(player, item.as_str());
-        let item = stats::get_or_else(&world.items, item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box();
-        let health_gain = stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int();
-        let energy_gain = stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int();
+        let item = stats::get_or_else(&world.items, item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box()?;
+        let health_gain = stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int()?;
+        let energy_gain = stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int()?;
         player::change_stat(player, "health", health_gain);
         player::change_stat(player, "energy", energy_gain);
         let mut out = StringBuilder::new();
         out.append(format!("you got {} health, and {} energy\n", health_gain, energy_gain));
         return Ok(out);
     } else {
-        return Err("you don't have that item!".to_string());
+        return Err("you don't have that item!".into());
     }
 }
 
-fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>) -> Result<StringBuilder, String> {
+fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>) -> Res {
     let mut player = players[player_id as usize].as_mut().unwrap();
+    if params.len() != 1 {
+        return Err("expected exactly one stat to upgrade!".into());
+    }
     if let scanner::Param::String(s) = &params[0] {
         let result = player::upgrade_stat(&mut player, s.as_str());
         if result.is_ok() {
-            player::reset_to_base_with_buffs(&mut player);
+            player::reset_to_base(&mut player);
             let mut out = StringBuilder::new();
-            out.append("upgraded stat.");
+            out.append("upgraded stat.\n");
             return Ok(out);
         } else {
-            return Err(result.err().unwrap());
+            return Err(result.err().unwrap().into());
         }
     } else {
-        return Err("expected only one parameter, and expected it to be a string!".to_string());
+        return Err("expected only one parameter, and expected it to be a stat name!".into());
     }
 }
 
+fn wear(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
+    let mut player = players[player_id as usize].as_mut().unwrap();
+    if player.opponent().is_some() || entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
+        return Err("you cannot wear items while fighting!".into());
+    }
+    if params.len() > 1 {
+        return Err("expected exactly one item to wear!".into());
+    } else if params.len() == 0 {
+        player::unwear_all(player);
+        let mut out = StringBuilder::new();
+        out.append("unwore all items!\n");
+        return Ok(out);
+    } else {
+        if let scanner::Param::String(s) = &params[0] {
+            if !stats::has_var(&player::get_inventory(&player)?, s.as_str()) {
+                return Err("You do not have that item in your inventory!".into())
+            } 
+            let item = stats::get(&world.items, s);
+            if item.is_none() {
+                return Err("That item is not defined, and cannot be worn!".into());
+            }
+            let item = item.unwrap().as_box()?;
+            if !stats::has_var(&item, "buffs") {
+                return Err("You cannot wear this item!".into());
+            }
+            let result = player::wear(&mut player, s.to_string(), stats::get(&item, "buffs").unwrap().as_box()?);
+            if result.is_ok() {
+                player::reset_to_base(&mut player);
+                let mut out = StringBuilder::new();
+                out.append("wore item.\n");
+                return Ok(out);
+            } else {
+                return Err(result.err().unwrap().into());
+            }
+        } else {
+            return Err("expected only one parameter, and expected it to be an item name!".into());
+        }
+    }
+}

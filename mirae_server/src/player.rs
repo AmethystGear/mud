@@ -11,6 +11,7 @@ use crate::stats::Stats;
 use char_stream::CharStream;
 use std::fs::File;
 use rand::Rng;
+use std::error::Error;
 
 const DEFAULT : &str = "config/player_defaults.txt";
 const PLAYER_DATA : &str = "save/player_data.txt";
@@ -19,6 +20,7 @@ pub struct Player {
     data : Stats,
     opponent : Option<u8>,
     equip : Option<Stats>,
+    wears : Vec<(String, Stats)>,
     sender : Sender<(String, Option<u8>)>,
     cumulative_speed : i64,
     interact : bool,
@@ -71,6 +73,49 @@ impl Player {
     }
 }
 
+fn buff(player : &mut Player, buff : Stats) -> Result<(), Box<dyn Error>> {
+    let mut base = stats::get(player.data(), "buffed_stats").unwrap().as_box()?;
+    let vars = stats::get_var_names(&base);
+    for var in vars {
+        let curr = stats::get_or_else(&base, var.as_str(), &Value::Int(0)).as_int()?;
+        if stats::has_var(&buff, var.as_str()) {
+            let b = stats::get(&buff, var.as_str()).unwrap().as_flt()?;
+            stats::set(&mut base, var.as_str(), stats::Value::Int(((curr as f64) * b) as i64));
+        }
+    }
+    stats::set(&mut player.data, "buffed_stats", Value::Box(base));
+    return Ok(())
+}
+
+pub fn wear(player : &mut Player, name : String, b : Stats) -> Result<(), Box<dyn Error>> {
+    let inv = get_inventory(player)?;
+    if !stats::has_var(&inv, &name) {
+        return Err("You don't have that item in your inventory!".into());
+    }
+    buff(player, b.clone())?;
+    remove_item_from_inventory(player, &name);
+    player.wears.push((name, b));
+    return Ok(());
+}
+
+pub fn unwear_all(player : &mut Player) {
+    unwear(player);
+    let mut names = vec![];
+    for (name, _) in &player.wears {
+        names.push(name.clone());
+    }
+    for name in names {
+        add_item_to_inventory(player, &name);
+    }
+    player.wears = vec![];
+}
+
+fn unwear(player : &mut Player) {
+    let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box().unwrap();
+    stats::set(&mut player.data, "buffed_stats", Value::Box(base_stats));
+    reset_to_base(player);
+}
+
 pub fn from(x : u16, y : u16, id : u8, sender: Sender<(String, Option<u8>)>) -> Player {
     let defaults : Stats = stats::from(&mut scanner::from(CharStream::from_file(File::open(DEFAULT).unwrap())));
     let mut identifiers : Stats = Stats::new();
@@ -83,21 +128,24 @@ pub fn from(x : u16, y : u16, id : u8, sender: Sender<(String, Option<u8>)>) -> 
     stats::set(&mut data, "inventory", Value::Box(Stats::new()));
     stats::set(&mut data, "identity", Value::Box(identifiers));
     stats::set(&mut data, "base_stats", Value::Box(defaults.clone()));
+    stats::set(&mut data, "buffed_stats", Value::Box(defaults.clone()));
     stats::set(&mut data, "stats", Value::Box(defaults.clone()));
     stats::set(&mut data, "posn", Value::Box(posn));
     stats::set(&mut data, "xp", Value::Int(0));
-    return Player { data : data, sender : sender , opponent : None, equip : None, turn : false, interact: false, cumulative_speed : 0};
+    return Player { data : data, sender : sender , opponent : None, equip : None, wears : vec![], turn : false, interact: false, cumulative_speed : 0};
 }
 
-pub fn login(player : &mut Player, save : File) {
+/*
+pub fn login(player : &mut Player, save : File) -> Result<(), Box<dyn Error>> {
     let mut player_data : Stats = stats::from(&mut scanner::from(CharStream::from_file(save)));
-    let a = stats::get(player.data(), "identity").unwrap().as_box();
+    let a = stats::get(player.data(), "identity").unwrap().as_box()?;
     let id = stats::get(&a, "id").unwrap();
-    let mut player_identifiers = stats::get(&player_data, "identity").unwrap().as_box();
+    let mut player_identifiers = stats::get(&player_data, "identity").unwrap().as_box()?;
     stats::set(&mut player_identifiers, "id", id.clone());
     stats::set(&mut player_data, "identity", Value::Box(player_identifiers));
     player.data = player_data;
 }
+*/
 
 pub fn respawn(player : &mut Player, world : &World) {
     let mut rng = rand::thread_rng();
@@ -109,98 +157,86 @@ pub fn respawn(player : &mut Player, world : &World) {
         y = rng.gen_range(0, world::MAP_SIZE);
     }
     set_posn(player, x, y);
-    reset_to_base_with_buffs(player);
+    reset_to_base(player);
+    let health = stats::get(&stats::get(player.data(), "buffed_stats").unwrap().as_box().unwrap(), "health").unwrap().as_int().unwrap();
+    change_stat(player, "health", health);
 }
 
 pub fn send(player : &Player, string : String) {
     player.sender.send((string, None)).unwrap();
 }
 
-pub fn change_stat(player : &mut Player, stat : &str, delta: i64) {
-    let stat_val = get_stat(player, stat);
-    let mut stats = stats::get(player.data(), "stats").unwrap().as_box();
-    let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
-    let mut buff = 1.0f64;
-    if player.equip.is_some() {
-        let buffs = stats::get(player.equip().unwrap(), "buffs").unwrap().as_box();
-        if stats::has_var(&buffs, stat) {
-            buff = stats::get(&buffs, stat).unwrap().as_flt();
-        }
-    }
-    let stat_max = ((stats::get(&base_stats, stat).unwrap().as_int() as f64) * buff) as i64;
+pub fn change_stat(player : &mut Player, stat : &str, delta: i64) -> Result<(), Box<dyn Error>> {
+    let stat_val = get_stat(player, stat)?;
+    let mut stats = stats::get(player.data(), "stats").unwrap().as_box()?;
+    let base_stats = stats::get(player.data(), "buffed_stats").unwrap().as_box()?;
+    let stat_max = stats::get(&base_stats, stat).unwrap().as_int()?;
     stats::set(&mut stats, stat, Value::Int(std::cmp::min(stat_max, std::cmp::max(0, stat_val + delta))));
     stats::set(&mut player.data, "stats", Value::Box(stats));
+    return Ok(());
 }
 
-pub fn reset_to_base_with_buffs(player: &mut Player) {
-    let mut stats = stats::get(player.data(), "stats").unwrap().as_box();
-    let base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
-    let stat_names = stats::get_var_names(&stats);
-    let buffs;
-    if player.equip.is_some() {
-        buffs = stats::get(player.equip().unwrap(), "buffs").unwrap().as_box();
-    } else {
-        buffs = Stats::new();
-    }
-    for stat in stat_names {
-        let mut base_stat = stats::get(&base_stats, stat.as_str()).unwrap().as_int();
-        if stats::has_var(&buffs, stat.as_str()) {
-            let buff = stats::get(&buffs, stat.as_str()).unwrap().as_flt();
-            base_stat = ((base_stat as f64) * buff) as i64;
-        }
-        stats::set(&mut stats, stat.as_str(), Value::Int(base_stat));
-    }
-    stats::set(&mut player.data, "stats", Value::Box(stats));
+pub fn reset_to_base(player: &mut Player) -> Result<(), Box<dyn Error>> {
+    let health = get_stat(player, "health")?;
+    let mut base_stats = stats::get(player.data(), "buffed_stats").unwrap().as_box()?;
+    let max_health = stats::get(&base_stats, "health").unwrap().as_int()?;
+    stats::set(&mut base_stats, "health", Value::Int(std::cmp::min(health, max_health)));
+    
+    stats::set(&mut player.data, "stats", Value::Box(base_stats));
+    return Ok(());
 }
 
-pub fn change_xp(player : &mut Player, delta : i64) {
-    let xp = stats::get(player.data(), "xp").unwrap().as_int();
+pub fn change_xp(player : &mut Player, delta : i64) -> Result<(), Box<dyn Error>> {
+    let xp = stats::get(player.data(), "xp").unwrap().as_int()?;
     stats::set(&mut player.data, "xp", Value::Int(std::cmp::max(0, xp + delta)));
+    return Ok(());
 }
 
-pub fn get_stat(player : &Player, stat : &str) -> i64 {
-    let stats = stats::get(player.data(), "stats").unwrap().as_box();
+pub fn get_stat(player : &Player, stat : &str) -> Result<i64, Box<dyn Error>> {
+    let stats = stats::get(player.data(), "stats").unwrap().as_box()?;
     return stats::get(&stats, stat).unwrap().as_int();
 }
 
-pub fn xp(player : &Player) -> i64 {
+pub fn xp(player : &Player) -> Result<i64, Box<dyn Error>> {
     return stats::get(player.data(), "xp").unwrap().as_int();
 }
 
-pub fn x(player : &Player) -> u16 {
-    return stats::get(&stats::get(player.data(), "posn").unwrap().as_box(), "x").unwrap().as_int() as u16;
+pub fn x(player : &Player) -> Result<u16, Box<dyn Error>> {
+    return Ok(stats::get(&stats::get(player.data(), "posn").unwrap().as_box()?, "x").unwrap().as_int()? as u16);
 }
 
-pub fn y(player : &Player) -> u16 {
-    return stats::get(&stats::get(player.data(), "posn").unwrap().as_box(), "y").unwrap().as_int() as u16;
+pub fn y(player : &Player) -> Result<u16, Box<dyn Error>> {
+    return Ok(stats::get(&stats::get(player.data(), "posn").unwrap().as_box()?, "y").unwrap().as_int()? as u16);
 }
 
-pub fn set_posn(player: &mut Player, x : u16, y : u16) {
-    let mut posn = stats::get(player.data(), "posn").unwrap().as_box();
+pub fn set_posn(player: &mut Player, x : u16, y : u16) -> Result<(), Box<dyn Error>> {
+    let mut posn = stats::get(player.data(), "posn").unwrap().as_box()?;
     stats::set(&mut posn, "x", Value::Int(x as i64));
     stats::set(&mut posn, "y", Value::Int(y as i64));
     stats::set(&mut player.data, "posn", Value::Box(posn));
+    return Ok(())
 }
 
-pub fn equip(player: &mut Player, item_name : String, world : &mut World) -> Result<(), String>{
+pub fn equip(player: &mut Player, item_name : String, world : &mut World) -> Result<(), Box<dyn Error>>{
     if !stats::has_var(&world.items, item_name.as_str()) {
-        return Err("that item doesn't exist!".to_string());
+        return Err("that item doesn't exist!".into());
     }
-    let inventory = stats::get(player.data(), "inventory").unwrap().as_box();
+    let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
     if !stats::has_var(&inventory, item_name.as_str()) {
-        return Err("that item is not in your inventory!".to_string());
+        return Err("that item is not in your inventory!".into());
     }
-    let item = stats::get(&world.items, item_name.as_str()).unwrap().as_box();
+    let item = stats::get(&world.items, item_name.as_str()).unwrap().as_box()?;
     player.equip = Some(item);
     return Ok(())
 }
 
-pub fn is_dead(player : &Player) -> bool {
-    return get_stat(player, "health") == 0;
+pub fn is_dead(player : &Player) -> Result<bool, Box<dyn Error>> {
+    return Ok(get_stat(player, "health")? == 0);
 }
 
+/*
 pub fn display(player: &Player) -> String {
-    let id = format!("{:x}", stats::get(player.data(), "id").unwrap().as_int() as u8);
+    let id = format!("{:x}", stats::get(player.data(), "id").unwrap().as_int()? as u8);
     if id.len() == 2 {
         return id;
     } else if id.len() == 1 {
@@ -209,26 +245,36 @@ pub fn display(player: &Player) -> String {
         unreachable!();
     }
 }
+*/
 
-pub fn add_items_to_inventory(player : &mut Player, stats : Stats) {
-    let new_inventory = stats::add(stats::get(player.data(), "inventory").unwrap().as_box(), stats);
+pub fn add_items_to_inventory(player : &mut Player, stats : Stats) -> Result<(), Box<dyn Error>> {
+    let new_inventory = stats::add(stats::get(player.data(), "inventory").unwrap().as_box()?, stats);
     stats::set(&mut player.data, "inventory", Value::Box(new_inventory));
+    return Ok(());
 }
 
-pub fn remove_item_from_inventory(player : &mut Player, item : &str) {
-    let mut inv = stats::get(player.data(), "inventory").unwrap().as_box();
+pub fn remove_item_from_inventory(player : &mut Player, item : &str) -> Result<(), Box<dyn Error>> {
+    let mut inv = stats::get(player.data(), "inventory").unwrap().as_box()?;
     if stats::has_var(&inv, item) {
-        let m = stats::get(&mut inv, item).unwrap().as_int();
+        let m = stats::get(&mut inv, item).unwrap().as_int()?;
         stats::set(&mut inv, item, Value::Int(m - 1));
-        if stats::get(&mut inv, item).unwrap().as_int() == 0 {
+        if stats::get(&mut inv, item).unwrap().as_int()? == 0 {
             stats::rm(&mut inv, item);
         }
     }
     stats::set(&mut player.data, "inventory", Value::Box(inv));
+    return Ok(());
 }
 
-pub fn get_inventory(player : &Player) -> Stats {
-    return stats::get(player.data(), "inventory").unwrap().as_box();
+pub fn add_item_to_inventory(player : &mut Player, item : &str) -> Result<(), Box<dyn Error>> {
+    let mut stats = Stats::new();
+    stats::set(&mut stats, item, stats::Value::Int(1));
+    add_items_to_inventory(player, stats)?;
+    return Ok(());
+}
+
+pub fn get_inventory(player : &Player) -> Result<Stats, Box<dyn Error>> {
+    return Ok(stats::get(player.data(), "inventory").unwrap().as_box()?);
 }
 
 pub fn turn(player : &Player) -> bool {
@@ -239,15 +285,23 @@ pub fn set_turn(player : &mut Player, val : bool) {
     player.turn = val;
 }
 
-pub fn upgrade_stat(player : &mut Player, stat : &str) -> Result<(), String> {
-    let mut base_stats = stats::get(player.data(), "base_stats").unwrap().as_box();
-    let val = stats::get(&base_stats, stat).unwrap().as_int();
+pub fn upgrade_stat(player : &mut Player, stat : &str) -> Result<(), Box<dyn Error>> {
+    let mut base_stats = stats::get(player.data(), "base_stats").ok_or("no base stats")?.as_box()?;
+    let val = stats::get(&base_stats, stat).ok_or("That stat doesn't exist! Type 'help stat' to see the stats you can upgrade.")?.as_int()?;
     let xp_cost = val * 100;
-    if xp_cost > xp(player) {
-        return Err(format!("you need {} xp to upgrade this stat, but you only have {} xp.", xp_cost, xp(player)));
+    if xp_cost > xp(player)? {
+        return Err(format!("you need {} xp to upgrade this stat, but you only have {} xp.", xp_cost, xp(player)?).into());
     }
-    change_xp(player, -xp_cost);
+    change_xp(player, -xp_cost)?;
+    unwear(player);
     stats::set(&mut base_stats, stat, Value::Int(val + 1));
-    stats::set(&mut player.data, "base_stats", Value::Box(base_stats));
+    stats::set(&mut player.data, "base_stats", Value::Box(base_stats.clone()));
+    stats::set(&mut player.data, "buffed_stats", Value::Box(base_stats.clone()));
+    for i in 0..player.wears.len() {
+        let name = player.wears[i].0.clone();
+        let stat = player.wears[i].1.clone();
+        wear(player, name, stat);
+    }
+    reset_to_base(player);
     return Ok(());
 }

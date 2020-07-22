@@ -1351,7 +1351,7 @@ Box thornsberry_ap_stats
 	}
 	Box drops
 	{
-		string[] drops "A+"
+		string[] drops "A"
 		float[] drop_prob 1.0
 		int[] drop_per 1
 		int drop_max 1
@@ -1359,7 +1359,7 @@ Box thornsberry_ap_stats
 	}
 	Box items
 	{
-		string[] items "A+"
+		string[] items "A"
 		float[] item_prob 1.0
 		int max_num_items 1		
 	}	
@@ -1633,7 +1633,7 @@ Box astrology
 	{
 		string[] drops "A+" "B+" "C-" "D+" "F"
 		float[] drop_prob 0.05 0.4 0.4 0.1 0.05
-		int[] drop_per 1
+		int[] drop_per 1 1 1 1 1
 		int drop_max 1
 		int drop_min 1
 	}

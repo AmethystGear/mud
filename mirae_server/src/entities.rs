@@ -14,6 +14,9 @@ use crate::action::{Action, ActionMap, ActionFunc};
 use crate::scanner::Param;
 use rand::Rng;
 use crate::player;
+use std::error::Error;
+
+type Res = std::result::Result<StringBuilder, Box<dyn Error>>;
 
 pub struct SpawnedEntities {
     spawned_entities : HashMap<u32, Box<dyn Spawnable>>,
@@ -67,11 +70,12 @@ pub fn hash(x : u16, y : u16) -> u32 {
     return ((y as u32) << 16) | (x as u32);
 }
 
-pub fn spawn(stats: Stats, x: u16, y: u16, name : String, se: &mut SpawnedEntities, world : &mut World) {
-    let entity_type = stats::get(&stats, "entity_type").unwrap().as_string();
+pub fn spawn(stats: Stats, x: u16, y: u16, name : String, se: &mut SpawnedEntities, world : &mut World) -> Result<(), Box<dyn Error>> {
+    let entity_type = stats::get(&stats, "entity_type").unwrap().as_string()?;
     let create_entity = se.create_entity_map.get(&entity_type).unwrap();
     let entity = create_entity(stats, x, y, name, world);
     se.spawned_entities.insert(hash(x, y), entity);
+    return Ok(())
 }
 
 pub fn has_entity(spawned_entities : &SpawnedEntities, x : u16, y : u16) -> bool {
@@ -150,7 +154,7 @@ impl Spawnable for Mob {
 
 impl Mob {
     pub fn new(stats: Stats, x : u16, y : u16, name : String) -> Self {
-        let s =  stats::get(&stats, "stats").unwrap().as_box();
+        let s =  stats::get(&stats, "stats").unwrap().as_box().unwrap();
         let mut m = Mob {
             x : x,
             y : y,
@@ -160,7 +164,7 @@ impl Mob {
             entity_type : "mob".to_string(),
             weapons : Stats::new()
         };
-        m.weapons = get_items(&m, "item");
+        m.weapons = get_items(&m, "item").unwrap();
         return m;
     }
 }
@@ -207,12 +211,12 @@ impl Spawnable for TradingMob {
 
 impl TradingMob {
     pub fn new (stats: Stats, x : u16, y : u16, name : String, world : &World) -> Self {
-        let min = stats::get(&stats, "trade_min").unwrap().as_int() as usize;
-        let max = stats::get(&stats, "trade_max").unwrap().as_int() as usize;
+        let min = stats::get(&stats, "trade_min").unwrap().as_int().unwrap() as usize;
+        let max = stats::get(&stats, "trade_max").unwrap().as_int().unwrap() as usize;
         let mut rng = rand::thread_rng();
         let num_items = rng.gen_range(min, max + 1);
         let items = get_random_items(num_items, world);
-        let s = stats::get(&stats, "stats").unwrap().as_box();
+        let s = stats::get(&stats, "stats").unwrap().as_box().unwrap();
         let mut tm = TradingMob {
             x : x,
             y : y,
@@ -223,7 +227,7 @@ impl TradingMob {
             entity_type : "trading_mob".to_string(),
             weapons : Stats::new()
         };
-        tm.weapons = get_items(&tm, "item");
+        tm.weapons = get_items(&tm, "item").unwrap();
         return tm;
     }
 }
@@ -262,8 +266,8 @@ impl Spawnable for LootChest {
 
 impl LootChest {
     pub fn new (stats: Stats, x : u16, y : u16, name : String, world : &World) -> Self {
-        let min = stats::get_or_else(&stats, "items_min", &stats::Value::Int(0)).as_int() as usize;
-        let max = stats::get_or_else(&stats, "items_max", &stats::Value::Int(0)).as_int() as usize;
+        let min = stats::get_or_else(&stats, "items_min", &stats::Value::Int(0)).as_int().unwrap() as usize;
+        let max = stats::get_or_else(&stats, "items_max", &stats::Value::Int(0)).as_int().unwrap() as usize;
         let mut rng = rand::thread_rng();
         let num_items = rng.gen_range(min, max + 1);
         let items = get_random_items(num_items, world);
@@ -284,7 +288,7 @@ pub fn get_random_items(num_items : usize, world : &World) -> Stats {
             stats::set(&mut items, &item, stats::Value::Int(1));
         } else {
             let clone = items.clone();
-            stats::set(&mut items, &item, stats::Value::Int(stats::get(&clone, &item).unwrap().as_int() + 1));
+            stats::set(&mut items, &item, stats::Value::Int(stats::get(&clone, &item).unwrap().as_int().unwrap() + 1));
         }
     }
     return items;
@@ -294,10 +298,10 @@ pub fn create_chest(stats : Stats, x : u16, y : u16, name : String, world : &Wor
     return Box::new(LootChest::new(stats, x, y, name, world));
 }
 
-pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let x = player::x(&player);
-    let y = player::y(&player);
+    let x = player::x(&player)?;
+    let y = player::y(&player)?;
     let chest = get_entity(entities, x, y).unwrap();
     let mut out = StringBuilder::new();
     out.append("you recieved:\n");
@@ -307,33 +311,33 @@ pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players :
     return Ok(out);
 }
 
-pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let x = player::x(&player);
-    let y = player::y(&player);
+    let x = player::x(&player)?;
+    let y = player::y(&player)?;
     let entity = get_entity_mut(entities, x, y).unwrap();
     let physical_dmg = params[0].as_int().unwrap();
     let magic_dmg = params[1].as_int().unwrap();
     let entity_name = entity.name();
     let data = entity.mut_data();
-    let phys_def = stats::get_or_else(data, "physical_def", &stats::Value::Float(0.0f64)).as_flt();
-    let magic_def = stats::get_or_else(data, "magic_def", &stats::Value::Float(0.0f64)).as_flt();
+    let phys_def = stats::get_or_else(data, "physical_def", &stats::Value::Float(0.0f64)).as_flt()?;
+    let magic_def = stats::get_or_else(data, "magic_def", &stats::Value::Float(0.0f64)).as_flt()?;
     let true_physical_dmg = ((physical_dmg as f64) * (1.0f64 - phys_def)) as i64;
     let true_magic_dmg = ((magic_dmg as f64) * (1.0f64 - magic_def)) as i64;
     let dmg = true_magic_dmg + true_physical_dmg;
-    let health = stats::get(data, "health").unwrap().as_int();
+    let health = stats::get(data, "health").unwrap().as_int()?;
     let mut out = StringBuilder::new();
     out.append(format!("{} took {} damage!\n", entity_name, dmg));
     if health <= dmg {
         stats::set(data, "health", stats::Value::Int(0));
-        out.append(format!("{}: {}\n", entity.name(), get_random_quote(entity, "player_victory")));
+        out.append(format!("{}: {}\n", entity.name(), get_random_quote(entity, "player_victory")?));
         out.append(format!("You MURDERED {}! CONGRATULATIONS!\n", entity.name()));
         if stats::has_var(&entity.data(), "drops") {
-            let mob_drops = get_items(entity, "drop");
+            let mob_drops = get_items(entity, "drop")?;
             out.append("you got:\n");
             out.append(stats::string(&mob_drops));
             out.append("and:\n");
-            let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box(), "xp").unwrap().as_int();
+            let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box()?, "xp").unwrap().as_int()?;
             out.append(format!("{} xp.\n", xp));
             let player = players[player_id as usize].as_mut().unwrap();
             player::add_items_to_inventory(player, mob_drops);
@@ -346,116 +350,116 @@ pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8
     return Ok(out);
 }
 
-pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let x = player::x(&player);
-    let y = player::y(&player);
+    let x = player::x(&player)?;
+    let y = player::y(&player)?;
     let entity = get_entity(entities, x, y).unwrap();
 
     let mut out = StringBuilder::new();
-    let items = stats::get(&entity.data(), "items").unwrap().as_box();
+    let items = stats::get(&entity.data(), "items").unwrap().as_box()?;
     let item_names = stats::get_var_names(&items);
     if params.is_empty() {
         out.append("the availible trades are:\n");
         for i in 0..item_names.len() {
             let item = &item_names[i];
-            let item_box = stats::get(&world.items, item).unwrap().as_box();
-            let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int();
+            let item_box = stats::get(&world.items, item).unwrap().as_box()?;
+            let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
             out.append(format!("{}. {} --> {} xp\n", i, item, xp));
         }
     } else if params.len() == 2 {
         if params[0].as_int().is_none() || params[1].as_int().is_none() {
-            return Err("expected 2 integers as parameters".to_string());
+            return Err("expected 2 integers as parameters".into());
         }
         let trade_num = params[0].as_int().unwrap();
         let num_to_trade = params[1].as_int().unwrap();
         let player = players[player_id as usize].as_mut().unwrap();
-        let inventory = stats::get(player.data(), "inventory").unwrap().as_box();
+        let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
         if trade_num < 0 || trade_num > item_names.len() as i64 {
-            return Err(format!("there is no trade numbered {}", trade_num));
+            return Err(format!("there is no trade numbered {}", trade_num).into());
         }
         let item = &item_names[trade_num as usize];
-        let num_in_inventory = stats::get_or_else(&inventory, item, &stats::Value::Int(0)).as_int();
+        let num_in_inventory = stats::get_or_else(&inventory, item, &stats::Value::Int(0)).as_int()?;
         if num_to_trade > num_in_inventory {
-            return Err(format!("you only have {} of that item", num_in_inventory));
+            return Err(format!("you only have {} of that item", num_in_inventory).into());
         }
-        let item_box = stats::get(&world.items, item.as_str()).unwrap().as_box();
-        let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int();
+        let item_box = stats::get(&world.items, item.as_str()).unwrap().as_box()?;
+        let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
         player::change_xp(player, num_to_trade * xp);
         out.append(format!("You traded {} of {} for {} xp. This is the best trade deal in the history of trade deals, maybe ever.\n", num_to_trade, item, num_to_trade * xp));
     } else {
-        return Err("expected 0 or 2 parameters".to_string());
+        return Err("expected 0 or 2 parameters".into());
     }
     return Ok(out);
 }
 
-pub fn interact_mob(entities : &mut SpawnedEntities, player_id : u8, players: &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn interact_mob(entities : &mut SpawnedEntities, player_id : u8, players: &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut out = StringBuilder::new();
     let player = players[player_id as usize].as_mut().unwrap();
-    let x = player::x(&player);
-    let y = player::y(&player);
+    let x = player::x(&player)?;
+    let y = player::y(&player)?;
     let entity = get_entity_mut(entities, x, y).unwrap();
-    let entrance_quote = get_random_quote(entity, "entrance");
+    let entrance_quote = get_random_quote(entity, "entrance")?;
     out.append(format!("You have encountered {}\n", entity.name()));
     out.append(format!("{}: {}\n", entity.name(), entrance_quote));
-    let img = stats::get_or_else(&entity.data(), "img", &stats::Value::LongString(stats::StrBuilder::new(StringBuilder::new()))).as_longstring();
+    let img = stats::get_or_else(&entity.data(), "img", &stats::Value::LongString(stats::StrBuilder::new(StringBuilder::new()))).as_longstring()?;
     out.append(img);
-    let stats = stats::get(player.data(), "stats").unwrap().as_box();
-    let player_speed = stats::get(&stats, "speed").unwrap().as_int();
-    let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int();
+    let stats = stats::get(player.data(), "stats").unwrap().as_box()?;
+    let player_speed = stats::get(&stats, "speed").unwrap().as_int()?;
+    let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
     if stats::has_prop(&entity.data(), "attack_first") && entity_speed > player_speed {
         out.append(attack(entities, player_id, players, world).ok().unwrap());
     }
     return Ok(out);
 }
 
-pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Option<Player>>, world : &mut World) -> Result<StringBuilder, String> {
+pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let player = players[player_id as usize].as_mut().unwrap();
-    let x = player::x(&player);
-    let y = player::y(&player);
+    let x = player::x(&player)?;
+    let y = player::y(&player)?;
     let entity = get_entity_mut(entity, x, y).unwrap();
 
     let mut out = StringBuilder::new();
     let mut cumulative_player_speed = 0;
-    let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int();
-    let base_dmg = stats::get_or_else(entity.mut_data(), "dmg", &stats::Value::Int(0)).as_int();
-    let stats = stats::get(player.data(), "stats").unwrap().as_box();
-    let player_speed = stats::get(&stats, "speed").unwrap().as_int();
+    let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
+    let base_dmg = stats::get_or_else(entity.mut_data(), "dmg", &stats::Value::Int(0)).as_int()?;
+    let stats = stats::get(player.data(), "stats").unwrap().as_box()?;
+    let player_speed = stats::get(&stats, "speed").unwrap().as_int()?;
     println!("{}", player_speed);
     while cumulative_player_speed < entity_speed {
         cumulative_player_speed += player_speed;
-        if player::is_dead(&player) {
-            println!("player died");
-            out.append("You got ded.");
+        if player::is_dead(&player)? {
+            out.append("YOU DIED.\n");
+            out.append("respawning...\n");
             player::respawn(player, world);
             return Ok(out);
         }
 
         println!("{}, {}",  cumulative_player_speed, entity_speed);
-        let attack_quote = get_random_quote(entity, "attack");
+        let attack_quote = get_random_quote(entity, "attack")?;
         out.append(format!("{}: {}\n", entity.name(), attack_quote));
         player::change_stat(player, "health", -base_dmg);
         out.append(format!("{} did {} damage to you.\n", entity.name(), base_dmg));
-        let weapons = stats::get_var_names(&stats::get(&entity.data(), "weapons").unwrap().as_box());
+        let weapons = stats::get_var_names(&stats::get(&entity.data(), "weapons").unwrap().as_box()?);
         if weapons.is_empty() {
             continue;
         }
         let mut rng = rand::thread_rng();
         let weapon_name = &weapons[rng.gen_range(0, weapons.len())];
-        let weapon = stats::get_or_else(&world.items, weapon_name.as_str(), &Value::Box(Stats::new())).as_box();
+        let weapon = stats::get_or_else(&world.items, weapon_name.as_str(), &Value::Box(Stats::new())).as_box()?;
         if stats::has_var(&weapon, "abilities") {
             out.append(format!("{} equipped item {}\n", entity.name(), weapon_name));
-            let abilities = stats::get(&weapon, "abilities").unwrap().as_box();
+            let abilities = stats::get(&weapon, "abilities").unwrap().as_box()?;
             let ability_names = stats::get_var_names(&abilities);
             let ability_name = &ability_names[rng.gen_range(0, ability_names.len())];
-            let ability = stats::get(&abilities, ability_name.as_str()).unwrap().as_box();
+            let ability = stats::get(&abilities, ability_name.as_str()).unwrap().as_box()?;
             let mut physical_dmg = 0;
             let mut magic_dmg = 0;
             if stats::has_var(&ability, "physical_dmg") {
-                physical_dmg = stats::get(&ability, "physical_dmg").unwrap().as_int();
+                physical_dmg = stats::get(&ability, "physical_dmg").unwrap().as_int()?;
             }
             if stats::has_var(&ability, "magic_dmg") {
-                magic_dmg = stats::get(&ability, "magic_dmg").unwrap().as_int();
+                magic_dmg = stats::get(&ability, "magic_dmg").unwrap().as_int()?;
             }
             player::change_stat(player, "health", -(physical_dmg + magic_dmg));
             out.append(format!("{} used {} and dealt {} damage.\n", entity.name(), ability_name, (physical_dmg + magic_dmg)));
@@ -466,30 +470,30 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
     return Ok(out);
 }
 
-pub fn get_random_quote(entity: &dyn Spawnable, quote_name : &str) -> String {
-    let quotes = stats::get_or_else(&entity.data(), "quotes", &stats::Value::Box(Stats::new())).as_box();
+pub fn get_random_quote(entity: &dyn Spawnable, quote_name : &str) -> Result<String, Box<dyn Error>> {
+    let quotes = stats::get_or_else(&entity.data(), "quotes", &stats::Value::Box(Stats::new())).as_box()?;
     let mut rng = rand::thread_rng();
     if stats::has_var(&quotes, quote_name) {
-        let player_win_quotes = stats::get(&quotes, quote_name).unwrap().as_vec();
+        let player_win_quotes = stats::get(&quotes, quote_name).unwrap().as_vec()?;
         return player_win_quotes[rng.gen_range(0, player_win_quotes.len())].as_string();
     } else {
-        return "".to_owned();
+        return Ok("".to_owned());
     }
 }
 
-pub fn get_items(entity : &dyn Spawnable, item : &str) -> Stats {
+pub fn get_items(entity : &dyn Spawnable, item : &str) -> Result<Stats, Box<dyn Error>> {
     if !stats::has_var(&entity.data(),  &format!("{}s", item)) {
-        return Stats::new();
+        return Ok(Stats::new());
     }
-    let drops = stats::get(&entity.data(), &format!("{}s", item)).unwrap().as_box();
-    let drop_names = stats::get(&drops, &format!("{}s", item)).unwrap().as_vec();
-    let probs = stats::get(&drops, &format!("{}_prob", item)).unwrap().as_vec();
+    let drops = stats::get(&entity.data(), &format!("{}s", item)).unwrap().as_box()?;
+    let drop_names = stats::get(&drops, &format!("{}s", item)).unwrap().as_vec()?;
+    let probs = stats::get(&drops, &format!("{}_prob", item)).unwrap().as_vec()?;
     let default : Vec<Value> = vec![stats::Value::Int(1i64); drop_names.len()];
-    let drop_per = stats::get_or_else(&drops, &format!("{}_per", item), &stats::Value::List(default)).as_vec();
+    let drop_per = stats::get_or_else(&drops, &format!("{}_per", item), &stats::Value::List(default)).as_vec()?;
 
     let mut rng = rand::thread_rng();
-    let min = stats::get_or_else(&drops, &format!("{}_min", item), &stats::Value::Int(0)).as_int() as usize;
-    let max = stats::get_or_else(&drops, &format!("{}_max", item), &stats::Value::Int(0)).as_int() as usize;
+    let min = stats::get_or_else(&drops, &format!("{}_min", item), &stats::Value::Int(0)).as_int()? as usize;
+    let max = stats::get_or_else(&drops, &format!("{}_max", item), &stats::Value::Int(0)).as_int()? as usize;
     let num_runs = rng.gen_range(min, max + 1);
     println!("num_runs: {}", num_runs);
 
@@ -497,23 +501,19 @@ pub fn get_items(entity : &dyn Spawnable, item : &str) -> Stats {
     let mut thresholds = vec![];
     let mut sum = 0.0f64;
     for prob in probs {
-        sum += prob.as_flt();
+        sum += prob.as_flt()?;
         thresholds.push(sum);
     }
 
     for _ in 0..num_runs {
-        println!("hereeeeeeee");
         let p : f64 = rng.gen();
         for i in 0..thresholds.len() {
-            println!("hereeeeeeeee1, {}, {}", p, thresholds[i]);
-
             if p < thresholds[i] {
-                println!("bruh");
-                stats::set(&mut mob_drops, drop_names[i].as_string().as_str(), drop_per[i].clone());
+                stats::set(&mut mob_drops, drop_names[i].as_string()?.as_str(), drop_per[i].clone());
                 break;
             }
         }
     }
-    println!("drops:\n {}", stats::string(&mob_drops));
-    return mob_drops;
+    println!("mob drops:\n {}", stats::string(&mob_drops));
+    return Ok(mob_drops);
 }

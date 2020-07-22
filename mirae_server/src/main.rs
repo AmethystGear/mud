@@ -1,4 +1,5 @@
 extern crate ansi_term;
+extern crate rstring_builder;
 
 use crate::scanner::Param;
 use crate::action::Action;
@@ -11,6 +12,8 @@ use std::io::{BufReader, BufRead, BufWriter};
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::u8;
+use rstring_builder::StringBuilder;
+use std::error::Error;
 
 mod scanner;
 mod stats;
@@ -33,7 +36,7 @@ fn init(reader : &mut BufReader<TcpStream>, action_map : &action::ActionMap, sen
         }
         return recv.recv().unwrap();
     } else {
-        let err = ansi_term::Color::Red.paint(action_res.err().unwrap());
+        let err = ansi_term::Color::Red.paint(action_res.err().unwrap().as_ref().to_string());
         return (err.to_string(), None);
     }
 }
@@ -65,16 +68,26 @@ fn handle_connection(stream: TcpStream, channel : Sender<(String, Vec<Param>, Ac
             writer.flush().unwrap();
         }
     });
-    let mut last_res = Err("no last command to run!".to_string());
+    let mut last_res : Option<(String, Vec<Param>, Action)> = None;
     loop {
         let mut line = String::new();
         reader.read_line(&mut line).unwrap();
-        let action_res;
+        let action_res : Result<(String, Vec<Param>, Action), Box<dyn Error>>;
         if line.trim() == "" {
-            action_res = last_res.clone();
+            let clone = last_res.clone();
+            if clone.is_some() {
+                action_res = Ok(clone.unwrap());
+            } else {
+                action_res = Err("no last successful command to run!".into());
+            }
         } else {
             action_res = action::get_action_and_params(&action_map, line.clone());
-            last_res = action::get_action_and_params(&action_map, line);
+            let res = action::get_action_and_params(&action_map, line);
+            if res.is_ok() {
+                last_res = Some(res.ok().unwrap());
+            } else {
+                last_res = None;
+            }
         }
         if action_res.is_ok() {
             let (keyword, params, action) = action_res.unwrap();
@@ -83,7 +96,7 @@ fn handle_connection(stream: TcpStream, channel : Sender<(String, Vec<Param>, Ac
                 println!("\n\nERROR: {}\n\n", res.err().unwrap());
             }
         } else {
-            let err =  ansi_term::Color::Red.paint(action_res.err().unwrap());
+            let err =  ansi_term::Color::Red.paint(action_res.err().unwrap().as_ref().to_string());
             send.send((err.to_string(), None)).unwrap();
         }
     }
@@ -105,7 +118,7 @@ fn main() {
                         Receiver<(String, Vec<Param>, Action, Option<Sender<(String, Option<u8>)>>, Option<u8>)>) = mpsc::channel();
 
     spawn(move || {
-        let mut world = world::from_seed(0);
+        let mut world : world::World = world::from_seed(0).ok().unwrap();
         let mut spawned_entities = SpawnedEntities::new();
 
         let action_map = action::get_action_map();
@@ -143,8 +156,16 @@ fn main() {
                 let result = action.run(Some(&mut spawned_entities), Some(&action_map), Some(keyword), Some(&params),
                                         Some(player_id), Some(&mut players), Some(&mut world));
                 let player = players[player_id as usize].as_ref().unwrap();
-                x = player::x(&player);
-                y = player::y(&player);
+                let x_ = player::x(&player);
+                let y_ = player::y(&player);
+                if x_.is_err() || y_.is_err() {
+                    println!("{:?}", x_);
+                    println!("{:?}", y_);
+                    continue;
+                }
+                x = x_.unwrap();
+                y = y_.unwrap();
+                
                 if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y) {
                     let name = world::get_entity_name(&world, x, y).unwrap();
                     let stats = world::get_entity_properties(&world, x, y).unwrap().clone();
@@ -153,7 +174,7 @@ fn main() {
                 if result.is_ok() {
                     string_result = result.ok().unwrap().string();
                 } else {
-                    let err = ansi_term::Color::Red.paint(result.err().unwrap()).to_string();
+                    let err = ansi_term::Color::Red.paint(result.err().unwrap().as_ref().to_string()).to_string();
                     string_result = format!("{}\n", err);
                 }
             }

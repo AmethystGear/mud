@@ -8,7 +8,7 @@ use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use char_stream::CharStream;
-
+use std::error::Error;
 use crate::scanner;
 
 #[derive(Clone)]
@@ -22,51 +22,51 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn as_int(&self) -> i64 {
+    pub fn as_int(&self) -> Result<i64, Box<dyn Error>> {
         if let Value::Int(a) = self {
-            return a.clone();
+            return Ok(a.clone());
         } else {
-            unreachable!();
+            return Err("value is not an int!".into());
         }
     }
 
-    pub fn as_flt(&self) -> f64 {
+    pub fn as_flt(&self) ->  Result<f64, Box<dyn Error>> {
         if let Value::Float(a) = self {
-            return a.clone();
+            return Ok(a.clone());
         } else {
-            unreachable!();
+            return Err("value is not a float!".into());
         }
     }
 
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> Result<String, Box<dyn Error>> {
         if let Value::String(a) = self {
-            return a.clone();
+            return Ok(a.clone());
         } else {
-            unreachable!();
+            return Err("value is not a string!".into());
         }
     }
 
-    pub fn as_longstring(&self) -> StringBuilder {
+    pub fn as_longstring(&self) -> Result<StringBuilder, Box<dyn Error>> {
         if let Value::LongString(a) = self {
-            return a.clone().sb;
+            return Ok(a.clone().sb);
         } else {
-            unreachable!();
+            return Err("value is not a longstring!".into());
         }
     }
 
-    pub fn as_vec(&self) -> Vec<Value> {
+    pub fn as_vec(&self) -> Result<Vec<Value>, Box<dyn Error>> {
         if let Value::List(a) = self {
-            return a.clone();
+            return Ok(a.clone());
         } else {
-            unreachable!();
+            return Err("value is not a vector!".into());
         }
     }
 
-    pub fn as_box(&self) -> Stats {
+    pub fn as_box(&self) -> Result<Stats, Box<dyn Error>> {
         if let Value::Box(a) = self {
-            return a.clone();
+            return Ok(a.clone());
         } else {
-            unreachable!();
+            return Err("value is not a box!".into());
         }
     }
 }

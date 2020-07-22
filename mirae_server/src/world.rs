@@ -14,6 +14,7 @@ use char_stream::CharStream;
 use std::u16;
 use std::fs;
 use rand::Rng;
+use std::error::Error;
 
 pub const MAP_SIZE : u16 = 400;
 const ENTITIES_CONFIG_DIR : &str = "config/instantiables/";
@@ -44,10 +45,9 @@ pub struct World {
     seed : i64
 }
 
-fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats, generate_ids: bool) {
+fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats, generate_ids: bool) -> Result<(), Box<dyn Error>>{
     println!("{}", stats::string(terrain_configuration));
-    let blocks = stats::get(terrain_configuration, "blocks").unwrap();
-    let mut blocks = blocks.as_box();
+    let mut blocks = stats::get(terrain_configuration, "blocks").unwrap().as_box()?;
     let block_names = stats::get_var_names(&blocks);
 
     if generate_ids {
@@ -55,35 +55,36 @@ fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats, generate_
     }
 
     for block_name in block_names {
-        let block = stats::get(&blocks, block_name.as_str()).unwrap().as_box();
-        let id = stats::get(&block, "id").unwrap().as_int() as u16;
+        let block = stats::get(&blocks, block_name.as_str()).unwrap().as_box()?;
+        let id = stats::get(&block, "id").unwrap().as_int()? as u16;
         world.blocks.id_to_name.insert(id, block_name.clone());
         world.blocks.name_to_stats.insert(block_name, block);
     }
+    return Ok(())
 }
 
-fn get_entities(world: &mut World, entity_config : &mut stats::Stats, generate_ids: bool, f_name : Option<String>, id_start: Option<i64>) -> i64 {
+fn get_entities(world: &mut World, entity_config : &mut stats::Stats, generate_ids: bool, f_name : Option<String>, id_start: Option<i64>) -> Result<i64, Box<dyn Error>> {
     let mut last_id = -1;
     if generate_ids {
         last_id = stats::add_ids_to_boxes(entity_config, id_start.unwrap());
     }
     let entity_names = stats::get_var_names(&entity_config);
     for entity_name in entity_names {
-        let mut entity = stats::get(&entity_config, entity_name.as_str()).unwrap().as_box();
+        let mut entity = stats::get(&entity_config, entity_name.as_str()).unwrap().as_box()?;
         if generate_ids && !stats::has_var(&entity, "entity_type") {
             stats::set(&mut entity, "entity_type", stats::Value::String(f_name.clone().unwrap()));
         }
-        let id = stats::get(&entity, "id").unwrap().as_int();
+        let id = stats::get(&entity, "id").unwrap().as_int()?;
         if !generate_ids && id > last_id {
             last_id = id;
         }
         world.entities.id_to_name.insert(id as u16, entity_name.clone());
         world.entities.name_to_stats.insert(entity_name, entity);
     }
-    return last_id;
+    return Ok(last_id);
 }
 
-pub fn from_seed(seed : i64) -> World {
+pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     let mut world = World {
         blocks : Map::new(),
         entities : Map::new(),
@@ -97,24 +98,24 @@ pub fn from_seed(seed : i64) -> World {
     get_blocks(&mut world, &terrain_configuration, true);
 
     // generate terrain based on parameters provided
-    let terrain_params = stats::get(&terrain_configuration, "terrain_parameters").unwrap().as_box();
-    let octaves = stats::get(&terrain_params, "octaves").unwrap().as_int();
+    let terrain_params = stats::get(&terrain_configuration, "terrain_parameters").unwrap().as_box()?;
+    let octaves = stats::get(&terrain_params, "octaves").unwrap().as_int()?;
     let perlin_noise = perlin_noise::generate_perlin_noise(MAP_SIZE, MAP_SIZE, octaves as u8, world.seed);
 
-    let height_map = stats::get(&terrain_params, "height_map").unwrap().as_box();
-    let height_blocks = stats::get(&height_map, "blocks").unwrap().as_vec();
-    let heights = stats::get(&height_map, "heights").unwrap().as_vec();
+    let height_map = stats::get(&terrain_params, "height_map").unwrap().as_box()?;
+    let height_blocks = stats::get(&height_map, "blocks").unwrap().as_vec()?;
+    let heights = stats::get(&height_map, "heights").unwrap().as_vec()?;
     for i in 0..perlin_noise.len() {
         let mut level = 0;
         for l in 0..heights.len() {
-            if heights[l].as_flt() > perlin_noise[i] {
+            if heights[l].as_flt()? > perlin_noise[i] {
                 break;
             }
             level += 1;
         }
         
-        let block = world.blocks.name_to_stats.get(&height_blocks[level].as_string()).unwrap();
-        world.blocks.map[i] = stats::get(block, "id").unwrap().as_int() as u16;
+        let block = world.blocks.name_to_stats.get(&height_blocks[level].as_string()?).unwrap();
+        world.blocks.map[i] = stats::get(block, "id").unwrap().as_int()? as u16;
     }
 
     let files = fs::read_dir(ENTITIES_CONFIG_DIR).unwrap();
@@ -123,9 +124,9 @@ pub fn from_seed(seed : i64) -> World {
         println!("{:?}", file);
         let file_uw = file.unwrap().path();
         let f_name = file_uw.file_name().unwrap().to_str().unwrap();
-        let entity_config = File::open(file_uw.clone()).unwrap();
+        let entity_config = File::open(file_uw.clone())?;
         let mut f_entities = stats::from(&mut scanner::from(CharStream::from_file(entity_config)));
-        last_id = get_entities(&mut world, &mut f_entities, true, Some(f_name.to_string()), Some(last_id));
+        last_id = get_entities(&mut world, &mut f_entities, true, Some(f_name.to_string()), Some(last_id))?;
     }
 
     let mut rng = rand::thread_rng();
@@ -133,7 +134,7 @@ pub fn from_seed(seed : i64) -> World {
         for x in 0..MAP_SIZE {
             let block : &stats::Stats = get_block(&world, x, y);
             if stats::has_var(block, "mob_spawn_chance") {
-                let spawn_chance = stats::get(block, "mob_spawn_chance").unwrap().as_flt();
+                let spawn_chance = stats::get(block, "mob_spawn_chance").unwrap().as_flt()?;
                 if rng.gen::<f64>() < spawn_chance {
                     world.entities.map[index(x, y) as usize] = rng.gen_range(0, last_id) as u16;
                 }
@@ -142,9 +143,9 @@ pub fn from_seed(seed : i64) -> World {
     }
     world.max_entity_id = last_id as u16;
     println!("generated world");
-    return world;
+    return Ok(world);
 }
-
+/*
 pub fn from_save(file: File) -> World {
     let mut world = World {
         blocks : Map::new(),
@@ -156,10 +157,10 @@ pub fn from_save(file: File) -> World {
     let stats = stats::from(&mut scanner::from(CharStream::from_file(file)));
     world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(ITEMS_CONFIG).unwrap())));
     // get terrain from stats
-    let terrain = stats::get(&stats, "terrain").unwrap().as_box();
+    let terrain = stats::get(&stats, "terrain").unwrap().as_box()?;
     get_blocks(&mut world, &terrain, false);
-    let block_map = stats::get(&terrain, "block_map").unwrap().as_vec();
-    let entity_map = stats::get(&terrain, "entity_map").unwrap().as_vec();
+    let block_map = stats::get(&terrain, "block_map").unwrap().as_vec()?;
+    let entity_map = stats::get(&terrain, "entity_map").unwrap().as_vec()?;
     for i in 0..block_map.len() {
         world.blocks.map[i] = block_map[i].as_int() as u16;
         world.entities.map[i] = entity_map[i].as_int() as u16;
@@ -168,10 +169,11 @@ pub fn from_save(file: File) -> World {
     // get seed from stats
     world.seed = stats::get(&stats, "seed").unwrap().as_int();
 
-    let mut entities = stats::get(&stats, "entities").unwrap().as_box();
+    let mut entities = stats::get(&stats, "entities").unwrap().as_box()?;
     world.max_entity_id = get_entities(&mut world, &mut entities, false, None, None) as u16;
     return world;
 }
+*/
 
 pub fn save_to(world: &World, file: File) {
     let mut stats = stats::Stats::new();
