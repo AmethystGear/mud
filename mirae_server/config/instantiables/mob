@@ -1,4 +1,35 @@
 {
+	Box lowly_ben
+	{
+		Box stats 
+		{
+			int health 1
+			int speed 10
+			int energy 1000
+			int dmg 0
+			int xp 25
+		}
+		Box quotes
+		{
+			string[] entrance "ben"
+			string[] attack "ben"
+			string[] player_run "ben"
+			string[] player_victory "ben"
+			string[] mob_victory "ben"
+		}
+		Box drops
+		{
+			string[] drops "orange" "orange"
+			float[] drop_prob 0.001 0.999
+			int[] drop_per 1000 1
+			int drop_max 1
+			int drop_min 1
+		}
+		LongString img
+		{
+So lowly, he does not deserve an image.
+		}
+	}
 	Box aurelius_knight
 	{
 		Box quotes 
