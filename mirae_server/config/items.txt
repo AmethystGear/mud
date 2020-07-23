@@ -621,3 +621,43 @@
         }
     }
 }
+
+Box electronic_controlling_device
+{
+    prop edible
+    prop equipable
+    int health_gain -5
+    int xp 100
+    Box buffs
+    {
+        float health 1.0
+        float speed 1.1
+        float dmg 1.0
+        float view 1.0
+        float physical_dmg 1.0
+        float physical_def 1.0
+        float magic_dmg 1.0
+        float magic_def 1.0
+    }
+    Box abilities
+    {
+        Box zap
+        {
+            int physical_dmg -3
+            int energy_cost -5
+        }
+        Box bug_in_programming
+        {
+            int magic_dmg 2
+            int energy_cost 1
+        }
+
+    }
+
+}
+Box cockroach
+{
+    prop edible
+    int health_gain 2
+    int xp 100
+}

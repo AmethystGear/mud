@@ -495,21 +495,23 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                 return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\n\
                             Be honourable and just wait for your opponent to finish attacking you sirrrrrrrr....".into());
             }
+            let mut out = StringBuilder::new();
             let mut opponent = opponent.unwrap();
+            out.append(format!("You used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
             player::send(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
             player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg));
             if player::is_dead(&opponent)? {
-                let mut out = StringBuilder::new();
                 out.append("Congrats for murdering your opponent!!!!\n");
+                player::send(&opponent, format!("You were killed bigly.\n"));
                 player.set_opponent(None);
                 opponent.set_opponent(None);
+                player::set_turn(&mut player, false);
+                player::set_turn(&mut opponent, false);
                 player::respawn(&mut opponent, world);
                 return Ok(out);
             }
             player::set_turn(&mut player, false);
             player::set_turn(&mut opponent, true);
-            let mut out = StringBuilder::new();
-            out.append(format!("You dealt {} damage to your opponent!", (physical_dmg + magic_dmg)));
             return Ok(out);
         }
     } else {

@@ -1728,9 +1728,81 @@ Box astrology
      
 	}
 	}
-
-
-
-
 }
 
+Box robo_roach
+{
+	Box quotes 
+	{
+		string[] entrance "Beep boop" "Robots shall rule the world" "I shall defeat the evil trump and jayanth knight and conquer the world"
+		string[] attack  "bugly" "beep" "booP" "EAT ME!" "I dare you to eat me"
+		string[] player_run "run from a bug. how bugly" "bugly bugly bugly"
+		string[] player_victory "oh no. Dont eat me!" "I am just an innocent bug"
+		string[] mob_victory "somebody wont be eating cockroach today"
+	}
+	Box stats
+	{
+		int health 10
+		int speed 1
+		int dmg 1
+		int energy 1
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0.01
+		float magic_def 0.2
+		int max_items_steal 2
+		float looting 0.000001
+		float intelligence 0.01
+		float special 0.1
+		float special_boost 10.0
+	}
+	Box drops
+	{
+		string[] drops "cockroach" "electronic_controlling_device"
+		float[] drop_prob 0.9 0.1
+		int[] drop_per 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box items
+	{
+		string[] items "electronic_controlling_device"
+		float[] item_prob 1.0
+		int max_num_items 2		
+	}	
+
+	LongString img
+	{
+                                        
+                                       . .                                      
+                                         ,                                      
+                                          .                                     
+                                         .,                                     
+                                           .                                    
+                                          .,                                    
+                                          ...                                   
+                                           .,                                   
+                                           .,                                   
+                                 .,,       ..                                   
+                                    *.   .,(/                    ,.               
+                                    ///(((%&&&%,..................     
+                          ./*//. .*(#((#&&&&&&&(                             
+                ,,.  ,((/*.  .**//((#//%%%&&&&%.                                
+                   .( */***,**/(#%%&%#/***%##,                                  
+                  /,*,  ./*(#%###%%%%%%%#(/(*,,*.                               
+                ***.  ,##%&&&&&&&&%%%(#%%&/      ,,                             
+              ,(/   ,%%#%&%%&&&&&%%%%#//(**.        .,.                         
+           .*,..  .#%(&%(/#%%%#((%%&&%(,.,,*,                                   
+      ,*.        .#(##**%#/,*/*((#%&&/.,,,.                                     
+                .%&%//&&(,//(**%&&%,**,,,                                       
+             ((/#%&&&&#*(%%*/&%%,.,.** ,/.                                      
+                ,#%%##&&%,/(/.   *,,**                                          
+                  .*(%*,.     ***,.                                             
+                     ,(.    *(.                                                 
+                          .*                                                    
+                         ..                                                     
+                        ..                                              
+	}                        
+}
