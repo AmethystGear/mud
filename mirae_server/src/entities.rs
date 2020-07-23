@@ -337,7 +337,7 @@ pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8
             out.append("you got:\n");
             out.append(stats::string(&mob_drops));
             out.append("and:\n");
-            let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box()?, "xp").unwrap().as_int()?;
+            let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box()?, "xp").unwrap_or(Value::Int(0)).as_int()?;
             out.append(format!("{} xp.\n", xp));
             let player = players[player_id as usize].as_mut().unwrap();
             player::add_items_to_inventory(player, mob_drops);
