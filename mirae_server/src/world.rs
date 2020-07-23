@@ -16,7 +16,7 @@ use std::fs;
 use rand::Rng;
 use std::error::Error;
 
-pub const MAP_SIZE : u16 = 400;
+pub const MAP_SIZE : u16 = 100;
 const ENTITIES_CONFIG_DIR : &str = "config/instantiables/";
 const ITEMS_CONFIG : &str = "config/items.txt";
 const TERRAIN_CONFIG : &str = "config/terrain.txt";

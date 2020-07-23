@@ -325,6 +325,9 @@ fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Res {
 
 fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut player = players[player_id as usize].as_mut().unwrap();
+    if player.opponent().is_some() {
+        return Err("You can't just run away! Die with honour, scum!");
+    }
     let num_units;
     if params.is_empty() {
         num_units = player::get_stat(&player, "speed")?;
@@ -390,7 +393,7 @@ fn map(players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
 }
 
 pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> (&mut Player, &mut Player) {
-    let (head, tail) = players.split_at_mut(std::cmp::min(a, b) as usize + 1);
+    let (head, tail) = players.split_at_mut(std::cmp::max(a, b) as usize);
     if a > b {
         return (tail[0].as_mut().unwrap(), head[b as usize].as_mut().unwrap());
     } else if a < b {
@@ -551,26 +554,25 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
         player.set_opponent(None);
         return Err("no availible players in range!".into());
     } else {
-        let opponent_id = opponent;
-        println!("{}, {}", player_id, opponent_id.unwrap());
-        let (mut player, mut opponent) = get_two_players(player_id, opponent_id.unwrap(), players);
+        println!("versus {}, {}", player_id, opponent.unwrap());
+        let (player, opp) = get_two_players(player_id, opponent.unwrap(), players);
 
         let mut out = StringBuilder::new();
-        player.set_opponent(opponent_id);
-        out.append(format!("You are attacking player {}\n", opponent_id.unwrap()));
-        opponent.set_opponent(Some(player_id));
+        player.set_opponent(opponent);
+        out.append(format!("You are attacking player {}\n", opponent.unwrap()));
+        opp.set_opponent(Some(player_id));
         let player_speed = player::get_stat(&player, "speed")?;
-        let opponent_speed = player::get_stat(&opponent, "speed")?;
+        let opponent_speed = player::get_stat(&opp, "speed")?;
         if player_speed >= opponent_speed {
-            player::set_turn(&mut player, true);
-            player::set_turn(&mut opponent, false);
+            player::set_turn(player, true);
+            player::set_turn(opp, false);
             out.append("It is your turn!\n");
-            player::send(&opponent, "Another player is battling you! It is their turn.\n".to_string());
+            player::send(&opp, "Another player is battling you! It is their turn.\n".to_string());
         } else {
-            player::set_turn(&mut player, false);
-            player::set_turn(&mut opponent, true);
+            player::set_turn(player, false);
+            player::set_turn(opp, true);
             out.append("It is your opponent's turn!\n");
-            player::send(&opponent, "Another player is battling you! It is your turn!\n".to_string());
+            player::send(&opp, "Another player is battling you! It is your turn!\n".to_string());
         }
         return Ok(out);
     }
