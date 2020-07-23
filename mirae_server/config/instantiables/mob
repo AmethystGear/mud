@@ -1260,6 +1260,7 @@ A ball is launched at an angle of 45 degrees above the horizontal with an initia
 }
 Box god
 {
+        int xp 1000
 	Box quotes 
 	{
 		string[] entrance  "I am god"
