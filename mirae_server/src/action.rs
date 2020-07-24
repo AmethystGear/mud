@@ -326,7 +326,7 @@ fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Res {
 fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut player = players[player_id as usize].as_mut().unwrap();
     if player.opponent().is_some() {
-        return Err("You can't just run away! Die with honour, scum!");
+        return Err("You can't just run away! Die with honour, scum!".into());
     }
     let num_units;
     if params.is_empty() {
