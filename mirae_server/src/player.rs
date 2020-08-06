@@ -163,7 +163,7 @@ pub fn respawn(player : &mut Player, world : &World) -> Result<(), Box<dyn Error
     let mut x = rng.gen_range(0, world::MAP_SIZE);
     let mut y = rng.gen_range(0, world::MAP_SIZE);
 
-    while stats::has_prop(world::get_block(world, x, y), "solid") {
+    while stats::has_prop(world::get_block(world, x, y)?, "solid") {
         x = rng.gen_range(0, world::MAP_SIZE);
         y = rng.gen_range(0, world::MAP_SIZE);
     }

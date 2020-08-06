@@ -171,6 +171,11 @@ fn main() {
             {
                 let result = action.run(Some(&mut spawned_entities), Some(&action_map), Some(keyword), Some(&params),
                                         Some(player_id), Some(&mut players), Some(&mut world));
+                if result.is_none() {
+                    print!("bad params to function");
+                    continue;
+                }
+                let result = result.unwrap();
                 let player = players[player_id as usize].as_ref().unwrap();
                 let x_ = player::x(&player);
                 let y_ = player::y(&player);
@@ -205,6 +210,10 @@ fn main() {
             if entities::has_entity(&spawned_entities, x, y) && !interact {
                 let entity_action : Action = entities::get_entity_action(&mut spawned_entities, "interact".to_string(), x, y).unwrap();
                 let result = entity_action.run(Some(&mut spawned_entities), None, None, None, Some(player_id), Some(&mut players), Some(&mut world));
+                if result.is_none() {
+                    continue;
+                }
+                let result = result.unwrap();
                 if result.is_ok() {
                     mob_action_res = Some(result.ok().unwrap());
                 }

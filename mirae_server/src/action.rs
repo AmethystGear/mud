@@ -42,18 +42,18 @@ pub struct Action {
 impl Action {
     pub fn run(&self, s : Option<&mut SpawnedEntities>, a_map :Option<&ActionMap>, keyword : Option<String>, params : Option<&Vec<scanner::Param>>,
                player_id : Option<u8>, players : Option<&mut Vec<Option<Player>>>, world : Option<&mut World>)
-               -> Res {
+               -> Option<Res> {
         let result : Res = match self.func {
-            ActionFunc::A(x) => x(players.unwrap(), world.unwrap()),
-            ActionFunc::B(x) => x(keyword.unwrap(), params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::C(x) => x(params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::D(x) => x(player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::E(x) => x(a_map.unwrap(), params.unwrap()),
-            ActionFunc::F(x) => x(s.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::G(x) => x(s.unwrap(), params.unwrap(), player_id.unwrap(), players.unwrap(), world.unwrap()),
-            ActionFunc::H(x) => x(params.unwrap(), player_id.unwrap(), players.unwrap())
+            ActionFunc::A(x) => x(players?, world?),
+            ActionFunc::B(x) => x(keyword?, params?, player_id?, players?, world?),
+            ActionFunc::C(x) => x(params?, player_id?, players?, world?),
+            ActionFunc::D(x) => x(player_id?, players?, world?),
+            ActionFunc::E(x) => x(a_map?, params?),
+            ActionFunc::F(x) => x(s?, player_id?, players?, world?),
+            ActionFunc::G(x) => x(s?, params?, player_id?, players?, world?),
+            ActionFunc::H(x) => x(params?, player_id?, players?)
         };
-        return result;
+        return Some(result);
     }
 
     pub fn new(func : ActionFunc) -> Self {
@@ -254,7 +254,7 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
     let mut backtrack = false;
     while !(current.0 == max.0 && current.1 == max.1) {
         current = displace(current.0, current.1, x_axis, num_units.signum());
-        let block = world::get_block(world, current.0 as u16, current.1 as u16);
+        let block = world::get_block(world, current.0 as u16, current.1 as u16)?;
         if stats::has_prop(block, "solid") {
             backtrack = true;
             break;
@@ -488,6 +488,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                 let res = damage_opponent.unwrap().run(Some(spawned_entities), None, None,
                                                        Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
                                                        Some(player_id), Some(players), Some(world));
+                let res = res.unwrap();
 
                 player = players[player_id as usize].as_mut().unwrap();
                 if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
@@ -506,6 +507,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                     player.zero_entity_cumulative_speed();
                     let mob_attack = mob_attack.unwrap();
                     let res = mob_attack.run(Some(spawned_entities), None, None, None, Some(player_id), Some(players), Some(world));
+                    let res = res.unwrap();
                     out.append_player_out(res?);
                 }
                 return Ok(out);   
