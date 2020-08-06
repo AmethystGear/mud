@@ -128,6 +128,10 @@ pub fn get_action_map() -> ActionMap {
     add_action(&mut m, "a".to_string(), move_action.clone());
     add_action(&mut m, "s".to_string(), move_action.clone());
     add_action(&mut m, "d".to_string(), move_action.clone());
+    add_action(&mut m, "ww".to_string(), move_action.clone());
+    add_action(&mut m, "aa".to_string(), move_action.clone());
+    add_action(&mut m, "ss".to_string(), move_action.clone());
+    add_action(&mut m, "dd".to_string(), move_action.clone());
     add_action(&mut m,
     "disp".to_string(),
     Action {
@@ -330,7 +334,13 @@ fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec
     }
     let num_units;
     if params.is_empty() {
-        num_units = player::get_stat(&player, "speed")?;
+        if keyword == "ww" || keyword == "aa" || keyword == "ss" || keyword == "dd" {
+            num_units = player::get_stat(&player, "speed")?;
+        } else if keyword == "w" || keyword == "a" || keyword == "s" || keyword == "d" {
+            num_units = 1;
+        } else {
+            unreachable!("keyword must be one of the above move options!")
+        }        
     } else {
         let num = params[0].as_int();
         match num {
@@ -345,13 +355,14 @@ fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec
         }
     }
     let new_posn;
-    if keyword == "w" {
+    let mov = keyword.chars().next().expect("keyword can't be empty!");
+    if  mov == 'w' {
         new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, false, -num_units as i32, world)?;
-    } else if keyword == "a" {
+    } else if mov == 'a' {
         new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, true, -num_units as i32, world)?;
-    } else if keyword == "s" {
+    } else if mov == 's' {
         new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, false, num_units as i32, world)?;
-    } else if keyword == "d" {
+    } else if mov == 'd' {
         new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, true, num_units as i32, world)?;
     } else {
         unreachable!();
