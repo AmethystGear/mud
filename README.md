@@ -22,8 +22,8 @@ do:
 in the `mirae_server/` folder.
 
 ### running the client
-There's only one java file for the client, so we can compile and run at the same time.
-do:```java client/Client.java```
+just one python file.
+do:```python client/client.py```
 
 the client should look something like this if you're doing it right:
 ![image](https://user-images.githubusercontent.com/21998904/81458324-a8947680-914e-11ea-9215-0d2817299ca9.png)
