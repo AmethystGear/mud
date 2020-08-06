@@ -9,15 +9,18 @@
     {
         int items_min 5
         int items_max 10
+        String display "[]"
     }
     Box decent_chest
     {
         int items_min 1
         int items_max 1
+        String display "[]"
     }
     Box chesteroooo
     {
         int items_min 0
         int items_max 0
+        String display "[]"
     }
 }

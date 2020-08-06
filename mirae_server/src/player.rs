@@ -12,6 +12,7 @@ use char_stream::CharStream;
 use std::fs::File;
 use rand::Rng;
 use std::error::Error;
+use crate::playerout::PlayerOut;
 
 const DEFAULT : &str = "config/player_defaults.txt";
 const PLAYER_DATA : &str = "save/player_data.txt";
@@ -21,7 +22,7 @@ pub struct Player {
     opponent : Option<u8>,
     equip : Option<Stats>,
     wears : Vec<(String, Stats)>,
-    sender : Sender<(String, Option<u8>)>,
+    sender : Sender<(PlayerOut, Option<u8>)>,
     cumulative_speed : i64,
     interact : bool,
     turn : bool
@@ -116,7 +117,7 @@ fn unwear(player : &mut Player) {
     reset_to_base(player);
 }
 
-pub fn from(x : u16, y : u16, id : u8, sender: Sender<(String, Option<u8>)>) -> Player {
+pub fn from(x : u16, y : u16, id : u8, sender: Sender<(PlayerOut, Option<u8>)>) -> Player {
     let defaults : Stats = stats::from(&mut scanner::from(CharStream::from_file(File::open(DEFAULT).unwrap())));
     let mut identifiers : Stats = Stats::new();
     stats::set(&mut identifiers, "id", Value::Int(id as i64));
@@ -162,8 +163,14 @@ pub fn respawn(player : &mut Player, world : &World) {
     change_stat(player, "health", health);
 }
 
-pub fn send(player : &Player, string : String) {
-    player.sender.send((string, None)).unwrap();
+pub fn send(player : &Player, out : PlayerOut) {
+    player.sender.send((out, None)).unwrap();
+}
+
+pub fn send_str<S : Into<String>>(player : &Player, text : S) {
+    let mut out = PlayerOut::new();
+    out.append(text);
+    player.sender.send((out, None)).unwrap();
 }
 
 pub fn change_stat(player : &mut Player, stat : &str, delta: i64) -> Result<(), Box<dyn Error>> {
@@ -181,7 +188,6 @@ pub fn reset_to_base(player: &mut Player) -> Result<(), Box<dyn Error>> {
     let mut base_stats = stats::get(player.data(), "buffed_stats").unwrap().as_box()?;
     let max_health = stats::get(&base_stats, "health").unwrap().as_int()?;
     stats::set(&mut base_stats, "health", Value::Int(std::cmp::min(health, max_health)));
-    
     stats::set(&mut player.data, "stats", Value::Box(base_stats));
     return Ok(());
 }
@@ -218,14 +224,14 @@ pub fn set_posn(player: &mut Player, x : u16, y : u16) -> Result<(), Box<dyn Err
 }
 
 pub fn equip(player: &mut Player, item_name : String, world : &mut World) -> Result<(), Box<dyn Error>>{
-    if !stats::has_var(&world.items, item_name.as_str()) {
+    if !stats::has_var(&world.items(), item_name.as_str()) {
         return Err("that item doesn't exist!".into());
     }
     let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
     if !stats::has_var(&inventory, item_name.as_str()) {
         return Err("that item is not in your inventory!".into());
     }
-    let item = stats::get(&world.items, item_name.as_str()).unwrap().as_box()?;
+    let item = stats::get(&world.items(), item_name.as_str()).unwrap().as_box()?;
     player.equip = Some(item);
     return Ok(())
 }

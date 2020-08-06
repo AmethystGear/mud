@@ -2,7 +2,6 @@ extern crate rand;
 extern crate rstring_builder;
 
 use crate::stats::Value;
-use rstring_builder::StringBuilder;
 use crate::player::Player;
 use crate::world;
 use crate::world::World;
@@ -13,10 +12,11 @@ use crate::action;
 use crate::action::{Action, ActionMap, ActionFunc};
 use crate::scanner::Param;
 use rand::Rng;
-use crate::player;
+use crate::{playerout::PlayerOut, player};
 use std::error::Error;
+use rstring_builder::StringBuilder;
 
-type Res = std::result::Result<StringBuilder, Box<dyn Error>>;
+type Res = std::result::Result<PlayerOut, Box<dyn Error>>;
 
 pub struct SpawnedEntities {
     spawned_entities : HashMap<u32, Box<dyn Spawnable>>,
@@ -169,7 +169,7 @@ impl Mob {
     }
 }
 
-pub fn create_mob(stats: Stats, x: u16, y: u16, name : String, world: &World) -> Box<dyn Spawnable> {
+pub fn create_mob(stats: Stats, x: u16, y: u16, name : String, _world: &World) -> Box<dyn Spawnable> {
     return Box::new(Mob::new(stats, x, y, name));
 }
 
@@ -303,10 +303,10 @@ pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players :
     let x = player::x(&player)?;
     let y = player::y(&player)?;
     let chest = get_entity(entities, x, y).unwrap();
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     out.append("you recieved:\n");
     out.append(stats::string(&chest.data()));
-    player::add_items_to_inventory(player, chest.data().clone());
+    player::add_items_to_inventory(player, chest.data().clone())?;
     remove_entity(world, entities, x, y);
     return Ok(out);
 }
@@ -326,7 +326,7 @@ pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8
     let true_magic_dmg = ((magic_dmg as f64) * (1.0f64 - magic_def)) as i64;
     let dmg = true_magic_dmg + true_physical_dmg;
     let health = stats::get(data, "health").unwrap().as_int()?;
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     out.append(format!("{} took {} damage!\n", entity_name, dmg));
     if health <= dmg {
         stats::set(data, "health", stats::Value::Int(0));
@@ -341,8 +341,8 @@ pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8
             let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box()?, "xp").unwrap_or(&def).as_int()?;
             out.append(format!("{} xp.\n", xp));
             let player = players[player_id as usize].as_mut().unwrap();
-            player::add_items_to_inventory(player, mob_drops);
-            player::change_xp(player, xp);
+            player::add_items_to_inventory(player, mob_drops)?;
+            player::change_xp(player, xp)?;
         }
         remove_entity(world, entities, x, y);
     } else {
@@ -357,14 +357,14 @@ pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : 
     let y = player::y(&player)?;
     let entity = get_entity(entities, x, y).unwrap();
 
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     let items = stats::get(&entity.data(), "items").unwrap().as_box()?;
     let item_names = stats::get_var_names(&items);
     if params.is_empty() {
         out.append("the availible trades are:\n");
         for i in 0..item_names.len() {
             let item = &item_names[i];
-            let item_box = stats::get(&world.items, item).unwrap().as_box()?;
+            let item_box = stats::get(&world.items(), item).unwrap().as_box()?;
             let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
             out.append(format!("{}. {} --> {} xp\n", i, item, xp));
         }
@@ -384,9 +384,9 @@ pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : 
         if num_to_trade > num_in_inventory {
             return Err(format!("you only have {} of that item", num_in_inventory).into());
         }
-        let item_box = stats::get(&world.items, item.as_str()).unwrap().as_box()?;
+        let item_box = stats::get(&world.items(), item.as_str()).unwrap().as_box()?;
         let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
-        player::change_xp(player, num_to_trade * xp);
+        player::change_xp(player, num_to_trade * xp)?;
         out.append(format!("You traded {} of {} for {} xp. This is the best trade deal in the history of trade deals, maybe ever.\n", num_to_trade, item, num_to_trade * xp));
     } else {
         return Err("expected 0 or 2 parameters".into());
@@ -395,7 +395,7 @@ pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : 
 }
 
 pub fn interact_mob(entities : &mut SpawnedEntities, player_id : u8, players: &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     let player = players[player_id as usize].as_mut().unwrap();
     let x = player::x(&player)?;
     let y = player::y(&player)?;
@@ -403,13 +403,16 @@ pub fn interact_mob(entities : &mut SpawnedEntities, player_id : u8, players: &m
     let entrance_quote = get_random_quote(entity, "entrance")?;
     out.append(format!("You have encountered {}\n", entity.name()));
     out.append(format!("{}: {}\n", entity.name(), entrance_quote));
-    let img = stats::get_or_else(&entity.data(), "img", &stats::Value::LongString(stats::StrBuilder::new(StringBuilder::new()))).as_longstring()?;
-    out.append(img);
+
+    let img = stats::get_or_else(&entity.data(), "img", 
+                        &stats::Value::LongString(stats::StrBuilder::new(StringBuilder::new()))).as_longstring()?;
+
+    out.append(img.string());
     let stats = stats::get(player.data(), "stats").unwrap().as_box()?;
     let player_speed = stats::get(&stats, "speed").unwrap().as_int()?;
     let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
     if stats::has_prop(&entity.data(), "attack_first") && entity_speed > player_speed {
-        out.append(attack(entities, player_id, players, world).ok().unwrap());
+        out.append_player_out(attack(entities, player_id, players, world)?);
     }
     return Ok(out);
 }
@@ -420,7 +423,7 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
     let y = player::y(&player)?;
     let entity = get_entity_mut(entity, x, y).unwrap();
 
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     let mut cumulative_player_speed = 0;
     let entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
     let base_dmg = stats::get_or_else(entity.mut_data(), "dmg", &stats::Value::Int(0)).as_int()?;
@@ -429,43 +432,42 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
     println!("{}", player_speed);
     while cumulative_player_speed < entity_speed {
         cumulative_player_speed += player_speed;
-        if player::is_dead(&player)? {
-            out.append("YOU DIED.\n");
-            out.append("respawning...\n");
-            player::respawn(player, world);
-            return Ok(out);
-        }
 
         println!("{}, {}",  cumulative_player_speed, entity_speed);
         let attack_quote = get_random_quote(entity, "attack")?;
         out.append(format!("{}: {}\n", entity.name(), attack_quote));
-        player::change_stat(player, "health", -base_dmg);
+        player::change_stat(player, "health", -base_dmg)?;
         out.append(format!("{} did {} damage to you.\n", entity.name(), base_dmg));
         let weapons = stats::get_var_names(&stats::get(&entity.data(), "weapons").unwrap().as_box()?);
-        if weapons.is_empty() {
-            continue;
+        if !weapons.is_empty() {
+            let mut rng = rand::thread_rng();
+            let weapon_name = &weapons[rng.gen_range(0, weapons.len())];
+            let weapon = stats::get_or_else(&world.items(), weapon_name.as_str(), &Value::Box(Stats::new())).as_box()?;
+            if stats::has_var(&weapon, "abilities") {
+                out.append(format!("{} equipped item {}\n", entity.name(), weapon_name));
+                let abilities = stats::get(&weapon, "abilities").unwrap().as_box()?;
+                let ability_names = stats::get_var_names(&abilities);
+                let ability_name = &ability_names[rng.gen_range(0, ability_names.len())];
+                let ability = stats::get(&abilities, ability_name.as_str()).unwrap().as_box()?;
+                let mut physical_dmg = 0;
+                let mut magic_dmg = 0;
+                if stats::has_var(&ability, "physical_dmg") {
+                    physical_dmg = stats::get(&ability, "physical_dmg").unwrap().as_int()?;
+                }
+                if stats::has_var(&ability, "magic_dmg") {
+                    magic_dmg = stats::get(&ability, "magic_dmg").unwrap().as_int()?;
+                }
+                player::change_stat(player, "health", -(physical_dmg + magic_dmg))?;
+                out.append(format!("{} used {} and dealt {} damage.\n", entity.name(), ability_name, (physical_dmg + magic_dmg)));
+            } else {
+                out.append(format!("{} chose to use {}, which has no abilities. Lucky you.\n", entity.name(), weapon_name));
+            }
         }
-        let mut rng = rand::thread_rng();
-        let weapon_name = &weapons[rng.gen_range(0, weapons.len())];
-        let weapon = stats::get_or_else(&world.items, weapon_name.as_str(), &Value::Box(Stats::new())).as_box()?;
-        if stats::has_var(&weapon, "abilities") {
-            out.append(format!("{} equipped item {}\n", entity.name(), weapon_name));
-            let abilities = stats::get(&weapon, "abilities").unwrap().as_box()?;
-            let ability_names = stats::get_var_names(&abilities);
-            let ability_name = &ability_names[rng.gen_range(0, ability_names.len())];
-            let ability = stats::get(&abilities, ability_name.as_str()).unwrap().as_box()?;
-            let mut physical_dmg = 0;
-            let mut magic_dmg = 0;
-            if stats::has_var(&ability, "physical_dmg") {
-                physical_dmg = stats::get(&ability, "physical_dmg").unwrap().as_int()?;
-            }
-            if stats::has_var(&ability, "magic_dmg") {
-                magic_dmg = stats::get(&ability, "magic_dmg").unwrap().as_int()?;
-            }
-            player::change_stat(player, "health", -(physical_dmg + magic_dmg));
-            out.append(format!("{} used {} and dealt {} damage.\n", entity.name(), ability_name, (physical_dmg + magic_dmg)));
-        } else {
-            out.append(format!("{} chose to use {}, which has no abilities. Lucky you.\n", entity.name(), weapon_name));
+        if player::is_dead(&player)? {
+            out.append("YOU DIED.\n");
+            out.append("respawning...\n");
+            player::respawn(player, world);
+            break;
         }
     }
     return Ok(out);

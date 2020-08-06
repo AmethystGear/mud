@@ -5,6 +5,7 @@ use crate::scanner::Param;
 use crate::action::Action;
 use crate::player::Player;
 use crate::entities::SpawnedEntities;
+use crate::playerout::PlayerOut;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 use std::thread::spawn;
@@ -12,7 +13,7 @@ use std::io::{BufReader, BufRead, BufWriter};
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::u8;
-use rstring_builder::StringBuilder;
+
 use std::error::Error;
 
 mod scanner;
@@ -23,51 +24,47 @@ mod perlin_noise;
 mod player;
 mod display;
 mod entities;
+mod playerout;
 
-fn init(reader : &mut BufReader<TcpStream>, action_map : &action::ActionMap, send: &Sender<(String, Option<u8>)>, recv : &Receiver<(String, Option<u8>)>, channel : &Sender<(String, Vec<Param>, Action, Option<Sender<(String, Option<u8>)>>, Option<u8>)>) -> (String, Option<u8>) {
-    let mut line = String::new();
-    reader.read_line(&mut line).unwrap();
-    let action_res = action::get_action_and_params(action_map, line);
-    if action_res.is_ok() {
-        let (keyword, params, action) = action_res.unwrap();
-        let res = channel.send((keyword, params, action, Some(send.clone()), None));
-        if res.is_err() {
-            println!("\n\nERROR: {}\n\n", res.err().unwrap());
-        }
-        return recv.recv().unwrap();
-    } else {
-        let err = ansi_term::Color::Red.paint(action_res.err().unwrap().as_ref().to_string());
-        return (err.to_string(), None);
-    }
-}
+type ConnOut = (Option<String>, Option<Vec<Param>>, Option<Action>, Option<Sender<(PlayerOut, Option<u8>)>>, Option<u8>);
+type ConnIn = (PlayerOut, Option<u8>);
 
-fn handle_connection(stream: TcpStream, channel : Sender<(String, Vec<Param>, Action, Option<Sender<(String, Option<u8>)>>, Option<u8>)>) {
+fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     let action_map = action::get_action_map();
-    let (send, recv) : (Sender<(String, Option<u8>)>, Receiver<(String, Option<u8>)>) = mpsc::channel();
+    let (send, recv) : (Sender<ConnIn>, Receiver<ConnIn>) = mpsc::channel();
     let id;
     let stream_clone = stream.try_clone().unwrap();
     let mut reader = BufReader::new(stream_clone);
     let stream_clone = stream.try_clone().unwrap();
     let mut writer = BufWriter::new(stream_clone);
 
-    let mut res = init(&mut reader, &action_map, &send, &recv, &channel);
+    // initialization step
+    channel.send((None, None, None, Some(send.clone()), None));
+    let mut res = recv.recv().unwrap();
     while res.1.is_none() {
-        res = init(&mut reader, &action_map, &send, &recv, &channel);
-        writer.write_all(format!("/begin/{}/end/\n", res.0).as_bytes()).unwrap();
+        channel.send((None, None, None, Some(send.clone()), None));
+        res = recv.recv().unwrap();
         writer.flush().unwrap();
     }
     id = res.1.unwrap();
-    writer.write_all(format!("/begin/{}/end/\n", res.0).as_bytes()).unwrap();
+    let pkt = res.0.get_pkt();
+    writer.write_all(&pkt.unwrap().bytes()).unwrap();
     writer.flush().unwrap();
 
+    // packet send step
     spawn(move || {
         loop {
-            let (string_response, _) = recv.recv().unwrap();
-            let string_response = format!("/begin/{}/end/\n", string_response);
-            writer.write_all(string_response.as_bytes()).unwrap();
+            let (mut response, _) = recv.recv().unwrap();
+            let mut pkt = response.get_pkt();
+            while pkt.is_some() {
+                writer.write_all(&pkt.unwrap().bytes()).unwrap();
+                pkt = response.get_pkt();
+            }
             writer.flush().unwrap();
         }
     });
+
+
     let mut last_res : Option<(String, Vec<Param>, Action)> = None;
     loop {
         let mut line = String::new();
@@ -91,13 +88,10 @@ fn handle_connection(stream: TcpStream, channel : Sender<(String, Vec<Param>, Ac
         }
         if action_res.is_ok() {
             let (keyword, params, action) = action_res.unwrap();
-            let res = channel.send((keyword, params, action, None, Some(id)));
+            let res = channel.send((Some(keyword), Some(params), Some(action), None, Some(id)));
             if res.is_err() {
                 println!("\n\nERROR: {}\n\n", res.err().unwrap());
             }
-        } else {
-            let err =  ansi_term::Color::Red.paint(action_res.err().unwrap().as_ref().to_string());
-            send.send((err.to_string(), None)).unwrap();
         }
     }
 }
@@ -114,8 +108,7 @@ fn get_first_availible_id(players : &Vec<Option<Player>>) -> Option<u8> {
 
 fn main() {
     let server = TcpListener::bind("0.0.0.0:31415").unwrap();
-    let (send, recv) : (Sender<(String, Vec<Param>, Action, Option<Sender<(String, Option<u8>)>>, Option<u8>)>,
-                        Receiver<(String, Vec<Param>, Action, Option<Sender<(String, Option<u8>)>>, Option<u8>)>) = mpsc::channel();
+    let (send, recv) : (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
 
     spawn(move || {
         let mut world : world::World = world::from_seed(0).ok().unwrap();
@@ -135,7 +128,9 @@ fn main() {
                 let sender = sender.clone().unwrap();
                 let id = get_first_availible_id(&players);
                 if id.is_none() {
-                    sender.send(("Cannot enter game! There are already 256 players on the server!".to_string(), None)).unwrap();
+                    let mut p_out = PlayerOut::new();
+                    p_out.append_err("Cannot enter game! There are already 256 players on the server!".to_string());
+                    sender.send((p_out, None)).unwrap();
                     continue;
                 }
                 let mut player = player::from(0, 0, id.unwrap(), sender.clone());
@@ -143,15 +138,22 @@ fn main() {
                 println!("{}", id.unwrap());
                 player_id = id.unwrap();
                 players[player_id as usize] = Some(player);
+                let mut p_out = PlayerOut::new();
+                p_out.add_pkt(playerout::get_init(&world));
+                sender.send((p_out, Some(player_id))).unwrap();
+                continue;
             } else if id.is_some() {
                 player_id = id.unwrap();
             } else {
                 unreachable!("both id and sender are None!");
             }
+            let keyword = keyword.expect("if id is not None, then keyword should be Some");
+            let params = params.expect("if params is not None, then params should be Some");
+            let action = action.expect("if id is not none, then action should be Some");
 
             let x;
             let y;
-            let mut string_result;
+            let mut res;
             {
                 let result = action.run(Some(&mut spawned_entities), Some(&action_map), Some(keyword), Some(&params),
                                         Some(player_id), Some(&mut players), Some(&mut world));
@@ -165,17 +167,19 @@ fn main() {
                 }
                 x = x_.unwrap();
                 y = y_.unwrap();
-                
                 if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y) {
                     let name = world::get_entity_name(&world, x, y).unwrap();
                     let stats = world::get_entity_properties(&world, x, y).unwrap().clone();
-                    entities::spawn(stats, x, y, name, &mut spawned_entities, &mut world);
+                    entities::spawn(stats, x, y, name, &mut spawned_entities, &mut world).unwrap();
                 }
-                if result.is_ok() {
-                    string_result = result.ok().unwrap().string();
-                } else {
-                    let err = ansi_term::Color::Red.paint(result.err().unwrap().as_ref().to_string()).to_string();
-                    string_result = format!("{}\n", err);
+                match result {
+                    Ok(ok) => {
+                        res = ok;
+                    }
+                    Err(err) => {
+                        res = PlayerOut::new();
+                        res.append(err.to_string());
+                    }
                 }
             }
             let mut mob_action_res = None;
@@ -194,15 +198,18 @@ fn main() {
                 player.set_interact(true);
             }
 
-            if mob_action_res.is_some() {
-                string_result = format!("{}{}", string_result, mob_action_res.unwrap().string());
+            match mob_action_res {
+                Some(some) => {
+                    res.append_player_out(some);
+                }
+                None => {}
             }
 
-            if sender.is_some() {
-                sender.unwrap().send((string_result, Some(player_id))).unwrap();
-            } else {
-                let player = players[player_id as usize].as_ref().unwrap();
-                player::send(player, string_result);
+            match players[player_id as usize].as_ref() {
+                Some(player) => {
+                    player::send(player, res);
+                }
+                None => {println!("Invalid player id {}", player_id)}
             }
         }
     });

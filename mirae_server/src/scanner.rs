@@ -95,7 +95,6 @@ fn update_token(scan : &mut Scanner) {
     if peek_next(scan).is_none() {
         return;
     }
-    println!("next {}", peek_next(scan).unwrap());
 }
 
 fn update_line(scan : &mut Scanner) {

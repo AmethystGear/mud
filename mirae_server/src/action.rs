@@ -1,6 +1,5 @@
 extern crate rstring_builder;
 
-use crate::entities::Spawnable;
 use crate::entities::SpawnedEntities;
 use crate::world::World;
 use crate::player::Player;
@@ -14,10 +13,11 @@ use crate::stats;
 use crate::world;
 use crate::player;
 use crate::entities;
+use crate::playerout::PlayerOut;
 use std::u8;
 use std::error::Error;
 
-type Res = std::result::Result<StringBuilder, Box<dyn Error>>;
+type Res = std::result::Result<PlayerOut, Box<dyn Error>>;
 
 #[derive(Clone)]
 pub enum ActionFunc {
@@ -67,6 +67,7 @@ impl Action {
     }
 }
 
+
 impl Clone for Action {
     fn clone(&self) -> Action {
         Action {
@@ -97,7 +98,7 @@ pub fn get_action_and_params(map: &ActionMap, s: String) -> Result<(String, Vec<
     scanner::next(&mut scan);
     let params = scanner::get_params(&mut scan);
     let action = map.command_word_map.get(&first_word).ok_or_else(|| "that command doesn't exist!".to_string())?;
-    return Ok((first_word.clone(), params, map.command_word_map.get(&first_word).unwrap().clone()));
+    return Ok((first_word.clone(), params, action.clone()));
 }
 
 pub fn add_action(map: &mut ActionMap, s: String, a: Action) {
@@ -206,7 +207,7 @@ pub fn get_action_map() -> ActionMap {
         name: "wear".to_string(),
         description: "wear an item in your inventory, or unwear all items.".to_string(),
         usage: "wear <x>|wear".to_string(),
-        keywords : "eat, consume".to_string(),
+        keywords : "wear".to_string(),
         func : ActionFunc::G(wear.clone())
     });
     return m;
@@ -276,7 +277,7 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
 }
 
 fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Res {
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     if params.is_empty() {
         out.append("welcome to the help menu!\n");
         out.append("type 'help action' to list all the stuff you can do!\n");
@@ -356,9 +357,9 @@ fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec
     } else {
         unreachable!();
     }
-    player::set_posn(&mut player, new_posn.0, new_posn.1);
+    player::set_posn(&mut player, new_posn.0, new_posn.1)?;
     player.set_interact(false);
-    player::reset_to_base(&mut player);
+    player::reset_to_base(&mut player)?;
     return disp(player_id, players, world);
 }
 
@@ -369,7 +370,7 @@ fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) 
     println!("p_x: {}", p_x);
     println!("p_y: {}", p_y);
     let view = player::get_stat(&player, "view")? as u16;
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     out.append(format!("{},{}\n", p_x, p_y));
     let x;
     if view > p_x {
@@ -383,13 +384,29 @@ fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) 
     } else {
         y = p_y - view;
     }
-    
-    out.append(display::display(world, players, x, y, std::cmp::min(2 * view + 1, world::MAP_SIZE - x), std::cmp::min(2 * view + 1, world::MAP_SIZE - y), 1)?);
+
+    let img = display::Img {
+        x_origin: x,
+        y_origin: y,
+        x_length: std::cmp::min(2 * view + 1, world::MAP_SIZE - x),
+        y_length:  std::cmp::min(2 * view + 1, world::MAP_SIZE - y),
+        resolution: 1
+    };
+    out.append_img(world, players, img)?;
     return Ok(out);
 }
 
 fn map(players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    return display::display(world, players, 0, 0, world::MAP_SIZE, world::MAP_SIZE, world::MAP_SIZE/100);
+    let mut out = PlayerOut::new();
+    let img = display::Img {
+        x_origin: 0,
+        x_length: world::MAP_SIZE,
+        y_origin: 0,
+        y_length: world::MAP_SIZE,
+        resolution: world::MAP_SIZE/100
+    };
+    out.append_img(world, players, img)?;
+    return Ok(out);
 }
 
 pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> (&mut Player, &mut Player) {
@@ -447,7 +464,7 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
         }
     }
     if player::get_stat(&player, "energy")? >= energy_cost {
-        player::change_stat(&mut player, "energy", -energy_cost);
+        player::change_stat(&mut player, "energy", -energy_cost)?;
         if player.opponent().is_none() { // fighting entity
             if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
                 return Err("you aren't fighting anything!".into());
@@ -462,50 +479,40 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                                                        Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
                                                        Some(player_id), Some(players), Some(world));
 
-                println!("ran dmg");
-
                 player = players[player_id as usize].as_mut().unwrap();
-                if res.is_err() {
+                if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
                     return res;
-                } else {
-                    if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
-                        return res;
-                    }
-                    let mut out = res.ok().unwrap();
-                    let entity_speed;
-                    {
-                        let entity = entities::get_entity_mut(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
-                        entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
-                    }
-                    let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player)?, player::y(player)?);
-                    let player_speed = player::get_stat(&player, "speed")?;
-                    player.add_entity_cumulative_speed(entity_speed);
-                    if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
-                        player.zero_entity_cumulative_speed();
-                        let mob_attack = mob_attack.unwrap();
-                        let res = mob_attack.run(Some(spawned_entities), None, None, None, Some(player_id), Some(players), Some(world));
-                        if res.is_err() {
-                            return res;
-                        } else {
-                            out.append(res.ok().unwrap());
-                        }
-                    }
-                    return Ok(out);
                 }
+                let mut out = res?;
+                let entity_speed;
+                {
+                    let entity = entities::get_entity_mut(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
+                    entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
+                }
+                let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player)?, player::y(player)?);
+                let player_speed = player::get_stat(&player, "speed")?;
+                player.add_entity_cumulative_speed(entity_speed);
+                if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
+                    player.zero_entity_cumulative_speed();
+                    let mob_attack = mob_attack.unwrap();
+                    let res = mob_attack.run(Some(spawned_entities), None, None, None, Some(player_id), Some(players), Some(world));
+                    out.append_player_out(res?);
+                }
+                return Ok(out);   
             }
         } else { // fighting another player
             if !player::turn(&player) {
                 return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\n\
                             Be honourable and just wait for your opponent to finish attacking you sirrrrrrrr....".into());
             }
-            let mut out = StringBuilder::new();
+            let mut out = PlayerOut::new();
             let mut opponent = opponent.unwrap();
             out.append(format!("You used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
-            player::send(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
-            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg));
+            player::send_str(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
+            player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg))?;
             if player::is_dead(&opponent)? {
                 out.append("Congrats for murdering your opponent!!!!\n");
-                player::send(&opponent, format!("You were killed bigly.\n"));
+                player::send_str(&opponent, format!("You were killed bigly.\n"));
                 player.set_opponent(None);
                 opponent.set_opponent(None);
                 player::set_turn(&mut player, false);
@@ -557,7 +564,7 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
         println!("versus {}, {}", player_id, opponent.unwrap());
         let (player, opp) = get_two_players(player_id, opponent.unwrap(), players);
 
-        let mut out = StringBuilder::new();
+        let mut out = PlayerOut::new();
         player.set_opponent(opponent);
         out.append(format!("You are attacking player {}\n", opponent.unwrap()));
         opp.set_opponent(Some(player_id));
@@ -567,19 +574,19 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
             player::set_turn(player, true);
             player::set_turn(opp, false);
             out.append("It is your turn!\n");
-            player::send(&opp, "Another player is battling you! It is their turn.\n".to_string());
+            player::send_str(&opp, "Another player is battling you! It is their turn.\n".to_string());
         } else {
             player::set_turn(player, false);
             player::set_turn(opp, true);
             out.append("It is your opponent's turn!\n");
-            player::send(&opp, "Another player is battling you! It is your turn!\n".to_string());
+            player::send_str(&opp, "Another player is battling you! It is your turn!\n".to_string());
         }
         return Ok(out);
     }
 }
 
 pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     let player = players[player_id as usize].as_mut().unwrap();
     if params.is_empty() {
         out.append("dequipping item.\n");
@@ -594,7 +601,8 @@ pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Op
         let selected_item = selected_item.unwrap();
         if items.contains(&selected_item) {
             out.append("equipping item.\n");
-            let item = stats::get(&world.items, selected_item.as_str());
+            let it = &world.items();
+            let item = stats::get(it, selected_item.as_str());
             if item.is_none() {
                 return Err("That item is not defined, and cannot be equipped!".into());
             }
@@ -609,7 +617,7 @@ pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Op
 }
 
 fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let mut out = StringBuilder::new();
+    let mut out = PlayerOut::new();
     let player = players[player_id as usize].as_mut().unwrap();
     if params.is_empty() {
         out.append(stats::string(player.data()));
@@ -637,8 +645,8 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
                 out.append(stats::string(opponent.data()));
             }
         } else {
-            if stats::has_var(&world.items, &val) {
-                out.append(stats::string(&stats::get(&world.items, &val).unwrap().as_box()?));
+            if stats::has_var(&world.items(), &val) {
+                out.append(stats::string(&stats::get(&world.items(), &val).unwrap().as_box()?));
             } else {
                 return Err("that item doesn't exist!".into());
             }
@@ -659,13 +667,13 @@ fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<
     }
     let item = item.unwrap();
     if stats::has_var(&inv, item.as_str()) {
-        player::remove_item_from_inventory(player, item.as_str());
-        let item = stats::get_or_else(&world.items, item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box()?;
+        player::remove_item_from_inventory(player, item.as_str())?;
+        let item = stats::get_or_else(&world.items(), item.as_str(), &stats::Value::Box(stats::Stats::new())).as_box()?;
         let health_gain = stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int()?;
         let energy_gain = stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int()?;
-        player::change_stat(player, "health", health_gain);
-        player::change_stat(player, "energy", energy_gain);
-        let mut out = StringBuilder::new();
+        player::change_stat(player, "health", health_gain)?;
+        player::change_stat(player, "energy", energy_gain)?;
+        let mut out = PlayerOut::new();
         out.append(format!("you got {} health, and {} energy\n", health_gain, energy_gain));
         return Ok(out);
     } else {
@@ -681,8 +689,8 @@ fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Opt
     if let scanner::Param::String(s) = &params[0] {
         let result = player::upgrade_stat(&mut player, s.as_str());
         if result.is_ok() {
-            player::reset_to_base(&mut player);
-            let mut out = StringBuilder::new();
+            player::reset_to_base(&mut player)?;
+            let mut out = PlayerOut::new();
             out.append("upgraded stat.\n");
             return Ok(out);
         } else {
@@ -702,15 +710,16 @@ fn wear(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, 
         return Err("expected exactly one item to wear!".into());
     } else if params.len() == 0 {
         player::unwear_all(player);
-        let mut out = StringBuilder::new();
+        let mut out = PlayerOut::new();
         out.append("unwore all items!\n");
         return Ok(out);
     } else {
         if let scanner::Param::String(s) = &params[0] {
             if !stats::has_var(&player::get_inventory(&player)?, s.as_str()) {
                 return Err("You do not have that item in your inventory!".into())
-            } 
-            let item = stats::get(&world.items, s);
+            }
+            let it = &world.items();
+            let item = stats::get(it, s);
             if item.is_none() {
                 return Err("That item is not defined, and cannot be worn!".into());
             }
@@ -720,8 +729,8 @@ fn wear(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, 
             }
             let result = player::wear(&mut player, s.to_string(), stats::get(&item, "buffs").unwrap().as_box()?);
             if result.is_ok() {
-                player::reset_to_base(&mut player);
-                let mut out = StringBuilder::new();
+                player::reset_to_base(&mut player)?;
+                let mut out = PlayerOut::new();
                 out.append("wore item.\n");
                 return Ok(out);
             } else {

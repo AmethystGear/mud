@@ -239,7 +239,6 @@ pub fn from (s : &mut scanner::Scanner) -> Stats {
         stats.types.insert(var_name.clone(), var_type);
         stats.stats.insert(var_name, var_value);
     }
-    println!("here {:?}", stats.types);
     return stats;
 }
 
