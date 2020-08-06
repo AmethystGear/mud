@@ -153,7 +153,7 @@ fn main() {
                 player_id = id.unwrap();
                 players[player_id as usize] = Some(player);
                 let mut p_out = PlayerOut::new();
-                p_out.add_pkt(playerout::get_init(&world));
+                p_out.add_pkt(playerout::get_init(&world).unwrap());
                 sender.send((p_out, Some(player_id))).unwrap();
                 continue;
             } else if id.is_some() {

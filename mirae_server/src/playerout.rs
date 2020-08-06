@@ -49,8 +49,7 @@ impl PlayerOut {
     }
 
     pub fn append<S : Into<String>>(&mut self, text : S) {
-        if self.packets.len() > 0 {
-            let mut most_recent_pkt = self.packets.pop_back().unwrap();
+        if let Some(mut most_recent_pkt) = self.packets.pop_back() {
             if most_recent_pkt.p_type == PacketType::Text {
                 most_recent_pkt.content.append(&mut text.into().into_bytes());
                 self.packets.push_back(most_recent_pkt);
@@ -131,8 +130,8 @@ impl PlayerOut {
         if first_p_out.is_none() {
             return;
         }
-        let mut first_p_out = first_p_out.unwrap();
-        let mut most_recent_pkt = most_recent_pkt.unwrap();
+        let mut first_p_out = first_p_out.expect("checked for none case above");
+        let mut most_recent_pkt = most_recent_pkt.expect("check for none case anove");
         
         if most_recent_pkt.p_type == PacketType::Text && first_p_out.p_type == PacketType::Text {
             most_recent_pkt.content.append(&mut first_p_out.content);  
@@ -150,7 +149,7 @@ impl PlayerOut {
     }
 }
 
-pub fn get_init(world : &World) -> Packet {
+pub fn get_init(world : &World) -> Result<Packet, Box<dyn Error>> {
     let mut init = stats::Stats::new();
     stats::set(&mut init, "default_mob", stats::Value::String("??".to_string()));
 
@@ -162,19 +161,19 @@ pub fn get_init(world : &World) -> Packet {
     println!("{}, {}", world.max_block_id(), world.max_entity_id());
     for i in 0..(world.max_block_id()) {
         let block = world::get_block_by_id(world, i);
-        let display = stats::get(block, "display").unwrap().as_int().unwrap() as u16;
-        data["block_display"].as_object_mut().unwrap().insert(format!("{}", i), json!(display));
+        let display = stats::get(block, "display")?.as_int()? as u16;
+        data["block_display"].as_object_mut().ok_or("badly formatted json value")?.insert(format!("{}", i), json!(display));
     }
     for i in 0..(world.max_entity_id()) {
         println!("{}", i);
         let entity = world::get_entity_properties_by_id(world, i);
         if stats::has_var(entity, "display") {
-            let display = stats::get(entity, "display").unwrap().as_string().unwrap();
-            data["entity_display"].as_object_mut().unwrap().insert(format!("{}", i), json!(display));
+            let display = stats::get(entity, "display")?.as_string()?;
+            data["entity_display"].as_object_mut().ok_or("badly formatted json value")?.insert(format!("{}", i), json!(display));
         }
     }
-    return Packet {
+    return Ok(Packet {
         p_type : PacketType::Init,
         content : data.to_string().into_bytes()
-    };
+    });
 }
