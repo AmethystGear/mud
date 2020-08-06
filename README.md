@@ -23,7 +23,7 @@ in the `mirae_server/` folder.
 
 ### running the client
 just one python file.
-do:```python client/client.py```
+do:```python client/client.py <ip-address> <port (if you don't want the default port)>```
 
 the client should look something like this if you're doing it right:
 ![image](https://user-images.githubusercontent.com/21998904/81458324-a8947680-914e-11ea-9215-0d2817299ca9.png)
