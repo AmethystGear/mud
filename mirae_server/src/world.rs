@@ -56,7 +56,7 @@ impl World {
 }
 
 fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats) -> Result<i64, Box<dyn Error>>{
-    println!("{}", stats::string(terrain_configuration));
+    println!("{}", stats::string(terrain_configuration)?);
     let mut blocks = stats::get(terrain_configuration, "blocks").unwrap().as_box()?;
     let block_names = stats::get_var_names(&blocks);
 
@@ -94,8 +94,8 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
         max_block_id : 0,
         seed : seed
     };
-    world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(ITEMS_CONFIG).unwrap())));
-    let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(File::open(TERRAIN_CONFIG).unwrap())));
+    world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(ITEMS_CONFIG)?)))?;
+    let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(File::open(TERRAIN_CONFIG)?)))?;
 
     world.max_block_id = get_blocks(&mut world, &terrain_configuration)? as u16;
     println!("world max block: {}", world.max_block_id);
@@ -128,7 +128,7 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
         let file_uw = file.unwrap().path();
         let f_name = file_uw.file_name().unwrap().to_str().unwrap();
         let entity_config = File::open(file_uw.clone())?;
-        let mut f_entities = stats::from(&mut scanner::from(CharStream::from_file(entity_config)));
+        let mut f_entities = stats::from(&mut scanner::from(CharStream::from_file(entity_config)))?;
         last_id = get_entities(&mut world, &mut f_entities, Some(f_name.to_string()), Some(last_id))?;
     }
     world.max_entity_id = last_id as u16;
@@ -149,7 +149,7 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     println!("generated world");
     return Ok(world);
 }
-/*
+/* COULD BE USED IN THE FUTURE FOR WORLD SAVES
 pub fn from_save(file: File) -> World {
     let mut world = World {
         blocks : Map::new(),
@@ -177,7 +177,6 @@ pub fn from_save(file: File) -> World {
     world.max_entity_id = get_entities(&mut world, &mut entities, false, None, None) as u16;
     return world;
 }
-*/
 
 pub fn save_to(world: &World, file: File) {
     let mut stats = stats::Stats::new();
@@ -209,7 +208,7 @@ pub fn save_to(world: &World, file: File) {
     stats::set(&mut stats, "entities", stats::Value::Box(entities));
     stats::save_to(&stats, file);
 }
-
+*/
 fn index(x : u16, y : u16) -> usize {
     return (y as usize) * (MAP_SIZE as usize) + (x as usize);
 }

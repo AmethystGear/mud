@@ -305,7 +305,7 @@ pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players :
     let chest = get_entity(entities, x, y).unwrap();
     let mut out = PlayerOut::new();
     out.append("you recieved:\n");
-    out.append(stats::string(&chest.data()));
+    out.append(stats::string(&chest.data())?);
     player::add_items_to_inventory(player, chest.data().clone())?;
     remove_entity(world, entities, x, y);
     return Ok(out);
@@ -335,7 +335,7 @@ pub fn dmg(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : u8
         if stats::has_var(&entity.data(), "drops") {
             let mob_drops = get_items(entity, "drop")?;
             out.append("you got:\n");
-            out.append(stats::string(&mob_drops));
+            out.append(stats::string(&mob_drops)?);
             out.append("and:\n");
             let def = Value::Int(0);
             let xp = stats::get(&stats::get(&entity.data(), "stats").unwrap().as_box()?, "xp").unwrap_or(&def).as_int()?;
@@ -369,11 +369,11 @@ pub fn trade(entities : &mut SpawnedEntities, params : &Vec<Param>, player_id : 
             out.append(format!("{}. {} --> {} xp\n", i, item, xp));
         }
     } else if params.len() == 2 {
-        if params[0].as_int().is_none() || params[1].as_int().is_none() {
+        if params[0].as_int().is_err() || params[1].as_int().is_err() {
             return Err("expected 2 integers as parameters".into());
         }
-        let trade_num = params[0].as_int().unwrap();
-        let num_to_trade = params[1].as_int().unwrap();
+        let trade_num = params[0].as_int()?;
+        let num_to_trade = params[1].as_int()?;
         let player = players[player_id as usize].as_mut().unwrap();
         let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
         if trade_num < 0 || trade_num > item_names.len() as i64 {
@@ -466,7 +466,7 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
         if player::is_dead(&player)? {
             out.append("YOU DIED.\n");
             out.append("respawning...\n");
-            player::respawn(player, world);
+            player::respawn(player, world)?;
             break;
         }
     }
@@ -517,6 +517,6 @@ pub fn get_items(entity : &dyn Spawnable, item : &str) -> Result<Stats, Box<dyn 
             }
         }
     }
-    println!("mob drops:\n {}", stats::string(&mob_drops));
+    println!("mob drops:\n {}", stats::string(&mob_drops)?);
     return Ok(mob_drops);
 }

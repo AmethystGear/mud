@@ -80,9 +80,9 @@ impl PlayerOut {
                     let p_x = player::x(p)?;
                     let p_y = player::y(p)?;
                     if p_x >= img.x_origin && p_x < (img.x_origin + img.x_length) && p_y >= img.y_origin && p_y < (img.y_origin + img.y_length) {
-                        let identity = stats::get(p.data(), "identity").ok_or_else(|| "player data doesn't have an identity!")?;
+                        let identity = stats::get(p.data(), "identity")?;
                         let identity = identity.as_box()?;
-                        let id = stats::get(&identity, "id").ok_or_else(|| "player identity doesn't have an ID!")?;
+                        let id = stats::get(&identity, "id")?;
                         let id = id.as_int()? as u8;
                         vec_img[1] += 1;
                         vec_img.push(0);

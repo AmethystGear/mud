@@ -39,10 +39,14 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     let mut writer = BufWriter::new(stream_clone);
 
     // initialization step
-    channel.send((None, None, None, Some(send.clone()), None));
+    while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
+        println!("{}", e); 
+    }
     let mut res = recv.recv().unwrap();
     while res.1.is_none() {
-        channel.send((None, None, None, Some(send.clone()), None));
+        while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
+            println!("{}", e); 
+        }
         res = recv.recv().unwrap();
         writer.flush().unwrap();
     }
@@ -133,8 +137,18 @@ fn main() {
                     sender.send((p_out, None)).unwrap();
                     continue;
                 }
-                let mut player = player::from(0, 0, id.unwrap(), sender.clone());
-                player::respawn(&mut player, &world);
+                let player = player::from(0, 0, id.unwrap(), sender.clone());
+                if player.is_err() {
+                    println!("failed to create player!");
+                    continue;
+                }
+                let mut player = player.expect("just checked that player is not err, so this should never fail");
+                let res = player::respawn(&mut player, &world);
+                if res.is_err() {
+                    println!("failed to respawn player!");
+                    continue;
+                }
+
                 println!("{}", id.unwrap());
                 player_id = id.unwrap();
                 players[player_id as usize] = Some(player);
@@ -207,7 +221,10 @@ fn main() {
 
             match players[player_id as usize].as_ref() {
                 Some(player) => {
-                    player::send(player, res);
+                    let res = player::send(player, res);
+                    if res.is_err() {
+                        println!("could not send to player!");
+                    }
                 }
                 None => {println!("Invalid player id {}", player_id)}
             }
