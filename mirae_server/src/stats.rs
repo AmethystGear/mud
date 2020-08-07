@@ -191,7 +191,9 @@ pub fn from (s : &mut scanner::Scanner) -> Result<Stats, Box<dyn Error>> {
 
         // properties are handled seperately
         if token == "prop" {
-            stats.properties.insert(scanner::next(&mut line_scan)?);
+            let next = scanner::next(&mut line_scan)?;
+            println!("{}", next);
+            stats.properties.insert(next);
             continue;
         }
 
@@ -390,6 +392,11 @@ pub fn string(stats : &Stats) -> Result<String, Box<dyn Error>> {
         s.append(key.to_string());
         s.append(' ');
         s.append(get_string_rep(&value)?);
+        s.append('\n');
+    }
+    for val in &stats.properties {
+        s.append("prop ");
+        s.append(val.to_string());
         s.append('\n');
     }
     s.append("}\n");

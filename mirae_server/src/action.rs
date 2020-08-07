@@ -256,6 +256,7 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
         current = displace(current.0, current.1, x_axis, num_units.signum());
         let block = world::get_block(world, current.0 as u16, current.1 as u16)?;
         if stats::has_prop(block, "solid") {
+            println!("backtrack");
             backtrack = true;
             break;
         }
@@ -269,7 +270,10 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
             }
         }
     }
-
+    let block = world::get_block(world, current.0 as u16, current.1 as u16)?;
+    if stats::has_prop(block, "solid") {
+        backtrack = true;
+    }
     let end;
     if backtrack {
         end = displace(current.0, current.1, x_axis, -num_units.signum());
@@ -328,7 +332,7 @@ fn help(action_map: &ActionMap, params : &Vec<scanner::Param>) -> Res {
 }
 
 fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let mut player = players[player_id as usize].as_mut().unwrap();
+    let mut player = players[player_id as usize].as_mut().ok_or("player id invalid")?;
     if player.opponent().is_some() {
         return Err("You can't just run away! Die with honour, scum!".into());
     }
@@ -691,7 +695,7 @@ fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<
 }
 
 fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>) -> Res {
-    let mut player = players[player_id as usize].as_mut().unwrap();
+    let mut player = players[player_id as usize].as_mut().ok_or("invalid player id!")?;
     if params.len() != 1 {
         return Err("expected exactly one stat to upgrade!".into());
     }
