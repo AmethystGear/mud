@@ -9,7 +9,7 @@ If your terminal doesn't support 256-color, then either get another terminal, or
 All the following commands should be run from the main directory.
 
 ## requirements:
-if you want to run the server, you need rust. If you want to run the client, you need java.
+if you want to run the server, you need rust. If you want to run the client, you need python.
 
 ### compiling the server
 do:
