@@ -304,6 +304,9 @@ pub fn chest_interact(entities : &mut SpawnedEntities, player_id : u8, players :
     let y = player::y(&player)?;
     let chest = get_entity(entities, x, y).ok_or("can't get entity")?;
     let mut out = PlayerOut::new();
+    out.append("you encountered a ");
+    out.append(chest.name());
+    out.append("\n");
     out.append("you recieved:\n");
     out.append(stats::string(&chest.data())?);
     player::add_items_to_inventory(player, chest.data().clone())?;
