@@ -1,7 +1,7 @@
 import sys
 import socket
 import json
-from colors import *
+import colors
 from enum import Enum
 from threading import Thread
 from collections import deque
@@ -139,12 +139,12 @@ def handle_packet(pkt):
                 if blocks[index] == prev:
                     sub_line += display
                 else:
-                    line += color(sub_line, bg=init_data['block_display'][str(prev)])
+                    line += colors.color(sub_line, bg=init_data['block_display'][str(prev)])
                     sub_line = display
                 
                 prev = blocks[index]
 
-            line += color(sub_line, bg=init_data['block_display'][str(prev)])
+            line += colors.color(sub_line, bg=init_data['block_display'][str(prev)])
             print(line)
 
     elif pkt.command == Commands.Init:
