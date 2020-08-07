@@ -56,7 +56,6 @@ impl World {
 }
 
 fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats) -> Result<i64, Box<dyn Error>>{
-    println!("{}", stats::string(terrain_configuration)?);
     let mut blocks = stats::get(terrain_configuration, "blocks")?.as_box()?;
     let block_names = stats::get_var_names(&blocks);
 
@@ -98,7 +97,6 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(File::open(TERRAIN_CONFIG)?)))?;
 
     world.max_block_id = get_blocks(&mut world, &terrain_configuration)? as u16;
-    println!("world max block: {}", world.max_block_id);
 
     // generate terrain based on parameters provided
     let terrain_params = stats::get(&terrain_configuration, "terrain_parameters")?.as_box()?;
@@ -124,7 +122,6 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     let files = fs::read_dir(ENTITIES_CONFIG_DIR)?;
     let mut last_id = 0;
     for file in files {
-        println!("{:?}", file);
         let file_uw = file?.path();
         let f_name = file_uw.file_name().ok_or("error getting file name")?.to_str().ok_or("error getting file name")?;
         let entity_config = File::open(file_uw.clone())?;
@@ -145,8 +142,6 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
             }
         }
     }
-    
-    println!("generated world");
     return Ok(world);
 }
 /* COULD BE USED IN THE FUTURE FOR WORLD SAVES

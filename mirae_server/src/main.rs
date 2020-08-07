@@ -40,12 +40,12 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
 
     // initialization step
     while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
-        println!("{}", e); 
+        println!("{}", e);
     }
     let mut res = recv.recv().unwrap();
     while res.1.is_none() {
         while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
-            println!("{}", e); 
+            println!("{}", e);
         }
         res = recv.recv().unwrap();
         writer.flush().unwrap();
@@ -64,13 +64,10 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
             while pkt.is_some() {
                 writer.write_all(&pkt.unwrap().bytes()).unwrap();
                 pkt = response.get_pkt();
-                println!("bah");
             }
-            println!("humbug");
             let res = writer.flush();
             if res.is_err() {
                 s.send(true).unwrap();
-                println!("connection terminated");
                 break;
             }
         }
@@ -131,6 +128,8 @@ fn main() {
 
     spawn(move || {
         let mut world : world::World = world::from_seed(0).ok().unwrap();
+        println!("generated world");
+
         let mut spawned_entities = SpawnedEntities::new();
 
         let action_map = action::get_action_map();
@@ -164,7 +163,6 @@ fn main() {
                     continue;
                 }
 
-                println!("{}", id.unwrap());
                 player_id = id.unwrap();
                 players[player_id as usize] = Some(player);
                 let mut p_out = PlayerOut::new();
@@ -187,7 +185,7 @@ fn main() {
                 let result = action.run(Some(&mut spawned_entities), Some(&action_map), Some(keyword), Some(&params),
                                         Some(player_id), Some(&mut players), Some(&mut world));
                 if result.is_none() {
-                    print!("bad params to function");
+                    println!("bad params to function");
                     continue;
                 }
                 let result = result.unwrap();
@@ -199,8 +197,6 @@ fn main() {
                 let x_ = player::x(&player);
                 let y_ = player::y(&player);
                 if x_.is_err() || y_.is_err() {
-                    println!("{:?}", x_);
-                    println!("{:?}", y_);
                     continue;
                 }
                 x = x_.unwrap();

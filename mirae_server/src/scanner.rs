@@ -210,7 +210,7 @@ pub fn get_params(scan: &mut Scanner) -> Vec<Param> {
         } else if let Ok(s) = next(scan) {
             params.push(Param::String(s));
         } else {
-            unreachable!()
+            break;
         }
     }
     return params;

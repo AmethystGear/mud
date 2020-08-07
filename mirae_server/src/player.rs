@@ -242,19 +242,6 @@ pub fn is_dead(player : &Player) -> Result<bool, Box<dyn Error>> {
     return Ok(get_stat(player, "health")? == 0);
 }
 
-/*
-pub fn display(player: &Player) -> String {
-    let id = format!("{:x}", stats::get(player.data(), "id")?.as_int()? as u8);
-    if id.len() == 2 {
-        return id;
-    } else if id.len() == 1 {
-        return format!("0{}", id);
-    } else {
-        unreachable!();
-    }
-}
-*/
-
 pub fn add_items_to_inventory(player : &mut Player, stats : Stats) -> Result<(), Box<dyn Error>> {
     let new_inventory = stats::add(stats::get(player.data(), "inventory")?.as_box()?, stats)?;
     stats::set(&mut player.data, "inventory", Value::Box(new_inventory));

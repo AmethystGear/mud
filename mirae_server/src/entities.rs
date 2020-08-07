@@ -432,11 +432,8 @@ pub fn attack(entity: &mut SpawnedEntities, player_id : u8, players: &mut Vec<Op
     let base_dmg = stats::get_or_else(entity.mut_data(), "dmg", &stats::Value::Int(0)).as_int()?;
     let stats = stats::get(player.data(), "stats")?.as_box()?;
     let player_speed = stats::get(&stats, "speed")?.as_int()?;
-    println!("{}", player_speed);
     while cumulative_player_speed < entity_speed {
         cumulative_player_speed += player_speed;
-
-        println!("{}, {}",  cumulative_player_speed, entity_speed);
         let attack_quote = get_random_quote(entity, "attack")?;
         out.append(format!("{}: {}\n", entity.name(), attack_quote));
         player::change_stat(player, "health", -base_dmg)?;
@@ -501,7 +498,6 @@ pub fn get_items(entity : &dyn Spawnable, item : &str) -> Result<Stats, Box<dyn 
     let min = stats::get_or_else(&drops, &format!("{}_min", item), &stats::Value::Int(0)).as_int()? as usize;
     let max = stats::get_or_else(&drops, &format!("{}_max", item), &stats::Value::Int(0)).as_int()? as usize;
     let num_runs = rng.gen_range(min, max + 1);
-    println!("num_runs: {}", num_runs);
 
     let mut mob_drops = Stats::new();
     let mut thresholds = vec![];
@@ -520,6 +516,5 @@ pub fn get_items(entity : &dyn Spawnable, item : &str) -> Result<Stats, Box<dyn 
             }
         }
     }
-    println!("mob drops:\n {}", stats::string(&mob_drops)?);
     return Ok(mob_drops);
 }

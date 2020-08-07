@@ -158,14 +158,12 @@ pub fn get_init(world : &World) -> Result<Packet, Box<dyn Error>> {
         "block_display" : {},
         "entity_display" : {}
     });
-    println!("{}, {}", world.max_block_id(), world.max_entity_id());
     for i in 0..(world.max_block_id()) {
         let block = world::get_block_by_id(world, i)?;
         let display = stats::get(block, "display")?.as_int()? as u16;
         data["block_display"].as_object_mut().ok_or("badly formatted json value")?.insert(format!("{}", i), json!(display));
     }
     for i in 0..(world.max_entity_id()) {
-        println!("{}", i);
         let entity = world::get_entity_properties_by_id(world, i)?;
         if stats::has_var(entity, "display") {
             let display = stats::get(entity, "display")?.as_string()?;

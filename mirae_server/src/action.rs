@@ -256,7 +256,6 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
         current = displace(current.0, current.1, x_axis, num_units.signum());
         let block = world::get_block(world, current.0 as u16, current.1 as u16)?;
         if stats::has_prop(block, "solid") {
-            println!("backtrack");
             backtrack = true;
             break;
         }
@@ -381,8 +380,6 @@ fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) 
     let player = players[player_id as usize].as_mut().ok_or("player id is invalid!")?;
     let p_x = player::x(&player)?;
     let p_y = player::y(&player)?;
-    println!("p_x: {}", p_x);
-    println!("p_y: {}", p_y);
     let view = player::get_stat(&player, "view")? as u16;
     let mut out = PlayerOut::new();
     out.append(format!("{},{}\n", p_x, p_y));
@@ -568,7 +565,6 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
     }
 
     if let Some(opponent) = opponent {
-        println!("versus {}, {}", player_id, opponent);
         let (player, opp) = get_two_players(player_id, opponent, players).ok_or("could not get two player ids")?;
 
         let mut out = PlayerOut::new();
@@ -636,7 +632,6 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
         let val = params[0].as_string()?;
         if val == "opponent" {
             if let Some(opponent) = player.opponent() {
-                println!("{}, {}", opponent, player_id);
                 let (opponent, _) = get_two_players(opponent, player_id, players).ok_or("could not get two players")?;
                 out.append(stats::string(opponent.data())?);
             } else {
