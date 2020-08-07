@@ -429,6 +429,7 @@ fn step(
             Err(_) => return Err("expected an integer!".into()),
         }
     }
+    let num_units = std::cmp::min(num_units, player::MAX_PHYSICAL_SPEED);
     let new_posn;
     let mov = keyword.chars().next().expect("keyword can't be empty!");
     if mov == 'w' {
@@ -493,6 +494,8 @@ fn disp(player_id: u8, players: &mut Vec<Option<Player>>, world: &mut World) -> 
     } else {
         y = p_y - view;
     }
+
+    let view = std::cmp::min(view, player::MAX_PHYSICAL_VIEW as u16);
 
     let img = display::Img {
         x_origin: x,
@@ -694,8 +697,16 @@ pub fn attack(
                 player::respawn(&mut opponent, world)?;
                 return Ok(out);
             }
-            player::set_turn(&mut player, false);
-            player::set_turn(&mut opponent, true);
+            opponent.add_entity_cumulative_speed(player::get_stat(&opponent, "speed")?);
+            if player.entity_cumulative_speed() <= opponent.entity_cumulative_speed() {
+                player::set_turn(&mut player, false);
+                player::set_turn(&mut opponent, true);
+                out.append("your turn has ended!\n");
+                player::send_str(&opponent, "your turn has started!\n")?;
+            } else {
+                out.append("it is still your turn.\n");
+                player::send_str(&opponent, "it is still your opponent's turn.\n")?;
+            }
             return Ok(out);
         }
     } else {
@@ -749,10 +760,14 @@ pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut Wor
         opp.set_opponent(Some(player_id));
         let player_speed = player::get_stat(&player, "speed")?;
         let opponent_speed = player::get_stat(&opp, "speed")?;
+        player.zero_entity_cumulative_speed();
+        opp.zero_entity_cumulative_speed();
         if player_speed >= opponent_speed {
             player::set_turn(player, true);
             player::set_turn(opp, false);
+            player.add_entity_cumulative_speed(player_speed);
             out.append("It is your turn!\n");
+
             player::send_str(
                 &opp,
                 "Another player is battling you! It is their turn.\n".to_string(),
@@ -760,6 +775,7 @@ pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut Wor
         } else {
             player::set_turn(player, false);
             player::set_turn(opp, true);
+            opp.add_entity_cumulative_speed(opponent_speed);
             out.append("It is your opponent's turn!\n");
             player::send_str(
                 &opp,

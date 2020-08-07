@@ -67,13 +67,16 @@ fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
         let (mut response, _) = recv.recv().unwrap();
         let mut pkt = response.get_pkt();
         while pkt.is_some() {
-            writer.write_all(&pkt.unwrap().bytes()).unwrap();
+            if (writer.write_all(&pkt.unwrap().bytes())).is_err() {
+                s.send(true).unwrap();
+                return;
+            }
             pkt = response.get_pkt();
         }
         let res = writer.flush();
         if res.is_err() {
             s.send(true).unwrap();
-            break;
+            return;
         }
     });
 

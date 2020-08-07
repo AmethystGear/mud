@@ -15,6 +15,9 @@ use std::fs::File;
 use std::sync::mpsc::Sender;
 
 const DEFAULT: &str = "config/player_defaults.txt";
+const MAX_NUM_WEARS: usize = 3;
+pub const MAX_PHYSICAL_SPEED: i64 = 15;
+pub const MAX_PHYSICAL_VIEW: i64 = 10;
 
 pub struct Player {
     data: Stats,
@@ -92,6 +95,13 @@ fn buff(player: &mut Player, buff: Stats) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn wear(player: &mut Player, name: String, b: Stats) -> Result<(), Box<dyn Error>> {
+    if player.wears.len() == MAX_NUM_WEARS {
+        return Err(format!(
+            "you are already wearing {} items, which is the maximum!",
+            MAX_NUM_WEARS
+        )
+        .into());
+    }
     let inv = get_inventory(player)?;
     if !stats::has_var(&inv, &name) {
         return Err("You don't have that item in your inventory!".into());
