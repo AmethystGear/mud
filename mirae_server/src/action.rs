@@ -261,7 +261,7 @@ fn get_step(x_origin : i32, y_origin : i32, x_axis : bool, num_units : i32, worl
             break;
         }
         if world::has_entity(world, current.0 as u16, current.1 as u16) {
-            let properties = world::get_entity_properties(world, current.0 as u16, current.1 as u16).unwrap();
+            let properties = world::get_entity_properties(world, current.0 as u16, current.1 as u16).ok_or("can't find entity properties")?;
             let mob_stats = stats::get_or_else(properties, "stats", &stats::Value::Box(stats::Stats::new())).as_box()?;
             let agression = stats::get_or_else(&mob_stats, "agression", &stats::Value::Float(0.0f64)).as_flt()?;
             let v : f64 = rand::random::<f64>();
@@ -369,7 +369,7 @@ fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec
     } else if mov == 'd' {
         new_posn = get_step(player::x(&player)? as i32, player::y(&player)? as i32, true, num_units as i32, world)?;
     } else {
-        unreachable!();
+        unreachable!("keyword must start with w, a, s, or d");
     }
     player::set_posn(&mut player, new_posn.0, new_posn.1)?;
     player.set_interact(false);
@@ -423,31 +423,31 @@ fn map(players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     return Ok(out);
 }
 
-pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> (&mut Player, &mut Player) {
+pub fn get_two_players(a : u8, b : u8, players : &mut Vec<Option<Player>>) -> Option<(&mut Player, &mut Player)> {
     let (head, tail) = players.split_at_mut(std::cmp::max(a, b) as usize);
     if a > b {
-        return (tail[0].as_mut().unwrap(), head[b as usize].as_mut().unwrap());
+        return Some((tail[0].as_mut()?, head[b as usize].as_mut()?));
     } else if a < b {
-        return (head[a as usize].as_mut().unwrap(), tail[0].as_mut().unwrap());
+        return Some((head[a as usize].as_mut()?, tail[0].as_mut()?));
     } else {
-        panic!("can't get multiple mutable references to the same location!");
+        return None;
     }
 }
 
 pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let opponent_id;
     {
-        let player = players[player_id as usize].as_ref().unwrap();
+        let player = players[player_id as usize].as_ref().ok_or("player id is invalid")?;
         opponent_id = player.opponent();
     }
     let opponent;
     let mut player;
-    if opponent_id.is_some() {
-        let (opp, p) = get_two_players(opponent_id.unwrap(), player_id, players);
+    if let Some(opponent_id) = opponent_id {
+        let (opp, p) = get_two_players(opponent_id, player_id, players).ok_or("could not get multiple player refs!")?;
         opponent = Some(opp);
         player = p;
     } else {
-        player = players[player_id as usize].as_mut().unwrap();
+        player = players[player_id as usize].as_mut().ok_or("player id is invalid")?;
         opponent = None;
     }
     let energy_cost;
@@ -461,20 +461,17 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
         at_name = "base attack".to_string();
     } else {
         if let Param::String(attack_name) = &params[0] {
-            if player.equip().is_none() {
-                return Err("you don't have anything equipped!".into());
-            }
-            let abilities = stats::get_or_else(player.equip().unwrap(), "abilities", &stats::Value::Box(stats::Stats::new())).as_box()?;
+            let abilities = stats::get_or_else(player.equip().ok_or("you don't have anything equipped!")?, "abilities", &stats::Value::Box(stats::Stats::new())).as_box()?;
             if !stats::has_var(&abilities, attack_name) {
                 return Err("your equipped weapon does not have that ability!".into());
             }
-            let ability = stats::get(&abilities, attack_name).unwrap().as_box()?;
+            let ability = stats::get(&abilities, attack_name)?.as_box()?;
             energy_cost = stats::get_or_else(&ability, "energy_cost", &stats::Value::Int(0)).as_int()?;
             physical_dmg = stats::get_or_else(&ability, "physical_dmg", &stats::Value::Int(0)).as_int()?;
             magic_dmg = stats::get_or_else(&ability, "magic_dmg", &stats::Value::Int(0)).as_int()?;
             at_name = attack_name.clone();
         } else {
-            unreachable!();
+            return Err("attack should be a string".into());
         }
     }
     if player::get_stat(&player, "energy")? >= energy_cost {
@@ -484,45 +481,43 @@ pub fn attack(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Pa
                 return Err("you aren't fighting anything!".into());
             }
             let damage_opponent = entities::get_entity_action(spawned_entities, "dmg".to_string(), player::x(player)?, player::y(player)?);
-            if damage_opponent.is_none() {
-                let entity = entities::get_entity(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
-                return Err(format!("You cannot damage a(n) {}", entity.name()).into());
-            } else {
-                let player;
-                let res = damage_opponent.unwrap().run(Some(spawned_entities), None, None,
-                                                       Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
-                                                       Some(player_id), Some(players), Some(world));
-                let res = res.unwrap();
-
-                player = players[player_id as usize].as_mut().unwrap();
-                if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
-                    return res;
-                }
-                let mut out = res?;
-                let entity_speed;
-                {
-                    let entity = entities::get_entity_mut(spawned_entities, player::x(player)?, player::y(player)?).unwrap();
-                    entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
-                }
-                let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player)?, player::y(player)?);
-                let player_speed = player::get_stat(&player, "speed")?;
-                player.add_entity_cumulative_speed(entity_speed);
-                if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
-                    player.zero_entity_cumulative_speed();
-                    let mob_attack = mob_attack.unwrap();
-                    let res = mob_attack.run(Some(spawned_entities), None, None, None, Some(player_id), Some(players), Some(world));
-                    let res = res.unwrap();
-                    out.append_player_out(res?);
-                }
-                return Ok(out);   
+            let damage_opponent = damage_opponent.ok_or("you cannot damage this entity!")?;
+            let player;
+            let res = damage_opponent.run(Some(spawned_entities), None, None,
+                                                    Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
+                                                    Some(player_id), Some(players), Some(world));
+            
+            let res = res.ok_or("bad None parameters to damage_opponent!")?;
+            
+            player = players[player_id as usize].as_mut().ok_or("player id invalid!")?;
+            if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
+                return res;
             }
+            let mut out = res?;
+            let entity_speed;
+            {
+                let entity = entities::get_entity_mut(spawned_entities, player::x(player)?, player::y(player)?).ok_or("cannot retrieve entity")?;
+                entity_speed = stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0)).as_int()?;
+            }
+            let mob_attack = entities::get_entity_action(spawned_entities, "attack".to_string(), player::x(player)?, player::y(player)?);
+            let player_speed = player::get_stat(&player, "speed")?;
+            player.add_entity_cumulative_speed(entity_speed);
+            if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
+                player.zero_entity_cumulative_speed();
+                let mob_attack = mob_attack.ok_or("cannot retrieve mob function")?;
+                let res = mob_attack.run(Some(spawned_entities), None, None, None,
+                                                                         Some(player_id), Some(players), Some(world));
+                let res = res.ok_or("bad None params to mob_attack function")?;
+                out.append_player_out(res?);
+            }
+            return Ok(out);
         } else { // fighting another player
             if !player::turn(&player) {
                 return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\n\
                             Be honourable and just wait for your opponent to finish attacking you sirrrrrrrr....".into());
             }
             let mut out = PlayerOut::new();
-            let mut opponent = opponent.unwrap();
+            let mut opponent = opponent.ok_or("invalid player id for opponent!")?;
             out.append(format!("You used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)));
             player::send_str(&opponent, format!("Your opponent used {}, dealing {} damage.\n", at_name, (physical_dmg + magic_dmg)))?;
             player::change_stat(&mut opponent, "health", -(physical_dmg + magic_dmg))?;
@@ -550,7 +545,7 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
     let p_y;
     let view;
     {
-        let player = players[player_id as usize].as_ref().unwrap();
+        let player = players[player_id as usize].as_ref().ok_or("invalid player id")?;
         p_x = player::x(&player)?;
         p_y = player::y(&player)?;
         view = player::get_stat(&player, "view")? as usize;
@@ -559,10 +554,10 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
     let mut least_dist = std::usize::MAX;
     let mut opponent = None;
     for i in 0..players.len() {
-        if players[i].is_none() || i == player_id as usize || players[i].as_ref().unwrap().opponent().is_some() {
+        if players[i].is_none() || i == player_id as usize || players[i].as_ref().ok_or("invalid player id")?.opponent().is_some() {
             continue;
         }
-        let opp = players[i].as_ref().unwrap();
+        let opp = players[i].as_ref().ok_or("invalid opponent player id")?;
         let dist_x = (player::x(&opp)? as i32 - p_x as i32) as isize;
         let dist_y = (player::y(&opp)? as i32 - p_y as i32) as isize;
         let dist = (dist_x * dist_x + dist_y * dist_y) as usize;
@@ -572,17 +567,13 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
         }
     }
 
-    if opponent.is_none() {
-        let player = players[player_id as usize].as_mut().unwrap();
-        player.set_opponent(None);
-        return Err("no availible players in range!".into());
-    } else {
-        println!("versus {}, {}", player_id, opponent.unwrap());
-        let (player, opp) = get_two_players(player_id, opponent.unwrap(), players);
+    if let Some(opponent) = opponent {
+        println!("versus {}, {}", player_id, opponent);
+        let (player, opp) = get_two_players(player_id, opponent, players).ok_or("could not get two player ids")?;
 
         let mut out = PlayerOut::new();
-        player.set_opponent(opponent);
-        out.append(format!("You are attacking player {}\n", opponent.unwrap()));
+        player.set_opponent(Some(opponent));
+        out.append(format!("You are attacking player {}\n", opponent));
         opp.set_opponent(Some(player_id));
         let player_speed = player::get_stat(&player, "speed")?;
         let opponent_speed = player::get_stat(&opp, "speed")?;
@@ -598,23 +589,27 @@ pub fn battle(player_id : u8, players : &mut Vec<Option<Player>>, _world : &mut 
             player::send_str(&opp, "Another player is battling you! It is your turn!\n".to_string())?;
         }
         return Ok(out);
+    } else {
+        let player = players[player_id as usize].as_mut().ok_or("invalid player id")?;
+        player.set_opponent(None);
+        return Err("no availible players in range!".into());
     }
 }
 
 pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut out = PlayerOut::new();
-    let player = players[player_id as usize].as_mut().unwrap();
+    let player = players[player_id as usize].as_mut().ok_or("invalid player id")?;
     if params.is_empty() {
         out.append("dequipping item.\n");
         player.set_equip(None);
     } else if params.len() == 1 {
-        let inventory = stats::get(player.data(), "inventory").unwrap().as_box()?;
+        let inventory = stats::get(player.data(), "inventory")?.as_box()?;
         let items = stats::get_var_names(&inventory);
         let selected_item = params[0].as_string();
         if selected_item.is_err() {
             return Err("expected string as first parameter!".into());
         }
-        let selected_item = selected_item.unwrap();
+        let selected_item = selected_item?;
         if items.contains(&selected_item) {
             out.append("equipping item.\n");
             let it = &world.items();
@@ -622,7 +617,7 @@ pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Op
             if item.is_err() {
                 return Err("That item is not defined, and cannot be equipped!".into());
             }
-            player.set_equip(Some(item.unwrap().as_box()?));
+            player.set_equip(Some(item?.as_box()?));
         } else {
             return Err("You don't have that item!".into());
         }
@@ -634,27 +629,27 @@ pub fn equip(params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Op
 
 fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
     let mut out = PlayerOut::new();
-    let player = players[player_id as usize].as_mut().unwrap();
+    let player = players[player_id as usize].as_mut().ok_or("invalid player id!")?;
     if params.is_empty() {
         out.append(stats::string(player.data())?);
     } else {
         let val = params[0].as_string()?;
         if val == "opponent" {
-            if player.opponent().is_none() {
+            if let Some(opponent) = player.opponent() {
+                println!("{}, {}", opponent, player_id);
+                let (opponent, _) = get_two_players(opponent, player_id, players).ok_or("could not get two players")?;
+                out.append(stats::string(opponent.data())?);
+            } else {
                 let entity = entities::get_entity_mut(entities, player::x(player)?, player::y(player)?);
                 if entity.is_none() {
                     out.append("no opponent!\n");
                 } else {
-                    let entity = entity.unwrap();
+                    let entity = entity.ok_or("could not get entity")?;
                     out.append("mutable data:\n");
                     out.append(stats::string(&entity.mut_data().clone())?);
                     out.append("regular data:\n");
                     out.append(stats::string(&entity.data())?);
                 }
-            } else {
-                println!("{}, {}", player.opponent().unwrap(), player_id);
-                let (opponent, _) = get_two_players(player.opponent().unwrap(), player_id, players);
-                out.append(stats::string(opponent.data())?);
             }
         } else {
             if stats::has_var(&world.items(), &val) {
@@ -668,7 +663,7 @@ fn stat(entities : &mut SpawnedEntities, params: &Vec<scanner::Param>, player_id
 }
 
 fn eat (params: &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let player = players[player_id as usize].as_mut().unwrap();
+    let player = players[player_id as usize].as_mut().ok_or("invalid player id")?;
     let inv = player::get_inventory(player)?;
     let msg = "expected exactly one item!";
     if params.len() != 1 {
@@ -700,15 +695,11 @@ fn upgrade(params : &Vec<scanner::Param>, player_id : u8, players : &mut Vec<Opt
         return Err("expected exactly one stat to upgrade!".into());
     }
     if let scanner::Param::String(s) = &params[0] {
-        let result = player::upgrade_stat(&mut player, s.as_str());
-        if result.is_ok() {
-            player::reset_to_base(&mut player)?;
-            let mut out = PlayerOut::new();
-            out.append("upgraded stat.\n");
-            return Ok(out);
-        } else {
-            return Err(result.err().unwrap().into());
-        }
+        player::upgrade_stat(&mut player, s.as_str())?;
+        player::reset_to_base(&mut player)?;
+        let mut out = PlayerOut::new();
+        out.append("upgraded stat.\n");
+        return Ok(out);
     } else {
         return Err("expected only one parameter, and expected it to be a stat name!".into());
     }
@@ -736,19 +727,15 @@ fn wear(spawned_entities : &mut SpawnedEntities, params : &Vec<scanner::Param>, 
             if item.is_err() {
                 return Err("That item is not defined, and cannot be worn!".into());
             }
-            let item = item.unwrap().as_box()?;
+            let item = item?.as_box()?;
             if !stats::has_var(&item, "buffs") {
                 return Err("You cannot wear this item!".into());
             }
-            let result = player::wear(&mut player, s.to_string(), stats::get(&item, "buffs").unwrap().as_box()?);
-            if result.is_ok() {
-                player::reset_to_base(&mut player)?;
-                let mut out = PlayerOut::new();
-                out.append("wore item.\n");
-                return Ok(out);
-            } else {
-                return Err(result.err().unwrap().into());
-            }
+            player::wear(&mut player, s.to_string(), stats::get(&item, "buffs")?.as_box()?)?;
+            player::reset_to_base(&mut player)?;
+            let mut out = PlayerOut::new();
+            out.append("wore item.\n");
+            return Ok(out);
         } else {
             return Err("expected only one parameter, and expected it to be an item name!".into());
         }
