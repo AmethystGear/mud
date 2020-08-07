@@ -656,10 +656,6 @@ pub fn get_items(entity: &dyn Spawnable, item: &str) -> Result<Stats, Box<dyn Er
     )
     .as_vec()?;
 
-    if !(drop_names.len() == drop_per.len() && drop_per.len() == probs.len() + 1) {
-        return Err("no items!".into());
-    }
-
     let mut rng = rand::thread_rng();
     let min = stats::get_or_else(&drops, &format!("{}_min", item), &stats::Value::Int(0))
         .as_int()? as usize;
@@ -674,6 +670,7 @@ pub fn get_items(entity: &dyn Spawnable, item: &str) -> Result<Stats, Box<dyn Er
         sum += prob.as_flt()?;
         thresholds.push(sum);
     }
+    thresholds.push(sum);
 
     for _ in 0..num_runs {
         let p: f64 = rng.gen();
