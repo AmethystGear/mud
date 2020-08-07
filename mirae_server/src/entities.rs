@@ -656,7 +656,7 @@ pub fn get_items(entity: &dyn Spawnable, item: &str) -> Result<Stats, Box<dyn Er
     )
     .as_vec()?;
 
-    if !(drop_names.len() == drop_per.len() && drop_per.len() == probs.len() - 1) {
+    if !(drop_names.len() == drop_per.len() && drop_per.len() == probs.len() + 1) {
         return Err("no items!".into());
     }
 
