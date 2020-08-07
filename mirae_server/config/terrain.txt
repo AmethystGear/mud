@@ -34,7 +34,7 @@
 
     Box terrain_parameters
     {
-        int octaves 10
+        int octaves 20
         Box height_map
         {
             string[] blocks "water" "sand" "grass" "forest" "rock"

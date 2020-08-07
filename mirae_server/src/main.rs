@@ -55,6 +55,7 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     writer.write_all(&pkt.unwrap().bytes()).unwrap();
     writer.flush().unwrap();
 
+    let (s, r) =  mpsc::channel();
     // packet send step
     spawn(move || {
         loop {
@@ -63,16 +64,29 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
             while pkt.is_some() {
                 writer.write_all(&pkt.unwrap().bytes()).unwrap();
                 pkt = response.get_pkt();
+                println!("bah");
             }
-            writer.flush().unwrap();
+            println!("humbug");
+            let res = writer.flush();
+            if res.is_err() {
+                s.send(true).unwrap();
+                println!("connection terminated");
+                break;
+            }
         }
     });
-
 
     let mut last_res : Option<(String, Vec<Param>, Action)> = None;
     loop {
         let mut line = String::new();
-        reader.read_line(&mut line).unwrap();
+        if reader.read_line(&mut line).is_err() {
+            println!("end conn");
+            break;
+        }
+        if let Ok(res) = r.try_recv() {
+            if res { break; }
+        }
+
         let action_res : Result<(String, Vec<Param>, Action), Box<dyn Error>>;
         if line.trim() == "" {
             let clone = last_res.clone();
@@ -94,7 +108,8 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
             let (keyword, params, action) = action_res.unwrap();
             let res = channel.send((Some(keyword), Some(params), Some(action), None, Some(id)));
             if res.is_err() {
-                println!("\n\nERROR: {}\n\n", res.err().unwrap());
+                println!("end conn");
+                break;
             }
         }
     }
@@ -176,7 +191,11 @@ fn main() {
                     continue;
                 }
                 let result = result.unwrap();
-                let player = players[player_id as usize].as_ref().unwrap();
+                let player = players[player_id as usize].as_ref();
+                if player.is_none() {
+                    continue;
+                }
+                let player = player.unwrap();
                 let x_ = player::x(&player);
                 let y_ = player::y(&player);
                 if x_.is_err() || y_.is_err() {
@@ -232,7 +251,7 @@ fn main() {
                 Some(player) => {
                     let res = player::send(player, res);
                     if res.is_err() {
-                        println!("could not send to player!");
+                        players[player_id as usize] = None;
                     }
                 }
                 None => {println!("Invalid player id {}", player_id)}

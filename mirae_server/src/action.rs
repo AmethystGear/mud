@@ -374,7 +374,7 @@ fn step(keyword: String, params: &Vec<Param>, player_id : u8, players : &mut Vec
 }
 
 fn disp(player_id : u8, players : &mut Vec<Option<Player>>, world : &mut World) -> Res {
-    let player = players[player_id as usize].as_mut().unwrap();
+    let player = players[player_id as usize].as_mut().ok_or("player id is invalid!")?;
     let p_x = player::x(&player)?;
     let p_y = player::y(&player)?;
     println!("p_x: {}", p_x);
