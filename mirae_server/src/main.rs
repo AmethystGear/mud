@@ -224,7 +224,11 @@ fn main() {
                 {
                     let name = world::get_entity_name(&world, x, y).unwrap();
                     let stats = world::get_entity_properties(&world, x, y).unwrap().clone();
-                    entities::spawn(stats, x, y, name, &mut spawned_entities, &mut world).unwrap();
+                    println!("{}", name.clone());
+                    let err = entities::spawn(stats, x, y, name.clone(), &mut spawned_entities, &mut world);
+                    if err.is_err() {
+                        println!("{}", name.clone());
+                    }
                 }
                 match result {
                     Ok(ok) => {
