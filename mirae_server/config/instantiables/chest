@@ -17,7 +17,7 @@
         int items_max 1
         String display "[]"
     }
-    Box chesteroooo
+    Box chesterooooo
     {
         int items_min 0
         int items_max 0

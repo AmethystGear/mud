@@ -138,7 +138,8 @@ Box oranges
 	{
 		string[] items "orange" "trumps_orange"
 		float[] item_prob 0.6 0.4
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2	
 	}	
 
 	LongString img
@@ -240,7 +241,8 @@ Box flying_wall
 	{
 		string[] items "wall_staff" "wall_armor"
 		float[] item_prob 0.5 0.5
-		int max_num_items 3		
+		int items_min 0
+		int items_max 3	
 	}	
 
 	LongString img
@@ -920,7 +922,8 @@ Box enigma
 	{
 		string[] items "enigmatic_gun"
 		float[] item_prob 1.0
-		int max_num_items 3		
+		int items_min 0
+		int items_max 3	
 	}	
 
 	LongString img
@@ -1012,7 +1015,8 @@ Box literally_jayanth
 	{
 		string[] items "oxford_dictionary" "physics_homework" "honour"	
 		float[] item_prob 0.5 0.4 0.1
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2
 	}	
 
 	LongString img
@@ -1113,7 +1117,8 @@ Box bank_vault
 	{
 		string[] items "bronze_coin" "silver_coin" "gold_coin"	
 		float[] item_prob 0.5 0.4 0.1
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2
 	}	
 
 	LongString img
@@ -1191,7 +1196,8 @@ Box human_person
 	{
 		string[] items "robot_brain" "robot_heart" "robot_soul"	
 		float[] item_prob 0.5 0.4 0.1
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2
 	}	
 
 	LongString img
@@ -1246,7 +1252,8 @@ Box physics_homework
 	{
 		string[] items "newtons_laws" "C+" "the_meaning_of_the_universe"	
 		float[] item_prob 0.5 0.4 0.1
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2
 	}	
 
 	LongString img
@@ -1299,7 +1306,8 @@ Box god
 	{
 		string[] items "sins_of_humanity" "the_meaning_of_the_universe"	
 		float[] item_prob 0.5 0.5
-		int max_num_items 1		
+		int items_min 0
+		int items_max 1	
 	}	
 
 	LongString img
@@ -1393,7 +1401,8 @@ Box thornsberry_ap_stats
 	{
 		string[] items "A"
 		float[] item_prob 1.0
-		int max_num_items 1		
+		int items_min 0
+		int items_max 1	
 	}	
 
 	LongString img
@@ -1469,7 +1478,8 @@ Box sonic_knight
 	{
 		string[] items "fest_boots"
 		float[] item_prob 1.0
-		int max_num_items 1		
+		int items_min 0
+		int items_max 1	
 	}	
 
 	LongString img
@@ -1570,7 +1580,8 @@ Box reges_cs142
 	{
 		string[] items "A+"
 		float[] item_prob 1.0
-		int max_num_items 1		
+		int items_min 0
+		int items_max 1	
 	}	
 
 	LongString img
@@ -1673,7 +1684,8 @@ Box astrology
 	{
 		string[] items "A+"
 		float[] item_prob 1.0
-		int max_num_items 1		
+		int items_min 0
+		int items_max 1
 	}	
 
 	LongString img
@@ -1771,7 +1783,8 @@ Box robo_roach
 	{
 		string[] items "electronic_controlling_device"
 		float[] item_prob 1.0
-		int max_num_items 2		
+		int items_min 0
+		int items_max 2
 	}	
 
 	LongString img

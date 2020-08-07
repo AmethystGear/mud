@@ -495,34 +495,6 @@
         }
         
     }
-    Box never_told_a_lie
-    {
-        prop equipable
-        int xp 1
-        prop edible
-        int health_gain -2
-        Box buffs
-        {
-            float health 1.0
-            float speed 0.1
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
-        }
-        Box abilities
-        {
-            Box lie
-            {
-                int magic_dmg 100
-                int energy_cost -1
-                prop destroys_item
-            }
-        }
-        
-    }
     Box wig
     {
         prop edible
