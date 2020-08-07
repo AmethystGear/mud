@@ -4,15 +4,15 @@ use rstring_builder::StringBuilder;
 use std::error::Error;
 
 pub struct Scanner {
-    input_stream : CharStream,
-    chars : Vec<char>,
-    whitespace : Vec<char>
+    input_stream: CharStream,
+    chars: Vec<char>,
+    whitespace: Vec<char>,
 }
 #[derive(Clone)]
 pub enum Param {
     Int(i64),
     Float(f64),
-    String(String)
+    String(String),
 }
 
 impl Param {
@@ -43,23 +43,23 @@ impl Param {
     }
 }
 
-pub fn from(input : CharStream) -> Scanner {
-    let mut scan =  Scanner {
-        input_stream : input,
-        chars : Vec::new(),
-        whitespace : Vec::new()
+pub fn from(input: CharStream) -> Scanner {
+    let mut scan = Scanner {
+        input_stream: input,
+        chars: Vec::new(),
+        whitespace: Vec::new(),
     };
     update_token(&mut scan);
     return scan;
 }
 
-pub fn next(scan : &mut Scanner) -> Result<String, Box<dyn Error>> {
+pub fn next(scan: &mut Scanner) -> Result<String, Box<dyn Error>> {
     let current = peek_next(scan);
     update_token(scan);
     return current;
 }
 
-pub fn peek_next(scan : &Scanner) -> Result<String, Box<dyn Error>> {
+pub fn peek_next(scan: &Scanner) -> Result<String, Box<dyn Error>> {
     let chars = &scan.chars;
     if chars.len() == 0 {
         return Err("no next token!".into());
@@ -68,7 +68,7 @@ pub fn peek_next(scan : &Scanner) -> Result<String, Box<dyn Error>> {
     }
 }
 
-pub fn next_line(scan : &mut Scanner) -> Result<String, Box<dyn Error>> {
+pub fn next_line(scan: &mut Scanner) -> Result<String, Box<dyn Error>> {
     if !has_next_line(scan) {
         return Err("no next line!".into());
     }
@@ -77,27 +77,27 @@ pub fn next_line(scan : &mut Scanner) -> Result<String, Box<dyn Error>> {
     return Ok(chars.into_iter().collect());
 }
 
-pub fn has_next_line(scan : &mut Scanner) -> bool {
+pub fn has_next_line(scan: &mut Scanner) -> bool {
     return (&mut scan.input_stream).peek().is_some();
 }
 
-fn update_token(scan : &mut Scanner) {
+fn update_token(scan: &mut Scanner) {
     scan.chars = vec![];
     scan.whitespace = vec![];
-    let mut next : Option<char>;
+    let mut next: Option<char>;
     loop {
         next = scan.input_stream.next();
         if let Some(nxt) = next {
             if nxt.is_whitespace() {
                 scan.whitespace.push(nxt);
                 continue;
-            } 
-        } 
+            }
+        }
         break;
     }
     loop {
         if let Some(nxt) = next {
-            if !nxt.is_whitespace() {                
+            if !nxt.is_whitespace() {
                 scan.chars.push(nxt);
                 next = scan.input_stream.next();
                 continue;
@@ -107,9 +107,9 @@ fn update_token(scan : &mut Scanner) {
     }
 }
 
-fn update_line(scan : &mut Scanner) {
+fn update_line(scan: &mut Scanner) {
     scan.chars = vec![];
-    let mut next : Option<char> = scan.input_stream.next();
+    let mut next: Option<char> = scan.input_stream.next();
 
     while let Some(nxt) = next {
         if nxt == '\n' {
@@ -120,21 +120,21 @@ fn update_line(scan : &mut Scanner) {
     }
 }
 
-pub fn is_next_int(scan : &mut Scanner) -> bool {
+pub fn is_next_int(scan: &mut Scanner) -> bool {
     match peek_next(scan) {
         Ok(val) => val.parse::<i64>().is_ok(),
-        Err(_) => false
+        Err(_) => false,
     }
 }
 
-pub fn is_next_float(scan : &mut Scanner) -> bool {
+pub fn is_next_float(scan: &mut Scanner) -> bool {
     match peek_next(scan) {
         Ok(val) => val.parse::<f64>().is_ok(),
-        Err(_) => false
+        Err(_) => false,
     }
 }
 
-pub fn get_next_as_int(scan : &mut Scanner) -> Option<i64> {
+pub fn get_next_as_int(scan: &mut Scanner) -> Option<i64> {
     if !is_next_int(scan) {
         return None;
     }
@@ -147,9 +147,9 @@ pub fn get_next_as_int(scan : &mut Scanner) -> Option<i64> {
                 Err(_) => {
                     return None;
                 }
-            };            
-        },
-        Err(_) => None
+            };
+        }
+        Err(_) => None,
     }
 }
 
@@ -166,14 +166,14 @@ pub fn get_next_as_float(scan: &mut Scanner) -> Option<f64> {
                 Err(_) => {
                     return None;
                 }
-            };            
-        },
-        Err(_) => None
+            };
+        }
+        Err(_) => None,
     }
 }
 
 pub fn get_next_string(scan: &mut Scanner) -> Option<String> {
-    let mut s : StringBuilder = StringBuilder::new();
+    let mut s: StringBuilder = StringBuilder::new();
     let nxt = peek_next(scan);
     if let Ok(nxt) = nxt {
         if !nxt.starts_with('"') {
@@ -197,7 +197,7 @@ pub fn get_next_string(scan: &mut Scanner) -> Option<String> {
         }
     }
 
-    return Some(s.string()[1..(s.string().len()-1)].to_string());
+    return Some(s.string()[1..(s.string().len() - 1)].to_string());
 }
 
 pub fn get_params(scan: &mut Scanner) -> Vec<Param> {

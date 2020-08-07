@@ -1,4 +1,3 @@
-use serde_json::json;
 use crate::display::display;
 use crate::display::Img;
 use crate::player;
@@ -6,27 +5,27 @@ use crate::player::Player;
 use crate::stats;
 use crate::world;
 use crate::world::World;
-use std::error::Error;
+use serde_json::json;
 use std::collections::VecDeque;
+use std::error::Error;
 
-#[derive(Debug)]
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum PacketType {
     Text = 0,
     Img = 1,
     Init = 2,
-    Err = 3
+    Err = 3,
 }
 
 impl std::fmt::Display for PacketType {
-    fn fmt(&self, f : &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
 pub struct Packet {
-    p_type : PacketType,
-    content : Vec<u8>
+    p_type: PacketType,
+    content: Vec<u8>,
 }
 
 impl Packet {
@@ -38,47 +37,58 @@ impl Packet {
 }
 
 pub struct PlayerOut {
-    packets : VecDeque<Packet>
+    packets: VecDeque<Packet>,
 }
 
 impl PlayerOut {
     pub fn new() -> Self {
         PlayerOut {
-            packets : VecDeque::new()
+            packets: VecDeque::new(),
         }
     }
 
-    pub fn append<S : Into<String>>(&mut self, text : S) {
+    pub fn append<S: Into<String>>(&mut self, text: S) {
         if let Some(mut most_recent_pkt) = self.packets.pop_back() {
             if most_recent_pkt.p_type == PacketType::Text {
-                most_recent_pkt.content.append(&mut text.into().into_bytes());
+                most_recent_pkt
+                    .content
+                    .append(&mut text.into().into_bytes());
                 self.packets.push_back(most_recent_pkt);
                 return;
-            }      
-        } 
+            }
+        }
         self.packets.push_back(Packet {
-            p_type : PacketType::Text,
-            content : text.into().into_bytes()
+            p_type: PacketType::Text,
+            content: text.into().into_bytes(),
         });
     }
 
-    pub fn append_err(&mut self, err_string : String) {
+    pub fn append_err(&mut self, err_string: String) {
         self.packets.push_back(Packet {
-            p_type : PacketType::Err,
-            content : err_string.into_bytes()
+            p_type: PacketType::Err,
+            content: err_string.into_bytes(),
         });
     }
 
-    pub fn append_img(&mut self, world: &World, players : &Vec<Option<Player>>, img : Img) -> Result<(), Box<dyn Error>> {
-        let mut vec_img : Vec<u8> = vec![];
+    pub fn append_img(
+        &mut self,
+        world: &World,
+        players: &Vec<Option<Player>>,
+        img: Img,
+    ) -> Result<(), Box<dyn Error>> {
+        let mut vec_img: Vec<u8> = vec![];
         vec_img.push(0);
         vec_img.push(0);
         for k in 0..players.len() {
             match &players[k] {
-                Some (p) => {
+                Some(p) => {
                     let p_x = player::x(p)?;
                     let p_y = player::y(p)?;
-                    if p_x >= img.x_origin && p_x < (img.x_origin + img.x_length) && p_y >= img.y_origin && p_y < (img.y_origin + img.y_length) {
+                    if p_x >= img.x_origin
+                        && p_x < (img.x_origin + img.x_length)
+                        && p_y >= img.y_origin
+                        && p_y < (img.y_origin + img.y_length)
+                    {
                         let identity = stats::get(p.data(), "identity")?;
                         let identity = identity.as_box()?;
                         let id = stats::get(&identity, "id")?;
@@ -87,40 +97,40 @@ impl PlayerOut {
                         vec_img.push(0);
                         vec_img.push(id);
                         vec_img.push(0);
-                        vec_img.push(((p_x - img.x_origin)/img.resolution) as u8);
+                        vec_img.push(((p_x - img.x_origin) / img.resolution) as u8);
                         vec_img.push(0);
-                        vec_img.push(((p_y - img.y_origin)/img.resolution) as u8);
+                        vec_img.push(((p_y - img.y_origin) / img.resolution) as u8);
                     }
-                },
+                }
                 None => {}
             }
         }
-        let bytes = (img.x_length/img.resolution).to_be_bytes();
+        let bytes = (img.x_length / img.resolution).to_be_bytes();
         vec_img.push(bytes[0]);
         vec_img.push(bytes[1]);
         let (mut block_vec, mut entity_vec) = display(world, img)?;
-        let block_vec_len_bytes = ((block_vec.len()/2) as u16).to_be_bytes();
+        let block_vec_len_bytes = ((block_vec.len() / 2) as u16).to_be_bytes();
         vec_img.push(block_vec_len_bytes[0]);
         vec_img.push(block_vec_len_bytes[1]);
         vec_img.append(&mut block_vec);
-        let entity_vec_len_bytes = ((entity_vec.len()/2) as u16).to_be_bytes();
+        let entity_vec_len_bytes = ((entity_vec.len() / 2) as u16).to_be_bytes();
         vec_img.push(entity_vec_len_bytes[0]);
         vec_img.push(entity_vec_len_bytes[1]);
         vec_img.append(&mut entity_vec);
 
         let pkt = Packet {
-            p_type : PacketType::Img,
-            content : vec_img
+            p_type: PacketType::Img,
+            content: vec_img,
         };
         self.packets.push_back(pkt);
-        return Ok(())
+        return Ok(());
     }
 
     pub fn get_pkt(&mut self) -> Option<Packet> {
         return self.packets.pop_front();
     }
 
-    pub fn append_player_out(&mut self, mut p_out : PlayerOut) {
+    pub fn append_player_out(&mut self, mut p_out: PlayerOut) {
         let most_recent_pkt = self.packets.pop_back();
         let first_p_out = p_out.get_pkt();
         if most_recent_pkt.is_none() {
@@ -132,26 +142,31 @@ impl PlayerOut {
         }
         let mut first_p_out = first_p_out.expect("checked for none case above");
         let mut most_recent_pkt = most_recent_pkt.expect("check for none case anove");
-        
+
         if most_recent_pkt.p_type == PacketType::Text && first_p_out.p_type == PacketType::Text {
-            most_recent_pkt.content.append(&mut first_p_out.content);  
-        } 
+            most_recent_pkt.content.append(&mut first_p_out.content);
+        }
         self.packets.push_back(most_recent_pkt);
         let mut pkt = Some(first_p_out);
         while pkt.is_some() {
-            self.packets.push_back(pkt.expect("pkt should never be none in loop"));
+            self.packets
+                .push_back(pkt.expect("pkt should never be none in loop"));
             pkt = p_out.get_pkt();
         }
     }
 
-    pub fn add_pkt(&mut self, p : Packet) {
+    pub fn add_pkt(&mut self, p: Packet) {
         self.packets.push_back(p);
     }
 }
 
-pub fn get_init(world : &World) -> Result<Packet, Box<dyn Error>> {
+pub fn get_init(world: &World) -> Result<Packet, Box<dyn Error>> {
     let mut init = stats::Stats::new();
-    stats::set(&mut init, "default_mob", stats::Value::String("??".to_string()));
+    stats::set(
+        &mut init,
+        "default_mob",
+        stats::Value::String("??".to_string()),
+    );
 
     let mut data = json!({
         "default_entity" : "??",
@@ -161,17 +176,23 @@ pub fn get_init(world : &World) -> Result<Packet, Box<dyn Error>> {
     for i in 0..(world.max_block_id()) {
         let block = world::get_block_by_id(world, i)?;
         let display = stats::get(block, "display")?.as_int()? as u16;
-        data["block_display"].as_object_mut().ok_or("badly formatted json value")?.insert(format!("{}", i), json!(display));
+        data["block_display"]
+            .as_object_mut()
+            .ok_or("badly formatted json value")?
+            .insert(format!("{}", i), json!(display));
     }
     for i in 0..(world.max_entity_id()) {
         let entity = world::get_entity_properties_by_id(world, i)?;
         if stats::has_var(entity, "display") {
             let display = stats::get(entity, "display")?.as_string()?;
-            data["entity_display"].as_object_mut().ok_or("badly formatted json value")?.insert(format!("{}", i), json!(display));
+            data["entity_display"]
+                .as_object_mut()
+                .ok_or("badly formatted json value")?
+                .insert(format!("{}", i), json!(display));
         }
     }
     return Ok(Packet {
-        p_type : PacketType::Init,
-        content : data.to_string().into_bytes()
+        p_type: PacketType::Init,
+        content: data.to_string().into_bytes(),
     });
 }

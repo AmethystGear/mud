@@ -1,37 +1,43 @@
 extern crate ansi_term;
 extern crate rstring_builder;
 
-use crate::scanner::Param;
 use crate::action::Action;
-use crate::player::Player;
 use crate::entities::SpawnedEntities;
+use crate::player::Player;
 use crate::playerout::PlayerOut;
+use crate::scanner::Param;
 use std::io::Write;
+use std::io::{BufRead, BufReader, BufWriter};
 use std::net::{TcpListener, TcpStream};
-use std::thread::spawn;
-use std::io::{BufReader, BufRead, BufWriter};
 use std::sync::mpsc;
-use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc::{Receiver, Sender};
+use std::thread::spawn;
 use std::u8;
 
 use std::error::Error;
 
-mod scanner;
-mod stats;
 mod action;
-mod world;
-mod perlin_noise;
-mod player;
 mod display;
 mod entities;
+mod perlin_noise;
+mod player;
 mod playerout;
+mod scanner;
+mod stats;
+mod world;
 
-type ConnOut = (Option<String>, Option<Vec<Param>>, Option<Action>, Option<Sender<(PlayerOut, Option<u8>)>>, Option<u8>);
+type ConnOut = (
+    Option<String>,
+    Option<Vec<Param>>,
+    Option<Action>,
+    Option<Sender<(PlayerOut, Option<u8>)>>,
+    Option<u8>,
+);
 type ConnIn = (PlayerOut, Option<u8>);
 
-fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
+fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
     let action_map = action::get_action_map();
-    let (send, recv) : (Sender<ConnIn>, Receiver<ConnIn>) = mpsc::channel();
+    let (send, recv): (Sender<ConnIn>, Receiver<ConnIn>) = mpsc::channel();
     let id;
     let stream_clone = stream.try_clone().unwrap();
     let mut reader = BufReader::new(stream_clone);
@@ -39,12 +45,12 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     let mut writer = BufWriter::new(stream_clone);
 
     // initialization step
-    while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
+    while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) {
         println!("{}", e);
     }
     let mut res = recv.recv().unwrap();
     while res.1.is_none() {
-        while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) { 
+        while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) {
             println!("{}", e);
         }
         res = recv.recv().unwrap();
@@ -55,25 +61,23 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     writer.write_all(&pkt.unwrap().bytes()).unwrap();
     writer.flush().unwrap();
 
-    let (s, r) =  mpsc::channel();
+    let (s, r) = mpsc::channel();
     // packet send step
-    spawn(move || {
-        loop {
-            let (mut response, _) = recv.recv().unwrap();
-            let mut pkt = response.get_pkt();
-            while pkt.is_some() {
-                writer.write_all(&pkt.unwrap().bytes()).unwrap();
-                pkt = response.get_pkt();
-            }
-            let res = writer.flush();
-            if res.is_err() {
-                s.send(true).unwrap();
-                break;
-            }
+    spawn(move || loop {
+        let (mut response, _) = recv.recv().unwrap();
+        let mut pkt = response.get_pkt();
+        while pkt.is_some() {
+            writer.write_all(&pkt.unwrap().bytes()).unwrap();
+            pkt = response.get_pkt();
+        }
+        let res = writer.flush();
+        if res.is_err() {
+            s.send(true).unwrap();
+            break;
         }
     });
 
-    let mut last_res : Option<(String, Vec<Param>, Action)> = None;
+    let mut last_res: Option<(String, Vec<Param>, Action)> = None;
     loop {
         let mut line = String::new();
         if reader.read_line(&mut line).is_err() {
@@ -81,10 +85,12 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
             break;
         }
         if let Ok(res) = r.try_recv() {
-            if res { break; }
+            if res {
+                break;
+            }
         }
 
-        let action_res : Result<(String, Vec<Param>, Action), Box<dyn Error>>;
+        let action_res: Result<(String, Vec<Param>, Action), Box<dyn Error>>;
         if line.trim() == "" {
             let clone = last_res.clone();
             if clone.is_some() {
@@ -112,8 +118,7 @@ fn handle_connection(stream: TcpStream, channel : Sender<ConnOut>) {
     }
 }
 
-
-fn get_first_availible_id(players : &Vec<Option<Player>>) -> Option<u8> {
+fn get_first_availible_id(players: &Vec<Option<Player>>) -> Option<u8> {
     for i in 0..players.len() {
         if players[i].is_none() {
             return Some(i as u8);
@@ -124,16 +129,16 @@ fn get_first_availible_id(players : &Vec<Option<Player>>) -> Option<u8> {
 
 fn main() {
     let server = TcpListener::bind("0.0.0.0:31415").unwrap();
-    let (send, recv) : (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
+    let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
 
     spawn(move || {
-        let mut world : world::World = world::from_seed(0).ok().unwrap();
+        let mut world: world::World = world::from_seed(0).ok().unwrap();
         println!("generated world");
 
         let mut spawned_entities = SpawnedEntities::new();
 
         let action_map = action::get_action_map();
-        let mut players : Vec<Option<Player>> = Vec::new(); // max cap of 256 players per server.
+        let mut players: Vec<Option<Player>> = Vec::new(); // max cap of 256 players per server.
         for _ in 0..(std::u8::MAX as usize + 1) {
             players.push(None);
         }
@@ -147,7 +152,10 @@ fn main() {
                 let id = get_first_availible_id(&players);
                 if id.is_none() {
                     let mut p_out = PlayerOut::new();
-                    p_out.append_err("Cannot enter game! There are already 256 players on the server!".to_string());
+                    p_out.append_err(
+                        "Cannot enter game! There are already 256 players on the server!"
+                            .to_string(),
+                    );
                     sender.send((p_out, None)).unwrap();
                     continue;
                 }
@@ -156,7 +164,8 @@ fn main() {
                     println!("failed to create player!");
                     continue;
                 }
-                let mut player = player.expect("just checked that player is not err, so this should never fail");
+                let mut player =
+                    player.expect("just checked that player is not err, so this should never fail");
                 let res = player::respawn(&mut player, &world);
                 if res.is_err() {
                     println!("failed to respawn player!");
@@ -182,8 +191,15 @@ fn main() {
             let y;
             let mut res;
             {
-                let result = action.run(Some(&mut spawned_entities), Some(&action_map), Some(keyword), Some(&params),
-                                        Some(player_id), Some(&mut players), Some(&mut world));
+                let result = action.run(
+                    Some(&mut spawned_entities),
+                    Some(&action_map),
+                    Some(keyword),
+                    Some(&params),
+                    Some(player_id),
+                    Some(&mut players),
+                    Some(&mut world),
+                );
                 if result.is_none() {
                     println!("bad params to function");
                     continue;
@@ -201,7 +217,8 @@ fn main() {
                 }
                 x = x_.unwrap();
                 y = y_.unwrap();
-                if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y) {
+                if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y)
+                {
                     let name = world::get_entity_name(&world, x, y).unwrap();
                     let stats = world::get_entity_properties(&world, x, y).unwrap().clone();
                     entities::spawn(stats, x, y, name, &mut spawned_entities, &mut world).unwrap();
@@ -223,8 +240,22 @@ fn main() {
                 interact = player.interact();
             }
             if entities::has_entity(&spawned_entities, x, y) && !interact {
-                let entity_action : Action = entities::get_entity_action(&mut spawned_entities, "interact".to_string(), x, y).unwrap();
-                let result = entity_action.run(Some(&mut spawned_entities), None, None, None, Some(player_id), Some(&mut players), Some(&mut world));
+                let entity_action: Action = entities::get_entity_action(
+                    &mut spawned_entities,
+                    "interact".to_string(),
+                    x,
+                    y,
+                )
+                .unwrap();
+                let result = entity_action.run(
+                    Some(&mut spawned_entities),
+                    None,
+                    None,
+                    None,
+                    Some(player_id),
+                    Some(&mut players),
+                    Some(&mut world),
+                );
                 if result.is_none() {
                     continue;
                 }
@@ -250,7 +281,7 @@ fn main() {
                         players[player_id as usize] = None;
                     }
                 }
-                None => {println!("Invalid player id {}", player_id)}
+                None => println!("Invalid player id {}", player_id),
             }
         }
     });
@@ -259,11 +290,13 @@ fn main() {
         match stream {
             Err(_) => println!("listen error"),
             Ok(stream) => {
-                println!("connection from {} to {}",
-                         stream.peer_addr().unwrap(),
-                         stream.local_addr().unwrap());
+                println!(
+                    "connection from {} to {}",
+                    stream.peer_addr().unwrap(),
+                    stream.local_addr().unwrap()
+                );
                 let send = send.clone();
-                spawn(move|| {
+                spawn(move || {
                     handle_connection(stream, send);
                 });
             }

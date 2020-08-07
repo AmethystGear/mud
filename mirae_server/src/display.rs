@@ -7,15 +7,15 @@ use std::collections::HashMap;
 use std::error::Error;
 
 pub struct Img {
-    pub x_origin : u16,
-    pub y_origin : u16, 
-    pub x_length : u16,
-    pub y_length : u16,
-    pub resolution : u16
+    pub x_origin: u16,
+    pub y_origin: u16,
+    pub x_length: u16,
+    pub y_length: u16,
+    pub resolution: u16,
 }
 
 /// returns the id of the most common block in the region.
-fn get_majority_block_id(world : &World, x : u16, y : u16, square_length : u16) -> u16 {
+fn get_majority_block_id(world: &World, x: u16, y: u16, square_length: u16) -> u16 {
     let mut blocks = HashMap::new();
     for j in y..(y + square_length) {
         for i in x..(x + square_length) {
@@ -35,7 +35,7 @@ fn get_majority_block_id(world : &World, x : u16, y : u16, square_length : u16) 
 }
 
 /// returns a display of a portion of the world map.
-pub fn display(world: &World, img : Img) -> Result<(Vec<u8>, Vec<u8>), Box<dyn Error>> {
+pub fn display(world: &World, img: Img) -> Result<(Vec<u8>, Vec<u8>), Box<dyn Error>> {
     let x_origin = img.x_origin;
     let y_origin = img.y_origin;
     let x_length = img.x_length;
@@ -50,21 +50,21 @@ pub fn display(world: &World, img : Img) -> Result<(Vec<u8>, Vec<u8>), Box<dyn E
             let x = i * resolution + x_origin;
             let y = j * resolution + y_origin;
             let block_id = get_majority_block_id(world, x, y, resolution);
-            let bytes = block_id.to_be_bytes(); 
+            let bytes = block_id.to_be_bytes();
             block_vec.push(bytes[0]);
             block_vec.push(bytes[1]);
             if resolution == 1 {
                 let ent = world::get_entity_id(world, x, y);
                 match ent {
-                    u16::MAX => {                        
+                    u16::MAX => {
                         entity_vec.push(u8::MAX);
                         entity_vec.push(u8::MAX);
-                    },
+                    }
                     _ => {
                         let bytes = ent.to_be_bytes();
                         entity_vec.push(bytes[0]);
                         entity_vec.push(bytes[1]);
-                    },
+                    }
                 }
             }
         }

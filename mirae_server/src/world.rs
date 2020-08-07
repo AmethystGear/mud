@@ -1,44 +1,44 @@
 extern crate rand;
 
-use std::collections::HashMap;
-use std::fs::File;
+use crate::perlin_noise;
 use crate::scanner;
 use crate::stats;
-use crate::perlin_noise;
 use char_stream::CharStream;
-use std::u16;
-use std::fs;
 use rand::Rng;
+use std::collections::HashMap;
 use std::error::Error;
+use std::fs;
+use std::fs::File;
+use std::u16;
 
-pub const MAP_SIZE : u16 = 200;
-const ENTITIES_CONFIG_DIR : &str = "config/instantiables/";
-const ITEMS_CONFIG : &str = "config/items.txt";
-const TERRAIN_CONFIG : &str = "config/terrain.txt";
+pub const MAP_SIZE: u16 = 200;
+const ENTITIES_CONFIG_DIR: &str = "config/instantiables/";
+const ITEMS_CONFIG: &str = "config/items.txt";
+const TERRAIN_CONFIG: &str = "config/terrain.txt";
 
 struct Map {
-    id_to_name : HashMap<u16, String>,
-    name_to_stats : HashMap<String, stats::Stats>,
-    map : Vec<u16>
+    id_to_name: HashMap<u16, String>,
+    name_to_stats: HashMap<String, stats::Stats>,
+    map: Vec<u16>,
 }
 
 impl Map {
     pub fn new() -> Self {
         Map {
-            id_to_name : HashMap::new(),
-            name_to_stats : HashMap::new(),
-            map : vec![u16::MAX; (MAP_SIZE as usize) * (MAP_SIZE as usize)],
+            id_to_name: HashMap::new(),
+            name_to_stats: HashMap::new(),
+            map: vec![u16::MAX; (MAP_SIZE as usize) * (MAP_SIZE as usize)],
         }
     }
 }
 
 pub struct World {
-    blocks : Map,
-    entities : Map,
-    items : stats::Stats,
-    max_entity_id : u16,
-    max_block_id : u16,
-    seed : i64
+    blocks: Map,
+    entities: Map,
+    items: stats::Stats,
+    max_entity_id: u16,
+    max_block_id: u16,
+    seed: i64,
 }
 
 impl World {
@@ -55,7 +55,10 @@ impl World {
     }
 }
 
-fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats) -> Result<i64, Box<dyn Error>>{
+fn get_blocks(
+    world: &mut World,
+    terrain_configuration: &stats::Stats,
+) -> Result<i64, Box<dyn Error>> {
     let mut blocks = stats::get(terrain_configuration, "blocks")?.as_box()?;
     let block_names = stats::get_var_names(&blocks);
 
@@ -63,45 +66,65 @@ fn get_blocks(world: &mut World, terrain_configuration: &stats::Stats) -> Result
     for block_name in block_names {
         let block = stats::get(&blocks, block_name.as_str())?.as_box()?;
         let id = stats::get(&block, "id")?.as_int()?;
-        world.blocks.id_to_name.insert(id as u16, block_name.clone());
+        world
+            .blocks
+            .id_to_name
+            .insert(id as u16, block_name.clone());
         world.blocks.name_to_stats.insert(block_name, block);
     }
     return Ok(last_id);
 }
 
-fn get_entities(world: &mut World, entity_config : &mut stats::Stats, f_name : String, id_start: i64) -> Result<i64, Box<dyn Error>> {
+fn get_entities(
+    world: &mut World,
+    entity_config: &mut stats::Stats,
+    f_name: String,
+    id_start: i64,
+) -> Result<i64, Box<dyn Error>> {
     let last_id = stats::add_ids_to_boxes(entity_config, id_start);
     let entity_names = stats::get_var_names(&entity_config);
     for entity_name in entity_names {
         let mut entity = stats::get(&entity_config, entity_name.as_str())?.as_box()?;
         if !stats::has_var(&entity, "entity_type") {
-            stats::set(&mut entity, "entity_type", stats::Value::String(f_name.clone()));
+            stats::set(
+                &mut entity,
+                "entity_type",
+                stats::Value::String(f_name.clone()),
+            );
         }
         let id = stats::get(&entity, "id")?.as_int()?;
-        world.entities.id_to_name.insert(id as u16, entity_name.clone());
+        world
+            .entities
+            .id_to_name
+            .insert(id as u16, entity_name.clone());
         world.entities.name_to_stats.insert(entity_name, entity);
     }
     return Ok(last_id);
 }
 
-pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
+pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
     let mut world = World {
-        blocks : Map::new(),
-        entities : Map::new(),
-        items : stats::Stats::new(),
-        max_entity_id : 0,
-        max_block_id : 0,
-        seed : seed
+        blocks: Map::new(),
+        entities: Map::new(),
+        items: stats::Stats::new(),
+        max_entity_id: 0,
+        max_block_id: 0,
+        seed: seed,
     };
-    world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(ITEMS_CONFIG)?)))?;
-    let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(File::open(TERRAIN_CONFIG)?)))?;
+    world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(
+        ITEMS_CONFIG,
+    )?)))?;
+    let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(
+        File::open(TERRAIN_CONFIG)?,
+    )))?;
 
     world.max_block_id = get_blocks(&mut world, &terrain_configuration)? as u16;
 
     // generate terrain based on parameters provided
     let terrain_params = stats::get(&terrain_configuration, "terrain_parameters")?.as_box()?;
     let octaves = stats::get(&terrain_params, "octaves")?.as_int()?;
-    let perlin_noise = perlin_noise::generate_perlin_noise(MAP_SIZE, MAP_SIZE, octaves as u8, world.seed);
+    let perlin_noise =
+        perlin_noise::generate_perlin_noise(MAP_SIZE, MAP_SIZE, octaves as u8, world.seed);
 
     let height_map = stats::get(&terrain_params, "height_map")?.as_box()?;
     let height_blocks = stats::get(&height_map, "blocks")?.as_vec()?;
@@ -114,8 +137,12 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
             }
             level += 1;
         }
-        
-        let block = world.blocks.name_to_stats.get(&height_blocks[level].as_string()?).ok_or(format!("no block at level {}", level))?;
+
+        let block = world
+            .blocks
+            .name_to_stats
+            .get(&height_blocks[level].as_string()?)
+            .ok_or(format!("no block at level {}", level))?;
         world.blocks.map[i] = stats::get(block, "id")?.as_int()? as u16;
     }
 
@@ -123,7 +150,11 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     let mut last_id = 0;
     for file in files {
         let file_uw = file?.path();
-        let f_name = file_uw.file_name().ok_or("error getting file name")?.to_str().ok_or("error getting file name")?;
+        let f_name = file_uw
+            .file_name()
+            .ok_or("error getting file name")?
+            .to_str()
+            .ok_or("error getting file name")?;
         let entity_config = File::open(file_uw.clone())?;
         let mut f_entities = stats::from(&mut scanner::from(CharStream::from_file(entity_config)))?;
         last_id = get_entities(&mut world, &mut f_entities, f_name.to_string(), last_id)?;
@@ -133,7 +164,7 @@ pub fn from_seed(seed : i64) -> Result<World, Box<dyn Error>> {
     let mut rng = rand::thread_rng();
     for y in 0..MAP_SIZE {
         for x in 0..MAP_SIZE {
-            let block : &stats::Stats = get_block(&world, x, y)?;
+            let block: &stats::Stats = get_block(&world, x, y)?;
             if stats::has_var(block, "mob_spawn_chance") {
                 let spawn_chance = stats::get(block, "mob_spawn_chance")?.as_flt()?;
                 if rng.gen::<f64>() < spawn_chance {
@@ -204,31 +235,50 @@ pub fn save_to(world: &World, file: File) {
     stats::save_to(&stats, file);
 }
 */
-fn index(x : u16, y : u16) -> usize {
+fn index(x: u16, y: u16) -> usize {
     return (y as usize) * (MAP_SIZE as usize) + (x as usize);
 }
 
-pub fn get_block_id(world : &World, x : u16, y : u16) -> u16 {
+pub fn get_block_id(world: &World, x: u16, y: u16) -> u16 {
     return world.blocks.map[index(x, y)];
 }
 
-pub fn get_entity_id(world : &World, x : u16, y : u16) -> u16 {
+pub fn get_entity_id(world: &World, x: u16, y: u16) -> u16 {
     return world.entities.map[index(x, y)];
 }
 
-pub fn get_block(world : &World, x : u16, y : u16) -> Result<&stats::Stats, Box<dyn Error>> {
-    let block_name = world.blocks.id_to_name.get(&world.blocks.map[index(x, y) as usize]).ok_or("no block exists with this ID!")?;
-    return Ok(world.blocks.name_to_stats.get(&block_name.clone()).ok_or(format!("no block exists with the name {}", block_name))?);
+pub fn get_block(world: &World, x: u16, y: u16) -> Result<&stats::Stats, Box<dyn Error>> {
+    let block_name = world
+        .blocks
+        .id_to_name
+        .get(&world.blocks.map[index(x, y) as usize])
+        .ok_or("no block exists with this ID!")?;
+    return Ok(world
+        .blocks
+        .name_to_stats
+        .get(&block_name.clone())
+        .ok_or(format!("no block exists with the name {}", block_name))?);
 }
 
-pub fn get_block_by_id(world: &World, id : u16) -> Result<&stats::Stats, Box<dyn Error>> {
-    return Ok(world.blocks.name_to_stats.get(world.blocks.id_to_name.get(&id)
-                .ok_or("no block with the provided id")?)
-                .ok_or("no block with the provided name")?);
+pub fn get_block_by_id(world: &World, id: u16) -> Result<&stats::Stats, Box<dyn Error>> {
+    return Ok(world
+        .blocks
+        .name_to_stats
+        .get(
+            world
+                .blocks
+                .id_to_name
+                .get(&id)
+                .ok_or("no block with the provided id")?,
+        )
+        .ok_or("no block with the provided name")?);
 }
 
-pub fn get_entity_name(world : &World, x : u16, y : u16) -> Option<String> {
-    let name = world.entities.id_to_name.get(&world.entities.map[index(x, y) as usize]);
+pub fn get_entity_name(world: &World, x: u16, y: u16) -> Option<String> {
+    let name = world
+        .entities
+        .id_to_name
+        .get(&world.entities.map[index(x, y) as usize]);
     if name.is_none() {
         return None;
     } else {
@@ -236,27 +286,38 @@ pub fn get_entity_name(world : &World, x : u16, y : u16) -> Option<String> {
     }
 }
 
-pub fn get_entity_properties(world : &World, x : u16, y : u16) -> Option<&stats::Stats> {
+pub fn get_entity_properties(world: &World, x: u16, y: u16) -> Option<&stats::Stats> {
     let entity_name = get_entity_name(world, x, y);
     return world.entities.name_to_stats.get(&entity_name?.clone());
 }
 
-pub fn get_entity_properties_by_id(world : &World, id : u16) -> Result<&stats::Stats, Box<dyn Error>> {
-    return Ok(world.entities.name_to_stats.get(world.entities.id_to_name.get(&id)
-                .ok_or("no entity with the provided id")?)
-                .ok_or("no entity with the provided name")?);
+pub fn get_entity_properties_by_id(
+    world: &World,
+    id: u16,
+) -> Result<&stats::Stats, Box<dyn Error>> {
+    return Ok(world
+        .entities
+        .name_to_stats
+        .get(
+            world
+                .entities
+                .id_to_name
+                .get(&id)
+                .ok_or("no entity with the provided id")?,
+        )
+        .ok_or("no entity with the provided name")?);
 }
 
-pub fn has_entity(world : &World, x : u16, y : u16) -> bool {
+pub fn has_entity(world: &World, x: u16, y: u16) -> bool {
     return world.entities.map[index(x, y)] != u16::MAX;
 }
 
-pub fn get_random_item(world : &World) -> String {
+pub fn get_random_item(world: &World) -> String {
     let item_names = stats::get_var_names(&world.items());
     let mut rng = rand::thread_rng();
     return item_names[rng.gen_range(0, item_names.len())].clone();
 }
 
-pub fn remove_entity(world : &mut World, x : u16, y : u16) {
+pub fn remove_entity(world: &mut World, x: u16, y: u16) {
     world.entities.map[index(x, y)] = u16::MAX;
 }
