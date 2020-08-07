@@ -17,7 +17,7 @@ use std::sync::mpsc::Sender;
 const DEFAULT: &str = "config/player_defaults.txt";
 const MAX_NUM_WEARS: usize = 3;
 pub const MAX_PHYSICAL_SPEED: i64 = 15;
-pub const MAX_PHYSICAL_VIEW: i64 = 10;
+pub const MAX_PHYSICAL_VIEW: i64 = 15;
 
 pub struct Player {
     data: Stats,

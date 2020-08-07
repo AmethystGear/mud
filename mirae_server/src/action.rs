@@ -515,7 +515,7 @@ fn map(players: &mut Vec<Option<Player>>, world: &mut World) -> Res {
         x_length: world::MAP_SIZE,
         y_origin: 0,
         y_length: world::MAP_SIZE,
-        resolution: world::MAP_SIZE / 100,
+        resolution: world::MAP_SIZE / 50,
     };
     out.append_img(world, players, img)?;
     return Ok(out);
