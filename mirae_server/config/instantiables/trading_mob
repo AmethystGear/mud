@@ -1,5 +1,8 @@
+{
 Box reges_cs142
 {
+	int trade_min 3
+	int trade_max 5
 	Box quotes 
 	{
 		string[] entrance "want some drugs, kid"
@@ -28,13 +31,13 @@ Box reges_cs142
 	}
 	Box drops
 	{
-		string[] drops "A+" "B+" "C-" "D+" "F"
-		float[] drop_prob 0.05 0.4 0.4 0.1 0.05
-		int[] drop_per 1
+		string[] items "A+" "B+" "C-" "D+" "F"
+		float[] item_prob 0.05 0.4 0.4 0.1 0.05
+		int[] item_per 1
 		int drop_max 1
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "A+"
 		float[] item_prob 1.0
@@ -105,6 +108,8 @@ Box reges_cs142
 }
 Box astrology
 {
+	int trade_min 1
+	int trade_max 1
 	Box quotes 
 	{
 		string[] entrance "its astronomy sirrr not astrology" "its not astrology.... sirrrr astrology isnt a science" "SIRRRRRRRRR"
@@ -133,13 +138,13 @@ Box astrology
 	}
 	Box drops
 	{
-		string[] drops "A+" "B+" "C-" "D+" "F"
-		float[] drop_prob 0.05 0.4 0.4 0.1 0.05
-		int[] drop_per 1 1 1 1 1
+		string[] items "A+" "B+" "C-" "D+" "F"
+		float[] item_prob 0.05 0.4 0.4 0.1 0.05
+		int[] item_per 1 1 1 1 1
 		int drop_max 1
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "A+"
 		float[] item_prob 1.0
@@ -202,7 +207,8 @@ Box astrology
 }
 Box god
 {
-        int xp 1000
+	int trade_min 1
+	int trade_max 10
 	Box quotes 
 	{
 		string[] entrance  "I am god"
@@ -217,6 +223,7 @@ Box god
 		int speed 0
 		int dmg 1
 		int energy 1
+		int xp 0
 		int energy_regen 1
 		float agression 0.2
 		int physical_dmg 1
@@ -231,13 +238,13 @@ Box god
 	}
 	Box drops
 	{
-		string[] drops "sins_of_humanity" "the_meaning_of_the_universe"
-		float[] drop_prob 0.5 0.5
-		int[] drop_per 2 1
+		string[] items "sins_of_humanity" "the_meaning_of_the_universe"
+		float[] item_prob 0.5 0.5
+		int[] item_per 2 1
 		int drop_max 1
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "sins_of_humanity" "the_meaning_of_the_universe"	
 		float[] item_prob 0.5 0.5
@@ -295,4 +302,5 @@ rrrrrr)vx}cXmezjIePb6Eg0dMMWPPsywwwVuwwuwx*>~~~~!!::",",_____---------------___,
 =~~;<^^^^*****rr(vxxxccLvxchXT]}Tivvv(\vvvxxxix(**vI}v^*)rr*rzuy}yHY*^^~^~=!==~=<Tr*|)*v>)v^!!~<~iLY<~~=!:!!!!!!:::::=*=!:::!!::",",_--.-_________------.------.....--...''`'````````````````````
 =~~~~><^^^^^^***rv|rrrr)|xixvvux|vv\|vvv?|vvrr)))rui^***r*r*)s}(TVrr**^<^<;<>~==*Vx)^^*xrv^r^~~=~rx}*==!!::::::!!!!!:!~!!::_-_.-...-------_--_,___--......-----...-.'...'``'`'`````````'''`` ``
 	}
+}
 }

@@ -63,10 +63,10 @@ impl PlayerOut {
         });
     }
 
-    pub fn append_err(&mut self, err_string: String) {
+    pub fn append_err(&mut self, err: Box<dyn Error>) {
         self.packets.push_back(Packet {
             p_type: PacketType::Err,
-            content: err_string.into_bytes(),
+            content: err.to_string().into_bytes(),
         });
     }
 

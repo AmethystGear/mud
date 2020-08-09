@@ -154,9 +154,9 @@ fn get_next_value(s: &mut scanner::Scanner, var_type: &str) -> Result<Value, Box
                 return Ok(Value::String(val));
             }
         }
-        _ => {}
+        _ => {return Err(format!("bad var_type {}", var_type).into())}
     };
-    return Err("value conversion failed!".into());
+    return Err(format!("value conversion for {} failed!", var_type).into());
 }
 
 pub fn from(s: &mut scanner::Scanner) -> Result<Stats, Box<dyn Error>> {
@@ -196,6 +196,8 @@ pub fn from(s: &mut scanner::Scanner) -> Result<Stats, Box<dyn Error>> {
 
         let var_type = token.to_lowercase();
         let var_name = scanner::next(&mut line_scan)?;
+
+        println!("var_name {}", var_name);
 
         let var_value: Value;
         if var_type == "int" || var_type == "float" || var_type == "string" {

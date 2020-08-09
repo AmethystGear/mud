@@ -29,6 +29,7 @@ class Commands(Enum):
     Text = 0
     Img = 1
     Init = 2
+    Err = 3
 
 class Player:
     def __init__(self, ID, x, y):
@@ -92,6 +93,12 @@ def get_int_16_arr_from_bytes(bt):
     
     return arr
 
+def get_player_display(ID):
+    hex_digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
+    second_digit = int(ID/16)
+    first_digit = ID % 16
+    return hex_digits[second_digit] + hex_digits[first_digit]
+
 def handle_packet(pkt):
     global init_data
     if pkt.command == Commands.Text:
@@ -129,7 +136,7 @@ def handle_packet(pkt):
                 
                 display = '  '
                 if ((y << 8) + x) in players:
-                    display = str(players[((y << 8) + x)].ID) * 2
+                    display = get_player_display(players[((y << 8) + x)].ID)
                 elif (len(entities) != 0 and entities[index] != 65535):
                     if str(entities[index]) in init_data['entity_display']:
                         display = init_data['entity_display'][str(entities[index])]
@@ -149,6 +156,8 @@ def handle_packet(pkt):
 
     elif pkt.command == Commands.Init:
         init_data = json.loads(pkt.content.decode('utf-8'))
+    elif pkt.command == Commands.Err:
+         print(colors.color("ERROR: " + pkt.content.decode('utf-8'), fg='red'))
 
 def recv(s):
     msg = bytearray()

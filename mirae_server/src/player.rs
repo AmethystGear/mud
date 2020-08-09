@@ -13,11 +13,13 @@ use rand::Rng;
 use std::error::Error;
 use std::fs::File;
 use std::sync::mpsc::Sender;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 const DEFAULT: &str = "config/player_defaults.txt";
 const MAX_NUM_WEARS: usize = 3;
 pub const MAX_PHYSICAL_SPEED: i64 = 15;
 pub const MAX_PHYSICAL_VIEW: i64 = 15;
+pub const MAX_TURN_TIME_MILLIS : u128 = 15000;
 
 pub struct Player {
     data: Stats,
@@ -28,9 +30,18 @@ pub struct Player {
     cumulative_speed: i64,
     interact: bool,
     turn: bool,
+    last_turn: SystemTime
 }
 
 impl Player {
+    pub fn set_last_turn_time(&mut self, time : SystemTime) {
+        self.last_turn = time;
+    }
+
+    pub fn get_last_turn_time(&self) -> SystemTime {
+        return self.last_turn.clone();
+    }
+
     pub fn data(&self) -> &Stats {
         return &(self.data);
     }
@@ -168,6 +179,7 @@ pub fn from(
         turn: false,
         interact: false,
         cumulative_speed: 0,
+        last_turn: UNIX_EPOCH
     });
 }
 

@@ -15,7 +15,7 @@ use char_stream::CharStream;
 use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::error::Error;
-use std::u8;
+use std::{time::SystemTime, u8};
 
 type Res = std::result::Result<PlayerOut, Box<dyn Error>>;
 
@@ -236,9 +236,9 @@ pub fn get_action_map() -> ActionMap {
         Action {
             name: "eat".to_string(),
             description:
-                "eat something in your inventory... I mean seriously, do you need an explanation??"
+                "eat something in your inventory... I mean seriously, do you need an explanation??\n"
                     .to_string(),
-            usage: "eat <x>".to_string(),
+            usage: "eat <item>|eat <item> <count>".to_string(),
             keywords: "eat, consume".to_string(),
             func: ActionFunc::C(eat.clone()),
         },
@@ -254,6 +254,15 @@ pub fn get_action_map() -> ActionMap {
             func: ActionFunc::G(wear.clone()),
         },
     );
+    add_action(&mut m,
+        "trade".to_string(),
+        Action {
+            name: "trade".to_string(),
+            description: "trade with entity you are currently interacting with.\n".to_string(),
+            usage: "trade|trade <trade #> <# to trade>\n".to_string(),
+            keywords: "trade, sell".to_string(),
+            func: ActionFunc::G(trade.clone())
+        });
     return m;
 }
 
@@ -420,8 +429,9 @@ fn step(
         let num = params[0].as_int();
         match num {
             Ok(n) => {
-                if n > player::get_stat(&player, "speed")? {
-                    return Err(format!("You can only move {} units per turn!", n).into());
+                let speed = player::get_stat(&player, "speed")?;
+                if n > speed {
+                    return Err(format!("You can only move {} units per turn!", speed).into());
                 } else {
                     num_units = n;
                 }
@@ -698,13 +708,16 @@ pub fn attack(
                 return Ok(out);
             }
             opponent.add_entity_cumulative_speed(player::get_stat(&opponent, "speed")?);
+            
             if player.entity_cumulative_speed() <= opponent.entity_cumulative_speed() {
                 player::set_turn(&mut player, false);
                 player::set_turn(&mut opponent, true);
+                opponent.set_last_turn_time(SystemTime::now());
                 out.append("your turn has ended!\n");
                 player::send_str(&opponent, "your turn has started!\n")?;
             } else {
                 out.append("it is still your turn.\n");
+                player.set_last_turn_time(SystemTime::now());
                 player::send_str(&opponent, "it is still your opponent's turn.\n")?;
             }
             return Ok(out);
@@ -766,6 +779,7 @@ pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut Wor
             player::set_turn(player, true);
             player::set_turn(opp, false);
             player.add_entity_cumulative_speed(player_speed);
+            player.set_last_turn_time(SystemTime::now());
             out.append("It is your turn!\n");
 
             player::send_str(
@@ -776,6 +790,7 @@ pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut Wor
             player::set_turn(player, false);
             player::set_turn(opp, true);
             opp.add_entity_cumulative_speed(opponent_speed);
+            opp.set_last_turn_time(SystemTime::now());
             out.append("It is your opponent's turn!\n");
             player::send_str(
                 &opp,
@@ -985,4 +1000,35 @@ fn wear(
             return Err("expected only one parameter, and expected it to be an item name!".into());
         }
     }
+}
+
+fn trade(
+    spawned_entities: &mut SpawnedEntities,
+    params: &Vec<scanner::Param>,
+    player_id: u8,
+    players: &mut Vec<Option<Player>>,
+    world: &mut World,
+) -> Res {
+    let player = players[player_id as usize]
+    .as_mut()
+    .ok_or("invalid player id")?;
+    if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
+        return Err("you aren't fighting anything!".into());
+    }
+    let trade_opponent = entities::get_entity_action(
+        spawned_entities,
+        "trade".to_string(),
+        player::x(player)?,
+        player::y(player)?,
+    );
+    let trade_opponent = trade_opponent.ok_or("you cannot trade with this entity!")?;
+    return trade_opponent.run(
+        Some(spawned_entities),
+        None,
+        None,
+        Some(params),
+        Some(player_id),
+        Some(players),
+        Some(world),
+    ).ok_or("bad None params")?;
 }

@@ -3,6 +3,11 @@
     {
         prop edible
         prop equipable
+        Box spawn
+        {
+            float chance 0.05
+            int tier 0
+        }
         int xp 0
         int health_gain 0
         Box buffs
@@ -33,76 +38,156 @@
     }
     Box oxford_dictionary
     {
-        prop ediblestat 
+        prop edible
         int health_gain -3
         int xp 2000
+        Box spawn
+        {
+            float chance 1.0
+            int tier 3
+        }
     }
     Box physics_homework
     {
         prop edible
         int health_gain -10
         int xp 100
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
     }
     Box honour
     {
         prop edible
-        int health_gain 0
-        int energy_gain 100
-        int xp 100
+        int health_gain -1
+        int energy_gain 4
+        int xp 500
+        Box spawn
+        {
+            float chance 1.0
+            int tier 3
+        }
     }
     Box dragons_blood
     {
-        int xp 100
+        int xp 1000
+        Box spawn
+        {
+            float chance 0.05
+            int tier 2
+        }
     }
     Box the_journey_was_the_prize
     {
-        int xp 100
+        int xp -100
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box robot_brain
     {
-        int xp 100
+        int xp 0
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box robot_heart
     {
         int xp 2
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box robot_soul
     {
         int xp 2
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box robot
     {
         int xp 50
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
     }
     Box newtons_laws
     {
         int xp 100
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
     }
     Box the_meaning_of_the_universe
     {
         prop edible
         int health_gain -1000
         int xp -200
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box F
     {
         int xp 0
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box D+
     {
         int xp 100
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
     }
     Box C-
     {
         int xp 200
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
     }
     Box B+
     {
         int xp 500
+        Box spawn
+        {
+            float chance 0.5
+            int tier 3
+        }
     }
     Box A+
     {
         int xp 1000
+        Box spawn
+        {
+            float chance 0.25
+            int tier 2
+        }
     }
     Box sins_of_humanity
     {
@@ -115,7 +200,12 @@
     {
         prop edible
         int health_gain 10
-        int energy_gain 10
+        int energy_gain 20
+        Box spawn
+        {
+            float chance 0.1
+            int tier 1
+        }
         int xp 1000
     }
     Box heghead
@@ -123,6 +213,11 @@
         prop edible
         int health_gain -20
         int energy_gain 30
+        Box spawn
+        {
+            float chance 0.3
+            int tier 2
+        }
         int xp 200
     }
     Box fest_boots
@@ -133,8 +228,13 @@
         int xp 200
         Box buffs 
         {
-            float speed 2.5
+            float speed 3.0
             float health 0.9
+        }
+        Box spawn
+        {
+            float chance 0.05
+            int tier 0
         }
     }
     Box orange
@@ -145,11 +245,6 @@
         int xp 17
         Box buffs
         {
-            float health 1.0
-            float speed 1.0
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
             float physical_def 1.002
             float magic_dmg 0.999
             float magic_def 1.3
@@ -163,7 +258,11 @@
                 prop destroys_item
             }
         }
-        
+        Box spawn
+        {
+            float chance 1.0
+            int tier 3
+        }
     }
     Box trumps_orange
     {
@@ -174,7 +273,6 @@
         Box buffs
         {
             float health 0.3
-            float speed 1.0
             float dmg 1.2
             float view 0.2
             float physical_dmg 0.1
@@ -191,7 +289,11 @@
                 prop destroys_item
             }
         }
-        
+        Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
     }
     Box bigly_wall_staff
     {
@@ -201,11 +303,7 @@
         int xp 1
         Box buffs
         {
-            float health 1.0
             float speed 0.7
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
             float physical_def 1.1
             float magic_dmg 1.2
             float magic_def 1.1
@@ -223,7 +321,11 @@
                 int energy_cost 2
             }
         }
-        
+        Box spawn
+        {
+            float chance 0.3
+            int tier 3
+        }
     }
     Box wall_armor
     {
@@ -231,16 +333,15 @@
         int xp 1
         Box buffs
         {
-            float health 1.0
             float speed 0.6
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
             float physical_def 2.3
-            float magic_dmg 1.0
             float magic_def 1.4
         }
-
+        Box spawn
+        {
+            float chance 0.20
+            int tier 3
+        }
     }
     Box wings
     {
@@ -248,13 +349,8 @@
         int xp 1
         Box buffs
         {
-            float health 1.0
             float speed 1.4
-            float dmg 1.0
             float view 3.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
             float magic_def 1.1
         }
         Box abilities
@@ -272,7 +368,11 @@
                 prop destroys_item
             }
         }
-        
+        Box spawn
+        {
+            float chance 0.05
+            int tier 0
+        }
     }
     Box microsoft_edge
     {
@@ -280,14 +380,8 @@
         int xp 1
         Box buffs
         {
-            float health 1.0
             float speed 0.6
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
+            float dmg 1.5
         }
         Box abilities
         {
@@ -303,7 +397,11 @@
                 prop destroys_item
             }
         }
-        
+        Box spawn
+        {
+            float chance 0.05
+            int tier 4
+        }
     }
     Box internet_explorer
     {
@@ -313,14 +411,7 @@
         int health_gain -2
         Box buffs
         {
-            float health 1.0
             float speed 0.1
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
         }
         Box abilities
         {
@@ -330,7 +421,11 @@
                 int energy_cost 10
             }
         }
-        
+        Box spawn
+        {
+            float chance 0.05
+            int tier 4
+        }
     }
     Box rubix_cube
     {
@@ -338,17 +433,6 @@
         int xp 200
         prop edible
         int health_gain 2
-        Box buffs
-        {
-            float health 1.0
-            float speed 1.0
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
-        }
         Box abilities
         {
             Box rubix_blast
@@ -373,32 +457,45 @@
                 int energy_cost 4
                 int stun 1
             }
-                Box rubix_superstorm
+            Box rubix_superstorm
             {
                 int magic_dmg -5
                 int energy_cost 10
                 int stun 2			
             }
-                Box rubix_charge
+            Box rubix_charge
             {
                 int magic_dmg -1
                 int energy_cost -10			
             }
-            
         }
-        
+        Box spawn
+        {
+            float chance 0.05
+            int tier 0
+        }
     }
     Box living_train
     {
         prop edible
         int health_gain -100
         int xp 500
+        Box spawn
+        {
+            float chance 0.05
+            int tier 4
+        }
     }
     Box oil
     {
         prop edible
         int health_gain -10
         int xp 50
+        Box spawn
+        {
+            float chance 0.5
+            int tier 4
+        }
     }
     Box trainmail_armor
     {
@@ -406,16 +503,15 @@
         int xp 1
         Box buffs
         {
-            float health 1.0
             float speed 1.5
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
             float physical_def 0.8
             float magic_dmg 0.8
-            float magic_def 1.0
         }
-
+        Box spawn
+        {
+            float chance 0.05
+            int tier 2
+        }
     }
     Box trainmail_shield
     {
@@ -425,13 +521,7 @@
         int health_gain -2
         Box buffs
         {
-            float health 1.0
             float speed 1.5
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
             float magic_def 0.7
         }
         Box abilities
@@ -443,7 +533,11 @@
                 prop destroys_item
             }
         }
-        
+        Box spawn
+        {
+            float chance 0.15
+            int tier 2
+        }
     }
     Box valient_washingsword
     {
@@ -454,13 +548,10 @@
         Box buffs
         {
             float health 1.1
-            float speed 1.0
             float dmg 2.9
             float view 10.0
             float physical_dmg 2.0
-            float physical_def 1.0
             float magic_dmg 2.0
-            float magic_def 1.0
         }
         Box abilities
         {
@@ -491,15 +582,18 @@
                 int energy_cost 10
                 int stun 1		
             }
-            
         }
-        
     }
     Box wig
     {
         prop edible
         int health_gain 2
         int xp 500
+        Box spawn
+        {
+            float chance 0.15
+            int tier 3
+        }
     }
     Box george_washinghead
     {
@@ -509,20 +603,13 @@
     }
     Box george_washingtons_clothing
     {
-        prop wearable
         int xp 1
         Box buffs
         {
             float health 5.0
-            float speed 1.0
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
             float physical_def 5.0
-            float magic_dmg 1.0
             float magic_def 5.0
         }
-
     }
     Box enigmatic_gun
     {
@@ -530,17 +617,6 @@
         int xp 1000
         prop edible
         int health_gain -200000000000
-        Box buffs
-        {
-            float health 1.0
-            float speed 1.0
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
-        }
         Box abilities
         {
             Box squirt
@@ -600,14 +676,7 @@
         int xp 100
         Box buffs
         {
-            float health 1.0
             float speed 1.1
-            float dmg 1.0
-            float view 1.0
-            float physical_dmg 1.0
-            float physical_def 1.0
-            float magic_dmg 1.0
-            float magic_def 1.0
         }
         Box abilities
         {
@@ -621,14 +690,77 @@
                 int magic_dmg 2
                 int energy_cost 1
             }
-
         }
-
     }
     Box cockroach
     {
         prop edible
         int health_gain 2
         int xp 100
+    }
+    Box rusty_sword
+    {
+        int xp 50
+        Box abilities
+        {
+            Box swing_sword
+            {
+                int physical_dmg 3
+                int energy_cost 0
+            }
+        }
+    }
+    Box dark_armor
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 1.5
+            float dmg 2.0
+            float speed 0.5
+        }
+        Box spawn
+        {
+            float chance 0.15
+            int tier 2
+        }
+        Box spawn
+        {
+            float chance 0.35
+            int tier 1
+        }
+    }
+    Box wooden_armor
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 1.4
+            float dmg 1.1
+            float speed 0.9
+        }
+        Box spawn
+        {
+            float chance 0.35
+            int tier 3
+        }
+    }
+    Box iron_armor
+    {
+        prop wearable
+        int xp 1
+        Box buffs
+        {
+            float health 1.8
+            float dmg 1.4
+            float speed 0.8
+        }
+        Box spawn
+        {
+            float chance 0.15
+            int tier 2
+        }
     }
 }

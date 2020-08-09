@@ -175,7 +175,7 @@ pub struct Mob {
     base_stats: Stats,
     name: String,
     stats: Stats,
-    weapons: Stats,
+    tools: Stats,
 }
 
 impl Spawnable for Mob {
@@ -192,8 +192,8 @@ impl Spawnable for Mob {
         let mut stats = self.base_stats.clone();
         stats::set(
             &mut stats,
-            "weapons",
-            stats::Value::Box(self.weapons.clone()),
+            "tools",
+            stats::Value::Box(self.tools.clone()),
         );
         return stats;
     }
@@ -208,16 +208,15 @@ impl Spawnable for Mob {
 impl Mob {
     pub fn new(stats: Stats, x: u16, y: u16, name: String) -> Result<Self, Box<dyn Error>> {
         let s = stats::get(&stats, "stats")?.as_box()?;
-        let mut m = Mob {
+        let m = Mob {
             x: x,
             y: y,
-            base_stats: stats,
             name: name,
             stats: s,
             entity_type: "mob".to_string(),
-            weapons: Stats::new(),
+            tools: get_items(&stats::get(&stats, "tools")?.as_box()?)?,
+            base_stats: stats
         };
-        m.weapons = get_items(&m, "item")?;
         return Ok(m);
     }
 }
@@ -238,10 +237,10 @@ pub struct TradingMob {
     y: u16,
     base_stats: Stats,
     stats: Stats,
-    items: Stats,
+    trade_items: Stats,
     entity_type: String,
     name: String,
-    weapons: Stats,
+    tools: Stats,
 }
 
 impl Spawnable for TradingMob {
@@ -255,12 +254,12 @@ impl Spawnable for TradingMob {
         return &mut self.stats;
     }
     fn data(&self) -> Stats {
-        let mut stats = self.stats.clone();
-        stats::set(&mut stats, "items", stats::Value::Box(self.items.clone()));
+        let mut stats = self.base_stats.clone();
+        stats::set(&mut stats, "trade_items", stats::Value::Box(self.trade_items.clone()));
         stats::set(
             &mut stats,
-            "weapons",
-            stats::Value::Box(self.weapons.clone()),
+            "tools",
+            stats::Value::Box(self.tools.clone()),
         );
         stats::set(
             &mut stats,
@@ -289,19 +288,17 @@ impl TradingMob {
         let max = stats::get(&stats, "trade_max")?.as_int()? as usize;
         let mut rng = rand::thread_rng();
         let num_items = rng.gen_range(min, max + 1);
-        let items = get_random_items(num_items, world)?;
-        let s = stats::get(&stats, "stats")?.as_box()?;
-        let mut tm = TradingMob {
+        let trade_items = get_random_items(num_items, world, vec![0, 1, 2, 3, 4, 5])?;
+        let tm = TradingMob {
             x: x,
             y: y,
-            base_stats: stats,
-            stats: s,
+            stats: stats::get(&stats, "stats")?.as_box()?,
             name: name,
-            items: items,
+            trade_items: trade_items,
             entity_type: "trading_mob".to_string(),
-            weapons: Stats::new(),
+            tools: get_items(&stats::get(&stats, "tools")?.as_box()?)?,
+            base_stats: stats
         };
-        tm.weapons = get_items(&tm, "item")?;
         return Ok(tm);
     }
 }
@@ -348,17 +345,42 @@ impl LootChest {
     ) -> Result<Self, Box<dyn Error>> {
         let min = stats::get_or_else(&stats, "items_min", &stats::Value::Int(0)).as_int()? as usize;
         let max = stats::get_or_else(&stats, "items_max", &stats::Value::Int(0)).as_int()? as usize;
+
+        let tiers = stats::get_or_else(&stats, "tiers", &stats::Value::List(vec![])).as_vec()?;
+        let mut tiers_int = vec![];
+        for val in tiers {
+            tiers_int.push(val.as_int()?);
+        }
+        let tiers = tiers_int;
+
         let mut rng = rand::thread_rng();
         let num_items = rng.gen_range(min, max + 1);
-        let items = get_random_items(num_items, world)?;
+        let items = get_random_items(num_items, world, tiers)?;
         return Ok(LootChest { x, y, name, items });
     }
 }
 
-pub fn get_random_items(num_items: usize, world: &World) -> Result<Stats, Box<dyn Error>> {
+pub fn get_random_items(num_items: usize, world: &World, tiers : Vec<i64>) -> Result<Stats, Box<dyn Error>> {
     let mut items = Stats::new();
-    for _ in 0..num_items {
-        let item = world::get_random_item(world);
+    let mut num_items_collected = 0;
+    let tiered = world.items_tiered();
+    let mut allowed_items:  Vec<String> = vec![];
+    for tier in tiers {
+        let vec = tiered.get(&tier);
+        if vec.is_some() {
+            let mut v = vec.ok_or("")?.clone();
+            allowed_items.append(&mut v);
+        }
+    }
+    let mut rng = rand::thread_rng();
+    while num_items_collected < num_items {
+        let item = &allowed_items[rng.gen_range(0, allowed_items.len())];
+        let item_stats = stats::get(&world.items(), &item)?.as_box()?;
+        let spawn = stats::get(&item_stats, "spawn")?.as_box()?;
+        let v: f64 = rand::random::<f64>();
+        if v > stats::get(&spawn, "chance")?.as_flt()? {
+            continue;
+        }
         if !stats::has_var(&items, &item) {
             stats::set(&mut items, &item, stats::Value::Int(1));
         } else {
@@ -369,6 +391,7 @@ pub fn get_random_items(num_items: usize, world: &World) -> Result<Stats, Box<dy
                 stats::Value::Int(stats::get(&clone, &item)?.as_int()? + 1),
             );
         }
+        num_items_collected += 1;
     }
     return Ok(items);
 }
@@ -438,7 +461,7 @@ pub fn dmg(
             entity.name()
         ));
         if stats::has_var(&entity.data(), "drops") {
-            let mob_drops = get_items(entity, "drop")?;
+            let mob_drops = get_items(&stats::get(&entity.data(), "drops")?.as_box()?)?;
             out.append("you got:\n");
             out.append(stats::string(&mob_drops)?);
             out.append("and:\n");
@@ -473,7 +496,7 @@ pub fn trade(
     let entity = get_entity(entities, x, y).ok_or("")?;
 
     let mut out = PlayerOut::new();
-    let items = stats::get(&entity.data(), "items")?.as_box()?;
+    let items = stats::get(&entity.data(), "trade_items")?.as_box()?;
     let item_names = stats::get_var_names(&items);
     if params.is_empty() {
         out.append("the availible trades are:\n");
@@ -481,31 +504,37 @@ pub fn trade(
             let item = &item_names[i];
             let item_box = stats::get(&world.items(), item)?.as_box()?;
             let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
-            out.append(format!("{}. {} --> {} xp\n", i, item, xp));
+            out.append(format!("{} --> {} xp\n", item, xp));
         }
     } else if params.len() == 2 {
-        if params[0].as_int().is_err() || params[1].as_int().is_err() {
-            return Err("expected 2 integers as parameters".into());
+        if params[0].as_string().is_err() || params[1].as_int().is_err() {
+            return Err("expected item to trade, and then number to trade of that item.".into());
         }
-        let trade_num = params[0].as_int()?;
+        let item = params[0].as_string()?;
         let num_to_trade = params[1].as_int()?;
+        if num_to_trade < 1 {
+            return Err("you can't trade less than 1 item!".into());
+        }
         let player = players[player_id as usize]
             .as_mut()
             .ok_or("player id is invalid")?;
         let inventory = stats::get(player.data(), "inventory")?.as_box()?;
-        if trade_num < 0 || trade_num > item_names.len() as i64 {
-            return Err(format!("there is no trade numbered {}", trade_num).into());
+        if item_names.contains(&item) {
+            let num_in_inventory =
+                stats::get_or_else(&inventory, &item, &stats::Value::Int(0)).as_int()?;
+            if num_to_trade > num_in_inventory {
+                return Err(format!("you only have {} of that item", num_in_inventory).into());
+            }
+            let item_box = stats::get(&world.items(), item.as_str())?.as_box()?;
+            let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
+            player::change_xp(player, num_to_trade * xp)?;
+            for _ in 0..num_to_trade {
+                player::remove_item_from_inventory(player, &item)?;
+            }
+            out.append(format!("You traded {} of {} for {} xp. This is the best trade deal in the history of trade deals, maybe ever.\n", num_to_trade, item, num_to_trade * xp));
+        } else {
+            return Err("that trade is not offered!".into())
         }
-        let item = &item_names[trade_num as usize];
-        let num_in_inventory =
-            stats::get_or_else(&inventory, item, &stats::Value::Int(0)).as_int()?;
-        if num_to_trade > num_in_inventory {
-            return Err(format!("you only have {} of that item", num_in_inventory).into());
-        }
-        let item_box = stats::get(&world.items(), item.as_str())?.as_box()?;
-        let xp = stats::get_or_else(&item_box, "xp", &stats::Value::Int(0)).as_int()?;
-        player::change_xp(player, num_to_trade * xp)?;
-        out.append(format!("You traded {} of {} for {} xp. This is the best trade deal in the history of trade deals, maybe ever.\n", num_to_trade, item, num_to_trade * xp));
     } else {
         return Err("expected 0 or 2 parameters".into());
     }
@@ -577,10 +606,10 @@ pub fn attack(
             entity.name(),
             base_dmg
         ));
-        let weapons = stats::get_var_names(&stats::get(&entity.data(), "weapons")?.as_box()?);
-        if !weapons.is_empty() {
+        let tools = stats::get_var_names(&stats::get(&entity.data(), "tools")?.as_box()?);
+        if !tools.is_empty() {
             let mut rng = rand::thread_rng();
-            let weapon_name = &weapons[rng.gen_range(0, weapons.len())];
+            let weapon_name = &tools[rng.gen_range(0, tools.len())];
             let weapon = stats::get_or_else(
                 &world.items(),
                 weapon_name.as_str(),
@@ -641,36 +670,38 @@ pub fn get_random_quote(
     }
 }
 
-pub fn get_items(entity: &dyn Spawnable, item: &str) -> Result<Stats, Box<dyn Error>> {
-    if !stats::has_var(&entity.data(), &format!("{}s", item)) {
-        return Ok(Stats::new());
-    }
-    let drops = stats::get(&entity.data(), &format!("{}s", item))?.as_box()?;
-    let drop_names = stats::get(&drops, &format!("{}s", item))?.as_vec()?;
-    let probs = stats::get(&drops, &format!("{}_prob", item))?.as_vec()?;
-    let default: Vec<Value> = vec![stats::Value::Int(1i64); drop_names.len()];
-    let drop_per = stats::get_or_else(
-        &drops,
-        &format!("{}_per", item),
+pub fn get_items(items : &Stats) -> Result<Stats, Box<dyn Error>> {
+    let item_names = stats::get(items, "items")?.as_vec()?;
+    let item_probs = stats::get(items, "item_prob")?.as_vec()?;
+    let default: Vec<Value> = vec![stats::Value::Int(1i64); item_names.len()];
+    let item_per = stats::get_or_else(
+        items,
+        "item_per",
         &stats::Value::List(default),
     )
     .as_vec()?;
 
+    if !(item_names.len() == item_probs.len() && item_probs.len() == item_per.len()) {
+        return Err("invalid input for get_items".into());
+    }
+
     let mut rng = rand::thread_rng();
-    let min = stats::get_or_else(&drops, &format!("{}_min", item), &stats::Value::Int(0))
+    let min = stats::get_or_else(items, "item_min", &stats::Value::Int(0))
         .as_int()? as usize;
-    let max = stats::get_or_else(&drops, &format!("{}_max", item), &stats::Value::Int(0))
+    let max = stats::get_or_else(items, "item_max", &stats::Value::Int(0))
         .as_int()? as usize;
+    if max < min {
+        return Err("can't generate items! max < min!".into());
+    }
     let num_runs = rng.gen_range(min, max + 1);
 
     let mut mob_drops = Stats::new();
     let mut thresholds = vec![];
     let mut sum = 0.0f64;
-    for prob in probs {
+    for prob in item_probs {
         sum += prob.as_flt()?;
         thresholds.push(sum);
     }
-    thresholds.push(sum);
 
     for _ in 0..num_runs {
         let p: f64 = rng.gen();
@@ -678,8 +709,8 @@ pub fn get_items(entity: &dyn Spawnable, item: &str) -> Result<Stats, Box<dyn Er
             if p < thresholds[i] {
                 stats::set(
                     &mut mob_drops,
-                    drop_names[i].as_string()?.as_str(),
-                    drop_per[i].clone(),
+                    item_names[i].as_string()?.as_str(),
+                    item_per[i].clone(),
                 );
                 break;
             }

@@ -19,9 +19,9 @@
 		}
 		Box drops
 		{
-			string[] drops "orange" "orange"
-			float[] drop_prob 0.001 0.999
-			int[] drop_per 1000 1
+			string[] items "orange" "orange"
+			float[] item_prob 0.001 0.999
+			int[] item_per 1000 1
 			int drop_max 1
 			int drop_min 1
 		}
@@ -45,7 +45,8 @@ So lowly, he does not deserve an image.
 			int health 10
 			int speed 5
 			int dmg 1
-			int energy 10
+			int energy 5
+			int xp 200
 			int energy_regen 1
 			float agression 0.5	
 			int physical_dmg 1
@@ -59,15 +60,15 @@ So lowly, he does not deserve an image.
 		}
 		Box drops
 		{
-			string[] drops "rusty_sword" "broken_armor" "missspelled_incantation" "bronze_coin"
-			float[] drop_prob 0.1 0.1 0.6 0.2
-			int[] drop_per 1 1 1 3
+			string[] items "rusty_sword" "broken_armor" "missspelled_incantation" "bronze_coin"
+			float[] item_prob 0.1 0.1 0.6 0.2
+			int[] item_per 1 1 1 3
 			int drop_max 3
 			int drop_min 0
 		}
-		Box items
+		Box tools
 		{
-			string[] items "obsidian_staff"	
+			string[] items "rusty_sword"	
 			float[] item_prob 1.0
 		    int item_max 1
 			int item_min 1
@@ -101,8 +102,8 @@ Box oranges
 {
 	Box quotes 
 	{
-		string[] entrance  "SUCK ME ORANGES" 
-		string[] attack  "CITRUS!" "FEEL THE WRATH OF THE ORANGES" "TRUMP SENT ME TO GET YOU!" "BIGLY" "MAGA"
+		string[] entrance  "SUCK MY ORANGES" 
+		string[] attack  "CITRUS!" "FEEL THE WRATH OF THE ORANGES" "TRUMP SENT ME TO GETCHA!" "BIGLY" "MAGA"
 		string[] player_run  "YOU HONOUR KNIGHTS WILL LOSE TO US TRUMPS!!"
 		string[] player_victory  "Here... take my oranges."
 		string[] mob_victory  "orange you glad I won" "the honour knights will lose to us trumps!" "SUCK MY ORANGES"
@@ -128,13 +129,13 @@ Box oranges
 	}
 	Box drops
 	{
-		string[] drops "orange" "trumps_orange"
-		float[] drop_prob 0.5 0.5
-		int[] drop_per 10 1
+		string[] items "orange" "trumps_orange"
+		float[] item_prob 0.5 0.5
+		int[] item_per 10 1
 		int drop_max 2
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "orange" "trumps_orange"
 		float[] item_prob 0.6 0.4
@@ -208,7 +209,7 @@ Box flying_wall
 		string[] attack  "AIRMIGRATION SHALL BE DEFEATED" "This wall is so good. SO good. trust me. bigly" 
 		string[] player_run  "good. Stay away. We dont want any bad hombres or jayanth knights in trump land"
 		string[] player_victory  "but it was clear and everything" "honour shall not win!" "I am too bigly. I win. fake news!" "FAKE NEWS!"
-		string[] mob_victory  "TRUMP TRUMP TRUMP" "Like all walls, I fly" "You are too slow!"
+		string[] mob_victory  "TRUMP TRUMP TRUMP" "Like all walls, I fly"
 	}
 	Box stats
 	{
@@ -216,7 +217,7 @@ Box flying_wall
 		int speed 1
 		int dmg 0
 		int energy 30
-		int xp 1000
+		int xp 2000
 		int energy_regen 1
 		float agression 0.5	
 		int physical_dmg 0
@@ -231,13 +232,13 @@ Box flying_wall
 	}
 	Box drops
 	{
-		string[] drops "wall_armor" "wings" "bigly_wall_staff"
-		float[] drop_prob 0.3 0.5 0.2
-		int[] drop_per 1 1
+		string[] items "wall_armor" "wings" "bigly_wall_staff"
+		float[] item_prob 0.3 0.5 0.2
+		int[] item_per 1 1
 		int drop_max 3
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "wall_staff" "wall_armor"
 		float[] item_prob 0.5 0.5
@@ -322,7 +323,7 @@ Box compooter
 		int speed 1
 		int dmg 1
 		int energy 1
-		int xp 100
+		int xp 250
 		int energy_regen 1
 		float agression 0.5	
 		int physical_dmg 0
@@ -337,13 +338,13 @@ Box compooter
 	}
 	Box drops
 	{
-		string[] drops "A+" "B+" "C-" "D+" "F" "gold_coin" "silver_coin" "bronze_coin"
-		float[] drop_prob 0.05 0.1 0.1 0.05 0.1 0.2 0.2 0.2
-		int[] drop_per 1 1 1 1 1 1 1 1
+		string[] items "A+" "B+" "C-" "D+" "F" "gold_coin" "silver_coin" "bronze_coin"
+		float[] item_prob 0.05 0.1 0.1 0.05 0.1 0.2 0.2 0.2
+		int[] item_per 1 1 1 1 1 1 1 1
 		int drop_max 8
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
@@ -425,7 +426,7 @@ Box edge
 		int speed 1
 		int dmg 1
 		int energy 1
-		int xp 100
+		int xp 400
 		int energy_regen 1
 		float agression 0.5	
 		int physical_dmg 0
@@ -440,13 +441,13 @@ Box edge
 	}
 	Box drops
 	{
-		string[] drops "dark_armor" "microsoft_edge"
-		float[] drop_prob 0.5 0.5
-		int[] drop_per 1 1
+		string[] items "dark_armor" "microsoft_edge"
+		float[] item_prob 0.5 0.5
+		int[] item_per 1 1
 		int drop_max 1
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
@@ -535,13 +536,13 @@ Box internet_explorer
 	}
 	Box drops
 	{
-		string[] drops "wooden_armor" "internet_explorer"
-		float[] drop_prob 0.5 0.5
-		int[] drop_per 1 1
+		string[] items "wooden_armor" "internet_explorer"
+		float[] item_prob 0.5 0.5
+		int[] item_per 1 1
 		int drop_max 1
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
@@ -602,7 +603,7 @@ Box rubix_cube_mage
 		int speed 1
 		int dmg 1
 		int energy 20
-		int xp 100
+		int xp 400
 		int energy_regen 1
 		float agression 0.5	
 		int physical_dmg 0
@@ -617,13 +618,13 @@ Box rubix_cube_mage
 	}
 	Box drops
 	{
-		string[] drops "honour" "rubix_cube"
-		float[] drop_prob 0.5 0.5
-		int[] drop_per 1 1
+		string[] items "honour" "rubix_cube"
+		float[] item_prob 0.5 0.5
+		int[] item_per 1 1
 		int drop_max 1
 		int drop_min 1
 	}
-	Box items
+	Box tools
 	{
 		string[] items "rubix_cube"
 		float[] item_prob 1.0
@@ -692,7 +693,7 @@ Box cursed_thomas_train
 		int speed 10
 		int dmg 1
 		int energy 20
-		int xp 100
+		int xp 250
 		int energy_regen 1
 		float agression 0.5	
 		int physical_dmg 0
@@ -707,13 +708,13 @@ Box cursed_thomas_train
 	}
 	Box drops
 	{
-		string[] drops "beating_dark_train_heart" "trainmail_armor" "trainmail_shield" "oil"
-		float[] drop_prob 0.04 0.06 0.1 0.8
-		int[] drop_per 2 1 1 10
+		string[] items "beating_dark_train_heart" "trainmail_armor" "trainmail_shield" "oil"
+		float[] item_prob 0.04 0.06 0.1 0.8
+		int[] item_per 2 1 1 10
 		int drop_max 6
 		int drop_min 3
 	}
-	Box items
+	Box tools
 	{
 		string[] items "trainmail_armor" "trainmail_shield"
 		float[] item_prob 0.5 0.5
@@ -791,7 +792,7 @@ Box sir_george_washington_bastion_of_honour
 		int speed 1
 		int dmg 1
 		int energy 50
-		int xp 100
+		int xp 5000
 		int energy_regen 2
 		float agression 0.9	
 		int physical_dmg 0
@@ -806,13 +807,13 @@ Box sir_george_washington_bastion_of_honour
 	}
 	Box drops
 	{
-		string[] drops "honour" "valiant_washingsword" "never_told_a_lie" "wig" "george_washingtons_clothing" "george_washinghead"
-		float[] drop_prob 0.1 0.1 0.2 0.2 0.2 0.2
-		int[] drop_per 20 1 1 10 1 1
+		string[] items "honour" "valiant_washingsword" "never_told_a_lie" "wig" "george_washingtons_clothing" "george_washinghead"
+		float[] item_prob 0.1 0.1 0.2 0.2 0.2 0.2
+		int[] item_per 20 1 1 10 1 1
 		int drop_max 10
 		int drop_min 5
 	}
-	Box items
+	Box tools
 	{
 		string[] items "valiant_washingsword" "george_washingtons_clothing" "never_told_a_lie"
 		float[] item_prob 0.3 0.3 0.4
@@ -897,7 +898,7 @@ Box enigma
 		int speed 1
 		int dmg 1
 		int energy 60
-		int xp 100
+		int xp 600
 		int energy_regen 3
 		float agression 0.999	
 		int physical_dmg 0
@@ -912,13 +913,13 @@ Box enigma
 	}
 	Box drops
 	{
-		string[] drops "dihydrogen_monoxide" "enigmatic_gun"
-		float[] drop_prob 0.7 0.3
-		int[] drop_per 20 1
+		string[] items "dihydrogen_monoxide" "enigmatic_gun"
+		float[] item_prob 0.7 0.3
+		int[] item_per 20 1
 		int drop_max 2
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "enigmatic_gun"
 		float[] item_prob 1.0
@@ -990,6 +991,7 @@ Box literally_jayanth
 		int health 20
 		int speed 1
 		int dmg 1
+		int xp 60
 		int energy 10
 		int energy_regen 1
 		float agression 0.01	
@@ -1005,13 +1007,13 @@ Box literally_jayanth
 	}
 	Box drops
 	{
-		string[] drops "oxford_dictionary" "dragons_blood" "physics_homework" "honour"
-		float[] drop_prob 0.1 0.1 0.799 0.001
-		int[] drop_per 2 2 1 25
+		string[] items "oxford_dictionary" "dragons_blood" "physics_homework" "honour"
+		float[] item_prob 0.1 0.1 0.799 0.001
+		int[] item_per 2 2 1 25
 		int drop_max 3
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "oxford_dictionary" "physics_homework" "honour"	
 		float[] item_prob 0.5 0.4 0.1
@@ -1092,6 +1094,7 @@ Box bank_vault
 		int health 50
 		int speed 0
 		int dmg 1
+		int xp 30
 		int energy 10
 		int energy_regen 1
 		float agression 0.01	
@@ -1107,13 +1110,13 @@ Box bank_vault
 	}
 	Box drops
 	{
-		string[] drops "bronze_coin" "silver_coin" "gold_coin" "the_journey_was_the_prize"
-		float[] drop_prob 0.15 0.1 0.05 0.7
-		int[] drop_per 1 3 10 0
+		string[] items "bronze_coin" "silver_coin" "gold_coin" "the_journey_was_the_prize"
+		float[] item_prob 0.15 0.1 0.05 0.7
+		int[] item_per 1 3 10 0
 		int drop_max 1
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "bronze_coin" "silver_coin" "gold_coin"	
 		float[] item_prob 0.5 0.4 0.1
@@ -1171,6 +1174,7 @@ Box human_person
 		int health 1000
 		int speed 20
 		int dmg 8
+		int xp 1000
 		int energy 100
 		int energy_regen 10
 		float agression 0.99
@@ -1186,13 +1190,13 @@ Box human_person
 	}
 	Box drops
 	{
-		string[] drops "robot_brain" "robot_heart" "robot_soul" "robot"
-		float[] drop_prob 0.05 0.05 0.05 0.85
-		int[] drop_per 1000 1000 1000 20
+		string[] items "robot_brain" "robot_heart" "robot_soul" "robot"
+		float[] item_prob 0.05 0.05 0.05 0.85
+		int[] item_per 1000 1000 1000 20
 		int drop_max 2
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "robot_brain" "robot_heart" "robot_soul"	
 		float[] item_prob 0.5 0.4 0.1
@@ -1228,6 +1232,7 @@ Box physics_homework
 		int speed 1
 		int dmg 1
 		int energy 1
+		int xp 300
 		int energy_regen 1
 		float agression 0.2
 		int physical_dmg 1
@@ -1242,13 +1247,13 @@ Box physics_homework
 	}
 	Box drops
 	{
-		string[] drops "newtons_laws" "the_meaning_of_the_universe" "A+" "B+" "C-" "D+" "F"
-		float[] drop_prob 0.1 0.1 0.1 0.1 0.2 0.2 0.2
-		int[] drop_per 1 1 1 1 1 1 0
+		string[] items "newtons_laws" "the_meaning_of_the_universe" "A+" "B+" "C-" "D+" "F"
+		float[] item_prob 0.1 0.1 0.1 0.1 0.2 0.2 0.2
+		int[] item_per 1 1 1 1 1 1 0
 		int drop_max 1
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "newtons_laws" "C+" "the_meaning_of_the_universe"	
 		float[] item_prob 0.5 0.4 0.1
@@ -1258,7 +1263,7 @@ Box physics_homework
 
 	LongString img
 	{
-A ball is launched at an angle of 45 degrees above the horizontal with an initial velocity of 1000 m/s. 1 secod after the ball reaches its vertex what is 
+A ball is launched at an angle of 45 degrees above the horizontal with an initial velocity of 1000 m/s. 1 second after the ball reaches its vertex what is:
 	a. the amount of drag force on the ball
 	b. the remaining time before the ball hits the ground
 	c. the ball's mass
@@ -1280,6 +1285,7 @@ Box thornsberry_ap_stats
 		int health 50
 		int speed 2
 		int dmg 5
+		int xp 440
 		int energy 10
 		int energy_regen 1
 		float agression 0.27	
@@ -1295,13 +1301,13 @@ Box thornsberry_ap_stats
 	}
 	Box drops
 	{
-		string[] drops "A"
-		float[] drop_prob 1.0
-		int[] drop_per 1
+		string[] items "A"
+		float[] item_prob 1.0
+		int[] item_per 5
 		int drop_max 1
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "A"
 		float[] item_prob 1.0
@@ -1356,6 +1362,7 @@ Box sonic_knight
 	{
 		int health 1
 		int speed 10000
+		int xp -100
 		int dmg 1
 		int energy 10
 		int energy_regen 1
@@ -1372,13 +1379,13 @@ Box sonic_knight
 	}
 	Box drops
 	{
-		string[] drops "heghead" "sonic_chops" "fest_boots"
-		float[] drop_prob 0.5 0.4 0.1
-		int[] drop_per 1 1 1
+		string[] items "heghead" "sonic_chops" "fest_boots"
+		float[] item_prob 0.5 0.4 0.1
+		int[] item_per 1 1 1
 		int drop_max 3
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "fest_boots"
 		float[] item_prob 1.0
@@ -1459,6 +1466,7 @@ Box robo_roach
 		int health 10
 		int speed 1
 		int dmg 1
+		int xp 80
 		int energy 1
 		int energy_regen 1
 		float agression 0.3	
@@ -1474,13 +1482,13 @@ Box robo_roach
 	}
 	Box drops
 	{
-		string[] drops "cockroach" "electronic_controlling_device"
-		float[] drop_prob 0.9 0.1
-		int[] drop_per 1 1
+		string[] items "cockroach" "electronic_controlling_device"
+		float[] item_prob 0.9 0.1
+		int[] item_per 1 1
 		int drop_max 4
 		int drop_min 0
 	}
-	Box items
+	Box tools
 	{
 		string[] items "electronic_controlling_device"
 		float[] item_prob 1.0

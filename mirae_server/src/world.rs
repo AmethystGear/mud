@@ -36,6 +36,7 @@ pub struct World {
     blocks: Map,
     entities: Map,
     items: stats::Stats,
+    items_tiered: HashMap<i64, Vec<String>>,
     max_entity_id: u16,
     max_block_id: u16,
     seed: i64,
@@ -44,6 +45,10 @@ pub struct World {
 impl World {
     pub fn items(&self) -> stats::Stats {
         return self.items.clone();
+    }
+
+    pub fn items_tiered(&self) -> &HashMap<i64, Vec<String>> {
+        return &self.items_tiered;
     }
 
     pub fn max_entity_id(&self) -> u16 {
@@ -109,11 +114,23 @@ pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
         items: stats::Stats::new(),
         max_entity_id: 0,
         max_block_id: 0,
-        seed: seed,
+        seed,
+        items_tiered : HashMap::new()
     };
     world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(
         ITEMS_CONFIG,
     )?)))?;
+    let item_names = stats::get_var_names(&world.items());
+    for item in item_names {
+        let spawn = stats::get_or_else(&stats::get(&world.items, &item)?.as_box()?, "spawn", &stats::Value::Box(stats::Stats::new())).as_box()?;
+        let tier = stats::get_or_else(&spawn, "tier", &stats::Value::Int(-1)).as_int()?;
+        if world.items_tiered.contains_key(&tier) {
+            world.items_tiered.get_mut(&tier).ok_or("this should never happen")?.push(item);
+        } else {
+            world.items_tiered.insert(tier, vec![item]);
+        }
+    }
+
     let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(
         File::open(TERRAIN_CONFIG)?,
     )))?;
@@ -310,12 +327,6 @@ pub fn get_entity_properties_by_id(
 
 pub fn has_entity(world: &World, x: u16, y: u16) -> bool {
     return world.entities.map[index(x, y)] != u16::MAX;
-}
-
-pub fn get_random_item(world: &World) -> String {
-    let item_names = stats::get_var_names(&world.items());
-    let mut rng = rand::thread_rng();
-    return item_names[rng.gen_range(0, item_names.len())].clone();
 }
 
 pub fn remove_entity(world: &mut World, x: u16, y: u16) {
