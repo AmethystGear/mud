@@ -7,15 +7,19 @@ use crate::player::Player;
 use crate::playerout::PlayerOut;
 use crate::scanner::Param;
 use std::io::Write;
-use std::io::{BufRead, BufReader, BufWriter};
+use std::io::{self, BufRead, BufReader, BufWriter};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
-use std::sync::{Mutex, mpsc::{Receiver, Sender}, Arc};
+use std::sync::{
+    mpsc::{Receiver, Sender},
+    Arc, Mutex,
+};
 use std::thread::spawn;
 use std::u8;
 
-use std::{time::SystemTime, error::Error};
 use action::ActionMap;
+use std::env;
+use std::{error::Error, fs::File, time::SystemTime};
 
 mod action;
 mod display;
@@ -35,6 +39,9 @@ type ConnOut = (
     Option<u8>,
 );
 type ConnIn = (PlayerOut, Option<u8>);
+
+const WORLD_SAVE: &str = "world_save";
+const DEFAULT_PORT: u64 = 31415;
 
 fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
     let action_map = action::get_action_map();
@@ -132,15 +139,25 @@ fn get_first_availible_id(players: &Vec<Option<Player>>) -> Option<u8> {
 }
 
 fn main() {
-    let server = TcpListener::bind("0.0.0.0:31415").unwrap();
+    let args: Vec<String> = env::args().collect();
+    let port: u64 = args[1].parse().unwrap();
+    let server = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
     let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
 
+    let world;
+    if args[2] == "load" {
+        let file = File::open(WORLD_SAVE).unwrap();
+        world = world::from_save(file);
+    } else {
+        let seed: i64 = args[2].parse().unwrap();
+        world = world::from_seed(seed);
+    }
+    if world.is_err() {
+        panic!("{}", world.err().unwrap());
+    }
+    let world = Arc::new(Mutex::new(world.unwrap()));
+    let world_clone = world.clone();
     spawn(move || {
-        let world = world::from_seed(0);
-        if world.is_err() {
-            panic!("{}", world.err().unwrap());
-        }
-        let mut world = world.unwrap();
         println!("generated world");
 
         let mut spawned_entities = SpawnedEntities::new();
@@ -152,11 +169,19 @@ fn main() {
         }
 
         loop {
-            let res  = recv.try_recv();
+            let res = recv.try_recv();
             // as long as there is player input to process, handle that first
             if let Ok(res) = res {
-                handle_player_inp(res, &mut players, &mut world, &mut spawned_entities, &action_map);
-            } else { // then handle any background game logic as needed.
+                let mut world = world.lock().unwrap();
+                handle_player_inp(
+                    res,
+                    &mut players,
+                    &mut world,
+                    &mut spawned_entities,
+                    &action_map,
+                );
+            } else {
+                // then handle any background game logic as needed.
 
                 // this adds time limits to pvp turns.
                 let mut opponents = vec![];
@@ -164,10 +189,19 @@ fn main() {
                     if let Some(player) = player {
                         if player::turn(player) {
                             if let Some(opponent) = player.opponent() {
-                                if SystemTime::now().duration_since(player.get_last_turn_time()).expect("time went backwards??").as_millis() > player::MAX_TURN_TIME_MILLIS {
+                                if SystemTime::now()
+                                    .duration_since(player.get_last_turn_time())
+                                    .expect("time went backwards??")
+                                    .as_millis()
+                                    > player::MAX_TURN_TIME_MILLIS
+                                {
                                     opponents.push(opponent);
                                     player::set_turn(player, false);
-                                    player::send_str(player, "You're TOO SLOW!!! Your turn is up!\n").unwrap();
+                                    player::send_str(
+                                        player,
+                                        "You're TOO SLOW!!! Your turn is up!\n",
+                                    )
+                                    .unwrap();
                                 }
                             }
                         }
@@ -177,31 +211,53 @@ fn main() {
                     let opp = players[opponent as usize].as_mut().unwrap();
                     player::set_turn(opp, true);
                     opp.set_last_turn_time(SystemTime::now());
-                    player::send_str(opp, "Your opponent was TOO SLOW!!! It's your turn now!\n").unwrap();
+                    player::send_str(opp, "Your opponent was TOO SLOW!!! It's your turn now!\n")
+                        .unwrap();
                 }
             }
         }
     });
-
-    for stream in server.incoming() {
-        match stream {
-            Err(_) => println!("listen error"),
-            Ok(stream) => {
-                println!(
-                    "connection from {} to {}",
-                    stream.peer_addr().unwrap(),
-                    stream.local_addr().unwrap()
-                );
-                let send = send.clone();
-                spawn(move || {
-                    handle_connection(stream, send);
-                });
+    spawn(move || {
+        for stream in server.incoming() {
+            match stream {
+                Err(_) => println!("listen error"),
+                Ok(stream) => {
+                    println!(
+                        "connection from {} to {}",
+                        stream.peer_addr().unwrap(),
+                        stream.local_addr().unwrap()
+                    );
+                    let send = send.clone();
+                    spawn(move || {
+                        handle_connection(stream, send);
+                    });
+                }
             }
+        }
+    });
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        if let Ok(line) = line {
+            if line == "save" {
+                let w = world_clone.lock().unwrap();
+                let save = File::open(WORLD_SAVE).unwrap();
+                world::save_to(&w, save).unwrap();
+            } else {
+                println!("did not recognize command!")
+            }
+        } else {
+            println!("could not read from stdin!");
         }
     }
 }
 
-fn handle_player_inp(data : ConnOut, players : &mut Vec<Option<Player>>, world : &mut world::World, spawned_entities : &mut SpawnedEntities, action_map : &ActionMap) {
+fn handle_player_inp(
+    data: ConnOut,
+    players: &mut Vec<Option<Player>>,
+    world: &mut world::World,
+    spawned_entities: &mut SpawnedEntities,
+    action_map: &ActionMap,
+) {
     let (keyword, params, action, sender, id) = data;
     let player_id;
     if sender.is_some() {
@@ -209,7 +265,8 @@ fn handle_player_inp(data : ConnOut, players : &mut Vec<Option<Player>>, world :
         let id = get_first_availible_id(&players);
         if id.is_none() {
             let mut p_out = PlayerOut::new();
-            let err : Result<u8, Box<dyn Error>> = Err("There are already 256 players in the game!".into());
+            let err: Result<u8, Box<dyn Error>> =
+                Err("There are already 256 players in the game!".into());
             p_out.append_err(err.err().unwrap());
             sender.send((p_out, None)).unwrap();
             return;
@@ -272,8 +329,7 @@ fn handle_player_inp(data : ConnOut, players : &mut Vec<Option<Player>>, world :
         }
         x = x_.unwrap();
         y = y_.unwrap();
-        if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y)
-        {
+        if !entities::has_entity(&spawned_entities, x, y) && world::has_entity(&world, x, y) {
             let name = world::get_entity_name(&world, x, y).unwrap();
             let stats = world::get_entity_properties(&world, x, y).unwrap().clone();
             let err = entities::spawn(stats, x, y, name.clone(), spawned_entities, world);
@@ -299,13 +355,8 @@ fn handle_player_inp(data : ConnOut, players : &mut Vec<Option<Player>>, world :
         interact = player.interact();
     }
     if entities::has_entity(&spawned_entities, x, y) && !interact {
-        let entity_action: Action = entities::get_entity_action(
-            spawned_entities,
-            "interact".to_string(),
-            x,
-            y,
-        )
-        .unwrap();
+        let entity_action: Action =
+            entities::get_entity_action(spawned_entities, "interact".to_string(), x, y).unwrap();
         let result = entity_action.run(
             Some(spawned_entities),
             None,

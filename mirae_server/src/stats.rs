@@ -11,7 +11,7 @@ use crate::scanner;
 use char_stream::CharStream;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::error::Error;
+use std::{error::Error, fs::File, io::Write};
 
 #[derive(Clone)]
 pub enum Value {
@@ -154,7 +154,7 @@ fn get_next_value(s: &mut scanner::Scanner, var_type: &str) -> Result<Value, Box
                 return Ok(Value::String(val));
             }
         }
-        _ => {return Err(format!("bad var_type {}", var_type).into())}
+        _ => return Err(format!("bad var_type {}", var_type).into()),
     };
     return Err(format!("value conversion for {} failed!", var_type).into());
 }
@@ -428,9 +428,7 @@ pub fn string(stats: &Stats) -> Result<String, Box<dyn Error>> {
     return Ok(s.string());
 }
 
-/* COULD BE USED IN THE FUTURE
-pub fn save_to(stats: &Stats, mut file : File) -> Result<(), Box<dyn Error>> {
+pub fn save_to(stats: &Stats, mut file: File) -> Result<(), Box<dyn Error>> {
     file.write_all(string(stats)?.as_bytes())?;
     return Ok(());
 }
-*/

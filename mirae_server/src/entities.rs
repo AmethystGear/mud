@@ -190,11 +190,7 @@ impl Spawnable for Mob {
     }
     fn data(&self) -> Stats {
         let mut stats = self.base_stats.clone();
-        stats::set(
-            &mut stats,
-            "tools",
-            stats::Value::Box(self.tools.clone()),
-        );
+        stats::set(&mut stats, "tools", stats::Value::Box(self.tools.clone()));
         return stats;
     }
     fn name(&self) -> String {
@@ -208,14 +204,20 @@ impl Spawnable for Mob {
 impl Mob {
     pub fn new(stats: Stats, x: u16, y: u16, name: String) -> Result<Self, Box<dyn Error>> {
         let s = stats::get(&stats, "stats")?.as_box()?;
+        let tools;
+        if stats::has_var(&stats, "tools") {
+            tools = get_items(&stats::get(&stats, "tools")?.as_box()?)?;
+        } else {
+            tools = Stats::new();
+        }
         let m = Mob {
             x: x,
             y: y,
             name: name,
             stats: s,
             entity_type: "mob".to_string(),
-            tools: get_items(&stats::get(&stats, "tools")?.as_box()?)?,
-            base_stats: stats
+            tools,
+            base_stats: stats,
         };
         return Ok(m);
     }
@@ -255,12 +257,12 @@ impl Spawnable for TradingMob {
     }
     fn data(&self) -> Stats {
         let mut stats = self.base_stats.clone();
-        stats::set(&mut stats, "trade_items", stats::Value::Box(self.trade_items.clone()));
         stats::set(
             &mut stats,
-            "tools",
-            stats::Value::Box(self.tools.clone()),
+            "trade_items",
+            stats::Value::Box(self.trade_items.clone()),
         );
+        stats::set(&mut stats, "tools", stats::Value::Box(self.tools.clone()));
         stats::set(
             &mut stats,
             "base_stats",
@@ -297,7 +299,7 @@ impl TradingMob {
             trade_items: trade_items,
             entity_type: "trading_mob".to_string(),
             tools: get_items(&stats::get(&stats, "tools")?.as_box()?)?,
-            base_stats: stats
+            base_stats: stats,
         };
         return Ok(tm);
     }
@@ -360,11 +362,15 @@ impl LootChest {
     }
 }
 
-pub fn get_random_items(num_items: usize, world: &World, tiers : Vec<i64>) -> Result<Stats, Box<dyn Error>> {
+pub fn get_random_items(
+    num_items: usize,
+    world: &World,
+    tiers: Vec<i64>,
+) -> Result<Stats, Box<dyn Error>> {
     let mut items = Stats::new();
     let mut num_items_collected = 0;
     let tiered = world.items_tiered();
-    let mut allowed_items:  Vec<String> = vec![];
+    let mut allowed_items: Vec<String> = vec![];
     for tier in tiers {
         let vec = tiered.get(&tier);
         if vec.is_some() {
@@ -533,7 +539,7 @@ pub fn trade(
             }
             out.append(format!("You traded {} of {} for {} xp. This is the best trade deal in the history of trade deals, maybe ever.\n", num_to_trade, item, num_to_trade * xp));
         } else {
-            return Err("that trade is not offered!".into())
+            return Err("that trade is not offered!".into());
         }
     } else {
         return Err("expected 0 or 2 parameters".into());
@@ -670,26 +676,19 @@ pub fn get_random_quote(
     }
 }
 
-pub fn get_items(items : &Stats) -> Result<Stats, Box<dyn Error>> {
+pub fn get_items(items: &Stats) -> Result<Stats, Box<dyn Error>> {
     let item_names = stats::get(items, "items")?.as_vec()?;
     let item_probs = stats::get(items, "item_prob")?.as_vec()?;
     let default: Vec<Value> = vec![stats::Value::Int(1i64); item_names.len()];
-    let item_per = stats::get_or_else(
-        items,
-        "item_per",
-        &stats::Value::List(default),
-    )
-    .as_vec()?;
+    let item_per = stats::get_or_else(items, "item_per", &stats::Value::List(default)).as_vec()?;
 
     if !(item_names.len() == item_probs.len() && item_probs.len() == item_per.len()) {
         return Err("invalid input for get_items".into());
     }
 
     let mut rng = rand::thread_rng();
-    let min = stats::get_or_else(items, "item_min", &stats::Value::Int(0))
-        .as_int()? as usize;
-    let max = stats::get_or_else(items, "item_max", &stats::Value::Int(0))
-        .as_int()? as usize;
+    let min = stats::get_or_else(items, "item_min", &stats::Value::Int(0)).as_int()? as usize;
+    let max = stats::get_or_else(items, "item_max", &stats::Value::Int(0)).as_int()? as usize;
     if max < min {
         return Err("can't generate items! max < min!".into());
     }

@@ -254,15 +254,17 @@ pub fn get_action_map() -> ActionMap {
             func: ActionFunc::G(wear.clone()),
         },
     );
-    add_action(&mut m,
+    add_action(
+        &mut m,
         "trade".to_string(),
         Action {
             name: "trade".to_string(),
             description: "trade with entity you are currently interacting with.\n".to_string(),
             usage: "trade|trade <trade #> <# to trade>\n".to_string(),
             keywords: "trade, sell".to_string(),
-            func: ActionFunc::G(trade.clone())
-        });
+            func: ActionFunc::G(trade.clone()),
+        },
+    );
     return m;
 }
 
@@ -688,6 +690,16 @@ pub fn attack(
                 at_name,
                 (physical_dmg + magic_dmg)
             ));
+            let player_health = format!("health: {}\n", player::get_stat(&player, "health")?);
+            let opp_health = format!("health: {}\n", player::get_stat(&opponent, "health")?);
+            out.append(format!(
+                "Your {}\nYour opponent's {}",
+                player_health, opp_health
+            ));
+            player::send_str(
+                &opponent,
+                format!("Your {}\nYour opponent's {}", opp_health, player_health),
+            )?;
             player::send_str(
                 &opponent,
                 format!(
@@ -707,24 +719,30 @@ pub fn attack(
                 player::respawn(&mut opponent, world)?;
                 return Ok(out);
             }
-            opponent.add_entity_cumulative_speed(player::get_stat(&opponent, "speed")?);
-            
-            if player.entity_cumulative_speed() <= opponent.entity_cumulative_speed() {
-                player::set_turn(&mut player, false);
-                player::set_turn(&mut opponent, true);
-                opponent.set_last_turn_time(SystemTime::now());
-                out.append("your turn has ended!\n");
-                player::send_str(&opponent, "your turn has started!\n")?;
-            } else {
-                out.append("it is still your turn.\n");
-                player.set_last_turn_time(SystemTime::now());
-                player::send_str(&opponent, "it is still your opponent's turn.\n")?;
-            }
+            out.append_player_out(do_turn(player, opponent)?);
             return Ok(out);
         }
     } else {
         return Err("You don't have enough energy for that ability!".into());
     }
+}
+
+fn do_turn(player: &mut Player, opponent: &mut Player) -> Res {
+    let mut out = PlayerOut::new();
+    opponent.add_entity_cumulative_speed(player::get_stat(&opponent, "speed")?);
+
+    if player.entity_cumulative_speed() <= opponent.entity_cumulative_speed() {
+        player::set_turn(player, false);
+        player::set_turn(opponent, true);
+        opponent.set_last_turn_time(SystemTime::now());
+        out.append("your turn has ended!\n");
+        player::send_str(&opponent, "your turn has started!\n")?;
+    } else {
+        out.append("it is still your turn.\n");
+        player.set_last_turn_time(SystemTime::now());
+        player::send_str(&opponent, "it is still your opponent's turn.\n")?;
+    }
+    return Ok(out);
 }
 
 pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut World) -> Res {
@@ -842,6 +860,11 @@ pub fn equip(
     } else {
         return Err("You can only equip one item!".into());
     }
+    if let Some(opponent_id) = player.opponent() {
+        let (player, opponent) = get_two_players(player_id, opponent_id, players)
+            .ok_or("could not get two player ids")?;
+        out.append_player_out(do_turn(player, opponent)?);
+    }
     return Ok(out);
 }
 
@@ -898,39 +921,68 @@ fn eat(
     let player = players[player_id as usize]
         .as_mut()
         .ok_or("invalid player id")?;
-    let inv = player::get_inventory(player)?;
-    let msg = "expected exactly one item!";
-    if params.len() != 1 {
-        return Err(msg.into());
+    if params.len() != 1 && params.len() != 2 {
+        return Err("expected either one or two params!".into());
     }
-    let item = params[0].as_string();
-    if item.is_err() {
-        return Err(msg.into());
+    let item = params[0].as_string()?;
+    let num_in_inv = stats::get_or_else(
+        &(player::get_inventory(&player)?),
+        &item,
+        &stats::Value::Int(0),
+    )
+    .as_int()?;
+    if num_in_inv == 0 {
+        return Err("you don't have that item!".into());
     }
-    let item = item?;
-    if stats::has_var(&inv, item.as_str()) {
-        player::remove_item_from_inventory(player, item.as_str())?;
-        let item = stats::get_or_else(
-            &world.items(),
-            item.as_str(),
-            &stats::Value::Box(stats::Stats::new()),
-        )
-        .as_box()?;
+    let num_items;
+    if params.len() == 2 {
+        if let Ok(num) = params[1].as_int() {
+            if num <= 0 {
+                return Err(format!("you can't eat {} items", num).into());
+            }
+            num_items = num;
+        } else if let Ok(string) = params[1].as_string() {
+            if string == "all" {
+                num_items = num_in_inv;
+            } else {
+                return Err("expected string to be 'all'".into());
+            }
+        } else {
+            return Err("expected either string or int as second parameter!".into());
+        }
+    } else {
+        num_items = 1;
+    }
+    if num_items > num_in_inv {
+        return Err(format!("you only have {} of that item", num_in_inv).into());
+    }
+    let item_stats = stats::get_or_else(
+        &world.items(),
+        item.as_str(),
+        &stats::Value::Box(stats::Stats::new()),
+    )
+    .as_box()?;
+    let mut out = PlayerOut::new();
+    for _ in 0..num_items {
+        player::remove_item_from_inventory(player, &item)?;
         let health_gain =
-            stats::get_or_else(&item, "health_gain", &stats::Value::Int(0)).as_int()?;
+            stats::get_or_else(&item_stats, "health_gain", &stats::Value::Int(0)).as_int()?;
         let energy_gain =
-            stats::get_or_else(&item, "energy_gain", &stats::Value::Int(0)).as_int()?;
+            stats::get_or_else(&item_stats, "energy_gain", &stats::Value::Int(0)).as_int()?;
         player::change_stat(player, "health", health_gain)?;
         player::change_stat(player, "energy", energy_gain)?;
-        let mut out = PlayerOut::new();
+        out.append(format!("you ate {}\n", &item));
         out.append(format!(
             "you got {} health, and {} energy\n",
             health_gain, energy_gain
         ));
-        return Ok(out);
-    } else {
-        return Err("you don't have that item!".into());
     }
+    if let Some(opponent_id) = player.opponent() {
+        let (player, opponent) = get_two_players(player_id, opponent_id, players)
+            .ok_or("could not get two player ids")?;
+        out.append_player_out(do_turn(player, opponent)?);
+    }
+    return Ok(out);
 }
 
 fn upgrade(params: &Vec<scanner::Param>, player_id: u8, players: &mut Vec<Option<Player>>) -> Res {
@@ -1010,8 +1062,8 @@ fn trade(
     world: &mut World,
 ) -> Res {
     let player = players[player_id as usize]
-    .as_mut()
-    .ok_or("invalid player id")?;
+        .as_mut()
+        .ok_or("invalid player id")?;
     if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
         return Err("you aren't fighting anything!".into());
     }
@@ -1022,13 +1074,15 @@ fn trade(
         player::y(player)?,
     );
     let trade_opponent = trade_opponent.ok_or("you cannot trade with this entity!")?;
-    return trade_opponent.run(
-        Some(spawned_entities),
-        None,
-        None,
-        Some(params),
-        Some(player_id),
-        Some(players),
-        Some(world),
-    ).ok_or("bad None params")?;
+    return trade_opponent
+        .run(
+            Some(spawned_entities),
+            None,
+            None,
+            Some(params),
+            Some(player_id),
+            Some(players),
+            Some(world),
+        )
+        .ok_or("bad None params")?;
 }

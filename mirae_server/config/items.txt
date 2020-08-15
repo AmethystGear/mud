@@ -61,8 +61,8 @@
     Box honour
     {
         prop edible
-        int health_gain -1
-        int energy_gain 4
+        int health_gain 1
+        int energy_gain -1
         int xp 500
         Box spawn
         {
@@ -99,7 +99,7 @@
     }
     Box robot_heart
     {
-        int xp 2
+        int xp -20
         Box spawn
         {
             float chance 1.0
@@ -108,7 +108,7 @@
     }
     Box robot_soul
     {
-        int xp 2
+        int xp -5
         Box spawn
         {
             float chance 1.0

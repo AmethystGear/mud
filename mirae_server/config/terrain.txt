@@ -4,7 +4,7 @@
         Box grass
         {
             int display 35
-            float mob_spawn_chance 0.002
+            float mob_spawn_chance 0.0
         }
 
         Box rock
@@ -34,7 +34,6 @@
         Box trump_block
         {
             int display 208
-            prop solid
             float mob_spawn_chance 1.0
         }
     }
@@ -43,8 +42,8 @@
         int octaves 6
         Box height_map
         {
-            string[] blocks "trump_block" "water" "sand" "grass" "forest" "rock"
-            float[] heights 0.2 0.45 0.55 0.8 0.9
+            string[] blocks "trump_block" "rock" "water" "sand" "grass" "forest" "rock"
+            float[] heights 0.2 0.225 0.45 0.56 0.725 0.85
         }
     }
 }

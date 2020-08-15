@@ -19,7 +19,7 @@ const DEFAULT: &str = "config/player_defaults.txt";
 const MAX_NUM_WEARS: usize = 3;
 pub const MAX_PHYSICAL_SPEED: i64 = 15;
 pub const MAX_PHYSICAL_VIEW: i64 = 15;
-pub const MAX_TURN_TIME_MILLIS : u128 = 15000;
+pub const MAX_TURN_TIME_MILLIS: u128 = 15000;
 
 pub struct Player {
     data: Stats,
@@ -30,11 +30,11 @@ pub struct Player {
     cumulative_speed: i64,
     interact: bool,
     turn: bool,
-    last_turn: SystemTime
+    last_turn: SystemTime,
 }
 
 impl Player {
-    pub fn set_last_turn_time(&mut self, time : SystemTime) {
+    pub fn set_last_turn_time(&mut self, time: SystemTime) {
         self.last_turn = time;
     }
 
@@ -179,7 +179,7 @@ pub fn from(
         turn: false,
         interact: false,
         cumulative_speed: 0,
-        last_turn: UNIX_EPOCH
+        last_turn: UNIX_EPOCH,
     });
 }
 
@@ -358,7 +358,9 @@ pub fn upgrade_stat(player: &mut Player, stat: &str) -> Result<(), Box<dyn Error
         "buffed_stats",
         Value::Box(base_stats.clone()),
     );
-    for i in 0..player.wears.len() {
+    let clone = player.wears.clone();
+    player.wears = vec![];
+    for i in 0..clone.len() {
         let name = player.wears[i].0.clone();
         let stat = player.wears[i].1.clone();
         wear(player, name, stat)?;
