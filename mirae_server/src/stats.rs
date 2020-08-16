@@ -196,7 +196,7 @@ pub fn from(s: &mut scanner::Scanner) -> Result<Stats, Box<dyn Error>> {
 
         let var_type = token.to_lowercase();
         let var_name = scanner::next(&mut line_scan)?;
-
+        println!("{}", var_name);
         let var_value: Value;
         if var_type == "int" || var_type == "float" || var_type == "string" {
             var_value = get_next_value(&mut line_scan, &var_type)?;

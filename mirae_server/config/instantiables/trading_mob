@@ -303,4 +303,73 @@ rrrrrr)vx}cXmezjIePb6Eg0dMMWPPsywwwVuwwuwx*>~~~~!!::",",_____---------------___,
 =~~~~><^^^^^^***rv|rrrr)|xixvvux|vv\|vvv?|vvrr)))rui^***r*r*)s}(TVrr**^<^<;<>~==*Vx)^^*xrv^r^~~=~rx}*==!!::::::!!!!!:!~!!::_-_.-...-------_--_,___--......-----...-.'...'``'`'`````````'''`` ``
 	}
 }
+
+Box howner_mage
+{
+	int trade_min 1
+        int trade_max 7
+	Box quotes 
+	{
+		String[] entrance "I fight with magic and for howner!"
+		String[] attack "trade with me instead!" "dont kill me I am an innocent howner mage!" "If you defeat me, I may just share some of my 'magic' powder with you *winks*"
+		String[] player-run "running is very hownerable"
+		String[] player-victory "You killed me! But you are hurt. I shall heal you..... *dies*"
+		String[] mob-victory "I fought valiantly... but I am so sorry for hurting you. :("
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 4
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 0
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0.999
+		int max_items_steal 2
+		float looting 0
+		float intelligence 0.002
+		float special 1.0
+		float special_boost 2.0
+	}
+	Box drops
+	{
+		string[] items "magic_staff" "'magic'_powder"
+		float[] item_prob 0.1 0.9
+		int[] item_per 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "magic_staff"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+                        .
+              /^\     .
+         /\   "V"
+        /__\   I      O  o
+       //..\\  I     .
+       \].`[/  I
+       /l\/j\  (]    .  O
+      /. ~~ ,\/I          .
+      \\L__j^\/I       o
+       \/--v}  I     o   .
+       |    |  I   _________
+       |    |  I c(`       ')o
+       |    l  I   \.     ,/
+     _/j  L l\_!  _//^---^\\_   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        
+	}
+}
 }

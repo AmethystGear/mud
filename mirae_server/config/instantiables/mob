@@ -1529,3 +1529,713 @@ Box robo_roach
                         ..                                              
 	}                        
 }
+Box sentinel
+{
+	Box quotes 
+	{
+		String[] entrance "THEAT-DETECTED" "*ANGRY-BOOP*"
+		String[] attack "*ANGRY-BOOP*" "PEW-PEW" "No-free-slots-left-in-suit-inventory" "suck my gravitino balls!"
+		String[] player_run "THEAT-SUBSIDING"
+		String[] player_victory "sad-boop" "*sentinel-eint xplodes*"
+		String[] mob_victory "THREAT-NEUTRALIZED"
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 1
+		int xp 100
+		int energy 1
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.1
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "pugenum" "gravitino_ball"
+		float[] item_prob 0.9 0.1
+		int[] item_per 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "gravitino_ball"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+                            @#**/**/#/#       
+                        (** .. (*/ *@@    
+                        ((.,,,,,,%.  ,*/((.#&    
+            ((////////////////////////*...(#%  
+            .(.   . ..........  *(////. .*///,.(@@    
+        @(,.      .((/(((((**. .*.///////////, *&@@  
+        @(,*..  .. .*..**,,,//*(((. ..////*,.. .*****,%@  
+    @#*..  . ,. *.,/(##%#/,,**/((/.....   ,*/********@
+    @%*. .    . .*./##%#%&#(.,*,/(/,.*(..*#///******,**@ 
+/@@(.  . .  .  * /#(###%%(.,**,//,.,...,(////********&@ 
+*@@*    .   .  .*.,//(((/,,/,*/**..,....*(///******,,#@
+@@%&/*.   ......  ,*,.,,,,*,,**..   ..  . *(////******%@ 
+/&*,       (,.... .. .,****. . .. ..  ..,*./(///******#@ 
+    @@@@@@@/,......          .  .. ,/...      .,****#@
+            @@,,#((///**,,,,.  .  /.             @@  
+                    &%%%#(..,..   /@@@@%/ &#/@   
+                        @#.*,/&@     @@,/ &@    
+                                @/.*@@@       
+                                @#*(@                           
+                        
+	}                        
+}
+Box free_food
+{
+	Box quotes 
+	{
+		String[] entrance "Hungry?"
+		String[] attack "foooood" "this food tastes good... totally not garbage!" "the taste is biiiiigly" "yummmmmm" "yummy yummy in my tummy" "Jayanth, if you are reading this, this is a reminder that your homework is due at 12:00 am today. Please finish on time unlike yesterday"
+		String[] player_run "you can run from food but you cannot hide!"
+		String[] player_victory "enjoy the free food"
+		String[] mob_victory "I WIN!"
+	}
+	Box stats
+	{
+		int health 10
+		int speed 1
+		int dmg 1
+		int xp 100
+		int energy 1
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.1
+		float intelligence 0.9
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "orange" "trumps_orange" "gop_juice" "trumps_banana" "half_eaten_bigmac" "soda_but_its_just_a_cup_no_soda" "rotten_hand" "forgotten_bloomberg_ad" "golden_trump_orange"
+		float[] item_prob 0.1 0.1 0.1 0.1 0.25 0.1 0.1 0.1 0.05
+		int[] item_per 1 1 1 1 1 1 1 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "trumps_orange"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+                                                                      
+                                         ```..-::::::---..`                                         
+                               ``.-://+++++ooo+++++++++++///---..........`                          
+                          `-:+oyyhhysssoooooosssyyyysssooooosssyysyyyyhyyyyo+:`                     
+                     ..-+oydddddhsyyhhhhhhhhhyyysssyhhhhhhyyyyyyhdhhhhhhddhyhhyo:                   
+                  `/+sydddddhysooooooooosssyyhhdhhhhhhddddddhhhhyyyhhhhyyyyyhyyy:                   
+                  +hhyhhddmmmmmddhhyysssooooyyhddmdmddddddhhhhhhhyyysssyyyyyyyo:                    
+                  -/+syyyyyyyhhhhdddddmmmddddhdmmmNmdddddddhhhyyyyyyyyyyyyyy+-`                     
+                     `+yyyyyyyyyyyyyyyyhhyhhdddmNNmmdddddhhhhhhhyyyyyyyyyyys                        
+                       /yyyyyyyyyyyyyhyyyyyyyyyhdmmddddhhhhhhhhhyyyyyyyyyyy/                        
+                        /yyyyyyyyyyyyyyhhhhhhhhhdddddddhhhhhhhhhhyyyyyyyyyy:                        
+                        `yyyyyyyyyyyyyyyyyhhhhhhddddddhhhhhhhhhhhyyyyyyyyyy.                        
+                         syhhhhhhhyyyyyyyhhhhhhhhdddddhhhhhhhhhhhyyyyyyyyhy`                        
+                         /yhhhhhhhhhhhhhhhdddhhhhhddddhhhhhhhhhhhhhyyyhhhhy                         
+                         :yyhhhhhhh i'm coming to get you shiven hhhhhhhhh              
+                         `yyyyyhhhhhhhhhhhhhhhhhhhhdddhhhhhhhhhhhhhhhhhhhy-                         
+                          +yyyyyhhhhhhhhhhhhhhhhhhhdddhhhhhhhhhhhhhhhhhhh-                          
+                           `syyyyyhhhhhhhhhhhhhhhhddddhhhhhhhhhhhhhhhhhhh.                          
+                            /yyyhhhhhhhhhhhyhhhhhhddddhhhhhhhhhhhdddhhhhh`                          
+                            -yyyhhhhhhhyyyyyyhhhhhddddhhhhhddhhddhhhhhhhh                           
+                            `yyhhdmdhhhhyyyhhhhhhhddddddddhhdhhhhhhhhhhhy                           
+                             shhhmNMNmmddhyhhhhhdddddmddddhhdhhhhhhhhhhhs                           
+                             ohhhdNMNmmmddhhhhhhdddddddddhhhdhhhhhdhhhhho                           
+                             /hhhdNMMmmmddhhhhhhdddddddddhhhdhhhhhhhhhhh+                           
+                             -yhhddhddmmdddhhhhhdddddddddhhhdhhhhhhhhhhh/                           
+                             .yhhhNhyo++ssyhhhhhdddddddddhhhdhhhhhhhhhhh:                           
+                             `yhyhNNNmmhysoyhhhhdddddddddhhhdhhhhhhhhhhh.                           
+                              syyymNNmdhhhhhhhhhdddddddddhhhdhhhhhhhhhhy`                           
+                              +yydNmmmdhhhhhhhhhdddddddddhhhdhhhhhhhho-`                            
+                              :yymNmdmdhhhhhhhhhdddddddddhhhdhhhhhhhdy+.                            
+                              .yymNddNdhhhhhyhhhdddddddddhhhdhhhhhhddmdh`                           
+                               sydNddNddhhhhhyhhddddddddhhhhhhhhhhdNmmmd-                           
+                               +ydNmdNddhhhhhyhhhdddddddhhhhhhhhhmmmdmmd.                           
+                               :yhNmdmddhhhhhhhhhdddddddhhhhhhhhdmmysmNs                            
+                               .yhNmdmddhhhhhhyhhdddddddhhhhhhhhdNNmNdh.                            
+                               `shmmdmddhhhhhhyhhdddddddhhhhhhhhdmNddy.                             
+                                +hdmddddhhhhhhyhhhhdddddhhhhhhhhdmdh+`                              
+                                `+o/:///oyyhhhyhhhhdddddhhhhhhh/-:-`                                
+                                         `-/oyyhhhhdddddhhhhdhh-                                    
+                                             `-hhhhddddhhhhhy+-                                     
+                                               yhhhhhhhhys:.                                        
+                                               .:+++++/:`                            
+                        
+	}                        
+}
+Box Trump
+{
+	Box quotes 
+	{
+		String[] entrance "I am the best president, possibly ever, no ever. Definitely ever. With the possible exception of Abraham Lincoln. No. I am the best."
+		String[] attack "Suck my oranges!" "bigly" "covfefe" "almost, certainly almost, almost victorious" "you should put my head on mount rushmore" "we trumps shall defeat the jayanth knights!"
+		String[] player_run "bigly bigly bigly" "you cant run from trump. IM GONNA GET YOU BIIIIGLY"
+		String[] player_victory "I WiN! A win for trump. You say you win but you dont. I win!"
+		String[] mob_victory "biiiiigly" "I am still coming to get you bigly" "bigly" "suck my oranges!"
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 1
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "trumps_orange" "orange" 
+		float[] item_prob 0.4 0.6
+		int[] item_per 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "trumps_orange" "taunt"
+		float[] item_prob 0.5 0.5
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+&&&&&&&@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&@@&&&&@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+&&&&&&&@@@@@@@@@@@@@@@@&@@&&%%%##((((((////////#%&&&&&&&@@&&@@@@@@@@@@@&@@@@@@@@
+&&&&&&&&&&&@@@@@@@@@@@&%##((/(((/((((//((//////**/***,*/(&&&&&&@@@@@@@@@@@@@@@@@
+&&&&&&&&&&&@&&@@&&&%#(/(///*//////////////(/((((((///****///&%&&&&@&&&&&&&&&&@@@
+&&&&&&&&&&&&&&&&%#####((/////////////////((/(((////(/****/**(/#%&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&@&%%%##%(((///*/*///*/*//////////(////////(/**///#%%&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&@&%%%%####((///////**//****/////((((((((/((/////((##%&&&&&&&&&&&&&&&
+&&&&&&&&&&&&@%%%%%####((///////****///////////(((((((((((((((/(#%&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&%%%%###(/******,,,***************//****/(///////,/%&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&@%%%(///****,,,,,*,,,,,,**,*,,,*,,,,**////////****(%&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&%%%(*********,,*,,,,,,,***,,****/*/(#//////**//*,(#&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&@#%%#//**,****//*///(#((//***/(##/*/****/*//**/(*,#%%&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&#%%#(//***////(*.,,**///*,,,,,/*//(((*,*,****///(##%%&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&%##(//****,,,,,,,,,,*,,,,,,,,,********,*****///###%#&&&&&&&&&&&&&&&
+&&&&&&&&&&&&%###((/****,,,,,,,,,,,,,,,,,,***,,,,,,,,,***////#(((/&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&#((///*****,,,,,..,,,**,,,,,,**//*,,,,***/////(#/**(%&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&****(*******,,,,,,*(/(%%(((%&%#/(*******//////*/,,#&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&,.,,,************(*,,,,,,,,,***//********////,,*,&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&#,,..***********/*,,,,,,,,/((************////,,*&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&#,,,************,,*/#*. .....(/*********//(((%&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&%##//***********%@@&&&&&&&&&@,*,,***///(((%&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&#///******,**,,*//*****/(*,,*****///(((#&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&&*(///*******,,,,,,*,,*,,/********/((((&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&&&/////****,,,,,,*(((##/*****,*/*//(((%&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&&&&*////****,,,,,,,,,,,,,,,,**/**/((#%%&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&%%&@  ,///****/*,,,,,,,,,*****/(//((##*.@&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&%(##%&&/    .(////*/(////*//*//((#((####,...,@%%%&&&&&&&&&&&&&&&&&
+&&&&&&&%(######%%%&&&,      .%@@%(((#%%%%%%%%%###(#/...... *%%&%&%#%&&&&&&&&&&&&
+((#####%%%#####%%%&&&*     /&&&&&#%&&&&@%%%%%###*.......  .*%&&&%%%%%%%#%%&&&&&&                      
+                        
+	}                        
+}
+Box coronavirus
+{
+	Box quotes 
+	{
+		String[] entrance ".."
+		String[] attack ".."
+		String[] player_run ".."
+		String[] player_victory ".."
+		String[] mob_victory ".."
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 100
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0.3	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "living_virus"
+		float[] item_prob 1.0
+		int[] item_per 1 1
+		int drop_max 4
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "living_virus"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+                       (#        ((       *(#                                    
+                     (((#      (((#      (((#       ((                          
+            #(       ((((      ((((./##(*(((#      (((#                         
+            ((((     (((#.#((((#((#(((((((((((((((#((((       ##                
+             ((((#   ##(((((((((((((((((((#(((((((((((##   #((((#               
+              /(((((((((((((((((((((((((((((((((((((##(((((((((#                
+       ((((    #((((((((((((((((((((((((((((((((((((((((((((((                  
+        #((((#(((((((((((((((((((((((((/(((((((((((((((((((((((/                
+           (((((((((((((((((((((((((((.(//(((((((((((((((((((((((((((((((#      
+          /((((((((((((((((((((((((((((/((((((((((((((((((((((((((              
+   ((((((*(((((((*(((((((((((((((((((((*(((((((((((((((((((((/((((((((((((#     
+     #(((((((((((/(((((((((((((((((((((((((((((((((((((((((((((( ,,, ###.       
+         ((((((((/(#(((@((@%(#(#(@((%%(%#((@#(@(@@((((((@((((((( ...            
+        ,((((((((/((((((((((((((((((((((((((((((((((((((((((((((((#((*          
+  #(((((#((((((((/((((((((((((((((((((((((((((((((((((((((((((((((((((((        
+     ((((((#(((((/(((((((((((((((((((((((((((((((((((((((((((((((((##((((       
+          (((((((/(((((((((((((((((((((((((((((((((((((((((((((((((   .((#      
+           ((((((/((((((((((((((((((((((((((((((((((((((((((((((##              
+        #((((((#(/((((((((((((((((((((((((((((((((((((((((((((((((((#           
+      (((((#. (((/(((((((((((((((((((((((((((((((((((((((((((((  #((((          
+                (/((((((((((((((((((((((((((((((((((((((((((((     #(((         
+            (((((/(#(#(((((((((((((((((/(((((((((((((((((( ((/(                 
+          #((((#   ((((((((((((((((((((((((((((((((((((    #((((                
+                  #((((   #(((((((((((((((((((#(#/   ((((   #(((/               
+                  (((    .((((  ,(((     (((# ((((   #((((    #(                
+                         #(((   ((((     (((( ((((,   .(((.                     
+                          ((    ((((     ((((  (((.                             
+                                #((.     #((        
+                        
+	}
+}
+Box linux
+{
+	Box quotes 
+	{
+		String[] entrance  "KEEP_IT_SIMPLE" 
+		String[] attack  "error-failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error-failed-retrieving-file"
+		String[] player_run  "Btw I use ARCH"
+		String[] player_victory  "you_ACTUALLY_set_up_the_drivers?!_HOW?!"
+		String[] mob_victory  "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!" "you learned the truth that windows is way better"
+	}
+	Box stats
+	{
+		int health 20
+		int speed 1
+		int dmg 4
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "broken_computer" "computer"
+		float[] item_prob 0.95 0.05
+		int[] item_per 100 1
+		int drop_max 1
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "broken_computer" "computer"
+		float[] item_prob 0.9 0.1
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+             
+                                                                 #####
+                                                                #######
+                   #                                            ##O#O##
+  ######          ###                                           #VVVVV#
+    ##             #                                          ##  VVV  ##
+    ##         ###    ### ####   ###    ###  ##### #####     #          ##
+    ##        #  ##    ###    ##  ##     ##    ##   ##      #            ##
+    ##       #   ##    ##     ##  ##     ##      ###        #            ###
+    ##          ###    ##     ##  ##     ##      ###       QQ#           ##Q
+    ##       # ###     ##     ##  ##     ##     ## ##    QQQQQQ#       #QQQQQQ
+    ##      ## ### #   ##     ##  ###   ###    ##   ##   QQQQQQQ#     #QQQQQQQ
+  ############  ###   ####   ####   #### ### ##### #####   QQQQQ#######QQQQQ          
+                                #((.     #((        
+                        
+	}
+}
+Box arch_linux
+{
+	Box quotes 
+	{
+		String[] entrance  "KEEP_IT_SIMPLE" 
+		String[] attack  "error-failed-retrieving-file" "YOU_MUST_SET_UP_DRIVERS" "error-failed-retrieving-file"
+		String[] player_run  "Btw I use ARCH"
+		String[] player_victory  "you_ACTUALLY_set_up_the_drivers?!_HOW?!" "you converted to windows! Now you dont have to set up drivers!"
+		String[] mob_victory  "You-have-unlearnt-windows-quite-well!!!" "COMMUNISM-WINS!!!" "you learned the truth that windows is way better"
+	}
+	Box stats
+	{
+		int health 40
+		int speed 1
+		int dmg 8
+		int xp 400
+		int energy 10
+		int energy_regen 1
+		float agression 0	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "broken_computer" "computer"
+		float[] item_prob 0.6 0.4
+		int[] item_per 100 1
+		int drop_max 1
+		int drop_min 0
+	}
+	Box tools
+	{
+		String[] items "broken_computer" "computer"
+		float[] item_prob 0.6 0.4
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+                   -`
+                  .o+`
+                 `ooo/
+                `+oooo 
+               `+oooooo 
+               -+oooooo+ 
+             `/ - ++oooo+ 
+            `/++++/+++++++ 
+           `/++++++++++++++ 
+          `/+++ooooooooooooo/`
+         ./ooosssso++osssssso+`
+        .oossssso-````/ossssss+`
+       -osssssso.       ssssssso.
+       osssssss/        osssso+++.
+     /ossssssss/        +ssssooo/-
+   `/ossssso+/ -        - /+osssso+-
+  `+sso+ -`                 `.-/+oso 
+ `++ .                           `-/+/
+ .`                                 `
+                        
+	}
+}
+Box hagget_hall
+{
+	Box quotes 
+	{
+String[] entrance  "myhfs-has-done-well"
+String[] attack  "*Communal-bathrooms!* *Tiny-Corridors!!!*"
+String[] player_run  "Atleast-you-have-some-concience"
+String[] player_victory  "*We-are-permanently-closed*"
+String[] mob_victory  "*Thanks-for-dorming-with-us,-Mwahahaha* This is totally not a prison!"
+	}
+	Box stats
+	{
+		int health 50
+		int speed 1
+		int dmg 1
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "pagliacci_pizza" "rotten_hand"
+		float[] item_prob 0.5 0.5
+		int[] item_per 1 1
+		int drop_max 2
+		int drop_min 1
+	}
+	Box tools
+	{
+		String[] items "rotten_hand"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+                           o                    
+                       _---|         _ _ _ _ _ 
+                    o   ---|     o   ]-I-I-I-[ 
+   _ _ _ _ _ _  _---|      | _---|    \ ` ' / 
+   ]-I-I-I-I-[   ---|      |  ---|    |.   | 
+    \ `   '_/       |     / \    |    | /^\| 
+     [*]  __|       ^    / ^ \   ^    | |*|| 
+     |__   ,|      / \  /    `\ / \   | ===| 
+  ___| ___ ,|__   /    /=_=_=_=\   \  |,  _|
+  I_I__I_I__I_I  (====(_________)___|_|____|____
+  \-\--|-|--/-/  |     I  [ ]__I I_I__|____I_I_| 
+   |[]      '|   | []  |`__  . [  \-\--|-|--/-/  
+   |.   | |' |___|_____I___|___I___|---------| 
+  / \| []   .|_|-|_|-|-|_|-|_|-|_|-| []   [] | 
+ <===>  |   .|-=-=-=-=-=-=-=-=-=-=-|   |    / \  
+ ] []|`   [] ||.|.|.|.|.|.|.|.|.|.||-      <===> 
+ ] []| ` |   |/////////\\\\\\\\\\.||__.  | |[] [ 
+ <===>     ' ||||| |   |   | ||||.||  []   <===>
+  \T/  | |-- ||||| | O | O | ||||.|| . |'   \T/ 
+   |      . _||||| |   |   | ||||.|| |     | |
+../|' v . | .|||||/____|____\|||| /|. . | . ./
+.|//\............/...........\........../../\\\
+                  
+	}
+}
+Box pagliacci
+{
+	Box quotes 
+	{
+String[] entrance  "Get some pizza!"
+String[] attack  "pizzzaaaaaaa" "get some pizza" "we also have cookies" "peeeetzaaaa"
+String[] player_run  "you cant run from pagliaccis"
+String[] player_victory  "your pizza is ready sir"
+String[] mob_victory  "you got killed by pizza somehow"
+	}
+	Box stats
+	{
+		int health 50
+		int speed 0
+		int dmg 0
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "pagliacci_pizza" "cookie"
+		float[] item_prob 0.9 0.1
+		int[] item_per 1 1
+		int drop_max 3
+		int drop_min 1
+	}
+	Box tools
+	{
+		String[] items "pagliacci_pizza"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+
+                                                                                
+                                                                                
+                          ```.------.------::::::::::::---..```                 
+          `````.....-----:://+++///:------:::://:::://:::::::::/::-..`          
+         `-://///:::---:://+//++++++oo++////////////++/:://::://:::--.          
+          .::///////+++oo+//+oo++sysyssssssysoo++++++++/+o+///+/:--::.          
+          `-/++ossosyso+///:/++/://+ooosso+.:osysssso+/+oo+///+//:::.           
+           .:ossso:::::::/://+//+//::::://-.-:-+sssy+/+ssso+/+///::.            
+           `./oos:--:-:/:-/::://::/-::-..-:/:--/::/+o+//::+osooso+.             
+            `-+so-----://///:::::::://:---:-...-::---.-::://+//o+.              
+             `-+----.--::::::-------:/:--::---.---....--:::::++/.               
+              `--:..----------------------:----.........::-:/:/-`               
+               `://::::----::-.-------.------......-....-.-//:-.                
+                `/+//:---:::-------:--------.--.-.---.-.-.-:/-.                 
+                `.//::::-------------:::::::------........-:-.                  
+                 `-::::::/::-----------------------:-:/:---.`                   
+                  ./::/:////:-:-----------.--...------:-..-`                    
+                   `::/:::::::-::::-------...............-.                     
+                   `.::/:--:::---------:::-...----------:-                      
+                    `-:::-----------..--------.--::--:::-`                      
+                     `.///:----::---...-:-------------:-`                       
+                      `-++/:--:+/-------....-..-.::-::-`                        
+                       `-/:---.--.-----.....----------`                         
+                       `.-:----..------.-----...--::-`                          
+                        `.-/:::...--------...-----::-                           
+                         `-:---...-/--::---.------:-                            
+                          `-------..--///:---::----`                            
+                           `--.-:-----:::-:---...-`                             
+                           ``----:/--:::------..-.                              
+                             `-::::---..----:---.                               
+                              `:///-....-:-:---.                                
+                               `:::-----:-..--.                                 
+                                .-::/:/+::---:`                                 
+                                 .://-:::----.                                  
+                                 `.:/-::----.                                   
+                                  `-//:::-:.                                    
+                                   `-::::::`                                    
+                                    `://::`                                     
+                                    `----.                                      
+                                      ``.        
+                  
+	}
+}
+Box soda_machine
+{
+	Box quotes 
+	{
+String[] entrance  "soda run time!"
+String[] attack  "feel the caffeeeeene!!!"
+String[] player_run  "you can never run from soda!"
+String[] player_victory  "have some soda"
+String[] mob_victory  "sugar is a powerful drug!"
+	}
+	Box stats
+	{
+		int health 1
+		int speed 0
+		int dmg 0
+		int xp 100
+		int energy 10
+		int energy_regen 1
+		float agression 0	
+		int physical_dmg 1
+		int magic_dmg 1
+		float physical_def 0
+		float magic_def 0
+		int max_items_steal 2
+		float looting 0.99
+		float intelligence 0
+		float special 0
+		float special_boost 0
+	}
+	Box drops
+	{
+		string[] items "green_soda" "gop_juice" "orange_soda" "red_soda"
+		float[] item_prob 0.1 0.1 0.4 0.4
+		int[] item_per 2 2 2 2
+		int drop_max 5
+		int drop_min 1
+	}
+	Box tools
+	{
+		String[] items "pagliacci_pizza"
+		float[] item_prob 1.0
+		int items_min 0
+		int items_max 2
+	}	
+
+	LongString img
+	{
+
+                                                                                
+                                                                                
+                                      `....`                                    
+                                     `syyyyy:                                   
+                                     `soooos:                                   
+                                      ::---/`                                   
+                                     `-.```..                                   
+                                     `       `                                  
+                                   .ooo+//+ooo:                                 
+                                  +dmhyso+osydmy`                               
+                                .hdyyyssoosyyhdmm/                              
+                               :ddhossooossyyyddmmo                             
+                              -hdds+so+oossyyyhdmmd+                            
+                             `yhdho+s+/+ossyyyydmmmh-                           
+                             +hhdy+os+/+osssysshdmmhy                           
+                             yhhdhssyoosyyyyyyyhdmmdh`                          
+                             +ssyyoooossssysoosyyyyys                           
+                             +ssys++oosssssoo++osysss                           
+                             +ss/+/ooosooss/:/+yo//os                           
+                             +s:o:/-+:::+o-++oos/++ss                           
+                             +s-o/o:o-/+s.+//:+:+//ss                           
+                             +s/osoo/:+ss:+o+/s/+/oss                           
+                             +syyysssyyyyyyyssyyy/oys                           
+                             +syyyssyyyyyyyyssyyy+oys                           
+                             ydddhyyysssyyyyyyhddmddh                           
+                             oddmdsyhsooyyhhhyhmmNNds                           
+                             -hmNmyyhsooyyyhhyhmNmNd/                           
+                              ddNmyshs+osyyhhydmNmmd`                           
+                              mdmmhsyy+ossyhhydmNmms                            
+                              lhhmmhsss++ssshyydmmmd+                            
+                              Mdddddyyyssyyyhhydddddy`                           
+                             dhdddhshsssyyyhhyddddmhy                           
+                             ddmddyyysosyyshyyhddmmdh`                          
+                            `hdmmhyssoossssyyyyhddmmh`                          
+                             hmNmdmyooyyyyyyyddhddmmh                           
+                             +dNmdmmyyhhhhhhdmdhdmmd+                           
+                              sNNmdmmdmmmdddmmddmmmy                            
+                               smmmmmmmmmmmmmdmNNmo                             
+                               -oyyyyhdNNmhysyddho.                             
+                                ``````.---.```````         
+                  
+	}
+}
+                                                                                
