@@ -467,7 +467,9 @@ pub fn dmg(
             entity.name()
         ));
         if stats::has_var(&entity.data(), "drops") {
+            println!("attempting drops");
             let mob_drops = get_items(&stats::get(&entity.data(), "drops")?.as_box()?)?;
+            println!("{}", stats::string(&mob_drops)?);
             out.append("you got:\n");
             out.append(stats::string(&mob_drops)?);
             out.append("and:\n");
@@ -685,12 +687,16 @@ pub fn get_items(items: &Stats) -> Result<Stats, Box<dyn Error>> {
     }
 
     let mut rng = rand::thread_rng();
-    let min = stats::get_or_else(items, "item_min", &stats::Value::Int(0)).as_int()? as usize;
-    let max = stats::get_or_else(items, "item_max", &stats::Value::Int(0)).as_int()? as usize;
+    let min = stats::get_or_else(items, "items_min", &stats::Value::Int(0)).as_int()? as usize;
+    let max = stats::get_or_else(items, "items_max", &stats::Value::Int(0)).as_int()? as usize;
+    println!("min {}, max {}", min, max);
+
     if max < min {
         return Err("can't generate items! max < min!".into());
     }
     let num_runs = rng.gen_range(min, max + 1);
+
+    println!("num runs {}", num_runs);
 
     let mut mob_drops = Stats::new();
     let mut thresholds = vec![];
@@ -703,12 +709,14 @@ pub fn get_items(items: &Stats) -> Result<Stats, Box<dyn Error>> {
     for _ in 0..num_runs {
         let p: f64 = rng.gen();
         for i in 0..thresholds.len() {
+            
             if p < thresholds[i] {
                 stats::set(
                     &mut mob_drops,
                     item_names[i].as_string()?.as_str(),
                     item_per[i].clone(),
                 );
+                println!("here");
                 break;
             }
         }

@@ -22,8 +22,8 @@
 			string[] items "orange" "orange"
 			float[] item_prob 0.001 0.999
 			int[] item_per 1000 1
-			int drop_max 1
-			int drop_min 1
+			int items_max 1
+			int items_min 1
 		}
 		LongString img
 		{
@@ -63,15 +63,15 @@ So lowly, he does not deserve an image.
 			string[] items "rusty_sword" "broken_armor" "missspelled_incantation" "bronze_coin"
 			float[] item_prob 0.1 0.1 0.6 0.2
 			int[] item_per 1 1 1 3
-			int drop_max 3
-			int drop_min 0
+			int items_max 3
+			int items_min 0
 		}
 		Box tools
 		{
 			string[] items "rusty_sword"	
 			float[] item_prob 1.0
-		    int item_max 1
-			int item_min 1
+		    int items_max 1
+			int items_min 1
 		}	
 
 		LongString img
@@ -132,8 +132,8 @@ Box oranges
 		string[] items "orange" "trumps_orange"
 		float[] item_prob 0.5 0.5
 		int[] item_per 10 1
-		int drop_max 2
-		int drop_min 0
+		int items_max 2
+		int items_min 0
 	}
 	Box tools
 	{
@@ -235,8 +235,8 @@ Box flying_wall
 		string[] items "wall_armor" "wings" "bigly_wall_staff"
 		float[] item_prob 0.3 0.5 0.2
 		int[] item_per 1 1
-		int drop_max 3
-		int drop_min 0
+		int items_max 3
+		int items_min 0
 	}
 	Box tools
 	{
@@ -341,14 +341,14 @@ Box compooter
 		string[] items "A+" "B+" "C-" "D+" "F" "gold_coin" "silver_coin" "bronze_coin"
 		float[] item_prob 0.05 0.1 0.1 0.05 0.1 0.2 0.2 0.2
 		int[] item_per 1 1 1 1 1 1 1 1
-		int drop_max 8
-		int drop_min 1
+		int items_max 8
+		int items_min 1
 	}
 	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int item_max 2
+		int items_max 2
 	}	
 
 	LongString img
@@ -444,14 +444,14 @@ Box edge
 		string[] items "dark_armor" "microsoft_edge"
 		float[] item_prob 0.5 0.5
 		int[] item_per 1 1
-		int drop_max 1
-		int drop_min 1
+		int items_max 1
+		int items_min 1
 	}
 	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int item_max 1	
+		int items_max 1	
 	}	
 
 	LongString img
@@ -539,14 +539,14 @@ Box internet_explorer
 		string[] items "wooden_armor" "internet_explorer"
 		float[] item_prob 0.5 0.5
 		int[] item_per 1 1
-		int drop_max 1
-		int drop_min 1
+		int items_max 1
+		int items_min 1
 	}
 	Box tools
 	{
 		string[] items "F"
 		float[] item_prob 1.0
-		int item_max 5	
+		int items_max 5	
 	}	
 
 	LongString img
@@ -621,14 +621,14 @@ Box rubix_cube_mage
 		string[] items "honour" "rubix_cube"
 		float[] item_prob 0.5 0.5
 		int[] item_per 1 1
-		int drop_max 1
-		int drop_min 1
+		int items_max 1
+		int items_min 1
 	}
 	Box tools
 	{
 		string[] items "rubix_cube"
 		float[] item_prob 1.0
-		int item_max 1	
+		int items_max 1	
 	}	
 
 	LongString img
@@ -711,15 +711,15 @@ Box cursed_thomas_train
 		string[] items "beating_dark_train_heart" "trainmail_armor" "trainmail_shield" "oil"
 		float[] item_prob 0.04 0.06 0.1 0.8
 		int[] item_per 2 1 1 10
-		int drop_max 6
-		int drop_min 3
+		int items_max 6
+		int items_min 3
 	}
 	Box tools
 	{
 		string[] items "trainmail_armor" "trainmail_shield"
 		float[] item_prob 0.5 0.5
-		int item_max 3
-		int item_min 1		
+		int items_max 3
+		int items_min 1		
 	}	
 
 	LongString img
@@ -810,15 +810,15 @@ Box sir_george_washington_bastion_of_honour
 		string[] items "honour" "valiant_washingsword" "never_told_a_lie" "wig" "george_washingtons_clothing" "george_washinghead"
 		float[] item_prob 0.1 0.1 0.2 0.2 0.2 0.2
 		int[] item_per 20 1 1 10 1 1
-		int drop_max 10
-		int drop_min 5
+		int items_max 10
+		int items_min 5
 	}
 	Box tools
 	{
 		string[] items "valiant_washingsword" "george_washingtons_clothing" "never_told_a_lie"
 		float[] item_prob 0.3 0.3 0.4
-		int item_max 3
-		int item_min 1		
+		int items_max 3
+		int items_min 1		
 	}	
 
 	LongString img
@@ -916,8 +916,8 @@ Box enigma
 		string[] items "dihydrogen_monoxide" "enigmatic_gun"
 		float[] item_prob 0.7 0.3
 		int[] item_per 20 1
-		int drop_max 2
-		int drop_min 0
+		int items_max 2
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1010,8 +1010,8 @@ Box literally_jayanth
 		string[] items "oxford_dictionary" "dragons_blood" "physics_homework" "honour"
 		float[] item_prob 0.1 0.1 0.799 0.001
 		int[] item_per 2 2 1 25
-		int drop_max 3
-		int drop_min 0
+		int items_max 3
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1113,8 +1113,8 @@ Box bank_vault
 		string[] items "bronze_coin" "silver_coin" "gold_coin" "the_journey_was_the_prize"
 		float[] item_prob 0.15 0.1 0.05 0.7
 		int[] item_per 1 3 10 0
-		int drop_max 1
-		int drop_min 0
+		int items_max 1
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1193,8 +1193,8 @@ Box human_person
 		string[] items "robot_brain" "robot_heart" "robot_soul" "robot"
 		float[] item_prob 0.05 0.05 0.05 0.85
 		int[] item_per 1000 1000 1000 20
-		int drop_max 2
-		int drop_min 0
+		int items_max 2
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1250,8 +1250,8 @@ Box physics_homework
 		string[] items "newtons_laws" "the_meaning_of_the_universe" "A+" "B+" "C-" "D+" "F"
 		float[] item_prob 0.1 0.1 0.1 0.1 0.2 0.2 0.2
 		int[] item_per 1 1 1 1 1 1 0
-		int drop_max 1
-		int drop_min 0
+		int items_max 1
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1304,8 +1304,8 @@ Box thornsberry_ap_stats
 		string[] items "A"
 		float[] item_prob 1.0
 		int[] item_per 5
-		int drop_max 1
-		int drop_min 0
+		int items_max 1
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1382,8 +1382,8 @@ Box sonic_knight
 		string[] items "heghead" "sonic_chops" "fest_boots"
 		float[] item_prob 0.5 0.4 0.1
 		int[] item_per 1 1 1
-		int drop_max 3
-		int drop_min 0
+		int items_max 3
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1485,8 +1485,8 @@ Box robo_roach
 		string[] items "cockroach" "electronic_controlling_device"
 		float[] item_prob 0.9 0.1
 		int[] item_per 1 1
-		int drop_max 4
-		int drop_min 0
+		int items_max 4
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1563,8 +1563,8 @@ Box sentinel
 		string[] items "pugenum" "gravitino_ball"
 		float[] item_prob 0.9 0.1
 		int[] item_per 1 1
-		int drop_max 4
-		int drop_min 0
+		int items_max 4
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1633,8 +1633,8 @@ Box free_food
 		string[] items "orange" "trumps_orange" "gop_juice" "trumps_banana" "half_eaten_bigmac" "soda_but_its_just_a_cup_no_soda" "rotten_hand" "forgotten_bloomberg_ad" "golden_trump_orange"
 		float[] item_prob 0.1 0.1 0.1 0.1 0.25 0.1 0.1 0.1 0.05
 		int[] item_per 1 1 1 1 1 1 1 1 1
-		int drop_max 4
-		int drop_min 0
+		int items_max 4
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1726,8 +1726,8 @@ Box Trump
 		string[] items "trumps_orange" "orange" 
 		float[] item_prob 0.4 0.6
 		int[] item_per 1 1
-		int drop_max 4
-		int drop_min 0
+		int items_max 4
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1806,8 +1806,8 @@ Box coronavirus
 		string[] items "living_virus"
 		float[] item_prob 1.0
 		int[] item_per 1 1
-		int drop_max 4
-		int drop_min 0
+		int items_max 4
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1885,8 +1885,8 @@ Box linux
 		string[] items "broken_computer" "computer"
 		float[] item_prob 0.95 0.05
 		int[] item_per 100 1
-		int drop_max 1
-		int drop_min 0
+		int items_max 1
+		int items_min 0
 	}
 	Box tools
 	{
@@ -1949,8 +1949,8 @@ Box arch_linux
 		string[] items "broken_computer" "computer"
 		float[] item_prob 0.6 0.4
 		int[] item_per 100 1
-		int drop_max 1
-		int drop_min 0
+		int items_max 1
+		int items_min 0
 	}
 	Box tools
 	{
@@ -2018,8 +2018,8 @@ String[] mob_victory  "*Thanks-for-dorming-with-us,-Mwahahaha* This is totally n
 		string[] items "pagliacci_pizza" "rotten_hand"
 		float[] item_prob 0.5 0.5
 		int[] item_per 1 1
-		int drop_max 2
-		int drop_min 1
+		int items_max 2
+		int items_min 1
 	}
 	Box tools
 	{
@@ -2090,8 +2090,8 @@ String[] mob_victory  "you got killed by pizza somehow"
 		string[] items "pagliacci_pizza" "cookie"
 		float[] item_prob 0.9 0.1
 		int[] item_per 1 1
-		int drop_max 3
-		int drop_min 1
+		int items_max 3
+		int items_min 1
 	}
 	Box tools
 	{
@@ -2181,8 +2181,8 @@ String[] mob_victory  "sugar is a powerful drug!"
 		string[] items "green_soda" "gop_juice" "orange_soda" "red_soda"
 		float[] item_prob 0.1 0.1 0.4 0.4
 		int[] item_per 2 2 2 2
-		int drop_max 5
-		int drop_min 1
+		int items_max 5
+		int items_min 1
 	}
 	Box tools
 	{
