@@ -7,19 +7,23 @@ use crate::player::Player;
 use crate::playerout::PlayerOut;
 use crate::scanner::Param;
 use std::io::Write;
-use std::io::{self, BufRead, BufReader, BufWriter};
+use std::io::{BufRead, BufReader, BufWriter};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::sync::{
     mpsc::{Receiver, Sender},
     Arc, Mutex,
 };
-use std::thread::spawn;
+use std::thread::{self, spawn};
 use std::u8;
 
 use action::ActionMap;
 use std::env;
-use std::{error::Error, fs::File, time::SystemTime};
+use std::{
+    error::Error,
+    fs::{self, File, OpenOptions},
+    time::{Duration, SystemTime},
+};
 
 mod action;
 mod display;
@@ -40,8 +44,186 @@ type ConnOut = (
 );
 type ConnIn = (PlayerOut, Option<u8>);
 
-const WORLD_SAVE: &str = "world_save";
-const DEFAULT_PORT: u64 = 31415;
+const SAVE: &str = "save";
+const WORLD_SAVE: &str = "save/world_save";
+const PVP_TERRAIN_CONFIG: &str = "config/terrain/pvp";
+const PVE_TERRAIN_CONFIG: &str = "config/terrain/pve";
+const PLAYER_AUTOSAVE_INTERVAL: u64 = 5;
+const WORLD_AUTOSAVE_INTERVAL: u64 = 240;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let port: u64 = args[1].parse().unwrap();
+    let server = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
+    let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
+
+    let world;
+    if args[2] == "load" {
+        let file = File::open(WORLD_SAVE).unwrap();
+        world = world::from_save(file);
+    } else {
+        let seed: i64 = args[2].parse().unwrap();
+        let file;
+        if args[3] == "pvp" {
+            file = File::open(PVP_TERRAIN_CONFIG).unwrap();
+        } else if args[3] == "pve" {
+            file = File::open(PVE_TERRAIN_CONFIG).unwrap();
+        } else {
+            panic!("expected 3rd argument to be pvp or pve!")
+        }
+        world = world::from_seed(seed, file, args[3].clone());
+    }
+    if world.is_err() {
+        panic!("{}", world.err().unwrap());
+    }
+    let world = Arc::new(Mutex::new(world.unwrap()));
+    let world_clone = world.clone();
+
+    let mut players = vec![]; // max cap of 256 players per server.
+    for _ in 0..(std::u8::MAX as usize + 1) {
+        players.push(None);
+    }
+    let players = Arc::new(Mutex::new(players));
+    let players_clone = players.clone();
+    spawn(move || {
+        println!("generated world");
+
+        let mut spawned_entities = SpawnedEntities::new();
+
+        let action_map = action::get_action_map();
+
+        loop {
+            let res = recv.try_recv();
+            // as long as there is player input to process, handle that first
+            if let Ok(res) = res {
+                let mut world = world.lock().unwrap();
+                let mut players = players.lock().unwrap();
+                handle_player_inp(
+                    res,
+                    &mut players,
+                    &mut world,
+                    &mut spawned_entities,
+                    &action_map,
+                );
+            } else {
+                // then handle any background game logic as needed.
+                // this adds time limits to pvp turns.
+                let mut players = players.lock().unwrap();
+                let mut opponents = vec![];
+                for player in &mut *players {
+                    if let Some(player) = player {
+                        if player::turn(player) {
+                            if let Some(opponent) = player.opponent() {
+                                if SystemTime::now()
+                                    .duration_since(player.get_last_turn_time())
+                                    .expect("time went backwards??")
+                                    .as_millis()
+                                    > player::MAX_TURN_TIME_MILLIS
+                                {
+                                    opponents.push(opponent);
+                                    player::set_turn(player, false);
+                                    player::send_str(
+                                        player,
+                                        "You're TOO SLOW!!! Your turn is up!\n",
+                                    )
+                                    .unwrap();
+                                }
+                            }
+                        }
+                    }
+                }
+                for opponent in opponents {
+                    let opp = players[opponent as usize].as_mut().unwrap();
+                    player::set_turn(opp, true);
+                    opp.set_last_turn_time(SystemTime::now());
+                    player::send_str(opp, "Your opponent was TOO SLOW!!! It's your turn now!\n")
+                        .unwrap();
+                }
+            }
+        }
+    });
+    spawn(move || {
+        for stream in server.incoming() {
+            match stream {
+                Err(_) => println!("listen error"),
+                Ok(stream) => {
+                    println!(
+                        "connection from {} to {}",
+                        stream.peer_addr().unwrap(),
+                        stream.local_addr().unwrap()
+                    );
+                    let send = send.clone();
+                    spawn(move || {
+                        handle_connection(stream, send);
+                    });
+                }
+            }
+        }
+    });
+    let players_world_save = players_clone.clone();
+
+    // only autosave in pve
+    if args[3] == "pve" {
+        // player autosave loop
+        spawn(move || loop {
+            {
+                let players = &mut *players_clone.lock().unwrap();
+                for player in players {
+                    let player = player.as_mut();
+                    if let Some(player) = player {
+                        let player_name = get_player_name(player).unwrap();
+                        let mut save = OpenOptions::new()
+                            .write(true)
+                            .create(true)
+                            .open(format!("{}/{}", SAVE, player_name))
+                            .unwrap();
+                        player::save_to(player, &mut save).unwrap();
+                    }
+                }
+            }
+            thread::sleep(Duration::from_secs(PLAYER_AUTOSAVE_INTERVAL));
+        });
+        // world autosave loop
+        spawn(move || loop {
+            {
+                let players = &mut *players_world_save.lock().unwrap();
+                for player in players {
+                    let player = player.as_mut();
+                    if let Some(player) = player {
+                        if player::send_str(player, "autosaving world...\n").is_err() {
+                            println!("couldn't send world autosave message!");
+                        }
+                    }
+                }
+            }
+            {
+                let w = world_clone.lock().unwrap();
+                let mut save = OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .open(WORLD_SAVE)
+                    .unwrap();
+                fs::create_dir_all(SAVE).unwrap();
+                world::save_to(&w, &mut save).unwrap();
+            }
+            {
+                let players = &mut *players_world_save.lock().unwrap();
+                for player in players {
+                    let player = player.as_mut();
+                    if let Some(player) = player {
+                        if player::send_str(player, "world saved!\n").is_err() {
+                            println!("couldn't send world autosave message!");
+                        }
+                    }
+                }
+            }
+            thread::sleep(Duration::from_secs(WORLD_AUTOSAVE_INTERVAL));
+        });
+    }
+
+    // this is to ensure none of our threads just quit
+    loop {}
+}
 
 fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
     let action_map = action::get_action_map();
@@ -138,117 +320,8 @@ fn get_first_availible_id(players: &Vec<Option<Player>>) -> Option<u8> {
     return None;
 }
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let port: u64 = args[1].parse().unwrap();
-    let server = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
-    let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
-
-    let world;
-    if args[2] == "load" {
-        let file = File::open(WORLD_SAVE).unwrap();
-        world = world::from_save(file);
-    } else {
-        let seed: i64 = args[2].parse().unwrap();
-        world = world::from_seed(seed);
-    }
-    if world.is_err() {
-        panic!("{}", world.err().unwrap());
-    }
-    let world = Arc::new(Mutex::new(world.unwrap()));
-    let world_clone = world.clone();
-    spawn(move || {
-        println!("generated world");
-
-        let mut spawned_entities = SpawnedEntities::new();
-
-        let action_map = action::get_action_map();
-        let mut players: Vec<Option<Player>> = Vec::new(); // max cap of 256 players per server.
-        for _ in 0..(std::u8::MAX as usize + 1) {
-            players.push(None);
-        }
-
-        loop {
-            let res = recv.try_recv();
-            // as long as there is player input to process, handle that first
-            if let Ok(res) = res {
-                let mut world = world.lock().unwrap();
-                handle_player_inp(
-                    res,
-                    &mut players,
-                    &mut world,
-                    &mut spawned_entities,
-                    &action_map,
-                );
-            } else {
-                // then handle any background game logic as needed.
-
-                // this adds time limits to pvp turns.
-                let mut opponents = vec![];
-                for player in &mut players {
-                    if let Some(player) = player {
-                        if player::turn(player) {
-                            if let Some(opponent) = player.opponent() {
-                                if SystemTime::now()
-                                    .duration_since(player.get_last_turn_time())
-                                    .expect("time went backwards??")
-                                    .as_millis()
-                                    > player::MAX_TURN_TIME_MILLIS
-                                {
-                                    opponents.push(opponent);
-                                    player::set_turn(player, false);
-                                    player::send_str(
-                                        player,
-                                        "You're TOO SLOW!!! Your turn is up!\n",
-                                    )
-                                    .unwrap();
-                                }
-                            }
-                        }
-                    }
-                }
-                for opponent in opponents {
-                    let opp = players[opponent as usize].as_mut().unwrap();
-                    player::set_turn(opp, true);
-                    opp.set_last_turn_time(SystemTime::now());
-                    player::send_str(opp, "Your opponent was TOO SLOW!!! It's your turn now!\n")
-                        .unwrap();
-                }
-            }
-        }
-    });
-    spawn(move || {
-        for stream in server.incoming() {
-            match stream {
-                Err(_) => println!("listen error"),
-                Ok(stream) => {
-                    println!(
-                        "connection from {} to {}",
-                        stream.peer_addr().unwrap(),
-                        stream.local_addr().unwrap()
-                    );
-                    let send = send.clone();
-                    spawn(move || {
-                        handle_connection(stream, send);
-                    });
-                }
-            }
-        }
-    });
-    let stdin = io::stdin();
-    for line in stdin.lock().lines() {
-        if let Ok(line) = line {
-            if line == "save" {
-                let w = world_clone.lock().unwrap();
-                let save = File::open(WORLD_SAVE).unwrap();
-                world::save_to(&w, save).unwrap();
-            } else {
-                println!("did not recognize command!")
-            }
-        } else {
-            println!("could not read from stdin!");
-        }
-    }
+fn get_player_name(player: &Player) -> Result<String, Box<dyn Error>> {
+    return stats::get(&stats::get(player.data(), "identity")?.as_box()?, "name")?.as_string();
 }
 
 fn handle_player_inp(

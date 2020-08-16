@@ -183,26 +183,48 @@ pub fn from(
     });
 }
 
-/*
-pub fn login(player : &mut Player, save : File) -> Result<(), Box<dyn Error>> {
-    let mut player_data : Stats = stats::from(&mut scanner::from(CharStream::from_file(save)));
-    let a = stats::get(player.data(), "identity")?.as_box()?;
-    let id = stats::get(&a, "id")?;
-    let mut player_identifiers = stats::get(&player_data, "identity")?.as_box()?;
-    stats::set(&mut player_identifiers, "id", id.clone());
-    stats::set(&mut player_data, "identity", Value::Box(player_identifiers));
-    player.data = player_data;
+pub fn login(player: &mut Player, save: File, world: &World) -> Result<(), Box<dyn Error>> {
+
+    let player_data: Stats = stats::from(&mut scanner::from(CharStream::from_file(save)))?;
+    if world.gamemode() == "pve" {
+        player.data = player_data;
+    } else if world.gamemode() == "pvp" {
+        let mut stats_sum = 0;
+        let base_stats = stats::get(&player_data, "base_stats")?.as_box()?;
+        for name in stats::get_var_names(&base_stats) {
+            stats_sum += stats::get(&base_stats, &name)?.as_int()?;
+        }
+        change_xp(player, -xp(player)?)?;
+        change_xp(player, stats_sum * 100)?;
+    } else {
+        return Err("gamemode should be pvp or pve!".into());
+    }
+    player.opponent = None;
+    player.equip = None;
+    player.wears = vec![];
+    player.turn = false;
+    player.interact = false;
+    player.cumulative_speed = 0;
+    player.last_turn = UNIX_EPOCH;
+    let mut rng = rand::thread_rng();
+    let mut x = rng.gen_range(0, world.map_size());
+    let mut y = rng.gen_range(0, world.map_size());
+    while stats::has_prop(world::get_block(world, x, y)?, "solid") {
+        x = rng.gen_range(0, world.map_size());
+        y = rng.gen_range(0, world.map_size());
+    }
+    set_posn(player, x, y)?;
+    return Ok(());
 }
-*/
 
 pub fn respawn(player: &mut Player, world: &World) -> Result<(), Box<dyn Error>> {
     let mut rng = rand::thread_rng();
-    let mut x = rng.gen_range(0, world::MAP_SIZE);
-    let mut y = rng.gen_range(0, world::MAP_SIZE);
+    let mut x = rng.gen_range(0, world.map_size());
+    let mut y = rng.gen_range(0, world.map_size());
 
     while stats::has_prop(world::get_block(world, x, y)?, "solid") {
-        x = rng.gen_range(0, world::MAP_SIZE);
-        y = rng.gen_range(0, world::MAP_SIZE);
+        x = rng.gen_range(0, world.map_size());
+        y = rng.gen_range(0, world.map_size());
     }
     set_posn(player, x, y)?;
     reset_to_base(player)?;
@@ -366,5 +388,22 @@ pub fn upgrade_stat(player: &mut Player, stat: &str) -> Result<(), Box<dyn Error
         wear(player, name, stat)?;
     }
     reset_to_base(player)?;
+    return Ok(());
+}
+
+pub fn save_to(player: &mut Player, file: &mut File) -> Result<(), Box<dyn Error>> {
+    let clone = player.wears.clone();
+    unwear_all(player)?;
+    stats::save_to(player.data(), file)?;
+    for item in clone {
+        wear(player, item.0, item.1)?;
+    }
+    return Ok(());
+}
+
+pub fn set_name(player: &mut Player, name: String) -> Result<(), Box<dyn Error>> {
+    let mut id_box = stats::get(player.data(), "identity")?.as_box()?;
+    stats::set(&mut id_box, "name", Value::String(name));
+    stats::set(&mut player.data, "identity", Value::Box(id_box));
     return Ok(());
 }

@@ -197,8 +197,6 @@ pub fn from(s: &mut scanner::Scanner) -> Result<Stats, Box<dyn Error>> {
         let var_type = token.to_lowercase();
         let var_name = scanner::next(&mut line_scan)?;
 
-        println!("var_name {}", var_name);
-
         let var_value: Value;
         if var_type == "int" || var_type == "float" || var_type == "string" {
             var_value = get_next_value(&mut line_scan, &var_type)?;
@@ -428,7 +426,7 @@ pub fn string(stats: &Stats) -> Result<String, Box<dyn Error>> {
     return Ok(s.string());
 }
 
-pub fn save_to(stats: &Stats, mut file: File) -> Result<(), Box<dyn Error>> {
+pub fn save_to(stats: &Stats, file: &mut File) -> Result<(), Box<dyn Error>> {
     file.write_all(string(stats)?.as_bytes())?;
     return Ok(());
 }

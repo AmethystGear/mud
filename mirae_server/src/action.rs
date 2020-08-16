@@ -15,13 +15,17 @@ use char_stream::CharStream;
 use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::error::Error;
-use std::{time::SystemTime, u8};
+use std::{
+    fs::{File, OpenOptions},
+    time::SystemTime,
+    u8,
+};
 
 type Res = std::result::Result<PlayerOut, Box<dyn Error>>;
 
 #[derive(Clone)]
 pub enum ActionFunc {
-    A(fn(&mut Vec<Option<Player>>, &mut World) -> Res),
+    A(fn(&Vec<scanner::Param>, &mut Vec<Option<Player>>, &mut World) -> Res),
     B(fn(String, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
     C(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
     D(fn(u8, &mut Vec<Option<Player>>, &mut World) -> Res),
@@ -59,7 +63,7 @@ impl Action {
         world: Option<&mut World>,
     ) -> Option<Res> {
         let result: Res = match self.func {
-            ActionFunc::A(x) => x(players?, world?),
+            ActionFunc::A(x) => x(params?, players?, world?),
             ActionFunc::B(x) => x(keyword?, params?, player_id?, players?, world?),
             ActionFunc::C(x) => x(params?, player_id?, players?, world?),
             ActionFunc::D(x) => x(player_id?, players?, world?),
@@ -174,6 +178,17 @@ pub fn get_action_map() -> ActionMap {
             usage: "map".to_string(),
             keywords: "map, world".to_string(),
             func: ActionFunc::A(map.clone()),
+        },
+    );
+    add_action(
+        &mut m,
+        "login".to_string(),
+        Action {
+            name: "login".to_string(),
+            description: "login.\n".to_string(),
+            usage: "login <name>".to_string(),
+            keywords: "login".to_string(),
+            func: ActionFunc::C(login.clone()),
         },
     );
     add_action(&mut m,
@@ -292,17 +307,11 @@ fn bind(a: i32, min: i32, max: i32) -> i32 {
     }
 }
 
-fn displace(x_origin: i32, y_origin: i32, x_axis: bool, dist: i32) -> (i32, i32) {
+fn displace(x_origin: i32, y_origin: i32, x_axis: bool, dist: i32, map_size: u16) -> (i32, i32) {
     if x_axis {
-        return (
-            bind(x_origin + dist, 0, (world::MAP_SIZE - 1) as i32),
-            y_origin,
-        );
+        return (bind(x_origin + dist, 0, (map_size - 1) as i32), y_origin);
     } else {
-        return (
-            x_origin,
-            bind(y_origin + dist, 0, (world::MAP_SIZE - 1) as i32),
-        );
+        return (x_origin, bind(y_origin + dist, 0, (map_size - 1) as i32));
     }
 }
 
@@ -313,11 +322,23 @@ fn get_step(
     num_units: i32,
     world: &World,
 ) -> Result<(u16, u16), Box<dyn Error>> {
-    let max = displace(x_origin, y_origin, x_axis, num_units);
-    let mut current = displace(x_origin, y_origin, x_axis, num_units.signum());
+    let max = displace(x_origin, y_origin, x_axis, num_units, world.map_size());
+    let mut current = displace(
+        x_origin,
+        y_origin,
+        x_axis,
+        num_units.signum(),
+        world.map_size(),
+    );
     let mut backtrack = false;
     while !(current.0 == max.0 && current.1 == max.1) {
-        current = displace(current.0, current.1, x_axis, num_units.signum());
+        current = displace(
+            current.0,
+            current.1,
+            x_axis,
+            num_units.signum(),
+            world.map_size(),
+        );
         let block = world::get_block(world, current.0 as u16, current.1 as u16)?;
         if stats::has_prop(block, "solid") {
             backtrack = true;
@@ -345,7 +366,13 @@ fn get_step(
     }
     let end;
     if backtrack {
-        end = displace(current.0, current.1, x_axis, -num_units.signum());
+        end = displace(
+            current.0,
+            current.1,
+            x_axis,
+            -num_units.signum(),
+            world.map_size(),
+        );
     } else {
         end = current;
     }
@@ -512,22 +539,32 @@ fn disp(player_id: u8, players: &mut Vec<Option<Player>>, world: &mut World) -> 
     let img = display::Img {
         x_origin: x,
         y_origin: y,
-        x_length: std::cmp::min(2 * view + 1, world::MAP_SIZE - x),
-        y_length: std::cmp::min(2 * view + 1, world::MAP_SIZE - y),
+        x_length: std::cmp::min(2 * view + 1, world.map_size() - x),
+        y_length: std::cmp::min(2 * view + 1, world.map_size() - y),
         resolution: 1,
     };
     out.append_img(world, players, img)?;
     return Ok(out);
 }
 
-fn map(players: &mut Vec<Option<Player>>, world: &mut World) -> Res {
+fn map(params: &Vec<scanner::Param>, players: &mut Vec<Option<Player>>, world: &mut World) -> Res {
+    let size;
+    if params.len() == 0 {
+        size = 25;
+    } else {
+        size = params[0].as_int()?;
+    }
+    if size <= 0 || size >= world.map_size() as i64 {
+        return Err(format!("you can't display a map of size {}", size).into());
+    }
+    let size = size as u16;
     let mut out = PlayerOut::new();
     let img = display::Img {
         x_origin: 0,
-        x_length: world::MAP_SIZE,
+        x_length: world.map_size(),
         y_origin: 0,
-        y_length: world::MAP_SIZE,
-        resolution: world::MAP_SIZE / 25,
+        y_length: world.map_size(),
+        resolution: world.map_size() / size,
     };
     out.append_img(world, players, img)?;
     return Ok(out);
@@ -1085,4 +1122,38 @@ fn trade(
             Some(world),
         )
         .ok_or("bad None params")?;
+}
+
+pub fn login(
+    params: &Vec<scanner::Param>,
+    player_id: u8,
+    players: &mut Vec<Option<Player>>,
+    world: &mut World,
+) -> Res {
+    let player = &mut players[player_id as usize]
+        .as_mut()
+        .ok_or("bad player id")?;
+
+    if player.opponent().is_some() {
+        return Err("you can't login while fighting an opponent!".into());
+    }
+
+    let mut out = PlayerOut::new();
+    let name = params
+        .get(0)
+        .ok_or("expected exactly one parameter")?
+        .as_string()?;
+    let path = format!("{}/{}", crate::SAVE, name);
+
+    let save = File::open(path);
+    if save.is_err() {
+        player::set_name(player, name)?;
+        out.append("There is no save file under that name. Making a new account.\n");
+    } else {
+        let save = save?;
+        player::login(player, save, world)?;
+        player::set_name(player, name)?;
+        out.append("logged in successfully.\n");
+    }
+    return Ok(out);
 }

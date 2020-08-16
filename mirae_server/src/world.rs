@@ -11,7 +11,6 @@ use std::fs;
 use std::fs::File;
 use std::u16;
 
-pub const MAP_SIZE: u16 = 200;
 const ENTITIES_CONFIG_DIR: &str = "config/instantiables/";
 const ITEMS_CONFIG: &str = "config/items.txt";
 const TERRAIN_CONFIG: &str = "config/terrain.txt";
@@ -23,11 +22,11 @@ struct Map {
 }
 
 impl Map {
-    pub fn new() -> Self {
+    pub fn new(size: u16) -> Self {
         Map {
             id_to_name: HashMap::new(),
             name_to_stats: HashMap::new(),
-            map: vec![u16::MAX; (MAP_SIZE as usize) * (MAP_SIZE as usize)],
+            map: vec![u16::MAX; (size as usize) * (size as usize)],
         }
     }
 }
@@ -39,7 +38,9 @@ pub struct World {
     items_tiered: HashMap<i64, Vec<String>>,
     max_entity_id: u16,
     max_block_id: u16,
+    map_size: u16,
     seed: i64,
+    gamemode: String
 }
 
 impl World {
@@ -57,6 +58,14 @@ impl World {
 
     pub fn max_block_id(&self) -> u16 {
         return self.max_block_id;
+    }
+
+    pub fn map_size(&self) -> u16 {
+        return self.map_size;
+    }
+
+    pub fn gamemode(&self) -> String {
+        return self.gamemode.clone();
     }
 }
 
@@ -145,14 +154,20 @@ fn tier_items(world: &mut World) -> Result<(), Box<dyn Error>> {
     return Ok(());
 }
 
-pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
+pub fn from_seed(seed: i64, terrain_config: File, gamemode : String) -> Result<World, Box<dyn Error>> {
+    let terrain_configuration =
+        stats::from(&mut scanner::from(CharStream::from_file(terrain_config)))?;
+    let terrain_params = stats::get(&terrain_configuration, "terrain_parameters")?.as_box()?;
+    let map_size = stats::get(&terrain_params, "map_size")?.as_int()? as u16;
     let mut world = World {
-        blocks: Map::new(),
-        entities: Map::new(),
+        blocks: Map::new(map_size),
+        entities: Map::new(map_size),
         items: stats::Stats::new(),
         max_entity_id: 0,
         max_block_id: 0,
+        map_size,
         seed,
+        gamemode,
         items_tiered: HashMap::new(),
     };
     world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(
@@ -161,17 +176,12 @@ pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
 
     tier_items(&mut world)?;
 
-    let terrain_configuration = stats::from(&mut scanner::from(CharStream::from_file(
-        File::open(TERRAIN_CONFIG)?,
-    )))?;
-
     world.max_block_id = get_blocks(&mut world, &terrain_configuration, true)? as u16;
 
     // generate terrain based on parameters provided
-    let terrain_params = stats::get(&terrain_configuration, "terrain_parameters")?.as_box()?;
     let octaves = stats::get(&terrain_params, "octaves")?.as_int()?;
     let perlin_noise =
-        perlin_noise::generate_perlin_noise(MAP_SIZE, MAP_SIZE, octaves as u8, world.seed);
+        perlin_noise::generate_perlin_noise(map_size, map_size, octaves as u8, world.seed);
 
     let height_map = stats::get(&terrain_params, "height_map")?.as_box()?;
     let height_blocks = stats::get(&height_map, "blocks")?.as_vec()?;
@@ -214,13 +224,14 @@ pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
     world.max_entity_id = last_id as u16;
 
     let mut rng = rand::thread_rng();
-    for y in 0..MAP_SIZE {
-        for x in 0..MAP_SIZE {
+    for y in 0..map_size {
+        for x in 0..map_size {
             let block: &stats::Stats = get_block(&world, x, y)?;
             if stats::has_var(block, "mob_spawn_chance") {
                 let spawn_chance = stats::get(block, "mob_spawn_chance")?.as_flt()?;
                 if rng.gen::<f64>() < spawn_chance {
-                    world.entities.map[index(x, y) as usize] = rng.gen_range(0, last_id) as u16;
+                    world.entities.map[index(x, y, world.map_size) as usize] =
+                        rng.gen_range(0, last_id) as u16;
                 }
             }
         }
@@ -229,16 +240,19 @@ pub fn from_seed(seed: i64) -> Result<World, Box<dyn Error>> {
 }
 
 pub fn from_save(file: File) -> Result<World, Box<dyn Error>> {
+    let stats = stats::from(&mut scanner::from(CharStream::from_file(file)))?;
+    let map_size = stats::get(&stats, "map_size")?.as_int()? as u16;
     let mut world = World {
-        blocks: Map::new(),
-        entities: Map::new(),
+        blocks: Map::new(map_size),
+        entities: Map::new(map_size),
         items: stats::Stats::new(),
         max_entity_id: 0,
         max_block_id: 0,
-        seed: 0,
+        map_size,
+        seed: stats::get(&stats, "seed")?.as_int()?,
+        gamemode: stats::get(&stats, "gamemode")?.as_string()?,
         items_tiered: HashMap::new(),
     };
-    let stats = stats::from(&mut scanner::from(CharStream::from_file(file)))?;
     world.items = stats::from(&mut scanner::from(CharStream::from_file(File::open(
         ITEMS_CONFIG,
     )?)))?;
@@ -253,19 +267,25 @@ pub fn from_save(file: File) -> Result<World, Box<dyn Error>> {
         world.entities.map[i] = entity_map[i].as_int()? as u16;
     }
 
-    // get seed from stats
-    world.seed = stats::get(&stats, "seed")?.as_int()?;
-
     let mut entities = stats::get(&stats, "entities")?.as_box()?;
     world.max_entity_id = get_entities(&mut world, &mut entities, None, None)? as u16;
     return Ok(world);
 }
 
-pub fn save_to(world: &World, file: File) -> Result<(), Box<dyn Error>> {
+pub fn save_to(world: &World, file: &mut File) -> Result<(), Box<dyn Error>> {
     let mut stats = stats::Stats::new();
-    // add seed to stats
+    // add seed and map_size to stats
     stats::set(&mut stats, "seed", stats::Value::Int(world.seed));
-
+    stats::set(
+        &mut stats,
+        "map_size",
+        stats::Value::Int(world.map_size as i64),
+    );
+    stats::set(
+        &mut stats,
+        "gamemode",
+        stats::Value::String(world.gamemode()),
+    );
     // create and add terrain to stats
     let mut terrain = stats::Stats::new();
     let mut block_map = Vec::new();
@@ -285,30 +305,30 @@ pub fn save_to(world: &World, file: File) -> Result<(), Box<dyn Error>> {
     stats::set(&mut stats, "terrain", stats::Value::Box(terrain));
 
     let mut entities = stats::Stats::new();
-    for (name, entity) in world.blocks.name_to_stats.clone() {
+    for (name, entity) in world.entities.name_to_stats.clone() {
         stats::set(&mut entities, name.as_str(), stats::Value::Box(entity));
     }
     stats::set(&mut stats, "entities", stats::Value::Box(entities));
     return stats::save_to(&stats, file);
 }
 
-fn index(x: u16, y: u16) -> usize {
-    return (y as usize) * (MAP_SIZE as usize) + (x as usize);
+fn index(x: u16, y: u16, map_size: u16) -> usize {
+    return (y as usize) * (map_size as usize) + (x as usize);
 }
 
 pub fn get_block_id(world: &World, x: u16, y: u16) -> u16 {
-    return world.blocks.map[index(x, y)];
+    return world.blocks.map[index(x, y, world.map_size)];
 }
 
 pub fn get_entity_id(world: &World, x: u16, y: u16) -> u16 {
-    return world.entities.map[index(x, y)];
+    return world.entities.map[index(x, y, world.map_size)];
 }
 
 pub fn get_block(world: &World, x: u16, y: u16) -> Result<&stats::Stats, Box<dyn Error>> {
     let block_name = world
         .blocks
         .id_to_name
-        .get(&world.blocks.map[index(x, y) as usize])
+        .get(&world.blocks.map[index(x, y, world.map_size) as usize])
         .ok_or("no block exists with this ID!")?;
     return Ok(world
         .blocks
@@ -335,7 +355,7 @@ pub fn get_entity_name(world: &World, x: u16, y: u16) -> Option<String> {
     let name = world
         .entities
         .id_to_name
-        .get(&world.entities.map[index(x, y) as usize]);
+        .get(&world.entities.map[index(x, y, world.map_size) as usize]);
     if name.is_none() {
         return None;
     } else {
@@ -366,9 +386,9 @@ pub fn get_entity_properties_by_id(
 }
 
 pub fn has_entity(world: &World, x: u16, y: u16) -> bool {
-    return world.entities.map[index(x, y)] != u16::MAX;
+    return world.entities.map[index(x, y, world.map_size)] != u16::MAX;
 }
 
 pub fn remove_entity(world: &mut World, x: u16, y: u16) {
-    world.entities.map[index(x, y)] = u16::MAX;
+    world.entities.map[index(x, y, world.map_size)] = u16::MAX;
 }

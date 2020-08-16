@@ -39,6 +39,7 @@
     }
 
     Box terrain_parameters {
+        int map_size 200
         int octaves 6
         Box height_map
         {
