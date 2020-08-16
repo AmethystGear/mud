@@ -130,6 +130,7 @@ impl PlayerOut {
         return self.packets.pop_front();
     }
 
+    /*
     pub fn append_player_out(&mut self, mut p_out: PlayerOut) {
         let most_recent_pkt = self.packets.pop_back();
         let first_p_out = p_out.get_pkt();
@@ -153,6 +154,15 @@ impl PlayerOut {
                 .push_back(pkt.expect("pkt should never be none in loop"));
             pkt = p_out.get_pkt();
         }
+    }
+    */
+
+    pub fn append_player_out(&mut self, mut p_out: PlayerOut) {
+        let mut pkt = p_out.get_pkt();
+        while let Some(p) = pkt {
+            self.packets.push_back(p);
+            pkt = p_out.get_pkt();
+        }        
     }
 
     pub fn add_pkt(&mut self, p: Packet) {

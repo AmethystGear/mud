@@ -651,11 +651,6 @@
                 int physical_dmg 1
                 int energy_cost 4	
             }
-                    Box annoy
-            {
-                int physical_dmg 1
-                int energy_cost 4	
-            }
             Box pray_to_the_gods_of_17
             {
                 int physical_dmg -1
@@ -762,5 +757,448 @@
             float chance 0.15
             int tier 2
         }
+    }
+    Box gravitino_ball
+    {
+        prop edible
+        prop equipable
+        Box spawn
+        {
+            float chance 0.05
+            int tier 0
+        }
+        int xp 200
+        int health_gain 10
+	int energy_gain 5
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 2.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box blinding_light
+            {
+                int physical_dmg -50
+                int energy_cost -50
+                prop destroys_item
+            }
+            Box chuck_ball
+            {
+                int magic_dmg 6
+                int energy_cost 3
+            }
+        } 
+    }
+    Box pugenum
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 0.35
+            int tier 4
+        }
+        int health_gain -5
+	int energy_gain 2
+        int xp 100
+
+    }
+    Box gop_juice
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 0.35
+            int tier 2
+        }
+        int health_gain 10
+	int energy_gain -10
+        int xp 100
+
+    }
+    Box trumps_banana
+    {
+        prop edible
+        prop equipable
+        int health_gain -20
+	int energy_gain 100
+        int xp 17
+        Box buffs
+        {
+            float health 0.3
+            float dmg 1.2
+            float view 0.2
+            float physical_dmg 0.1
+            float physical_def 0.3
+            float magic_dmg 0.3
+            float magic_def 0.2
+        }
+        Box abilities
+        {
+            Box banorange
+            {
+                int physical_dmg -600
+                int energy_cost -1
+                prop destroys_item
+            }
+        }
+        Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
+    }
+    Box half_eaten_bigmac
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -3
+	int energy_gain 1
+        int xp 10
+
+    }
+    Box soda_but_its_just_a_cup_no_soda
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -5
+	int energy_gain 1
+        int xp 10
+
+    }
+    Box rotten_hand
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -5
+	int energy_gain -5
+        int xp -5
+
+    }
+    Box forgotten_bloomberg_ad
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -5
+	int energy_gain -5
+        int xp -5
+
+    }
+    Box golden_trump_orange
+    {
+        prop edible
+        int health_gain 50
+	int energy_gain 30
+        int xp 3000
+
+    }
+    Box taunt
+    {
+        prop equipable
+        int xp 200
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain 2
+	int energy_gain -1
+        Box abilities
+        {
+            Box you_suck
+            {
+                int magic_dmg 1
+                int energy_cost 0
+            }
+            Box enjoy_the_heal_idiot
+            {
+                int magic_dmg -1
+                int energy_cost 0
+            }
+            Box you_are_too_slow
+            {
+                int magic_dmg 1
+                int energy_cost 0
+            }
+            Box suck_my_oranges
+            {
+                int magic_dmg 1
+                int energy_cost 0
+            }
+            Box jayanth_you_are_dumb
+            {
+                int magic_dmg 1
+                int energy_cost 0		
+            }
+            Box shiven_you_are_dumb
+            {
+                int magic_dmg 1
+                int energy_cost -1			
+            }
+            Box ben_you_are_dumb
+            {
+                int magic_dmg -1
+                int energy_cost -1			
+            }
+            Box you_have_no_honour
+            {
+                int magic_dmg -1
+                int energy_cost -1		
+            }	    
+	    Box spit_on_opponent
+            {
+                int magic_dmg -1
+                int energy_cost -1		
+            }	    
+        }
+    }
+    Box living_virus
+    {
+        prop equipable
+        int xp 200
+        prop edible
+	Box spawn
+        {
+            float chance 0.1
+            int tier 1
+        }
+        int health_gain 2
+	int energy_gain -1
+        Box buffs
+        {
+            float health 1.0
+            float speed 1.0
+            float dmg 1.0
+            float view 1.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 2.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box infect
+            {
+                int magic_dmg 10
+                int energy_cost 3
+            }
+        
+        }
+    }
+    Box 'magic'_powder
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -1
+	int energy_gain 3
+        int xp 35
+
+    }
+    Box magic_staff
+    {
+        prop equipable
+        int xp 200
+        prop edible
+	Box spawn
+        {
+            float chance 0.1
+            int tier 0
+        }
+        int health_gain 2
+	int energy_gain -1
+        Box buffs
+        {
+            float health 1.5
+            float speed 1.0
+            float dmg 1.5
+            float view 1.5
+            float physical_dmg 0.2
+            float physical_def 0.2
+            float magic_dmg 1.5
+            float magic_def 1.5
+        }
+        Box abilities
+        {
+            Box hownerable_light
+            {
+                int magic_dmg -2
+                int energy_cost -3
+            }
+            Box hownerable_energy_storm
+            {
+                int magic_dmg -200
+                int energy_cost -300
+            }
+            Box show_of_valor
+            {
+                int magic_dmg 3
+                int energy_cost 1
+            }
+	    Box summon_howner_knight
+            {
+                int magic_dmg 10
+                int energy_cost 5
+            }
+	    Box summon_howner_dragon
+            {
+                int magic_dmg 30
+                int energy_cost 10
+            }
+        
+        }
+    }
+    Box computer
+    {
+        prop equipable
+        int xp 200
+        prop edible
+        int health_gain 2
+	int energy_gain -1
+        Box buffs
+        {
+            float health 1.5
+            float speed 2.0
+            float dmg 1.0
+            float view 4.0
+            float physical_dmg 1.0
+            float physical_def 1.0
+            float magic_dmg 1.0
+            float magic_def 1.0
+        }
+        Box abilities
+        {
+            Box google_search
+            {
+                int magic_dmg 1
+                int energy_cost -5
+            }
+            Box hack_opponent
+            {
+                int magic_dmg 6
+                int energy_cost 1
+            }
+            Box send_virus
+            {
+                int magic_dmg 50
+                int energy_cost 15
+            }
+	    Box beep_boop
+            {
+                int magic_dmg 12
+                int energy_cost 5
+            }
+	    Box explode_computer
+            {
+                int magic_dmg 30
+                int energy_cost 10
+            }
+        
+        }
+    }
+    Box broken_computer
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 5
+        }
+        int health_gain -20
+	int energy_gain 300
+        int xp 5
+
+    }
+    
+    Box pagliacci_pizza
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
+        int health_gain 3
+	int energy_gain 0
+        int xp 5
+
+    }
+    Box cookie
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 0
+        }
+        int health_gain 10
+	int energy_gain 5
+        int xp 5
+
+    }
+    Box red_soda
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 4
+        }
+        int health_gain 1
+	int energy_gain 1
+        int xp 25
+
+    }
+    Box orange_soda
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 3
+        }
+        int health_gain 5
+	int energy_gain -1
+        int xp 50
+
+    }
+    Box green_soda
+    {
+        prop edible
+	Box spawn
+        {
+            float chance 1.0
+            int tier 0
+        }
+        int health_gain -5
+	int energy_gain 10
+        int xp 100
+
     }
 }

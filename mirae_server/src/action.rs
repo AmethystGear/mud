@@ -585,6 +585,61 @@ pub fn get_two_players(
     }
 }
 
+fn damage_entity(spawned_entities: &mut SpawnedEntities, player_id: u8, players: &mut Vec<Option<Player>>, physical_dmg: i64, magic_dmg :i64, world: &mut World) -> Res {
+    let player = players[player_id as usize]
+    .as_mut()
+    .ok_or("player id invalid!")?;
+    let damage_opponent = entities::get_entity_action(
+        spawned_entities,
+        "dmg".to_string(),
+        player::x(player)?,
+        player::y(player)?,
+    );
+    let damage_opponent = damage_opponent.ok_or("you cannot damage this entity!")?;
+    let res = damage_opponent.run(
+        Some(spawned_entities),
+        None,
+        None,
+        Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
+        Some(player_id),
+        Some(players),
+        Some(world),
+    );
+    return res.ok_or("bad None parameters to damage_opponent!")?;
+}
+
+
+fn damage_player(spawned_entities: &mut SpawnedEntities, player_id: u8, players: &mut Vec<Option<Player>>, entity_speed: i64, world: &mut World) -> Res {
+    let mut out = PlayerOut::new();
+    let player = players[player_id as usize]
+    .as_mut()
+    .ok_or("player id invalid!")?;
+    let mob_attack = entities::get_entity_action(
+        spawned_entities,
+        "attack".to_string(),
+        player::x(player)?,
+        player::y(player)?,
+    );
+    let player_speed = player::get_stat(&player, "speed")?;
+    player.add_entity_cumulative_speed(entity_speed);
+    if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
+        player.zero_entity_cumulative_speed();
+        let mob_attack = mob_attack.ok_or("cannot retrieve mob function")?;
+        let res = mob_attack.run(
+            Some(spawned_entities),
+            None,
+            None,
+            None,
+            Some(player_id),
+            Some(players),
+            Some(world),
+        );
+        let res = res.ok_or("bad None params to mob_attack function")?;
+        out.append_player_out(res?);
+    }
+    return Ok(out);
+}
+
 pub fn attack(
     spawned_entities: &mut SpawnedEntities,
     params: &Vec<scanner::Param>,
@@ -592,26 +647,9 @@ pub fn attack(
     players: &mut Vec<Option<Player>>,
     world: &mut World,
 ) -> Res {
-    let opponent_id;
-    {
-        let player = players[player_id as usize]
-            .as_ref()
-            .ok_or("player id is invalid")?;
-        opponent_id = player.opponent();
-    }
-    let opponent;
-    let mut player;
-    if let Some(opponent_id) = opponent_id {
-        let (opp, p) = get_two_players(opponent_id, player_id, players)
-            .ok_or("could not get multiple player refs!")?;
-        opponent = Some(opp);
-        player = p;
-    } else {
-        player = players[player_id as usize]
-            .as_mut()
-            .ok_or("player id is invalid")?;
-        opponent = None;
-    }
+    let player = players[player_id as usize]
+    .as_mut()
+    .ok_or("player id is invalid")?;
     let energy_cost;
     let physical_dmg;
     let magic_dmg;
@@ -645,39 +683,13 @@ pub fn attack(
         }
     }
     if player::get_stat(&player, "energy")? >= energy_cost {
-        player::change_stat(&mut player, "energy", -energy_cost)?;
+        player::change_stat(player, "energy", -energy_cost)?;
         if player.opponent().is_none() {
             // fighting entity
             if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
                 return Err("you aren't fighting anything!".into());
             }
-            let damage_opponent = entities::get_entity_action(
-                spawned_entities,
-                "dmg".to_string(),
-                player::x(player)?,
-                player::y(player)?,
-            );
-            let damage_opponent = damage_opponent.ok_or("you cannot damage this entity!")?;
-            let player;
-            let res = damage_opponent.run(
-                Some(spawned_entities),
-                None,
-                None,
-                Some(&vec![Param::Int(physical_dmg), Param::Int(magic_dmg)]),
-                Some(player_id),
-                Some(players),
-                Some(world),
-            );
-
-            let res = res.ok_or("bad None parameters to damage_opponent!")?;
-
-            player = players[player_id as usize]
-                .as_mut()
-                .ok_or("player id invalid!")?;
-            if !entities::has_entity(spawned_entities, player::x(player)?, player::y(player)?) {
-                return res;
-            }
-            let mut out = res?;
+            
             let entity_speed;
             {
                 let entity = entities::get_entity_mut(
@@ -690,31 +702,65 @@ pub fn attack(
                     stats::get_or_else(entity.mut_data(), "speed", &stats::Value::Int(0))
                         .as_int()?;
             }
-            let mob_attack = entities::get_entity_action(
-                spawned_entities,
-                "attack".to_string(),
-                player::x(player)?,
-                player::y(player)?,
-            );
+
             let player_speed = player::get_stat(&player, "speed")?;
-            player.add_entity_cumulative_speed(entity_speed);
-            if mob_attack.is_some() && player.entity_cumulative_speed() >= player_speed {
-                player.zero_entity_cumulative_speed();
-                let mob_attack = mob_attack.ok_or("cannot retrieve mob function")?;
-                let res = mob_attack.run(
-                    Some(spawned_entities),
-                    None,
-                    None,
-                    None,
-                    Some(player_id),
-                    Some(players),
-                    Some(world),
+            let mut out = PlayerOut::new();
+            if entity_speed > player_speed {
+                out.append_player_out(damage_player(spawned_entities, player_id, players, entity_speed, world)?);
+                let player = players[player_id as usize]
+                .as_mut()
+                .ok_or("player id is invalid")?;
+                if player::is_dead(player)? {
+                    out.append("respawning...\n");
+                    player::respawn(player, world)?;
+                    return Ok(out);
+                }
+                out.append_player_out(damage_entity(spawned_entities, player_id, players,physical_dmg, magic_dmg, world)?);
+            } else {
+                out.append_player_out(damage_entity(spawned_entities, player_id, players, physical_dmg, magic_dmg, world)?);
+                let player = players[player_id as usize]
+                .as_mut()
+                .ok_or("player id is invalid")?;
+                let entity = entities::get_entity_mut(
+                    spawned_entities,
+                    player::x(player)?,
+                    player::y(player)?,
                 );
-                let res = res.ok_or("bad None params to mob_attack function")?;
-                out.append_player_out(res?);
+                if entity.is_none() {
+                    return Ok(out);
+                }
+                out.append_player_out(damage_player(spawned_entities, player_id, players, entity_speed, world)?);
+                let player = players[player_id as usize]
+                .as_mut()
+                .ok_or("player id is invalid")?;
+                if player::is_dead(player)? {
+                    out.append("respawning...\n");
+                    player::respawn(player, world)?;
+                    return Ok(out);
+                }
             }
             return Ok(out);
         } else {
+            let opponent_id;
+            {
+                let player = players[player_id as usize]
+                    .as_ref()
+                    .ok_or("player id is invalid")?;
+                opponent_id = player.opponent();
+            }
+            let opponent;
+            let mut player;
+            if let Some(opponent_id) = opponent_id {
+                let (opp, p) = get_two_players(opponent_id, player_id, players)
+                    .ok_or("could not get multiple player refs!")?;
+                opponent = Some(opp);
+                player = p;
+            } else {
+                player = players[player_id as usize]
+                    .as_mut()
+                    .ok_or("player id is invalid")?;
+                opponent = None;
+            }
             // fighting another player
             if !player::turn(&player) {
                 return Err("It's not your turn sirrrrrrrr, just a minute sirrrrrrrrrrrrrrrrrrr.\n\

@@ -653,8 +653,6 @@ pub fn attack(
         }
         if player::is_dead(&player)? {
             out.append("YOU DIED.\n");
-            out.append("respawning...\n");
-            player::respawn(player, world)?;
             break;
         }
     }
