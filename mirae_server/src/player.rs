@@ -383,8 +383,8 @@ pub fn upgrade_stat(player: &mut Player, stat: &str) -> Result<(), Box<dyn Error
     let clone = player.wears.clone();
     player.wears = vec![];
     for i in 0..clone.len() {
-        let name = player.wears[i].0.clone();
-        let stat = player.wears[i].1.clone();
+        let name = clone[i].0.clone();
+        let stat = clone[i].1.clone();
         wear(player, name, stat)?;
     }
     reset_to_base(player)?;
