@@ -6,9 +6,7 @@ use crate::entities::SpawnedEntities;
 use crate::player::Player;
 use crate::playerout::PlayerOut;
 use crate::scanner::Param;
-use std::io::Write;
-use std::io::{BufRead, BufReader, BufWriter};
-use std::net::{TcpListener, TcpStream};
+use std::net::TcpStream;
 use std::sync::mpsc;
 use std::sync::{
     mpsc::{Receiver, Sender},
@@ -24,6 +22,8 @@ use std::{
     fs::{self, File, OpenOptions},
     time::{Duration, SystemTime},
 };
+
+use websocket::{sync::Client, sync::Server, OwnedMessage};
 
 mod action;
 mod display;
@@ -54,7 +54,7 @@ const WORLD_AUTOSAVE_INTERVAL: u64 = 240;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let port: u64 = args[1].parse().unwrap();
-    let server = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
+    let server = Server::bind(format!("0.0.0.0:{}", port)).unwrap();
     let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
 
     let world;
@@ -143,22 +143,16 @@ fn main() {
         }
     });
     spawn(move || {
-        for stream in server.incoming() {
-            match stream {
-                Err(_) => println!("listen error"),
-                Ok(stream) => {
-                    println!(
-                        "connection from {} to {}",
-                        stream.peer_addr().unwrap(),
-                        stream.local_addr().unwrap()
-                    );
-                    let send = send.clone();
-                    spawn(move || {
-                        handle_connection(stream, send);
-                    });
-                }
-            }
+        for request in server.filter_map(Result::ok) {
+            let send = send.clone();
+            spawn(move || {
+                let client = request.accept().unwrap();
+                let ip = client.peer_addr().unwrap();
+                println!("Connection from {}", ip);
+                handle_connection(client, send);
+            });  
         }
+        println!("exiting")
     });
     let players_world_save = players_clone.clone();
 
@@ -225,14 +219,10 @@ fn main() {
     loop {}
 }
 
-fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
+fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
     let action_map = action::get_action_map();
     let (send, recv): (Sender<ConnIn>, Receiver<ConnIn>) = mpsc::channel();
     let id;
-    let stream_clone = stream.try_clone().unwrap();
-    let mut reader = BufReader::new(stream_clone);
-    let stream_clone = stream.try_clone().unwrap();
-    let mut writer = BufWriter::new(stream_clone);
 
     // initialization step
     while let Err(e) = channel.send((None, None, None, Some(send.clone()), None)) {
@@ -244,44 +234,42 @@ fn handle_connection(stream: TcpStream, channel: Sender<ConnOut>) {
             println!("{}", e);
         }
         res = recv.recv().unwrap();
-        writer.flush().unwrap();
     }
     id = res.1.unwrap();
     let pkt = res.0.get_pkt();
-    writer.write_all(&pkt.unwrap().bytes()).unwrap();
-    writer.flush().unwrap();
 
-    let (s, r) = mpsc::channel();
-    // packet send step
+    let (mut reader, mut writer) = stream.split().unwrap();
+
+    writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).unwrap();
+
     spawn(move || loop {
         let (mut response, _) = recv.recv().unwrap();
         let mut pkt = response.get_pkt();
         while pkt.is_some() {
-            if (writer.write_all(&pkt.unwrap().bytes())).is_err() {
-                s.send(true).unwrap();
+            if writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).is_err() {
+                writer.shutdown_all().unwrap();
                 return;
             }
             pkt = response.get_pkt();
-        }
-        let res = writer.flush();
-        if res.is_err() {
-            s.send(true).unwrap();
-            return;
         }
     });
 
     let mut last_res: Option<(String, Vec<Param>, Action)> = None;
     loop {
-        let mut line = String::new();
-        if reader.read_line(&mut line).is_err() {
-            println!("end conn");
+        let line = reader.recv_message();
+        
+        if line.is_err() {
             break;
         }
-        if let Ok(res) = r.try_recv() {
-            if res {
-                break;
-            }
+
+        let l;
+        if let OwnedMessage::Text(line) = line.unwrap() {
+            l = line;
+        } else {
+            break;
         }
+        let line = l;
+        println!("{}", line);
 
         let action_res: Result<(String, Vec<Param>, Action), Box<dyn Error>>;
         if line.trim() == "" {

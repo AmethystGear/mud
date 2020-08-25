@@ -179,13 +179,13 @@ pub fn get_init(world: &World) -> Result<Packet, Box<dyn Error>> {
     );
 
     let mut data = json!({
-        "default_entity" : "??",
+        "default_entity" : "default.png",
         "block_display" : {},
         "entity_display" : {}
     });
     for i in 0..(world.max_block_id()) {
         let block = world::get_block_by_id(world, i)?;
-        let display = stats::get(block, "display")?.as_int()? as u16;
+        let display = stats::get(block, "display")?.as_string()?;
         data["block_display"]
             .as_object_mut()
             .ok_or("badly formatted json value")?

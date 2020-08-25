@@ -1,0 +1,39 @@
+body {
+    background: #333333;
+}
+.text-line {
+    width: 35vw;
+    background-color: transparent;
+    color: #eeeeee;
+    outline: none;
+    outline-style: none;
+    outline-offset: 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: solid #eeeeee 1px;
+    padding: 3px 10px;
+    margin-top: 1vw;
+}
+
+.text-display {
+    background-color: transparent;
+    float: left;
+    width: 70vw;
+    height:40vw;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    margin-right: 1vw;
+    margin-top: 1vw
+}
+
+.canvas {
+    border: 1px solid #888888;
+    width: 24vw;
+    height: 24vw;
+    margin-top: 1vw
+}
+
+.display {
+    display: inline-block
+}

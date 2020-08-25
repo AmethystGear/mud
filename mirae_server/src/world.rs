@@ -13,7 +13,6 @@ use std::u16;
 
 const ENTITIES_CONFIG_DIR: &str = "config/instantiables/";
 const ITEMS_CONFIG: &str = "config/items.txt";
-const TERRAIN_CONFIG: &str = "config/terrain.txt";
 
 struct Map {
     id_to_name: HashMap<u16, String>,

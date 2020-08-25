@@ -16,7 +16,7 @@ use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::error::Error;
 use std::{
-    fs::{File, OpenOptions},
+    fs::File,
     time::SystemTime,
     u8,
 };
