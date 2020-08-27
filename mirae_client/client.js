@@ -5,10 +5,7 @@ const MAX_PACKET_TYPE_LEN = 5
 const MAX_PACKET_SIZE_LEN = 4
 const MAX_TEXTAREA_SIZE = 25000
 
-const ip = prompt("enter the ip you want to connect to: ", "<ip>")
-const port = prompt("enter the port you want to connect to: ", "<port>")
-const socket = new WebSocket("ws://" + ip + ":" + port);
-
+let socket = null
 let canvas = null
 let ct = null
 let text = null
@@ -16,6 +13,7 @@ let textbox = null
 let initData = null
 let imgData = null
 let buffer = null
+
 
 class Player {
     constructor(ID, x, y) {
@@ -292,51 +290,57 @@ function concatTypedArrays(a, b) {
 }
 
 $(document).ready(function() {
-    canvas = document.getElementById("canvas")
-    ct = canvas.getContext("2d");
-    text = document.getElementById("text")
-    textbox = document.getElementById("textbox")
-    initData = null
-    buffer = new Uint8Array(0)
-    text.scrollTop = text.scrollHeight;
+    (async () => {
+        let ws = await fetch('/ws-server-loc').then(function(response){return response.json()})
+        socket = new WebSocket("ws://" + ws['ip'] + ":" + ws['port'])
+        canvas = document.getElementById("canvas")
+        ct = canvas.getContext("2d");
+        text = document.getElementById("text")
+        textbox = document.getElementById("textbox")
+        initData = null
+        buffer = new Uint8Array(0)
+        text.scrollTop = text.scrollHeight;
 
-    textbox.addEventListener('keydown', (e) => {
-        if (e.key == 'Enter') {
-            onTextboxEnter()
-        }        
-    });
+        textbox.addEventListener('keydown', (e) => {
+            if (e.key == 'Enter') {
+                onTextboxEnter()
+            }        
+        });
+
+        socket.binaryType = 'arraybuffer';
+        socket.onmessage = function(evt) {
+            console.log(evt.data)
+            let data = new Uint8Array(evt.data)
+            console.log(data)
+            buffer = concatTypedArrays(buffer, data)
+            console.log(buffer)
+            
+            while (true) {
+                try {
+                    const {pkt, extra} = getPacket(buffer)
+                    handlePacket(pkt)
+                    buffer = extra
+                } catch (err) {
+                    if (err instanceof PacketIncomplete) {
+                        break
+                    } else if (err instanceof PacketBroken) {
+                        console.log(err)
+                        console.log("ERROR: recieved badly formatted packet:\n" + buffer)
+                        buffer = new Uint8Array(0)
+                        break
+                    } else if (err instanceof InitDataNotInitialized) {
+                        console.log(err)
+                        console.log("ERROR: never recieved init data!")
+                        buffer = new Uint8Array(0)
+                        break
+                    } else {
+                        throw err
+                    }
+                }
+            }    
+            
+        };
+    })();
 });
 
-socket.binaryType = 'arraybuffer';
-socket.onmessage = function(evt) {
-    console.log(evt.data)
-    let data = new Uint8Array(evt.data)
-    console.log(data)
-    buffer = concatTypedArrays(buffer, data)
-    console.log(buffer)
-    
-    while (true) {
-        try {
-            const {pkt, extra} = getPacket(buffer)
-            handlePacket(pkt)
-            buffer = extra
-        } catch (err) {
-            if (err instanceof PacketIncomplete) {
-                break
-            } else if (err instanceof PacketBroken) {
-                console.log(err)
-                console.log("ERROR: recieved badly formatted packet:\n" + buffer)
-                buffer = new Uint8Array(0)
-                break
-            } else if (err instanceof InitDataNotInitialized) {
-                console.log(err)
-                console.log("ERROR: never recieved init data!")
-                buffer = new Uint8Array(0)
-                break
-            } else {
-                throw err
-            }
-        }
-    }    
-    
-};
+
