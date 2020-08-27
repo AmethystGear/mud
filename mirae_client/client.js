@@ -170,26 +170,20 @@ function handlePacket(pkt) {
         if (initData === null) {
             throw new InitDataNotInitialized()
         }
-        console.log("img")
-        console.log(pkt.content.buffer)
         displayImg(new Uint16Iter(new DataView(pkt.content.buffer)))
     } else if (pkt.packetType === PacketTypes.Init) {
         initData = JSON.parse(dec.decode(pkt.content))
-
         imgData = {}
-        console.log(initData)
         for (entity in initData['entity_display']) {
-            console.log(entity)
             let name = initData['entity_display'][entity]
             imgData[name] = new Image()
             imgData[name].src = "resources/images/" + name
         }
         imgData[initData['default_entity']] = new Image()
         imgData[initData['default_entity']].src = "resources/images/" + initData['default_entity']
-
     } else if (pkt.packetType === PacketTypes.Err) {
         let decoded = dec.decode(pkt.content)
-        let err = "ERROR: " + decoded
+        let err = "ERROR: " + decoded + '\n'
         displayString(err)
     }
 }
