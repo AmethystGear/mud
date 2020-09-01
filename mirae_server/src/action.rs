@@ -715,7 +715,15 @@ pub fn attack(
                 .as_mut()
                 .ok_or("player id is invalid")?;
                 if player::is_dead(player)? {
+                    for i in 0..players.len() {
+                        if let Some(player) = players[i].as_ref() {
+                            player::send_str(player, format!("player {} killed by mob", player_id))?;
+                        }
+                    }
                     out.append("respawning...\n");
+                    let player = players[player_id as usize]
+                    .as_mut()
+                    .ok_or("player id is invalid")?;
                     player::respawn(player, world)?;
                     return Ok(out);
                 }
@@ -738,6 +746,14 @@ pub fn attack(
                 .as_mut()
                 .ok_or("player id is invalid")?;
                 if player::is_dead(player)? {
+                    for i in 0..players.len() {
+                        if let Some(player) = players[i].as_ref() {
+                            player::send_str(player, format!("player {} killed by mob", player_id))?;
+                        }
+                    }
+                    let player = players[player_id as usize]
+                    .as_mut()
+                    .ok_or("player id is invalid")?;
                     out.append("respawning...\n");
                     player::respawn(player, world)?;
                     return Ok(out);
