@@ -524,14 +524,18 @@ fn disp(player_id: u8, players: &mut Vec<Option<Player>>, world: &mut World) -> 
     let x;
     if view > p_x {
         x = 0;
-    } else {
+    } else if view + p_x < world.map_size() {
         x = p_x - view;
+    } else {
+        x = world.map_size() - (2 * view + 1);
     }
     let y;
     if view > p_y {
         y = 0;
-    } else {
+    } else if view + p_y < world.map_size() {
         y = p_y - view;
+    } else {
+        y = world.map_size() - (2 * view + 1);
     }
 
     let view = std::cmp::min(view, player::MAX_PHYSICAL_VIEW as u16);
@@ -539,8 +543,8 @@ fn disp(player_id: u8, players: &mut Vec<Option<Player>>, world: &mut World) -> 
     let img = display::Img {
         x_origin: x,
         y_origin: y,
-        x_length: std::cmp::min(2 * view + 1, world.map_size() - x),
-        y_length: std::cmp::min(2 * view + 1, world.map_size() - y),
+        x_length: 2 * view + 1,
+        y_length: 2 * view + 1,
         resolution: 1,
     };
     out.append_img(world, players, img)?;
@@ -836,6 +840,11 @@ pub fn battle(player_id: u8, players: &mut Vec<Option<Player>>, _world: &mut Wor
         let player = players[player_id as usize]
             .as_ref()
             .ok_or("invalid player id")?;
+
+        if player.opponent().is_some() {
+            return Err("You already have an opponent!".into());
+        }
+        
         p_x = player::x(&player)?;
         p_y = player::y(&player)?;
         view = player::get_stat(&player, "view")? as usize;
@@ -1004,6 +1013,10 @@ fn eat(
     let player = players[player_id as usize]
         .as_mut()
         .ok_or("invalid player id")?;
+    if player.opponent().is_some() && !player::turn(player) {
+        return Err("you cannot eat when it's not your turn!".into());
+    }
+
     if params.len() != 1 && params.len() != 2 {
         return Err("expected either one or two params!".into());
     }

@@ -368,7 +368,6 @@ pub fn upgrade_stat(player: &mut Player, stat: &str) -> Result<(), Box<dyn Error
         .into());
     }
     change_xp(player, -xp_cost)?;
-    unwear(player)?;
     stats::set(&mut base_stats, stat, Value::Int(val + 1));
     stats::set(
         &mut player.data,
@@ -385,6 +384,7 @@ pub fn upgrade_stat(player: &mut Player, stat: &str) -> Result<(), Box<dyn Error
     for i in 0..clone.len() {
         let name = clone[i].0.clone();
         let stat = clone[i].1.clone();
+        add_item_to_inventory(player, &name)?;
         wear(player, name, stat)?;
     }
     reset_to_base(player)?;

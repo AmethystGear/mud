@@ -110,6 +110,7 @@ fn main() {
                 // this adds time limits to pvp turns.
                 let mut players = players.lock().unwrap();
                 let mut opponents = vec![];
+                let mut errs = vec![];
                 for player in &mut *players {
                     if let Some(player) = player {
                         if player::turn(player) {
@@ -122,18 +123,23 @@ fn main() {
                                 {
                                     opponents.push(opponent);
                                     player::set_turn(player, false);
-                                    player::send_str(
+                                    errs.push(player::send_str(
                                         player,
                                         "You're TOO SLOW!!! Your turn is up!\n",
-                                    )
-                                    .unwrap();
+                                    ).is_err());
                                 }
                             }
                         }
                     }
                 }
-                for opponent in opponents {
-                    let opp = players[opponent as usize].as_mut().unwrap();
+                for i in 0..opponents.len() {
+                    let opp = players[opponents[i] as usize].as_mut().unwrap();
+                    if errs[i] {
+                        opp.set_opponent(None);
+                        if player::send_str(opp, "battle error!").is_err() {
+                            continue;
+                        }
+                    }
                     player::set_turn(opp, true);
                     opp.set_last_turn_time(SystemTime::now());
                     player::send_str(opp, "Your opponent was TOO SLOW!!! It's your turn now!\n")
@@ -152,7 +158,6 @@ fn main() {
                 handle_connection(client, send);
             });  
         }
-        println!("exiting")
     });
     let players_world_save = players_clone.clone();
 
@@ -242,22 +247,29 @@ fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
 
     writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).unwrap();
 
-    spawn(move || loop {
-        let (mut response, _) = recv.recv().unwrap();
-        let mut pkt = response.get_pkt();
-        while pkt.is_some() {
-            if writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).is_err() {
-                writer.shutdown_all().unwrap();
-                return;
+    let (tx, rx) = mpsc::channel();
+    spawn(move || {
+        loop {
+            if let Ok(_) = rx.try_recv() {
+                break;
             }
-            pkt = response.get_pkt();
+            if let Ok(res) = recv.try_recv() {
+                let (mut response, _) = res;        
+                let mut pkt = response.get_pkt();
+                while pkt.is_some() {
+                    if writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).is_err() {
+                        break;
+                    }
+                    pkt = response.get_pkt();
+                }
+            }
         }
     });
 
     let mut last_res: Option<(String, Vec<Param>, Action)> = None;
     loop {
         let line = reader.recv_message();
-        
+
         if line.is_err() {
             break;
         }
@@ -269,7 +281,6 @@ fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
             break;
         }
         let line = l;
-        println!("{}", line);
 
         let action_res: Result<(String, Vec<Param>, Action), Box<dyn Error>>;
         if line.trim() == "" {
@@ -292,11 +303,12 @@ fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
             let (keyword, params, action) = action_res.unwrap();
             let res = channel.send((Some(keyword), Some(params), Some(action), None, Some(id)));
             if res.is_err() {
-                println!("end conn");
                 break;
             }
         }
     }
+    tx.send(true).unwrap();
+    channel.send((None, None, None, None, Some(id))).unwrap();
 }
 
 fn get_first_availible_id(players: &Vec<Option<Player>>) -> Option<u8> {
@@ -320,6 +332,16 @@ fn handle_player_inp(
     action_map: &ActionMap,
 ) {
     let (keyword, params, action, sender, id) = data;
+    if keyword.is_none() && params.is_none() && action.is_none() && sender.is_none() {
+        let opp = players[id.unwrap() as usize].as_ref().unwrap().opponent();
+        if let Some(opp) = opp {
+            let opp = players[opp as usize].as_mut().unwrap();
+            opp.set_opponent(None);
+            player::send_str(opp, "Your opponent has disconnected!").unwrap();
+        }
+        players[id.unwrap() as usize] = None;
+        return;
+    }
     let player_id;
     if sender.is_some() {
         let sender = sender.clone().unwrap();

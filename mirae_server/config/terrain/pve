@@ -11,6 +11,7 @@
         {
             string display "#8a8a8a"
             int map_weight 3
+            prop solid
         }
         
         Box water

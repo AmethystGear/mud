@@ -11,6 +11,7 @@
         {
             string display "#8a8a8a"
             int map_weight 3
+            prop solid
         }
         
         Box water
@@ -38,12 +39,12 @@
     }
 
     Box terrain_parameters {
-        int map_size 2000
-        int octaves 10
+        int map_size 200
+        int octaves 7
         Box height_map
         {
             string[] blocks "trump_block" "rock" "water" "sand" "grass" "forest" "rock"
-            float[] heights 0.2 0.201 0.45 0.56 0.725 0.85
+            float[] heights 0.2 0.205 0.45 0.56 0.725 0.85
         }
     }
 }
