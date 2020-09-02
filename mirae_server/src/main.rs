@@ -13,6 +13,7 @@ use std::sync::{
     Arc, Mutex,
 };
 use std::thread::{self, spawn};
+use std::io::{self, BufRead};
 use std::u8;
 
 use action::ActionMap;
@@ -57,20 +58,23 @@ fn main() {
 
     let world;
     let world_save;
+    let begin_time = SystemTime::now();
     if args[2] == "load" {
+        println!("loading world...");
         let file = File::open(format!("{}/{}", SAVE, args[3])).unwrap();
         world = world::from_save(file);
         world_save = Some(args[3].clone());
     } else {
-        let seed: i64 = args[2].parse().unwrap();
-        let file = File::open(TERRAIN_CONFIG).unwrap();
-        world = world::from_seed(seed, file, args[3].clone());
+        println!("generating world...");
         if args.len() > 4 {
             world_save = Some(args[4].clone());
         } else {
             println!("not saving world... no save file specified.");
             world_save = None;
         }
+        let seed: i64 = args[2].parse().unwrap();
+        let file = File::open(TERRAIN_CONFIG).unwrap();
+        world = world::from_seed(seed, file, args[3].clone());
     }
     if world.is_err() {
         panic!("{}", world.err().unwrap());
@@ -87,10 +91,11 @@ fn main() {
     let players = Arc::new(Mutex::new(players));
     let players_clone = players.clone();
     spawn(move || {
+        let delta = SystemTime::now().duration_since(begin_time).expect("time went backwards??").as_secs_f32();
         if args[2] == "load" {
-            println!("loaded world");
+            println!("loaded world [{} seconds]", delta);
         } else {
-            println!("generated world");
+            println!("generated world [{} seconds]", delta);
         }
 
         let mut spawned_entities = SpawnedEntities::new();
@@ -230,8 +235,19 @@ fn main() {
         }
     }
 
-    // this is to ensure none of our threads just quit
-    loop {}
+    // only quit when user types quit, or we can't read from stdin for some reason
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        if let Ok(line) = line {
+            if line == "quit" || line == "exit" {
+                break;
+            } else {
+                println!("unrecognized command")
+            }
+        } else {
+            break;
+        }
+    }
 }
 
 fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
