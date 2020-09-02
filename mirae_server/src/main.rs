@@ -45,9 +45,7 @@ type ConnOut = (
 type ConnIn = (PlayerOut, Option<u8>);
 
 const SAVE: &str = "save";
-const WORLD_SAVE: &str = "save/world_save";
-const PVP_TERRAIN_CONFIG: &str = "config/terrain/pvp";
-const PVE_TERRAIN_CONFIG: &str = "config/terrain/pve";
+const TERRAIN_CONFIG: &str = "config/terrain";
 const PLAYER_AUTOSAVE_INTERVAL: u64 = 5;
 const WORLD_AUTOSAVE_INTERVAL: u64 = 240;
 
@@ -58,25 +56,28 @@ fn main() {
     let (send, recv): (Sender<ConnOut>, Receiver<ConnOut>) = mpsc::channel();
 
     let world;
+    let world_save;
     if args[2] == "load" {
-        let file = File::open(WORLD_SAVE).unwrap();
+        let file = File::open(format!("{}/{}", SAVE, args[3])).unwrap();
         world = world::from_save(file);
+        world_save = Some(args[3].clone());
     } else {
         let seed: i64 = args[2].parse().unwrap();
-        let file;
-        if args[3] == "pvp" {
-            file = File::open(PVP_TERRAIN_CONFIG).unwrap();
-        } else if args[3] == "pve" {
-            file = File::open(PVE_TERRAIN_CONFIG).unwrap();
-        } else {
-            panic!("expected 3rd argument to be pvp or pve!")
-        }
+        let file = File::open(TERRAIN_CONFIG).unwrap();
         world = world::from_seed(seed, file, args[3].clone());
+        if args.len() > 4 {
+            world_save = Some(args[4].clone());
+        } else {
+            println!("not saving world... no save file specified.");
+            world_save = None;
+        }
     }
     if world.is_err() {
         panic!("{}", world.err().unwrap());
     }
-    let world = Arc::new(Mutex::new(world.unwrap()));
+    let world = world.unwrap();
+    let gamemode = world.gamemode();
+    let world = Arc::new(Mutex::new(world));
     let world_clone = world.clone();
 
     let mut players = vec![]; // max cap of 256 players per server.
@@ -86,7 +87,11 @@ fn main() {
     let players = Arc::new(Mutex::new(players));
     let players_clone = players.clone();
     spawn(move || {
-        println!("generated world");
+        if args[2] == "load" {
+            println!("loaded world");
+        } else {
+            println!("generated world");
+        }
 
         let mut spawned_entities = SpawnedEntities::new();
 
@@ -123,10 +128,13 @@ fn main() {
                                 {
                                     opponents.push(opponent);
                                     player::set_turn(player, false);
-                                    errs.push(player::send_str(
-                                        player,
-                                        "You're TOO SLOW!!! Your turn is up!\n",
-                                    ).is_err());
+                                    errs.push(
+                                        player::send_str(
+                                            player,
+                                            "You're TOO SLOW!!! Your turn is up!\n",
+                                        )
+                                        .is_err(),
+                                    );
                                 }
                             }
                         }
@@ -156,13 +164,13 @@ fn main() {
                 let ip = client.peer_addr().unwrap();
                 println!("Connection from {}", ip);
                 handle_connection(client, send);
-            });  
+            });
         }
     });
     let players_world_save = players_clone.clone();
 
     // only autosave in pve
-    if args[3] == "pve" {
+    if gamemode == "pve" {
         // player autosave loop
         spawn(move || loop {
             {
@@ -182,42 +190,44 @@ fn main() {
             }
             thread::sleep(Duration::from_secs(PLAYER_AUTOSAVE_INTERVAL));
         });
-        // world autosave loop
-        spawn(move || loop {
-            {
-                let players = &mut *players_world_save.lock().unwrap();
-                for player in players {
-                    let player = player.as_mut();
-                    if let Some(player) = player {
-                        if player::send_str(player, "autosaving world...\n").is_err() {
-                            println!("couldn't send world autosave message!");
+        if let Some(world_save) = world_save {
+            let mut save = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(format!("{}/{}", SAVE, world_save))
+            .unwrap();
+            fs::create_dir_all(SAVE).unwrap();
+            // world autosave loop
+            spawn(move || loop {
+                {
+                    let players = &mut *players_world_save.lock().unwrap();
+                    for player in players {
+                        let player = player.as_mut();
+                        if let Some(player) = player {
+                            if player::send_str(player, "autosaving world...\n").is_err() {
+                                println!("couldn't send world autosave message!");
+                            }
                         }
                     }
                 }
-            }
-            {
-                let w = world_clone.lock().unwrap();
-                let mut save = OpenOptions::new()
-                    .write(true)
-                    .create(true)
-                    .open(WORLD_SAVE)
-                    .unwrap();
-                fs::create_dir_all(SAVE).unwrap();
-                world::save_to(&w, &mut save).unwrap();
-            }
-            {
-                let players = &mut *players_world_save.lock().unwrap();
-                for player in players {
-                    let player = player.as_mut();
-                    if let Some(player) = player {
-                        if player::send_str(player, "world saved!\n").is_err() {
-                            println!("couldn't send world autosave message!");
+                {
+                    let w = world_clone.lock().unwrap();
+                    world::save_to(&w, &mut save).unwrap();
+                }
+                {
+                    let players = &mut *players_world_save.lock().unwrap();
+                    for player in players {
+                        let player = player.as_mut();
+                        if let Some(player) = player {
+                            if player::send_str(player, "world saved!\n").is_err() {
+                                println!("couldn't send world autosave message!");
+                            }
                         }
                     }
                 }
-            }
-            thread::sleep(Duration::from_secs(WORLD_AUTOSAVE_INTERVAL));
-        });
+                thread::sleep(Duration::from_secs(WORLD_AUTOSAVE_INTERVAL));
+            });
+        }
     }
 
     // this is to ensure none of our threads just quit
@@ -245,23 +255,26 @@ fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnOut>) {
 
     let (mut reader, mut writer) = stream.split().unwrap();
 
-    writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).unwrap();
+    writer
+        .send_message(&OwnedMessage::Binary(pkt.unwrap().bytes()))
+        .unwrap();
 
     let (tx, rx) = mpsc::channel();
-    spawn(move || {
-        loop {
-            if let Ok(_) = rx.try_recv() {
-                break;
-            }
-            if let Ok(res) = recv.try_recv() {
-                let (mut response, _) = res;        
-                let mut pkt = response.get_pkt();
-                while pkt.is_some() {
-                    if writer.send_message(&OwnedMessage::Binary(pkt.unwrap().bytes())).is_err() {
-                        break;
-                    }
-                    pkt = response.get_pkt();
+    spawn(move || loop {
+        if let Ok(_) = rx.try_recv() {
+            break;
+        }
+        if let Ok(res) = recv.try_recv() {
+            let (mut response, _) = res;
+            let mut pkt = response.get_pkt();
+            while pkt.is_some() {
+                if writer
+                    .send_message(&OwnedMessage::Binary(pkt.unwrap().bytes()))
+                    .is_err()
+                {
+                    break;
                 }
+                pkt = response.get_pkt();
             }
         }
     });

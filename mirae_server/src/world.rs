@@ -39,7 +39,7 @@ pub struct World {
     max_block_id: u16,
     map_size: u16,
     seed: i64,
-    gamemode: String
+    gamemode: String,
 }
 
 impl World {
@@ -153,9 +153,16 @@ fn tier_items(world: &mut World) -> Result<(), Box<dyn Error>> {
     return Ok(());
 }
 
-pub fn from_seed(seed: i64, terrain_config: File, gamemode : String) -> Result<World, Box<dyn Error>> {
-    let terrain_configuration =
-        stats::from(&mut scanner::from(CharStream::from_file(terrain_config)))?;
+pub fn from_seed(
+    seed: i64,
+    terrain_config: File,
+    gamemode: String,
+) -> Result<World, Box<dyn Error>> {
+    let terrain_configuration = stats::get(
+        &stats::from(&mut scanner::from(CharStream::from_file(terrain_config)))?,
+        &gamemode,
+    )?
+    .as_box()?;
     let terrain_params = stats::get(&terrain_configuration, "terrain_parameters")?.as_box()?;
     let map_size = stats::get(&terrain_params, "map_size")?.as_int()? as u16;
     let mut world = World {
