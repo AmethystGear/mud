@@ -162,7 +162,7 @@ impl PlayerOut {
         while let Some(p) = pkt {
             self.packets.push_back(p);
             pkt = p_out.get_pkt();
-        }        
+        }
     }
 
     pub fn add_pkt(&mut self, p: Packet) {

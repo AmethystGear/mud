@@ -6,6 +6,7 @@ use crate::entities::SpawnedEntities;
 use crate::player::Player;
 use crate::playerout::PlayerOut;
 use crate::scanner::Param;
+use std::io::{self, BufRead};
 use std::net::TcpStream;
 use std::sync::mpsc;
 use std::sync::{
@@ -13,7 +14,6 @@ use std::sync::{
     Arc, Mutex,
 };
 use std::thread::{self, spawn};
-use std::io::{self, BufRead};
 use std::u8;
 
 use action::ActionMap;
@@ -91,7 +91,10 @@ fn main() {
     let players = Arc::new(Mutex::new(players));
     let players_clone = players.clone();
     spawn(move || {
-        let delta = SystemTime::now().duration_since(begin_time).expect("time went backwards??").as_secs_f32();
+        let delta = SystemTime::now()
+            .duration_since(begin_time)
+            .expect("time went backwards??")
+            .as_secs_f32();
         if args[2] == "load" {
             println!("loaded world [{} seconds]", delta);
         } else {
@@ -197,10 +200,10 @@ fn main() {
         });
         if let Some(world_save) = world_save {
             let mut save = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(format!("{}/{}", SAVE, world_save))
-            .unwrap();
+                .write(true)
+                .create(true)
+                .open(format!("{}/{}", SAVE, world_save))
+                .unwrap();
             fs::create_dir_all(SAVE).unwrap();
             // world autosave loop
             spawn(move || loop {

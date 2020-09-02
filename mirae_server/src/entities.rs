@@ -709,7 +709,6 @@ pub fn get_items(items: &Stats) -> Result<Stats, Box<dyn Error>> {
     for _ in 0..num_runs {
         let p: f64 = rng.gen();
         for i in 0..thresholds.len() {
-            
             if p < thresholds[i] {
                 stats::set(
                     &mut mob_drops,

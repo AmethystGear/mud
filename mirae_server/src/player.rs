@@ -184,7 +184,6 @@ pub fn from(
 }
 
 pub fn login(player: &mut Player, save: File, world: &World) -> Result<(), Box<dyn Error>> {
-
     let player_data: Stats = stats::from(&mut scanner::from(CharStream::from_file(save)))?;
     if world.gamemode() == "pve" {
         player.data = player_data;
