@@ -1,5 +1,3 @@
-extern crate rand;
-
 use crate::perlin_noise;
 use crate::scanner;
 use crate::stats;

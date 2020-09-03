@@ -1,6 +1,3 @@
-extern crate ansi_term;
-extern crate rstring_builder;
-
 use crate::world;
 use crate::world::World;
 use std::collections::HashMap;

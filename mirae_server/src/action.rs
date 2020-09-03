@@ -1,5 +1,3 @@
-extern crate rstring_builder;
-
 use crate::display;
 use crate::entities;
 use crate::entities::SpawnedEntities;

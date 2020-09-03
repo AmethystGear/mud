@@ -1,4 +1,3 @@
-extern crate rstring_builder;
 use char_stream::CharStream;
 use rstring_builder::StringBuilder;
 use std::error::Error;

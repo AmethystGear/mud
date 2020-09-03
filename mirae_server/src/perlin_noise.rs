@@ -1,4 +1,3 @@
-extern crate rand;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 

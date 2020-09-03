@@ -1,14 +1,6 @@
-extern crate char_stream;
-extern crate rstring_builder;
-
-/* COULD BE USED IF WE USE SAVE IN THE FUTURE
-use std::fs::File;
-use std::io::Write;
-*/
-use rstring_builder::StringBuilder;
-
 use crate::scanner;
 use char_stream::CharStream;
+use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::{error::Error, fs::File, io::Write};

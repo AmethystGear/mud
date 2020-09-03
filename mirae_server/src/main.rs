@@ -1,6 +1,3 @@
-extern crate ansi_term;
-extern crate rstring_builder;
-
 use crate::action::Action;
 use crate::entities::SpawnedEntities;
 use crate::player::Player;

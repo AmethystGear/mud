@@ -1,6 +1,3 @@
-extern crate rand;
-extern crate rstring_builder;
-
 use crate::action;
 use crate::action::{Action, ActionFunc, ActionMap};
 use crate::player::Player;

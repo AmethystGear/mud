@@ -1,6 +1,3 @@
-extern crate char_stream;
-extern crate rand;
-
 use crate::playerout::PlayerOut;
 use crate::scanner;
 use crate::stats;
