@@ -51,7 +51,7 @@ const PLAYER_AUTOSAVE_INTERVAL: u64 = 5;
 const WORLD_AUTOSAVE_INTERVAL: u64 = 240;
 
 fn main() {
-    fs::create_dir_all(format!("{}/", SAVE))?;
+    fs::create_dir_all(format!("{}/", SAVE)).unwrap();
     let args: Vec<String> = env::args().collect();
     let port: u64 = args[1].parse().unwrap();
     let server = Server::bind(format!("0.0.0.0:{}", port)).unwrap();
