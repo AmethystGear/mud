@@ -2,7 +2,6 @@ use crate::display::display;
 use crate::display::Img;
 use crate::player;
 use crate::player::Player;
-use crate::stats;
 use crate::world;
 use crate::world::World;
 use serde_json::json;
@@ -171,13 +170,6 @@ impl PlayerOut {
 }
 
 pub fn get_init(world: &World) -> Result<Packet, Box<dyn Error>> {
-    let mut init = stats::Stats::new();
-    stats::set(
-        &mut init,
-        "default_mob",
-        stats::Value::String("??".to_string()),
-    );
-
     let mut data = json!({
         "default_entity" : "default.png",
         "block_display" : {},

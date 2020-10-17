@@ -1,7 +1,5 @@
 use crate::perlin_noise;
-use crate::scanner;
-use crate::stats;
-use char_stream::CharStream;
+use crate::block::Block;
 use rand::Rng;
 use std::collections::HashMap;
 use std::error::Error;
@@ -12,9 +10,9 @@ use std::u16;
 const ENTITIES_CONFIG_DIR: &str = "config/instantiables/";
 const ITEMS_CONFIG: &str = "config/items.txt";
 
-struct Map {
+struct Map<T> {
     id_to_name: HashMap<u16, String>,
-    name_to_stats: HashMap<String, stats::Stats>,
+    name_to_stats: HashMap<String, T>,
     map: Vec<u16>,
 }
 
@@ -29,7 +27,7 @@ impl Map {
 }
 
 pub struct World {
-    blocks: Map,
+    blocks: Map<Block>,
     entities: Map,
     items: stats::Stats,
     items_tiered: HashMap<i64, Vec<String>>,

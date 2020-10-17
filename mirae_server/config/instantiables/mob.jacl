@@ -1,0 +1,86 @@
+"lowly_ben" : (
+    stats : {
+        "health" : 1
+        "speed" : 10
+        "energy" : 1000
+        "dmg" : 0
+        "xp" : 25
+    }
+    quotes: (
+        entrance : ["ben"]
+        attack : ["ben"]
+        player_run  : ["ben"]
+        player_victory : ["ben"]
+        mob_victory : ["ben"]
+    )
+    drops : (
+        items : ["trumps_orange" "orange"]
+        prob : [0.05 0.95]
+        per : [25 1]
+        range : [1 1]
+    )
+    img : "So lowly, he does not deserve an image"
+)
+
+"aurelius_knight" : (
+    Box quotes 
+    {
+        entrance : ["I have come to do battle!" "Fight me! Fight me! Fight me!"]
+        attack : ["I fight for HONOUR!" "Take this, fiend!"]
+        player_run : ["You have no HONOUR!" "Come back and fight me, scum!" "Alas! Chivalry is dead!"]
+        player_victory : ["Alas! I am slain!"]
+        mob_victory : ["You were a worthy adversary."]
+    }
+    stats : {
+        health : 10
+        speed : 5
+        dmg : 1
+        energy : 5
+        xp : 200
+        energy_regen : 1
+        agression : 0.5
+        physical_dmg : 1
+        magic_dmg : 2
+        magic_def : 0.2
+        max_items_steal : 2
+        looting : 0.8
+        intelligence : 0.1
+        special : 0.01
+        special_boost : 10.0
+    }
+    drops : (
+        items : ["rusty_sword" "broken_armor" "missspelled_incantation" "bronze_coin"]
+        item_prob : [0.1 0.1 0.6 0.2]
+        item_per : [1 1 1 3]
+        range : [0 3]
+    )
+    tools : (
+        items : ["rusty_sword"]	
+        prob : [1.0]
+        per : [1]
+        range : [0 1]
+    )
+    img :
+    "
+    _,.
+    ,` -.)
+   ( _/-\\-._
+  /,|`--._,-^|            ,
+  \_| |`-._/||          ,'|
+    |  `-, / |         /  /
+    |     || |        /  /
+    `r-._||/   __    /  /
+__,-<_     )`-/  `. /  /
+'  \   `---'   \   /  /
+    |           |./  /
+    /           //  /
+\_/' \         |/  /
+|    |   _,^-' /  /
+|    , ``  (\ /  /_
+\,.->._    \X-=/^
+(  /   `-._//^`
+`Y-.____(__}
+    |     {__)
+        ()
+    "
+)

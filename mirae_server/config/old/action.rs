@@ -1,16 +1,12 @@
+use serde_jacl::structs::Literal;
 use crate::display;
 use crate::entities;
 use crate::entities::SpawnedEntities;
 use crate::player;
 use crate::player::Player;
 use crate::playerout::PlayerOut;
-use crate::scanner;
-use crate::scanner::Param;
-use crate::stats;
 use crate::world;
 use crate::world::World;
-use char_stream::CharStream;
-use rstring_builder::StringBuilder;
 use std::collections::HashMap;
 use std::error::Error;
 use std::{fs::File, time::SystemTime, u8};
@@ -19,22 +15,22 @@ type Res = std::result::Result<PlayerOut, Box<dyn Error>>;
 
 #[derive(Clone)]
 pub enum ActionFunc {
-    A(fn(&Vec<scanner::Param>, &mut Vec<Option<Player>>, &mut World) -> Res),
-    B(fn(String, &Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
-    C(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    A(fn(&Vec<Literal>, &mut Vec<Option<Player>>, &mut World) -> Res),
+    B(fn(String, &Vec<Literal>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
+    C(fn(&Vec<Literal>, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
     D(fn(u8, &mut Vec<Option<Player>>, &mut World) -> Res),
-    E(fn(&ActionMap, &Vec<scanner::Param>) -> Res),
+    E(fn(&ActionMap, &Vec<Literal>) -> Res),
     F(fn(&mut SpawnedEntities, u8, &mut Vec<Option<Player>>, &mut World) -> Res),
     G(
         fn(
             &mut SpawnedEntities,
-            &Vec<scanner::Param>,
+            &Vec<Literal>,
             u8,
             &mut Vec<Option<Player>>,
             &mut World,
         ) -> Res,
     ),
-    H(fn(&Vec<scanner::Param>, u8, &mut Vec<Option<Player>>) -> Res),
+    H(fn(&Vec<Literal>, u8, &mut Vec<Option<Player>>) -> Res),
 }
 
 pub struct Action {
@@ -51,7 +47,7 @@ impl Action {
         s: Option<&mut SpawnedEntities>,
         a_map: Option<&ActionMap>,
         keyword: Option<String>,
-        params: Option<&Vec<scanner::Param>>,
+        params: Option<&Vec<Literal>>,
         player_id: Option<u8>,
         players: Option<&mut Vec<Option<Player>>>,
         world: Option<&mut World>,
@@ -107,10 +103,12 @@ impl ActionMap {
 pub fn get_action_and_params(
     map: &ActionMap,
     s: String,
-) -> Result<(String, Vec<Param>, Action), Box<dyn Error>> {
-    let mut scan = scanner::from(CharStream::from_string(s));
-    let first_word = scanner::next(&mut scan)?;
-    let params = scanner::get_params(&mut scan);
+) -> Result<(String, Vec<Literal>, Action), Box<dyn Error>> {
+    let s = s.trim();
+    let first_whitespace = s.find(' ').unwrap_or(s.len());
+    let first_word = s[0..first_whitespace].to_string();
+    let s = &s[first_whitespace..s.len()].to_string();
+    let params : Vec<Literal> = serde_jacl::de::from_str(format!("[{}]", s))?;
     let action = map
         .command_word_map
         .get(&first_word)
@@ -278,14 +276,7 @@ pub fn get_action_map() -> ActionMap {
 }
 
 fn action_to_string(action: &Action) -> String {
-    let mut out = StringBuilder::new();
-    out.append(action.name.clone());
-    out.append('\n');
-    out.append("description:\n");
-    out.append(action.description.clone());
-    out.append("usage:\n");
-    out.append(action.usage.clone());
-    return out.string();
+    [action.name.clone(), "\ndescription:\n".to_string(), action.description.clone(), "\nusage:\n".to_string(), action.usage.clone()].concat()
 }
 
 fn bind(a: i32, min: i32, max: i32) -> i32 {

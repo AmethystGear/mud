@@ -1,0 +1,14 @@
+"pvp" : (
+    map_size : 200
+    octaves : 7
+    blocks : [ 
+        "trump_block"
+        "rock"
+        "water"
+        "sand"
+        "grass"
+        "forest"
+        "rock"
+    ]
+    heights [ 0.2 0.205 0.45 0.56 0.725 0.85 ]
+)
