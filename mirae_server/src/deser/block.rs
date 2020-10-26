@@ -1,22 +1,26 @@
-use anyhow::{anyhow, Result};
+use super::named::{NameSet, Named};
 use serde::Deserialize;
-use std::collections::HashMap;
-pub struct Blocks(HashMap<String, Block>);
+
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct BlockName {
     name: String,
 }
-impl BlockName {
-    pub fn new<S: Into<String>>(name: S, blocks: &Blocks) -> Result<Self> {
-        let name = name.into();
-        if blocks.0.contains_key(&name) {
-            Ok(BlockName { name })
-        } else {
-            Err(anyhow!("block name {} not in blocks {:?}", name, blocks.0))
-        }
+
+impl Named for BlockName {
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn __from_name(s: String) -> Self {
+        BlockName { name: s }
+    }
+
+    fn __name_set() -> NameSet {
+        NameSet::Block
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Block {
     pub display: String,
     #[serde(default = "default_mob_spawn_chance")]

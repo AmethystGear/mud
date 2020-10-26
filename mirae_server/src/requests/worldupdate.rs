@@ -1,29 +1,31 @@
+use crate::location::Vector2;
+
 pub struct EntityMove {
-    pub x_start: u16,
-    pub y_start: u16,
-    pub x_to: u16,
-    pub y_to: u16,
+    pub start: Vector2,
+    pub end: Vector2,
 }
 
 pub struct EntityDel {
-    pub x: u16,
-    pub y: u16,
+    pub loc: Vector2,
 }
 
 pub struct EntitySpawn {
-    pub x: u16,
-    pub y: u16,
+    pub loc: Vector2,
     pub name: String,
 }
 
-pub enum EntityUpdate {
+pub enum WorldEntityUpdate {
     Move(EntityMove),
     Del(EntityDel),
     Spawn(EntitySpawn),
 }
 
-pub struct BlockUpdate {
-    pub x: u16,
-    pub y: u16,
-    pub blockname: String,
+pub struct WorldBlockUpdate {
+    pub loc: Vector2,
+    pub blockname: Option<String>,
+}
+
+pub enum WorldUpdate {
+    WorldEntityUpdate(WorldEntityUpdate),
+    WorldBlockUpdate(WorldBlockUpdate)
 }

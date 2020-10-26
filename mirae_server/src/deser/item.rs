@@ -1,12 +1,10 @@
-use super::named::Named;
-use anyhow::Result;
+use super::named::{NameSet, Named};
+
 use serde::Deserialize;
-use serde_jacl::{
-    de::from_str,
-    structs::{Literal, Value},
-};
+use serde_jacl::structs::Value;
 use std::collections::HashMap;
 
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct ItemName {
     name: String,
 }
@@ -16,8 +14,69 @@ impl Named for ItemName {
         return self.name.clone();
     }
 
-    fn from_name(s: String) -> Self {
+    fn __from_name(s: String) -> Self {
         ItemName { name: s }
+    }
+
+    fn __name_set() -> NameSet {
+        NameSet::Item
+    }
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+pub struct DmgName {
+    name: String,
+}
+
+impl Named for DmgName {
+    fn name(&self) -> String {
+        return self.name.clone();
+    }
+
+    fn __from_name(s: String) -> Self {
+        DmgName { name: s }
+    }
+
+    fn __name_set() -> NameSet {
+        NameSet::Dmg
+    }
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+pub struct EffectName {
+    name: String,
+}
+
+impl Named for EffectName {
+    fn name(&self) -> String {
+        return self.name.clone();
+    }
+
+    fn __from_name(s: String) -> Self {
+        Self { name: s }
+    }
+
+    fn __name_set() -> NameSet {
+        NameSet::Effect
+    }
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+pub struct StatName {
+    name: String,
+}
+
+impl Named for StatName {
+    fn name(&self) -> String {
+        return self.name.clone();
+    }
+
+    fn __from_name(s: String) -> Self {
+        Self { name: s }
+    }
+
+    fn __name_set() -> NameSet {
+        NameSet::Stat
     }
 }
 
@@ -53,10 +112,6 @@ fn default_u64() -> u64 {
     0
 }
 
-fn default_i64() -> i64 {
-    0
-}
-
 fn default_f64() -> f64 {
     0.0
 }
@@ -84,3 +139,4 @@ pub struct Item {
     #[serde(default = "default_abilities")]
     abilities: HashMap<String, HashMap<String, Value>>,
 }
+

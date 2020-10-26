@@ -6,10 +6,10 @@ use std::{collections::HashMap, fs};
 
 #[derive(Debug, Deserialize)]
 pub struct TerrainParameters {
-    map_size: u16,
-    octaves: u8,
-    blocks: Vec<String>,
-    heights: Vec<f64>,
+    pub map_size: u16,
+    pub octaves: u8,
+    pub blocks: Vec<String>,
+    pub heights: Vec<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -46,8 +46,4 @@ pub struct GameData {
     pub dmg: Vec<String>,
     pub effect: HashMap<String, HashMap<String, Value>>,
     pub stat: Vec<String>,
-}
-
-pub fn get_gamemodes(inp: &str) -> Result<HashMap<String, GameMode>> {
-    Ok(from_str(inp)?)
 }

@@ -1,10 +1,1 @@
-"stun" : { "num_turns" : "{int}" }
-"charge" : { "num_turns" : "{int}" }
-"repeat" : { "num_times" : "{int}" skip_turns : "{int}"}
-"damage" : { "amounts" : {"{dmg}" : "{flt}"} }
-"flee" : { "max_distance" : "{float}" }
-"block" : { "proportions" : {"{dmg}" : "{flt}"} }
-"counter" : { "proportions" : {"{dmg}" : "{flt}"} }
-"heal" : { "amount" : "{flt}" }
-"regen" : { "amount" : "{flt}" }
-"destroy_item" : {}
+p

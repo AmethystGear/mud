@@ -1,7 +1,7 @@
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-pub fn generate_perlin_noise(width: u16, height: u16, octave_count: u8, seed: i64) -> Vec<f64> {
+pub fn generate_perlin_noise(width: u16, height: u16, octave_count: u8, seed: u64) -> Vec<f64> {
     let mut white_noise = vec![0f64; (width as usize) * (height as usize)];
     let mut total_noise: Vec<Vec<f64>> = Vec::with_capacity(octave_count as usize);
     let mut p_noise = vec![0f64; (width as usize) * (height as usize)];

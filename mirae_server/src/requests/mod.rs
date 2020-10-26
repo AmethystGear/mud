@@ -1,7 +1,6 @@
 pub mod worldupdate;
-use worldupdate::{BlockUpdate, EntityUpdate};
+use worldupdate::WorldUpdate;
 
 pub enum Update {
-    BlockUpdate(BlockUpdate),
-    EntityUpdate(EntityUpdate),
+    WorldUpdate(WorldUpdate)
 }
