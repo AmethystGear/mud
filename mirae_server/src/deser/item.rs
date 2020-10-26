@@ -139,4 +139,3 @@ pub struct Item {
     #[serde(default = "default_abilities")]
     abilities: HashMap<String, HashMap<String, Value>>,
 }
-

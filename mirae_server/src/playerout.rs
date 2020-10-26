@@ -1,7 +1,7 @@
-use crate::{location::Vector2, world::world::World, gamedata, deser::player::Player};
+use crate::{deser::player::Player, gamedata, location::Vector2, world::world::World};
+use anyhow::{anyhow, Error, Result};
 use serde_json::json;
 use std::collections::{HashMap, VecDeque};
-use anyhow::{anyhow, Result, Error};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum PacketType {
@@ -138,24 +138,39 @@ pub fn get_init(world: &World) -> Result<Packet> {
         "block_display" : {},
         "entity_display" : {}
     });
-    let displays = [("block_display", &world.blocks), ("entity_display", &world.entities)];
+    let displays = [
+        ("block_display", &world.blocks),
+        ("entity_display", &world.entities),
+    ];
     for d in displays.iter() {
         let (entry, map) = d;
         let (entry, map) = (*entry, *map);
         for i in 0..map.max() {
-            let name = map.id_to_name().get(&i).ok_or_else(|| anyhow!("no mapping for id {} in map {:?}", i, map))?;
+            let name = map
+                .id_to_name()
+                .get(&i)
+                .ok_or_else(|| anyhow!("no mapping for id {} in map {:?}", i, map))?;
             let display = match entry {
                 "block_display" => {
-                    let block = gamedata::GAMEDATA.blocks.get(name).ok_or_else(|| anyhow!("no block with name {}", name))?;    
+                    let block = gamedata::GAMEDATA
+                        .blocks
+                        .get(name)
+                        .ok_or_else(|| anyhow!("no block with name {}", name))?;
                     Ok(&block.display)
-                },
+                }
                 "entity_display" => {
-                    let entity = gamedata::GAMEDATA.entities.get(name).ok_or_else(|| anyhow!("no entity with name {}", name))?;
+                    let entity = gamedata::GAMEDATA
+                        .entities
+                        .get(name)
+                        .ok_or_else(|| anyhow!("no entity with name {}", name))?;
                     Ok(&entity.display)
-                },
-                _ => Err(anyhow!("likely, a name was mispelled"))
+                }
+                _ => Err(anyhow!("likely, a name was mispelled")),
             }?;
-            data[entry].as_object_mut().ok_or_else(|| anyhow!("badly formatted json value"))?.insert(format!("{}", i), json!(display));
+            data[entry]
+                .as_object_mut()
+                .ok_or_else(|| anyhow!("badly formatted json value"))?
+                .insert(format!("{}", i), json!(display));
         }
     }
     return Ok(Packet {
@@ -165,14 +180,14 @@ pub fn get_init(world: &World) -> Result<Packet> {
 }
 
 pub struct Img {
-    pub origin : Vector2,
-    pub length : Vector2,
+    pub origin: Vector2,
+    pub length: Vector2,
     pub resolution: u16,
 }
 
 pub struct Display {
     blocks: Vec<u8>,
-    entities: Vec<u8>
+    entities: Vec<u8>,
 }
 
 /// returns the id of the most common block in the region.
@@ -180,7 +195,10 @@ fn get_majority_block_id(world: &World, x: u16, y: u16, square_length: u16) -> R
     let mut blocks = HashMap::new();
     for j in y..(y + square_length) {
         for i in x..(x + square_length) {
-            let id = world.blocks.get_id(Vector2::new(i, j))?.ok_or_else(|| anyhow!("no block at location!"))?;
+            let id = world
+                .blocks
+                .get_id(Vector2::new(i, j))?
+                .ok_or_else(|| anyhow!("no block at location!"))?;
             blocks.insert(id, blocks.get(&id).unwrap_or(&0) + 1);
         }
     }
@@ -221,7 +239,7 @@ pub fn display(world: &World, img: Img) -> Result<Display> {
                         let bytes = ent.to_be_bytes();
                         entities.push(bytes[0]);
                         entities.push(bytes[1]);
-                    },
+                    }
                     None => {
                         entities.push(u8::MAX);
                         entities.push(u8::MAX);
@@ -230,5 +248,5 @@ pub fn display(world: &World, img: Img) -> Result<Display> {
             }
         }
     }
-    return Ok(Display{ blocks, entities });
+    return Ok(Display { blocks, entities });
 }

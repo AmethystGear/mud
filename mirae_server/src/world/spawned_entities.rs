@@ -1,8 +1,5 @@
 use crate::gamedata;
-use crate::{
-    deser::entity::Entity,
-    location::Vector2,
-};
+use crate::{deser::entity::Entity, location::Vector2};
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 
@@ -67,7 +64,9 @@ impl SpawnedEntities {
         }
     }
 
-    pub fn get(&mut self, loc : Vector2) -> Result<&mut Entity> {
-        self.0.get_mut(&loc).ok_or_else(|| anyhow!("no entity at the location {:?}", loc))
+    pub fn get(&mut self, loc: Vector2) -> Result<&mut Entity> {
+        self.0
+            .get_mut(&loc)
+            .ok_or_else(|| anyhow!("no entity at the location {:?}", loc))
     }
 }

@@ -27,5 +27,5 @@ pub struct WorldBlockUpdate {
 
 pub enum WorldUpdate {
     WorldEntityUpdate(WorldEntityUpdate),
-    WorldBlockUpdate(WorldBlockUpdate)
+    WorldBlockUpdate(WorldBlockUpdate),
 }

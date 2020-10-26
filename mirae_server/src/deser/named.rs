@@ -10,12 +10,30 @@ use std::{
 lazy_static! {
     static ref NAMESETS: HashMap<NameSet, HashSet<String>> = {
         let mut m: HashMap<NameSet, HashSet<String>> = HashMap::new();
-        m.insert(NameSet::Block, gamedata::GAMEDATA.blocks.keys().cloned().collect());
-        m.insert(NameSet::Entity, gamedata::GAMEDATA.entities.keys().cloned().collect());
-        m.insert(NameSet::Item, gamedata::GAMEDATA.items.keys().cloned().collect());
-        m.insert(NameSet::Dmg, gamedata::GAMEDATA.dmg.iter().cloned().collect());
-        m.insert(NameSet::Effect, gamedata::GAMEDATA.effect.keys().cloned().collect());
-        m.insert(NameSet::Stat, gamedata::GAMEDATA.stat.iter().cloned().collect());
+        m.insert(
+            NameSet::Block,
+            gamedata::GAMEDATA.blocks.keys().cloned().collect(),
+        );
+        m.insert(
+            NameSet::Entity,
+            gamedata::GAMEDATA.entities.keys().cloned().collect(),
+        );
+        m.insert(
+            NameSet::Item,
+            gamedata::GAMEDATA.items.keys().cloned().collect(),
+        );
+        m.insert(
+            NameSet::Dmg,
+            gamedata::GAMEDATA.dmg.iter().cloned().collect(),
+        );
+        m.insert(
+            NameSet::Effect,
+            gamedata::GAMEDATA.effect.keys().cloned().collect(),
+        );
+        m.insert(
+            NameSet::Stat,
+            gamedata::GAMEDATA.stat.iter().cloned().collect(),
+        );
         return m;
     };
 }

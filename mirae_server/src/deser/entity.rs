@@ -1,11 +1,11 @@
+use super::stats::Stats;
 use crate::location::Vector2;
-use crate::{inventory, trades::Trades, gamedata};
+use crate::{gamedata, inventory, trades::Trades};
 use anyhow::{anyhow, Result};
 use inventory::Inventory;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 use serde::Deserialize;
 use std::collections::HashMap;
-use super::stats::Stats;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Quotes {
@@ -105,9 +105,13 @@ impl RandTrade {
         for _ in 0..num_trades {
             let item = rng.gen_range(0, set.len());
             let in_trade = set[item].clone();
-            let out_trade = self.items.get(&set[item]).ok_or_else(|| {
-                anyhow!("this should never happen, key should always be in hashmap")
-            })?.clone();
+            let out_trade = self
+                .items
+                .get(&set[item])
+                .ok_or_else(|| {
+                    anyhow!("this should never happen, key should always be in hashmap")
+                })?
+                .clone();
             trades.insert(in_trade, out_trade);
         }
         Ok(Trades(trades))
@@ -124,9 +128,9 @@ fn default_i64() -> i64 {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Steal {
-    pub max_num_items : u64,
-    pub looting : f64,
-    pub intelligence : f64
+    pub max_num_items: u64,
+    pub looting: f64,
+    pub intelligence: f64,
 }
 
 impl Steal {
@@ -134,7 +138,7 @@ impl Steal {
         Self {
             max_num_items: 0,
             looting: 0.0,
-            intelligence: 0.0
+            intelligence: 0.0,
         }
     }
 }
@@ -142,14 +146,14 @@ impl Steal {
 #[derive(Debug, Deserialize)]
 pub struct SpecialBoost {
     pub chance: f64,
-    pub boost: f64
+    pub boost: f64,
 }
 
 impl SpecialBoost {
     pub fn new() -> Self {
         Self {
             chance: -1.0,
-            boost: 1.0
+            boost: 1.0,
         }
     }
 }
@@ -157,7 +161,7 @@ impl SpecialBoost {
 #[derive(Debug, Deserialize)]
 pub struct Regen {
     pub health_regen: i64,
-    pub energy_regen: i64
+    pub energy_regen: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -175,16 +179,16 @@ pub struct EntityTemplate {
     #[serde(default = "default_i64")]
     pub xp: i64,
     #[serde(default = "Steal::new")]
-    pub steal : Steal,
+    pub steal: Steal,
     #[serde(default = "SpecialBoost::new")]
-    pub boost : SpecialBoost,
-    pub stat : Stats
+    pub boost: SpecialBoost,
+    pub stat: Stats,
 }
 
 impl EntityTemplate {
     pub fn construct(&self, location: Vector2, name: String, seed: u64) -> Result<Entity> {
         let mut rng = StdRng::seed_from_u64(seed);
-        
+
         let mut boosted_stat = None;
         let stats = ["intelligence", "looting", "speed", "energy", "health"];
         if self.boost.chance > rng.gen::<f64>() {
@@ -197,11 +201,11 @@ impl EntityTemplate {
         match boosted_stat {
             Some(string) => {
                 match string {
-                    "intelligence" => {steal.intelligence *= self.boost.boost},
-                    "looting" => {steal.looting *= self.boost.boost},
-                    "speed" => {stat.speed *= self.boost.boost as u64},
-                    "energy" => {stat.energy *= self.boost.boost as u64},
-                    "health" => {stat.health *= self.boost.boost as u64},
+                    "intelligence" => steal.intelligence *= self.boost.boost,
+                    "looting" => steal.looting *= self.boost.boost,
+                    "speed" => stat.speed *= self.boost.boost as u64,
+                    "energy" => stat.energy *= self.boost.boost as u64,
+                    "health" => stat.health *= self.boost.boost as u64,
                     _ => {}
                 };
             }
@@ -218,7 +222,7 @@ impl EntityTemplate {
             trades: self.trades.to_trades(&mut rng)?,
             steal,
             stat,
-            boosted_stat
+            boosted_stat,
         })
     }
 }
@@ -231,7 +235,7 @@ pub struct Entity {
     pub tools_inventory: Inventory,
     pub drops_inventory: Inventory,
     pub trades: Trades,
-    pub steal : Steal,
-    pub boosted_stat : Option<String>,
-    pub stat : Stats
+    pub steal: Steal,
+    pub boosted_stat: Option<String>,
+    pub stat: Stats,
 }

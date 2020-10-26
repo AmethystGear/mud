@@ -1,14 +1,14 @@
 use super::spawned_entities::SpawnedEntities;
 use crate::world::perlin_noise::generate_perlin_noise;
 use crate::{
+    deser::block::Block,
     gamedata,
-    location::Vector2, requests::worldupdate::{WorldEntityUpdate, WorldUpdate}, deser::{block::Block}
+    location::Vector2,
+    requests::worldupdate::{WorldEntityUpdate, WorldUpdate},
 };
 use anyhow::{anyhow, Result};
 use rand::{prelude::StdRng, Rng, SeedableRng};
-use std::{
-    collections::{HashMap, HashSet},
-};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct Map {
@@ -117,7 +117,7 @@ pub struct World {
     pub blocks: Map,
     pub entities: Map,
     pub spawned_entities: SpawnedEntities,
-    rng: StdRng
+    rng: StdRng,
 }
 
 impl World {
@@ -128,11 +128,10 @@ impl World {
             blocks: Map::new(gamedata::GAMEDATA.blocks.keys().collect(), map_size)?,
             entities: Map::new(gamedata::GAMEDATA.entities.keys().collect(), map_size)?,
             spawned_entities: SpawnedEntities::new(),
-            rng
+            rng,
         };
         let terrain_parameters = &gamedata::GAMEDATA.terrain;
-        let noise =
-            generate_perlin_noise(map_size, map_size, terrain_parameters.octaves, seed);
+        let noise = generate_perlin_noise(map_size, map_size, terrain_parameters.octaves, seed);
         for i in 0..noise.len() {
             let mut level = 0;
             for l in 0..terrain_parameters.heights.len() {
@@ -153,7 +152,10 @@ impl World {
                     .blocks
                     .get(Vector2::new(x, y))?
                     .ok_or_else(|| anyhow!("block doesn't exist at {}, {}", x, y))?;
-                let block = gamedata::GAMEDATA.blocks.get(block).ok_or_else(|| anyhow!("invalid block name '{}' at {},{}", block, x, y))?;
+                let block = gamedata::GAMEDATA
+                    .blocks
+                    .get(block)
+                    .ok_or_else(|| anyhow!("invalid block name '{}' at {},{}", block, x, y))?;
                 if world.rng.gen::<f64>() > block.mob_spawn_chance {
                     continue;
                 }
@@ -163,7 +165,7 @@ impl World {
                 } else {
                     world.entities.set(
                         Vector2::new(x, y),
-                        Some(&block.mob_filter[world.rng.gen_range(0, block.mob_filter.len())])
+                        Some(&block.mob_filter[world.rng.gen_range(0, block.mob_filter.len())]),
                     )?;
                 }
             }
@@ -173,7 +175,7 @@ impl World {
 
     fn mov_entity(&mut self, start: Vector2, end: Vector2) -> Result<()> {
         self.spawned_entities.mov(start, end)?;
-        let entity  = self.entities.get(start)?.map(|x| x.to_string());
+        let entity = self.entities.get(start)?.map(|x| x.to_string());
         self.entities.set(start, None)?;
         self.entities.set(end, (&entity).as_ref())?;
         Ok(())
@@ -185,31 +187,30 @@ impl World {
         Ok(())
     }
 
-    fn spawn_entity(&mut self, entity_name: String, loc : Vector2) -> Result<()> {
-        self.spawned_entities.spawn(entity_name.clone(), loc, self.rng.gen())?;
+    fn spawn_entity(&mut self, entity_name: String, loc: Vector2) -> Result<()> {
+        self.spawned_entities
+            .spawn(entity_name.clone(), loc, self.rng.gen())?;
         self.entities.set(loc, Some(&entity_name))?;
         Ok(())
     }
 
-    fn set_block(&mut self, loc : Vector2, name : &Option<String>) -> Result<()> {
+    fn set_block(&mut self, loc: Vector2, name: &Option<String>) -> Result<()> {
         self.blocks.set(loc, name.as_ref())
     }
-    
-    pub fn handle_world_update(&mut self, update : WorldUpdate) -> Result<()> {
+
+    pub fn handle_world_update(&mut self, update: WorldUpdate) -> Result<()> {
         match update {
-            WorldUpdate::WorldEntityUpdate(update) => {
-                match update {
-                    WorldEntityUpdate::Move(update) => {
-                        self.mov_entity(update.start, update.end)?;
-                    }
-                    WorldEntityUpdate::Del(update) => {
-                        self.del_entity(update.loc)?;
-                    }
-                    WorldEntityUpdate::Spawn(update) => {
-                        self.spawn_entity(update.name, update.loc)?;
-                    }
+            WorldUpdate::WorldEntityUpdate(update) => match update {
+                WorldEntityUpdate::Move(update) => {
+                    self.mov_entity(update.start, update.end)?;
                 }
-            }
+                WorldEntityUpdate::Del(update) => {
+                    self.del_entity(update.loc)?;
+                }
+                WorldEntityUpdate::Spawn(update) => {
+                    self.spawn_entity(update.name, update.loc)?;
+                }
+            },
             WorldUpdate::WorldBlockUpdate(update) => {
                 self.set_block(update.loc, &update.blockname)?;
             }
