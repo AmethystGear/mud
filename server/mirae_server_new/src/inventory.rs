@@ -1,6 +1,6 @@
-use crate::gamedata::ItemName;
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
+use crate::gamedata::gamedata::ItemName;
 
 pub struct Inventory(pub HashMap<ItemName, u64>);
 

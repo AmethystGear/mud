@@ -24,6 +24,10 @@ impl Vector3 {
         self.z
     }
 
+    pub fn dim(&self) -> usize {
+        self.x * self.y * self.z
+    }
+
     pub fn sqr_mag(&self) -> f64 {
         (self.x as f64).powi(2) + (self.y as f64).powi(2) + (self.z as f64).powi(2)
     }

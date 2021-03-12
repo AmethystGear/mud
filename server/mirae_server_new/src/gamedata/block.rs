@@ -1,5 +1,5 @@
-use crate::serde_defaults::*;
-use crate::{gamedata::BlockName, rgb::RGB};
+use super::{gamedata::BlockName, serde_defaults::*};
+use crate::rgb::RGB;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -75,9 +75,9 @@ pub struct Lighting {
 
 #[derive(Debug, Clone)]
 pub struct Block {
-    name: BlockName,
-    color: RGB,
-    mob_spawn_chance: f64,
-    solid: bool,
-    light: Option<Lighting>,
+    pub name: BlockName,
+    pub color: RGB,
+    pub mob_spawn_chance: f64,
+    pub solid: bool,
+    pub light: Option<Lighting>,
 }

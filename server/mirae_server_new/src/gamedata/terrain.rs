@@ -1,10 +1,8 @@
-use crate::{
-    gamedata::{BiomeName, BlockName, StructureName},
-    vector3::Vector3,
-};
+use crate::vector3::Vector3;
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::HashSet;
+use super::gamedata::{StructureName, BiomeName, BlockName};
 
 #[derive(Debug, Deserialize)]
 pub struct TerrainDeser {

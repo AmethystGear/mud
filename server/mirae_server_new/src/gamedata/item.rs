@@ -1,5 +1,5 @@
-use crate::gamedata::{DmgType, ItemName, StatType};
-use crate::serde_defaults::*;
+use super::{gamedata::{DmgType, ItemName, StatType},
+    serde_defaults::*};
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};

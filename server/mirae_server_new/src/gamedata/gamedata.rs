@@ -1,9 +1,3 @@
-use crate::{
-    block::{Block, BlockDeser},
-    item::{Item, ItemDeser},
-    mob::{MobTemplate, MobTemplateDeser},
-    terrain::{Biome, BiomeDeser, Terrain, TerrainDeser},
-};
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
 use serde::Deserialize;
@@ -12,7 +6,7 @@ use std::{
     collections::{HashMap, HashSet},
     fs,
 };
-
+use super::{item::{Item, ItemDeser}, terrain::{BiomeDeser, TerrainDeser, Terrain, Biome}, mobtemplate::{MobTemplate, MobTemplateDeser}, block::{Block, BlockDeser}};
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct DmgType(String);
 
@@ -300,8 +294,10 @@ pub struct GameData {
     pub mob_templates: HashMap<MobName, MobTemplate>,
     pub mob_actions: HashSet<MobAction>,
     pub mob_id_map: BiMap<u16, MobName>,
+    pub max_mob_id: u16,
     pub blocks: HashMap<BlockName, Block>,
     pub block_id_map: BiMap<u8, BlockName>,
+    pub max_block_id: u8,
 }
 
 impl GameData {
@@ -317,23 +313,29 @@ impl GameData {
         biomes: HashMap<BiomeName, Biome>,
     ) -> Result<Self> {
         let mut mob_id_map: BiMap<u16, MobName> = BiMap::new();
-        let mut id = 0;
+        let mut max_mob_id = 0;
         for name in mob_templates.keys() {
-            if id == u16::MAX {
+            if max_mob_id == u16::MAX {
                 return Err(anyhow!(format!(
                     "number of mobs cannot exceed {}",
                     u16::MAX
                 )));
             }
-            mob_id_map.insert(id, name.clone());
-            id += 1
+            mob_id_map.insert(max_mob_id, name.clone());
+            max_mob_id += 1
         }
 
         let mut block_id_map: BiMap<u8, BlockName> = BiMap::new();
-        let mut id = 0;
+        let mut max_block_id = 0;
         for name in blocks.keys() {
-            block_id_map.insert(id, name.clone());
-            id += 1
+            if max_block_id == u8::MAX {
+                return Err(anyhow!(format!(
+                    "number of blocks cannot exceed {}",
+                    u8::MAX
+                )));
+            }
+            block_id_map.insert(max_block_id, name.clone());
+            max_block_id += 1
         }
 
         Ok(GameData {
@@ -348,6 +350,8 @@ impl GameData {
             block_id_map,
             structures,
             biomes,
+            max_block_id,
+            max_mob_id,
         })
     }
 

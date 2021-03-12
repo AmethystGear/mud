@@ -1,8 +1,8 @@
-use crate::{gamedata::GameData, mob::Mob, noise, rgb::RGB, terrain::Biome, vector3::Vector3};
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
-use rand::{prelude::StdRng, SeedableRng};
+use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::collections::HashMap;
+use crate::{mob::Mob, vector3::Vector3, rgb::RGB, gamedata::{gamedata::GameData, terrain::Biome}, noise};
 
 pub struct Map<T> {
     dim: Vector3,
@@ -33,7 +33,7 @@ where
     pub fn new(dim: Vector3, default: T) -> Self {
         Map {
             dim,
-            map: vec![default; dim.x() * dim.y() * dim.z()],
+            map: vec![default; dim.dim()],
         }
     }
 
@@ -106,16 +106,8 @@ pub struct World {
     mob_map: Map<MobU16>,
     block_map: Map<u8>,
     color_map: Map<RGB>,
+    seed: u64,
     id: u64,
-}
-
-#[derive(Copy, Clone)]
-enum BiomeType {
-    Surface,
-    Ocean,
-    Underwater,
-    Underground,
-    Bottomground,
 }
 
 fn get_rand(seed: u64) -> StdRng {
@@ -134,17 +126,17 @@ struct Noise<'a, 'b, 'c> {
     biome: &'c Vec<f64>,
 }
 
-//TODO: structure generation
+// TODO: structure generation
 fn generate_biome(
-    blocks: &mut Map<u8>,
+    block_map: &mut Map<u8>,
     biome: &Biome,
     noise: Noise,
     g: &GameData,
     level: usize,
     cutoff: f64,
 ) -> Result<()> {
-    let start = blocks.index(Vector3::new(0, 0, level))?;
-    let layer_size = blocks.dim.x() * blocks.dim.y();
+    let start = block_map.index(Vector3::new(0, 0, level))?;
+    let layer_size = block_map.dim.x() * block_map.dim.y();
     for i in 0..layer_size {
         if noise.bounding[i] < cutoff {
             let mut block = None;
@@ -163,7 +155,7 @@ fn generate_biome(
                 }
             }
             if let Some(name) = block {
-                blocks.direct_set(i + start, g.get_block_id_by_blockname(name)?);
+                block_map.direct_set(i + start, g.get_block_id_by_blockname(name)?);
             } else {
                 return Err(anyhow!(format!(
                     "bad biome specification for {:?}, empty block!",
@@ -177,15 +169,9 @@ fn generate_biome(
 
 impl World {
     pub fn from_seed(seed: u64, g: &GameData) -> Result<World> {
-        let mut world = World {
-            spawned_mobs: SpawnedMobs::new(),
-            mob_map: Map::new(g.terrain.dim, MobU16::empty()),
-            block_map: Map::new(g.terrain.dim, 0),
-            color_map: Map::new(g.terrain.dim, RGB::new(0, 0, 0)),
-            id: 0,
-        };
         let mut rng = get_rand(seed);
 
+        // make a closure that will return us new noise every time we call it
         let mut gen_noise = || {
             noise::generate_perlin_noise(
                 g.terrain.dim.x(),
@@ -195,11 +181,11 @@ impl World {
             )
         };
 
+        // generate blocks
         let mut biome_noise = gen_noise();
         let mut terrain_noise = gen_noise();
         let mut bounding_noise = gen_noise();
-
-        let mut blocks = Map::new(g.terrain.dim, 0u8);
+        let mut block_map = Map::new(g.terrain.dim, 0u8);
         for full_pass in &g.terrain.full_passes {
             for level in 0..full_pass.layers.len() {
                 for pass in &full_pass.layers[level] {
@@ -212,7 +198,7 @@ impl World {
                         .biomes
                         .get(&pass.biome)
                         .ok_or(anyhow!(format!("{:?} is not a biome", pass.biome)))?;
-                    generate_biome(&mut blocks, biome, noise, g, level, pass.cutoff)?;
+                    generate_biome(&mut block_map, biome, noise, g, level, pass.cutoff)?;
                     biome_noise = gen_noise();
                     if full_pass.change_bounding_noise_per_pass {
                         bounding_noise = gen_noise();
@@ -220,28 +206,50 @@ impl World {
                 }
                 terrain_noise = gen_noise();
             }
+            bounding_noise = gen_noise();
         }
-        return Ok(world);
+
+        // generate mobs
+        let mut mob_map = Map::new(g.terrain.dim, MobU16::empty());
+        for i in 0..(mob_map.dim.dim()) {
+            let block = g.get_block_name_by_id(block_map.direct_get(i))?;
+            let block = g
+                .blocks
+                .get(&block)
+                .ok_or(anyhow!("block doesn't exist!"))?;
+            if rng.gen::<f64>() < block.mob_spawn_chance {
+                mob_map.direct_set(i, MobU16(rng.gen_range(0, g.max_mob_id)));
+            }
+        }
+
+        // generate colors
+        // TODO: lighting calculations here
+        let mut color_map = Map::new(g.terrain.dim, RGB::new(0, 0, 0));
+        for i in 0..(color_map.dim.dim()) {
+            let block = g.get_block_name_by_id(block_map.direct_get(i))?;
+            let block = g
+                .blocks
+                .get(&block)
+                .ok_or(anyhow!("block doesn't exist!"))?;
+            color_map.direct_set(i, block.color);
+        }
+
+        Ok(World {
+            spawned_mobs: SpawnedMobs::new(),
+            mob_map,
+            block_map,
+            color_map,
+            seed,
+            id: 0,
+        })
     }
 
     pub fn get_mob(&mut self, loc: Vector3, g: &GameData) -> Result<Mob> {
         if let Some(mob) = self.spawned_mobs.get(loc) {
             Ok(mob.clone())
         } else if let Some(_) = self.mob_map.get(loc)?.as_u16() {
-            self.spawn_mob(loc, g)
-        } else {
-            Err(anyhow!(format!("no mob at location {:?}", loc)))
-        }
-    }
-
-    pub fn update_mob(&mut self, loc: Vector3, m: Mob) -> Result<()> {
-        if let Some(mob) = self.spawned_mobs.get(loc) {
-            if mob.id() == m.id() {
-                self.spawned_mobs.insert(loc, m);
-                Ok(())
-            } else {
-                Err(anyhow!(format!("the mob you are trying to update {:?} and the mob you provided {:?} aren't the same", mob, m)))
-            }
+            self.spawn_mob(loc, g)?;
+            self.get_mob(loc, g)
         } else {
             Err(anyhow!(format!("no mob at location {:?}", loc)))
         }
@@ -274,7 +282,7 @@ impl World {
         Ok(())
     }
 
-    fn spawn_mob(&mut self, loc: Vector3, g: &GameData) -> Result<Mob> {
+    fn spawn_mob(&mut self, loc: Vector3, g: &GameData) -> Result<()>{
         let mob_name = g.get_mob_name_by_id(
             self.mob_map
                 .get(loc)?
@@ -285,108 +293,8 @@ impl World {
             .mob_templates
             .get(&mob_name)
             .ok_or_else(|| anyhow!("invalid mob name?"))?;
-        let mob = mob_template.spawn(self.id);
+        self.spawned_mobs.insert(loc,Mob::new(self.id, loc, mob_template));
         self.id += 1;
-        self.spawned_mobs.insert(loc, mob.clone());
-        Ok(mob)
+        Ok(())
     }
 }
-
-/*
-
-#[derive(Debug)]
-pub struct Map<V>
-where
-    V: Eq + Hash + Debug,
-{
-    id_val_map: BiMap<u16, V>,
-    dim: Vector3,
-    map: Vec<u16>,
-    max: u16,
-}
-
-impl<V> Map<V>
-where
-    V: Eq + Hash + Debug,
-{
-    fn new(vals: HashSet<V>, dim: Vector3) -> Result<Self> {
-        let mut id_val_map = BiMap::new();
-        let mut id: u16 = 0;
-        for v in vals {
-            if id == u16::MAX {
-                return Err(anyhow!("+"));
-            }
-            id_val_map.insert(id, v);
-            id += 1;
-        }
-        Ok(Map {
-            id_val_map,
-            dim,
-            map: vec![u16::MAX; (dim.x as usize) * (dim.y as usize) * (dim.z as usize)],
-            max: id,
-        })
-    }
-
-    fn index(&self, loc: Vector3) -> Result<usize> {
-        if loc.x >= self.dim.x || loc.y >= self.dim.y || loc.z >= self.dim.z {
-            Err(anyhow!("point {:?} not in map of dim {:?}", loc, self.dim))
-        } else {
-            Ok(loc.z * self.dim.x * self.dim.y + loc.y * self.dim.x + loc.x)
-        }
-    }
-
-    fn set(&mut self, loc: Vector3, name: Option<&V>) -> Result<()> {
-        let index = self.index(loc)?;
-        self.direct_set(index, name)
-    }
-
-    fn direct_set(&mut self, index: usize, name: Option<&V>) -> Result<()> {
-        if let Some(name) = name {
-            if let Some(id) = self.id_val_map.get_by_right(name) {
-                self.map[index] = id.clone();
-                Ok(())
-            } else {
-                Err(anyhow!(
-                    "object with name {:?} does not exist in map {:?}",
-                    name,
-                    self.id_val_map
-                ))
-            }
-        } else {
-            self.map[index] = u16::MAX;
-            Ok(())
-        }
-    }
-
-    pub fn get(&self, loc: Vector3) -> Result<Option<&V>> {
-        let index = self.index(loc)?;
-        if self.map[index] == u16::MAX {
-            Ok(None)
-        } else {
-            if let Some(name) = self.id_val_map.get_by_left(&self.map[index]) {
-                Ok(Some(name))
-            } else {
-                Err(anyhow!(
-                    "the id {} at {:?}, doesn't have a mapping in {:?}",
-                    self.map[index],
-                    loc,
-                    self.id_val_map
-                ))
-            }
-        }
-    }
-
-    pub fn get_id(&self, loc: Vector3) -> Result<Option<usize>> {
-        let index = self.index(loc)?;
-        if self.map[index] == u16::MAX {
-            Ok(None)
-        } else {
-            Ok(Some(self.map[index] as usize))
-        }
-    }
-
-    pub fn max(&self) -> u16 {
-        self.max
-    }
-}
-*/
