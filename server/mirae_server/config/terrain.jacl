@@ -1,0 +1,32 @@
+"pvp" : (
+    dim : (x : 200, y : 200, z : 5)
+    octaves : 7
+    top : [
+        [
+            (block : "water", height : 0.45)
+            (block : "sand", height : 0.55)
+            (block : "grass", height : 0.65)
+            (block : "forest", height : 0.80)
+            (block : "rock", height : 2.0)
+        ]
+
+        [
+            (block : "water", height : 0.45)
+            (block : "sand", height : 0.55)
+            (block : "grass", height : 0.65)
+            (block : "forest", height : 0.80)
+            (block : "rock", height : 2.0)
+        ]
+    ] 
+
+    blocks : [ 
+        "trump_block"
+        "rock"
+        "water"
+        "sand"
+        "grass"
+        "forest"
+        "rock"
+    ]
+    heights : [ 0.2 0.205 0.45 0.56 0.725 0.85 ]
+)

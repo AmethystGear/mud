@@ -1,0 +1,579 @@
+"workbench" : (
+    equippable : true
+    abilities : {
+        "honourable_ink" : (
+            remove_items : {
+                "honour" : 2
+                "ink" : 1
+            }
+            make_items : {
+                "honourable_ink" : 1
+            }
+        )
+
+        "iron_honour_sword" : (
+            remove_items : {
+                "iron_sword" : 1
+                "honour" : 15
+                "mana" : 5
+            }
+            make_items : {
+                "iron_honour_sword" : 1
+            }
+        )
+
+        "iron_sword" : (
+            remove_items : {
+                "stick" : 1
+                "iron" : 10
+            }
+            make_items : {
+                "iron_sword" : 1
+            }
+        )
+
+        "iron_from_ore" : {
+            remove_items : {
+                "iron_ore" : 1
+            }
+            make_items : {
+                "iron" : 2
+            }
+        }
+
+        "iron_from_junk_metal" : {
+            remove_items : {
+                "junk_metal" : 5
+            }
+            make_items : {
+                "iron" : 2
+            }
+        }
+
+        "stick" : {
+            remove_items : {
+                "wood" : 1
+            }
+            make_items : {
+                "stick" : 3
+            }
+        }
+
+        "junk_metal_from_busted_machinery" : {
+            remove_items : {
+                "busted_machinery" : 1
+            }
+            make_items : {
+                "junk_metal" : 5
+            }
+        }
+
+        "honour" : {
+            remove_items : {
+                "mana" : 5
+                "honour" : 1
+            }
+            make_items : {
+                "honour" : 2
+            }
+        }
+
+        "mana" : {
+            remove_items : {
+                "honour" : 1
+            }
+            make_items : {
+                "mana" : 2
+            }
+        }
+    }
+)
+
+"obsidian_staff" : (
+    equippable : true
+    abilities : {
+        "flames_of_honour" : (
+            energy : -5
+            damage : {
+                "magic" : 2
+                "heat" : 8
+                "honourable" : 2
+            }
+            require_items : {
+                "honour" : 15
+                "mana" : 1
+            }
+            remove_items : {
+                "mana" : 1
+            }
+        )
+        "honourable_throw" : (
+            destroy_item : true
+            damage : {
+                "honourable" : 20
+                "physical" : 10
+            }
+            require_items : {
+                "honour" : 30
+            }
+        )
+    }
+    description : "A magic staff, crafted by a skilled knight adept in the use of fire magic. You must have honour to weild it."
+)
+
+"iron_honour_sword" : (
+    equippable : true
+    abilities : {
+        "honourable_sepuku" : (
+            health : -99999999
+            destroy_item : true
+            make_items : {
+                "honour" : 25
+                "mana" : 25
+            }
+        )
+
+        "stab" : (
+            energy : -1
+            damage : {
+                physical : 1
+                honourable : 1
+                magical : 1
+            }
+            make_items : {
+                "honour" : 1
+            }
+        )
+
+        "honour_slash" : (
+            energy : -2
+            damage : {
+                honourable : 10
+                magic : 2
+            }
+            require_items : {
+                "honour" : 10
+                "mana" : 4
+            }
+            remove_items : {
+                "mana" : 4
+            }
+        )
+
+        "honourable_concentration" : (
+            make_items : {
+                "honour" : 1
+                "mana" : 3
+            }
+        )
+    }
+)
+
+"quill" : (
+    xp : 10
+)
+
+"ink" : (
+    xp : 5
+)
+
+"honourable_ink" : (
+    xp : 50
+)
+
+"junk_metal" : (
+    xp : 0
+    wearable : true
+    buffs : (
+        stat_buffs : {
+            "speed" : 0.95
+        }
+        defense_buffs : {
+            "physical" : 0.95
+            "electric" : 1.05
+        }
+        attack_buffs : {
+            "electric" : 1.05
+        }
+    )
+    description : "Metal scrap, rusty, broken, junk. Not extremely useful."
+)
+
+"busted_machinery" : (
+    xp : 0
+    description : "Broken pieces of a once functional machine."
+)
+
+"oxford_dictionary" : (
+    xp : 200
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            energy : -3
+        )
+    }
+    description : "A tome codifying the sacred rules of the knight's language"
+)
+
+"incomplete_physics_homework" : (
+    xp : 100
+    equippable : true
+    abilities : {
+        "finish_the_homework" : (
+            destroy_item : true
+            energy : -10
+            require_items : {
+                "quill" : 1
+                "honourable_ink" : 1
+            }
+            remove_items : {
+                "honourable_ink" : 1
+            }
+            make_items : {
+                "completed_physics_homework" : 1
+            }
+        )
+
+        "finish_just_the_extra_credit_sirr" : (
+            destroy_item : true
+            health : -1
+            energy : -5
+            require_items : {
+                "quill" : 1
+                "honourable_ink" : 1
+            }
+            remove_items : {
+                "honourable_ink" : 1
+            }
+            make_items : {
+                "completed_physics_extra_credit" : 1
+                "honour" : 20
+                "mana" : 5
+            }
+        )
+
+        "finish" : (
+            destroy_item : true
+            energy : -20
+            require_items : {
+                "quill" : 1
+                "honourable_ink" : 1
+            }
+            remove_items : {
+                "honourable_ink" : 1
+            }
+            make_items : {
+                "completed_physics_homework" : 1
+                "completed_physics_extra_credit" : 1
+            }
+        )
+    }
+    description : "A knight's physics homework... 
+looks like the knight was stuck on the extra credit,
+though they haven't even started on any of the other problems..."
+)
+
+"completed_physics_homework" : (
+    xp : 5000
+    abilities : {
+        "redo_the_assignment" : (
+            health : -1
+            energy : -2
+            make_items : {
+                "honour" : 1
+            }
+        )
+    }
+)
+
+"completed_physics_extra_credit : (
+    xp : 1000
+    abilities : {
+        "redo_the_assignment" : (
+            health : -1
+            energy : -2
+            make_items : {
+                "honour" : 1
+            }
+        )
+    }
+)
+
+"mana" : (
+    xp : 40
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            energy : 1
+        )
+    }
+    description : "A form of energy used by knights"
+)
+
+"honour" : (
+    xp : -40
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : 2
+            energy : -1
+        )
+    }
+    description : "A knight's favorite substance. Processed mana."
+)
+
+"dragon's_blood" : (
+    xp : 1000
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -10
+        )
+        "throw" : (
+            destroy_item : true
+            energy : -1
+            repeat : 3
+            damage : {                
+                "toxic" : 4
+            }
+            accuracy : 0.8
+        )
+    }
+    description : "highly toxic blood obtained from a dragon"
+)
+
+"the_journey_was_the_prize" : (
+    xp : -100
+    equippable : true
+    abilities : {
+        "self_reflection" : (
+            destroy_item : true
+            energy : -1
+        )
+    }
+
+    description : 
+"Reflect on your journey to get this item, 
+the sacrifices you made
+the challenges you overcame
+they were the TRUE prize,
+not this trinket.
+(This totally isn't just us scamming you btw.)"
+)
+
+"CPU" : (
+    xp : 3000
+)
+
+"copper_wires" : (
+    xp : 2
+)
+
+"broken_machinery" : (
+    xp : -10
+)
+
+"newton's_laws" : (
+    xp : 100
+)
+
+"the_meaning_of_the_universe" : (
+    xp : -200
+    description : 
+"the meaning of LIFE, the UNIVERSE and EVERYTHING can be understood
+if you simply USE this item to it's full extent..."
+    abilities : {
+        "42" : (
+            destroy_item : true
+            health : -424242
+        )
+    }
+)
+
+// grades, lol
+"F" : ( xp : -100 )
+"D+" : ( xp : 100 )
+"C-" : ( xp : 200 )
+"C++" : ( xp : -500 )
+"B+" : ( xp : 500 )
+"A+" : ( xp : 1000 )
+
+"sins_of_humanity" : (
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : 100
+            energy : 100
+        )
+    }
+)
+
+"sonic_chops" : (
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : 10
+            energy : 25
+        )
+    }
+    description : "Considered a rare delicacy, for few have tasted the meat of a sonic."
+)
+
+"heghead" : (
+    wearable : true
+    xp : 1500
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -7
+            energy : 35
+        )
+    }
+    buffs : (
+        stat_buffs : {
+            "speed" : 1.5
+            "max_energy" : 1.5
+            "accuracy" : 0.75
+        }
+    )
+    description : "The head of sonic the hedgehog. You can wear it, just mind the eyeball."
+)
+
+"sonic's_shoes" : (
+    wearable : true
+    xp : 2000
+    buffs : (
+        stat_buffs : {
+            "speed" : 2.0
+            "max_health" : 0.8
+        }
+    )
+    description : "Fast shoes, shoes go fest, gotta go festttttt!!!!"
+)
+
+"orange" : (
+    wearable : true
+    equippable : true
+    buffs : (
+        attack_buffs : {
+            "bigly" : 1.1
+            "psychological" : 1.1
+        }
+    )
+
+    abilities : {
+        "throw" : (
+            destroy_item : true
+            energy : -1
+            damage : {
+                "bigly" : 5
+            }
+        )
+        "eat" : (
+            destroy_item : true
+            health : 2
+        )
+    }
+)
+
+"trump_orange" : (
+    wearable : true
+    equippable : true
+    buffs : (
+        attack_buffs : {
+            "bigly" : 1.2
+            "psychological" : 1.2
+        }
+    )
+
+    abilities : {
+        "throw" : (
+            destroy_item : true
+            energy : -3
+            damage : {
+                "bigly" : 4
+            }
+        )
+        "eat" : (
+            destroy_item : true
+            health : -4
+            damage : {
+                "bigly" : 1
+                "psychological" : 7
+            }
+        )
+    }
+)
+
+"sentient_trump_orange" : (
+    wearable : true
+    equippable : true
+    buffs : (
+        attack_buffs : {
+            "bigly" : 1.15
+            "psychological" : 1.45
+        }
+    )
+
+    abilities : {
+        "throw" : (
+            destroy_item : true
+            energy : -3
+            damage : {
+                "bigly" : 4
+                "psychological" : 4
+            }
+        )
+        "no_no_no" : (
+            health : 3
+            energy : -3
+            counter : {
+                "physical" : 0.35
+            }
+        )
+        "speak" : (
+            energy : -5
+            damage : {
+                "psychological" : 6
+            }
+        )
+        "eat" : (
+            destroy_item : true
+            health : -4
+            damage : {
+                "bigly" : 2
+                "psychological" : 10
+            }
+        )
+    }
+)
+
+"wall_staff" : (
+    equippable : true
+    xp : 100
+    buffs : (
+        defense_buffs : {
+            "magic" : 0.9
+            "bogly" : 0.9
+        }
+    )
+)
+
+"raphael's_prophecy_1" : (
+    xp : -171717
+
+    description : "On the 17th of Boglianuary, 
+the TRUMPS shall defeat TRASH ISLAND 
+and make the greatest comeback ever seen in history!!"
+)
+
+"raphael's_holy_gift" : (
+    equippable : true
+    xp : -171717
+    description : "You can use this gift to become invincible, if you are a TRUE BELIEVER"
+    abilities : {
+        "oh_great_raphael_make_me_invincible" : (
+            health : -171717
+        )
+    }
+)

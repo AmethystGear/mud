@@ -1,0 +1,7 @@
+items: "pvp/items.jacl"
+terrain: "pvp/terrain.jacl"
+dmg: "pvp/dmg.jacl"
+stat: "pvp/stat.jacl"
+mob_actions: "pvp/mobactions.jacl"
+mobs: "pvp/mobs.jacl"
+blocks: "pvp/blocks.jacl"

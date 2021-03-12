@@ -1,0 +1,26 @@
+"lowly_ben" : (
+    xp : 25
+    quotes: {
+        "entrance" : ["ben"]
+        "mob_attack" : ["ben"]
+        "player_run"  : ["ben"]
+        "player_victory" : ["ben"]
+        "mob_victory" : ["ben"]
+    }
+    drops : (
+        items : [
+            (name : "trump_orange", prob : 0.05, per: 1)
+            (name : "orange", prob : 0.95, per: 1)
+        ]
+        min : 0
+        max : 1
+    )
+    tools : (
+        items : [
+            (name : "trump_orange", prob : 0.05, per: 1)
+            (name : "orange", prob : 0.95, per: 2)
+        ]
+        min : 0
+        max : 1
+    )
+)

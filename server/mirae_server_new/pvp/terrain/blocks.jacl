@@ -1,0 +1,35 @@
+"grass" : (
+    color : (r : 0, g : 175, b : 95)
+    mob_spawn_chance : 0.02
+)
+"rock" : (
+    color : (r : 138, g : 138, b : 138)
+    solid : true
+)
+"water" : (
+    color : (r : 0, g : 215, b : 255)
+    solid : true
+    z_passable : true
+)
+"forest" : (
+    color : (r : 0, g : 95, b : 0)
+    mob_spawn_chance : 0.35
+)
+"mud" : (
+    color : (r : 112, g : 84, b : 62)
+)
+"sand" : (
+    color : (r : 215, g : 175, b : 0)
+    mob_spawn_chance : 0.05
+)
+"ice" : (
+    color : (r : 185, g : 232, b : 234)
+)
+"snow" : (
+    color : (r : 250, g : 250, b : 250)
+)
+"empty" : (
+    color : (r : 0, g : 0, b : 0)
+    solid : true
+    z_passable : true
+)
