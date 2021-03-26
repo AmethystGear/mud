@@ -1,8 +1,11 @@
+use super::{
+    gamedata::{BiomeName, BlockName, StructureName},
+    serde_defaults::*,
+};
 use crate::vector3::Vector3;
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::HashSet;
-use super::gamedata::{StructureName, BiomeName, BlockName};
 
 #[derive(Debug, Deserialize)]
 pub struct TerrainDeser {
@@ -156,8 +159,11 @@ impl BlockCutoffDeser {
 
 #[derive(Debug, Deserialize)]
 pub struct BiomeDeser {
+    #[serde(default = "empty_vec")]
     pub terrain_pass: Vec<BlockCutoffDeser>,
+    #[serde(default = "empty_vec")]
     pub biome_pass: Vec<BlockCutoffDeser>,
+    #[serde(default = "empty_vec")]
     pub spawn: Vec<StructureSpawnDeser>,
 }
 

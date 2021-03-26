@@ -1,0 +1,132 @@
+"sunken_ship" : (
+    sources : ["ship.png"]
+    mapping : [
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "wood_wall"
+        )
+        (
+            color : (r : 0, g : 0, b : 255)
+            block : "wood_floor"
+        )
+        (
+            color : (r : 0, g : 255, b : 0)
+            block : "wood_floor"
+            mobs : [
+            	(mob : "pirate_knight", prob : 0.5)
+            	(mob : "sunken_pirate", prob : 0.4)
+            	(mob : "sunken_ghost", prob : 0.1)
+            ]
+        )
+        (
+            color : (r : 255, g : 255, b : 0)
+            block : "wood_floor"
+            mobs : [
+            	(mob : "chestaroo", prob : 0.2)
+            	(mob : "decent_chest", prob : 0.6)
+            	(mob : "awesome_chest", prob : 0.2)            
+            ]
+        )
+        (
+            color : (r : 0, g : 255, b : 255)
+            block : "sea_lantern"
+        )
+    ]
+)
+
+"ship" : (
+    sources : ["ship.png"]
+    mapping : [
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "wood_wall"
+        )
+        (
+            color : (r : 0, g : 0, b : 255)
+            block : "wood_floor"
+        )
+        (
+            color : (r : 0, g : 255, b : 0)
+            block : "wood_floor"
+            mobs : [
+            	(mob : "pirate", prob : 0.5)
+            ]
+        )
+        (
+            color : (r : 255, g : 255, b : 0)
+            block : "wood_floor"
+            mobs : [
+            	(mob : "chestaroo", prob : 0.2)
+            	(mob : "decent_chest", prob : 0.6)
+            	(mob : "awesome_chest", prob : 0.2)            
+            ]
+        )
+        (
+            color : (r : 0, g : 255, b : 255)
+            block : "wood_floor"
+        )
+    ]
+)
+
+"cave" : (
+    sources : ["caves/cave1.png", "caves/cave2.png", "caves/cave3.png"]
+    mapping : [
+        (
+            color : (r : 0, g : 0, b : 0)
+            block : "empty"
+        )
+    ]
+)
+
+"lantern" : (
+    sources : ["single.png"]
+    mapping : [
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "lantern"
+        )
+    ]
+)
+
+"sea_lantern" : (
+    sources : ["single.png"]
+    mapping : [
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "sea_lantern"
+        )
+    ]
+)
+
+"village" : (
+    sources : ["villages/village.png"]
+    mapping : [
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "rock"
+        )
+        (
+            color : (r : 0, g : 0, b : 255)
+            block : "wood_floor"
+        )
+        (
+            color : (r : 0, g : 255, b : 0)
+            block : "grass"
+            mobs : [(mob: "honour_knight", prob : 0.1)]
+        )
+        (
+            color : (r : 0, g : 0, b : 0)
+            block : "wood_wall"
+        )
+        (
+            color : (r : 255, g : 255, b : 0)
+            block : "wood_floor"
+            mobs : [
+                (mob: "honour_knight", prob : 0.1)
+                (mob: "honour_mage", prob : 0.1)
+                (mob: "chestaroo", prob : 0.2)
+                (mob: "awesome_chest", prob : 0.05)
+            ]
+        )
+    ]
+)

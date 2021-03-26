@@ -1,3 +1,14 @@
+use super::{
+    block::{Block, BlockDeser},
+    item::{Item, ItemDeser},
+    mobtemplate::{MobTemplate, MobTemplateDeser},
+    structures::{Structure, StructureDeser},
+    terrain::{Biome, BiomeDeser, Terrain, TerrainDeser},
+};
+use crate::{
+    playerout::{Packet, PacketType},
+    world::MobU16,
+};
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
 use serde::Deserialize;
@@ -5,8 +16,8 @@ use serde_jacl::de::from_str;
 use std::{
     collections::{HashMap, HashSet},
     fs,
+    path::Path,
 };
-use super::{item::{Item, ItemDeser}, terrain::{BiomeDeser, TerrainDeser, Terrain, Biome}, mobtemplate::{MobTemplate, MobTemplateDeser}, block::{Block, BlockDeser}};
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct DmgType(String);
 
@@ -37,7 +48,7 @@ impl From<String> for StatType {
 }
 
 impl StatType {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
         if g.stat.contains(&val) {
             Ok(val)
@@ -59,10 +70,14 @@ impl From<String> for StructureName {
 impl StructureName {
     fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
-        if g.structures.contains(&val) {
+        if g.structures.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.structures)))
+            Err(anyhow!(format!(
+                "{:?} not in {:?}",
+                val,
+                g.structures.keys().collect::<Vec<&StructureName>>()
+            )))
         }
     }
 }
@@ -103,26 +118,6 @@ impl ItemName {
             Ok(val)
         } else {
             Err(anyhow!(format!("{:?} not in {:?}", val, g.items.keys())))
-        }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MobAction(String);
-
-impl From<String> for MobAction {
-    fn from(s: String) -> Self {
-        Self(s)
-    }
-}
-
-impl MobAction {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.mob_actions.contains(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.mob_actions)))
         }
     }
 }
@@ -179,7 +174,6 @@ pub struct GameMode {
     structures: String,
     dmg: String,
     stat: String,
-    mob_actions: String,
     mobs: String,
     blocks: String,
 }
@@ -191,24 +185,14 @@ impl GameMode {
             dmg: from_str(&fs::read_to_string(&self.dmg)?)?,
             stat: from_str(&fs::read_to_string(&self.stat)?)?,
             items: from_str(&fs::read_to_string(&self.items)?)?,
-            mob_actions: from_str(&fs::read_to_string(&self.mob_actions)?)?,
             mob_templates: from_str(&fs::read_to_string(&self.mobs)?)?,
             blocks: from_str(&fs::read_to_string(&self.blocks)?)?,
-            biomes: from_str(&fs::read_to_string(&self.biomes)?)?,
             structures: from_str(&fs::read_to_string(&self.structures)?)?,
+            biomes: from_str(&fs::read_to_string(&self.biomes)?)?,
         };
-        let structures = deser
-            .structures
-            .into_iter()
-            .map(|x| StructureName(x))
-            .collect();
+
         let dmg_types = deser.dmg.into_iter().map(|x| DmgType(x)).collect();
         let stat_types = deser.stat.into_iter().map(|x| StatType(x)).collect();
-        let mob_actions = deser
-            .mob_actions
-            .into_iter()
-            .map(|x| MobAction(x))
-            .collect();
         let item_names = deser.items.keys().map(|x| ItemName(x.clone())).collect();
 
         let mut items = HashMap::new();
@@ -220,12 +204,14 @@ impl GameMode {
             );
         }
 
+        let mut mob_names = HashSet::new();
         let mut mob_templates = HashMap::new();
         for (name, v) in deser.mob_templates {
             let name = MobName::from(name);
+            mob_names.insert(name.clone());
             mob_templates.insert(
                 name.clone(),
-                v.into_mobtemplate(&dmg_types, &item_names, &mob_actions, name)?,
+                v.into_mobtemplate(&dmg_types, &item_names, &stat_types, name)?,
             );
         }
 
@@ -236,6 +222,7 @@ impl GameMode {
             .cloned()
             .map(|x| BlockName(x))
             .collect();
+
         let blocks: HashMap<BlockName, Block> = deser
             .blocks
             .into_iter()
@@ -247,12 +234,29 @@ impl GameMode {
             })
             .collect();
 
+        let folder = Path::new(&self.structures)
+            .parent()
+            .ok_or(anyhow!("invalid path"))?;
+        let mut structure_names = HashSet::new();
+        let mut structures = HashMap::new();
+        for (name, v) in deser.structures {
+            let name = StructureName(name);
+            structure_names.insert(name.clone());
+            structures.insert(
+                name.clone(),
+                v.get_structures(folder, &block_names, &mob_names, name)?,
+            );
+        }
+
         let mut biomes = HashMap::new();
         let mut biome_names = HashSet::new();
         for (name, v) in deser.biomes {
             let name = BiomeName(name);
             biome_names.insert(name.clone());
-            biomes.insert(name.clone(), v.into_biome(name, &structures, &block_names)?);
+            biomes.insert(
+                name.clone(),
+                v.into_biome(name, &structure_names, &block_names)?,
+            );
         }
 
         let terrain = deser.terrain.into_terrain(&biome_names)?;
@@ -263,10 +267,9 @@ impl GameMode {
             stat_types,
             items,
             mob_templates,
-            mob_actions,
             blocks,
-            structures,
             biomes,
+            structures,
         )
     }
 }
@@ -274,30 +277,30 @@ impl GameMode {
 #[derive(Debug, Deserialize)]
 pub struct GameDataDeser {
     terrain: TerrainDeser,
-    structures: Vec<String>,
     dmg: Vec<String>,
     stat: Vec<String>,
     items: HashMap<String, ItemDeser>,
-    mob_actions: Vec<String>,
     mob_templates: HashMap<String, MobTemplateDeser>,
     blocks: HashMap<String, BlockDeser>,
     biomes: HashMap<String, BiomeDeser>,
+    structures: HashMap<String, StructureDeser>,
 }
 
 pub struct GameData {
     pub terrain: Terrain,
     pub dmg: HashSet<DmgType>,
     pub stat: HashSet<StatType>,
-    pub structures: HashSet<StructureName>,
     pub biomes: HashMap<BiomeName, Biome>,
+    pub structures: HashMap<StructureName, Vec<Structure>>,
     pub items: HashMap<ItemName, Item>,
     pub mob_templates: HashMap<MobName, MobTemplate>,
-    pub mob_actions: HashSet<MobAction>,
-    pub mob_id_map: BiMap<u16, MobName>,
-    pub max_mob_id: u16,
+    pub mob_id_map: BiMap<MobU16, MobName>,
+    pub max_mob_id: MobU16,
     pub blocks: HashMap<BlockName, Block>,
     pub block_id_map: BiMap<u8, BlockName>,
     pub max_block_id: u8,
+    pub init_packet: Packet,
+    pub mob_id_to_img_id: HashMap<u16, u8>,
 }
 
 impl GameData {
@@ -307,22 +310,21 @@ impl GameData {
         stat: HashSet<StatType>,
         items: HashMap<ItemName, Item>,
         mob_templates: HashMap<MobName, MobTemplate>,
-        mob_actions: HashSet<MobAction>,
         blocks: HashMap<BlockName, Block>,
-        structures: HashSet<StructureName>,
         biomes: HashMap<BiomeName, Biome>,
+        structures: HashMap<StructureName, Vec<Structure>>,
     ) -> Result<Self> {
-        let mut mob_id_map: BiMap<u16, MobName> = BiMap::new();
-        let mut max_mob_id = 0;
+        let mut mob_id_map: BiMap<MobU16, MobName> = BiMap::new();
+        let mut max_mob_id = MobU16(0);
         for name in mob_templates.keys() {
-            if max_mob_id == u16::MAX {
+            if max_mob_id == MobU16::empty() {
                 return Err(anyhow!(format!(
-                    "number of mobs cannot exceed {}",
-                    u16::MAX
+                    "number of mobs cannot exceed {:?}",
+                    MobU16::empty()
                 )));
             }
             mob_id_map.insert(max_mob_id, name.clone());
-            max_mob_id += 1
+            max_mob_id = MobU16(max_mob_id.0 + 1);
         }
 
         let mut block_id_map: BiMap<u8, BlockName> = BiMap::new();
@@ -338,28 +340,66 @@ impl GameData {
             max_block_id += 1
         }
 
+        let mut img_to_img_id = HashMap::new();
+        let mut mob_id_to_img_id = HashMap::new();
+        let mut id: u8 = 0;
+        for i in 0..max_mob_id.0 {
+            let mob_name = mob_id_map
+                .get_by_left(&MobU16(i))
+                .ok_or(anyhow!("invalid id"))?;
+            let mob_template = mob_templates
+                .get(&mob_name)
+                .ok_or(anyhow!("invalid mob name"))?;
+
+            if !img_to_img_id.contains_key(&mob_template.display) {
+                img_to_img_id.insert(mob_template.display.clone(), id);
+                id += 1;
+            }
+            let val = img_to_img_id
+                .get(&mob_template.display)
+                .expect("this should never happen");
+
+            mob_id_to_img_id.insert(i, val.clone());
+        }
+        let mut img_id_to_img = HashMap::new();
+        for (k, v) in img_to_img_id {
+            img_id_to_img.insert(format!("{}", v), k);
+        }
+
         Ok(GameData {
             terrain,
             dmg,
             stat,
             items,
             mob_templates,
-            mob_actions,
             mob_id_map,
             blocks,
             block_id_map,
-            structures,
             biomes,
             max_block_id,
             max_mob_id,
+            structures,
+            init_packet: Packet {
+                p_type: PacketType::Init,
+                content: serde_json::to_string(&img_id_to_img)?.into_bytes(),
+            },
+            mob_id_to_img_id,
         })
     }
 
-    pub fn get_mob_name_by_id(&self, id: u16) -> Result<MobName> {
+    pub fn get_mob_name_by_id(&self, id: MobU16) -> Result<MobName> {
         Ok(self
             .mob_id_map
             .get_by_left(&id)
-            .ok_or_else(|| anyhow!(format!("invalid id {}", id)))?
+            .ok_or_else(|| anyhow!(format!("invalid id {:?}", id)))?
+            .clone())
+    }
+
+    pub fn get_mob_id_by_name(&self, name: &MobName) -> Result<MobU16> {
+        Ok(self
+            .mob_id_map
+            .get_by_right(name)
+            .ok_or_else(|| anyhow!(format!("invalid name {:?}", name)))?
             .clone())
     }
 

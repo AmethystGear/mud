@@ -1,5 +1,5 @@
 "workbench" : (
-    equippable : true
+    equipable : true
     abilities : {
         "honourable_ink" : (
             remove_items : {
@@ -11,64 +11,75 @@
             }
         )
 
-        "iron_honour_sword" : (
+        "iron_honoursword" : (
             remove_items : {
                 "iron_sword" : 1
+                "iron" : 5
                 "honour" : 15
                 "mana" : 5
             }
             make_items : {
-                "iron_honour_sword" : 1
+                "iron_honoursword" : 1
             }
         )
 
         "iron_sword" : (
             remove_items : {
                 "stick" : 1
-                "iron" : 10
+                "iron" : 15
             }
             make_items : {
                 "iron_sword" : 1
             }
         )
 
-        "iron_from_ore" : {
+        "iron_from_ore" : (
             remove_items : {
                 "iron_ore" : 1
             }
             make_items : {
-                "iron" : 2
+                "iron" : 3
             }
-        }
+        )
 
-        "iron_from_junk_metal" : {
+        "iron_from_junk_metal" : (
             remove_items : {
                 "junk_metal" : 5
             }
             make_items : {
                 "iron" : 2
             }
-        }
+        )
 
-        "stick" : {
+        "stick" : (
             remove_items : {
                 "wood" : 1
             }
             make_items : {
                 "stick" : 3
             }
-        }
+        )
 
-        "junk_metal_from_busted_machinery" : {
+        "bigly_stick" : (
+            remove_items : {
+                "stick" : 1
+                "trump_orange" : 1
+            }
+            make_items : {
+                "bigly_stick" : 1
+            }
+        )
+
+        "junk_metal_from_busted_machinery" : (
             remove_items : {
                 "busted_machinery" : 1
             }
             make_items : {
                 "junk_metal" : 5
             }
-        }
+        )
 
-        "honour" : {
+        "honour" : (
             remove_items : {
                 "mana" : 5
                 "honour" : 1
@@ -76,21 +87,54 @@
             make_items : {
                 "honour" : 2
             }
-        }
+        )
 
-        "mana" : {
+        "mana" : (
             remove_items : {
                 "honour" : 1
             }
             make_items : {
                 "mana" : 2
             }
-        }
+        )
+        /* TODO
+        "pewpew" : (
+            remove_items : {
+                "iron" : 25
+            }
+            make_items : {
+                "pewpew" : 1
+            }
+        )
+        */
     }
 )
 
+"stick" : ()
+
+"gold" : (xp : 100)
+
+"bigly_stick" : (
+    equipable : true
+    abilities : {
+        "yes_yes_yes" : (
+            make_items : {
+                "orange" : 5
+            }
+        )
+        "eat" : (
+            destroy_item : true
+            health : -3
+            make_items : {
+                "sentient_trump_orange" : 3
+            }
+        )
+    }
+    description : "biiiiiiigly"
+)
+
 "obsidian_staff" : (
-    equippable : true
+    equipable : true
     abilities : {
         "flames_of_honour" : (
             energy : -5
@@ -121,8 +165,8 @@
     description : "A magic staff, crafted by a skilled knight adept in the use of fire magic. You must have honour to weild it."
 )
 
-"iron_honour_sword" : (
-    equippable : true
+"iron_honoursword" : (
+    equipable : true
     abilities : {
         "honourable_sepuku" : (
             health : -99999999
@@ -136,9 +180,9 @@
         "stab" : (
             energy : -1
             damage : {
-                physical : 1
-                honourable : 1
-                magical : 1
+                "physical" : 1
+                "honourable" : 1
+                "magic" : 1
             }
             make_items : {
                 "honour" : 1
@@ -148,8 +192,8 @@
         "honour_slash" : (
             energy : -2
             damage : {
-                honourable : 10
-                magic : 2
+                "honourable" : 10
+                "magic" : 2
             }
             require_items : {
                 "honour" : 10
@@ -160,26 +204,22 @@
             }
         )
 
-        "honourable_concentration" : (
+        "concentrate" : (
             make_items : {
-                "honour" : 1
+                "honour" : 2
                 "mana" : 3
             }
         )
     }
 )
 
-"quill" : (
-    xp : 10
-)
+"quill" : (xp : 10)
 
-"ink" : (
-    xp : 5
-)
+"ink" : (xp : 5)
 
-"honourable_ink" : (
-    xp : 50
-)
+"honourable_ink" : (xp : 50)
+
+"iron" : (xp : 10)
 
 "junk_metal" : (
     xp : 0
@@ -189,7 +229,7 @@
             "speed" : 0.95
         }
         defense_buffs : {
-            "physical" : 0.95
+            "physical" : 1.05
             "electric" : 1.05
         }
         attack_buffs : {
@@ -215,9 +255,14 @@
     description : "A tome codifying the sacred rules of the knight's language"
 )
 
+"honourable_rune" : (
+    xp : 10000
+    description : "Rare magical artifact that only knights can decipher. Can be used to increase the power of certain spells."
+)
+
 "incomplete_physics_homework" : (
     xp : 100
-    equippable : true
+    equipable : true
     abilities : {
         "finish_the_homework" : (
             destroy_item : true
@@ -273,31 +318,8 @@ looks like the knight was stuck on the extra credit,
 though they haven't even started on any of the other problems..."
 )
 
-"completed_physics_homework" : (
-    xp : 5000
-    abilities : {
-        "redo_the_assignment" : (
-            health : -1
-            energy : -2
-            make_items : {
-                "honour" : 1
-            }
-        )
-    }
-)
-
-"completed_physics_extra_credit : (
-    xp : 1000
-    abilities : {
-        "redo_the_assignment" : (
-            health : -1
-            energy : -2
-            make_items : {
-                "honour" : 1
-            }
-        )
-    }
-)
+"completed_physics_homework" : (xp : 2000)
+"completed_physics_extra_credit" : (xp : 5000)
 
 "mana" : (
     xp : 40
@@ -344,7 +366,7 @@ though they haven't even started on any of the other problems..."
 
 "the_journey_was_the_prize" : (
     xp : -100
-    equippable : true
+    equipable : true
     abilities : {
         "self_reflection" : (
             destroy_item : true
@@ -433,11 +455,14 @@ if you simply USE this item to it's full extent..."
         stat_buffs : {
             "speed" : 1.5
             "max_energy" : 1.5
-            "accuracy" : 0.75
         }
     )
     description : "The head of sonic the hedgehog. You can wear it, just mind the eyeball."
 )
+
+"wood" : ()
+
+"iron_ore" : ()
 
 "sonic's_shoes" : (
     wearable : true
@@ -453,7 +478,7 @@ if you simply USE this item to it's full extent..."
 
 "orange" : (
     wearable : true
-    equippable : true
+    equipable : true
     buffs : (
         attack_buffs : {
             "bigly" : 1.1
@@ -478,7 +503,7 @@ if you simply USE this item to it's full extent..."
 
 "trump_orange" : (
     wearable : true
-    equippable : true
+    equipable : true
     buffs : (
         attack_buffs : {
             "bigly" : 1.2
@@ -507,7 +532,7 @@ if you simply USE this item to it's full extent..."
 
 "sentient_trump_orange" : (
     wearable : true
-    equippable : true
+    equipable : true
     buffs : (
         attack_buffs : {
             "bigly" : 1.15
@@ -549,14 +574,27 @@ if you simply USE this item to it's full extent..."
 )
 
 "wall_staff" : (
-    equippable : true
+    equipable : true
     xp : 100
     buffs : (
         defense_buffs : {
-            "magic" : 0.9
-            "bogly" : 0.9
+            "honourable" : 0.7
+            "magic" : 0.7
         }
     )
+
+    abilities : {
+        "shoot_wall" : (
+            health : -4
+            energy : -8
+            damage : {
+                "magic" : 4
+                "psychological" : 4
+                "physical" : 4
+                "bigly" : 4
+            }
+        )
+    }
 )
 
 "raphael's_prophecy_1" : (
@@ -568,7 +606,7 @@ and make the greatest comeback ever seen in history!!"
 )
 
 "raphael's_holy_gift" : (
-    equippable : true
+    equipable : true
     xp : -171717
     description : "You can use this gift to become invincible, if you are a TRUE BELIEVER"
     abilities : {
@@ -576,4 +614,153 @@ and make the greatest comeback ever seen in history!!"
             health : -171717
         )
     }
+)
+
+"heart_of_trump" : (
+    wearable : true,
+    equipable : true,
+    buffs : (
+        attack_buffs : {
+            "bigly" : 1.5
+        }
+        stat_buffs : {
+            "max_health" : 0.8
+            "speed" : 1.1
+        }
+    )
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -5
+            damage : {
+                "psychological" : 10
+            }
+        )
+    }
+)
+
+"physics_kit" : (
+    equipable : true,
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -1
+        )
+    }
+)
+
+"healthy_sword" : (
+    equipable : true,
+    wearable : true,
+
+
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -1
+        )
+    }
+)
+
+"faceman_meat" : (
+    abilities : {
+        "eat" : (
+            destroy_item : true
+            health : -9999999
+            make_items : {
+                "meat_shield_v0" : 1
+                "teeth_v0" : 1
+            }
+        )
+    }
+)
+
+"meat_shield_v0" : (
+
+)
+
+"meat_shield_v1" : (
+
+)
+
+"meat_shield_v2" : (
+
+)
+
+"teeth_v0" : (
+    abilities : {
+        "bite" : (
+            health : 2
+            damage : {
+                "bogly" : 1
+            }
+        )
+        "upgrade" : (
+            xp_cost : 1000
+            destroy_item : true
+            make_items : {
+                "teeth_v1" : 1
+            }
+        )
+    }
+)
+
+"teeth_v1" : (
+    abilities : {
+        "bite" : (
+            health : 3
+            damage : {
+                "bogly" : 1
+                "trash" : 1
+            }
+        )
+        "upgrade" : (
+            xp_cost : 2000
+            destroy_item : true
+            make_items : {
+                "teeth_v2" : 1
+            }
+        )
+    }
+)
+
+"teeth_v2" : (
+    abilities : {
+        "bite" : (
+            health : 4
+            damage : {
+                "bogly" : 1
+                "trash" : 1
+                "radiation" : 1
+            }
+        )
+    }
+)
+
+"iron_sword" : (
+    equipable : true
+    abilities : {
+        "sepuku" : (
+            health : -99999999
+            destroy_item : true
+        )
+
+        "stab" : (
+            energy : -1
+            damage : {
+                "physical" : 2
+            }
+        )
+
+        "slash" : (
+            energy : -3
+            damage : {
+                "physical" : 5
+            }
+        )
+    }
+)
+
+"iron_darksword" : (
+
 )

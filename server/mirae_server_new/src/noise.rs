@@ -1,5 +1,4 @@
-use rand::rngs::StdRng;
-use rand::Rng;
+use rand::{rngs::StdRng, Rng};
 
 pub fn generate_perlin_noise(
     width: usize,

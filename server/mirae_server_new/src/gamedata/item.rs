@@ -1,37 +1,42 @@
-use super::{gamedata::{DmgType, ItemName, StatType},
-    serde_defaults::*};
+use super::{
+    gamedata::{DmgType, ItemName, StatType},
+    serde_defaults::*,
+};
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Deserialize, Debug)]
 pub struct AbilityDeser {
-    #[serde(default = "default_false")]
+    #[serde(default = "false_bool")]
     destroy_item: bool,
-    #[serde(default = "default_u64")]
+    #[serde(default = "zero_u64")]
     stun: u64,
-    #[serde(default = "default_u64")]
+    #[serde(default = "zero_u64")]
     charge: u64,
-    #[serde(default = "default_u64")]
+    #[serde(default = "zero_u64")]
     repeat: u64,
-    #[serde(default = "default_f64")]
+    #[serde(default = "zero_f64")]
     health: f64,
-    #[serde(default = "default_f64")]
+    #[serde(default = "zero_f64")]
     energy: f64,
 
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     damage: HashMap<String, f64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     block: HashMap<String, f64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     counter: HashMap<String, f64>,
 
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     require_items: HashMap<String, u64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     remove_items: HashMap<String, u64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     make_items: HashMap<String, u64>,
+
+    #[serde(default = "zero_u64")]
+    xp_cost: u64,
 }
 
 impl AbilityDeser {
@@ -79,17 +84,18 @@ impl AbilityDeser {
             require_items,
             remove_items,
             make_items: map(self.make_items, item_names)?,
+            xp_cost: self.xp_cost,
         })
     }
 }
 
 #[derive(Deserialize, Debug)]
 pub struct BuffsDeser {
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     defense_buffs: HashMap<String, f64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     attack_buffs: HashMap<String, f64>,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     stat_buffs: HashMap<String, f64>,
 }
 
@@ -117,17 +123,17 @@ impl BuffsDeser {
 
 #[derive(Deserialize, Debug)]
 pub struct ItemDeser {
-    #[serde(default = "default_false")]
+    #[serde(default = "false_bool")]
     wearable: bool,
-    #[serde(default = "default_false")]
+    #[serde(default = "false_bool")]
     equipable: bool,
-    #[serde(default = "default_i64")]
+    #[serde(default = "zero_i64")]
     xp: i64,
     #[serde(default = "BuffsDeser::new")]
     buffs: BuffsDeser,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     abilities: HashMap<String, AbilityDeser>,
-    #[serde(default = "default_string")]
+    #[serde(default = "empty_string")]
     description: String,
 }
 
@@ -174,22 +180,23 @@ pub struct Ability {
     require_items: HashMap<ItemName, u64>,
     remove_items: HashMap<ItemName, u64>,
     make_items: HashMap<ItemName, u64>,
+    xp_cost: u64,
 }
 
 #[derive(Debug, Clone)]
 pub struct Buffs {
-    defense_buffs: HashMap<DmgType, f64>,
-    attack_buffs: HashMap<DmgType, f64>,
-    stat_buffs: HashMap<StatType, f64>,
+    pub defense_buffs: HashMap<DmgType, f64>,
+    pub attack_buffs: HashMap<DmgType, f64>,
+    pub stat_buffs: HashMap<StatType, f64>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Item {
-    name: ItemName,
-    wearable: bool,
-    equipable: bool,
-    xp: i64,
-    buffs: Buffs,
-    abilities: HashMap<String, Ability>,
-    description: Option<String>,
+    pub name: ItemName,
+    pub wearable: bool,
+    pub equipable: bool,
+    pub xp: i64,
+    pub buffs: Buffs,
+    pub abilities: HashMap<String, Ability>,
+    pub description: Option<String>,
 }

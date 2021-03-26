@@ -49,7 +49,11 @@ impl Sub for Vector3 {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
+        Self::new(
+            (self.x as isize - other.x as isize).min(0) as usize,
+            (self.y as isize - other.y as isize).min(0) as usize,
+            (self.z as isize - other.z as isize).min(0) as usize,
+        )
     }
 }
 

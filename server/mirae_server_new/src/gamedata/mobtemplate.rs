@@ -1,8 +1,9 @@
 use super::{
-    gamedata::{DmgType, ItemName, MobAction, MobName},
+    gamedata::{DmgType, GameData, ItemName, MobName, StatType},
     item::{Ability, AbilityDeser},
     serde_defaults::*,
 };
+use crate::stat::Stat;
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
@@ -30,10 +31,10 @@ impl ItemGenDeser {
 }
 
 #[derive(Debug, Clone)]
-struct ItemGen {
-    name: ItemName,
-    prob: f64,
-    per: u64,
+pub struct ItemGen {
+    pub name: ItemName,
+    pub prob: f64,
+    pub per: u64,
 }
 
 #[derive(Deserialize, Debug)]
@@ -44,10 +45,10 @@ struct InventoryBuilderDeser {
 }
 
 #[derive(Debug, Clone)]
-struct InventoryBuilder {
-    min: u64,
-    max: u64,
-    items: Vec<ItemGen>,
+pub struct InventoryBuilder {
+    pub min: u64,
+    pub max: u64,
+    pub items: Vec<ItemGen>,
 }
 
 impl InventoryBuilderDeser {
@@ -73,28 +74,69 @@ impl InventoryBuilderDeser {
     }
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct Quotes {
+    #[serde(default = "empty_vec")]
+    entrance: Vec<String>,
+    #[serde(default = "empty_vec")]
+    mob_attack: Vec<String>,
+    #[serde(default = "empty_vec")]
+    player_attack: Vec<String>,
+    #[serde(default = "empty_vec")]
+    player_run: Vec<String>,
+    #[serde(default = "empty_vec")]
+    player_run_success: Vec<String>,
+    #[serde(default = "empty_vec")]
+    player_run_failure: Vec<String>,
+    #[serde(default = "empty_vec")]
+    player_victory: Vec<String>,
+    #[serde(default = "empty_vec")]
+    mob_victory: Vec<String>,
+}
+
+impl Quotes {
+    fn new() -> Self {
+        Self {
+            entrance: Vec::new(),
+            mob_attack: Vec::new(),
+            player_attack: Vec::new(),
+            player_run: Vec::new(),
+            player_run_success: Vec::new(),
+            player_run_failure: Vec::new(),
+            player_victory: Vec::new(),
+            mob_victory: Vec::new(),
+        }
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct MobTemplateDeser {
-    #[serde(default = "default_i64")]
+    #[serde(default = "zero_i64")]
     xp: i64,
-    #[serde(default = "default_hmap")]
+    #[serde(default = "empty_hmap")]
     abilities: HashMap<String, AbilityDeser>,
-    #[serde(default = "default_hmap")]
-    quotes: HashMap<String, Vec<String>>,
+    #[serde(default = "Quotes::new")]
+    quotes: Quotes,
     #[serde(default = "InventoryBuilderDeser::new")]
     tools: InventoryBuilderDeser,
     #[serde(default = "InventoryBuilderDeser::new")]
     drops: InventoryBuilderDeser,
+    #[serde(default = "empty_hmap")]
+    stats: HashMap<String, f64>,
+    #[serde(default = "default_jpg_str")]
+    display: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct MobTemplate {
-    name: MobName,
-    xp: i64,
-    abilities: HashMap<String, Ability>,
-    quotes: HashMap<MobAction, Vec<String>>,
-    tools: InventoryBuilder,
-    drops: InventoryBuilder,
+    pub name: MobName,
+    pub xp: i64,
+    pub abilities: HashMap<String, Ability>,
+    pub quotes: Quotes,
+    pub tools: InventoryBuilder,
+    pub drops: InventoryBuilder,
+    pub stats: Stat,
+    pub display: String,
 }
 
 impl MobTemplateDeser {
@@ -102,20 +144,23 @@ impl MobTemplateDeser {
         self,
         dmg_types: &HashSet<DmgType>,
         item_names: &HashSet<ItemName>,
-        mob_actions: &HashSet<MobAction>,
+        stat_types: &HashSet<StatType>,
         name: MobName,
     ) -> Result<MobTemplate> {
         let mut abilities = HashMap::new();
         for (k, v) in self.abilities {
             abilities.insert(k, v.into_ability(dmg_types, item_names)?);
         }
+        let base = map(self.stats, stat_types)?;
         Ok(MobTemplate {
             name,
             xp: self.xp,
             abilities,
-            quotes: map(self.quotes, mob_actions)?,
+            quotes: self.quotes,
             tools: self.tools.into_inventorybuilder(item_names)?,
             drops: self.drops.into_inventorybuilder(item_names)?,
+            stats: Stat::new(base, stat_types),
+            display: self.display,
         })
     }
 }

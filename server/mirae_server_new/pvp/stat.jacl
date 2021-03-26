@@ -1,5 +1,5 @@
-"speed" 
-"view"
-"accuracy"
 "max_health"
 "max_energy"
+"energy_regen"
+"health_regen"
+"speed"
