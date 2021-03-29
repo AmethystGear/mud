@@ -109,15 +109,17 @@ pub struct StructureSpawn {
 pub struct StructureSpawnDeser {
     pub structure: String,
     pub prob: f64,
+    #[serde(default = "empty_vec")]
+    pub dissallow: Vec<String>
 }
 
 impl StructureSpawnDeser {
     pub fn into_structurespawn(
         self,
-        block_names: &HashSet<StructureName>,
+        structure_names: &HashSet<StructureName>,
     ) -> Result<StructureSpawn> {
         let name = self.structure.into();
-        if block_names.contains(&name) {
+        if structure_names.contains(&name) {
             Ok(StructureSpawn {
                 structure: name,
                 prob: self.prob,

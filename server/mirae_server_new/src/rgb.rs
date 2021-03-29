@@ -3,8 +3,8 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct RGB {
     pub r: u8,
-    pub b: u8,
     pub g: u8,
+    pub b: u8,
 }
 
 impl RGB {
@@ -28,9 +28,9 @@ impl RGB {
         let g_o = other.g as u16;
         let b_o = other.b as u16;
         RGB::new(
-            (r * r_o / (255 * 255)) as u8,
-            (g * g_o / (255 * 255)) as u8,
-            (b * b_o / (255 * 255)) as u8,
+            (r * r_o / 255) as u8,
+            (g * g_o / 255) as u8,
+            (b * b_o / 255) as u8,
         )
     }
 

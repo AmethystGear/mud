@@ -1,6 +1,6 @@
 "sunken_ship" : (
-    sources : ["ship.png"]
-    mapping : [
+    sources : [["ships/ship.png", "ships/ship_rotated.png"]]
+    mapping : [[
         (
             color : (r : 255, g : 0, b : 0)
             block : "wood_wall"
@@ -31,12 +31,12 @@
             color : (r : 0, g : 255, b : 255)
             block : "sea_lantern"
         )
-    ]
+    ]]
 )
 
 "ship" : (
-    sources : ["ship.png"]
-    mapping : [
+    sources : [["ships/ship.png", "ships/ship_rotated.png"]]
+    mapping : [[
         (
             color : (r : 255, g : 0, b : 0)
             block : "wood_wall"
@@ -65,42 +65,44 @@
             color : (r : 0, g : 255, b : 255)
             block : "wood_floor"
         )
-    ]
+    ]]
 )
 
 "cave" : (
-    sources : ["caves/cave1.png", "caves/cave2.png", "caves/cave3.png"]
+    sources : [
+        ["caves/cave1.png", "caves/cave1.png"]
+        ["caves/cave2.png", "caves/cave2.png"]
+        ["caves/cave3.png", "caves/cave3.png"]
+    ]
     mapping : [
-        (
-            color : (r : 0, g : 0, b : 0)
-            block : "empty"
-        )
+        [(color : (r : 0, g : 0, b : 0), block : "empty")]
+        [(color : (r : 0, g : 0, b : 0), block : "stone")]
     ]
 )
 
 "lantern" : (
-    sources : ["single.png"]
-    mapping : [
+    sources : [["single.png"]]
+    mapping : [[
         (
             color : (r : 255, g : 0, b : 0)
             block : "lantern"
         )
-    ]
+    ]]
 )
 
 "sea_lantern" : (
-    sources : ["single.png"]
-    mapping : [
+    sources : [["single.png"]]
+    mapping : [[
         (
             color : (r : 255, g : 0, b : 0)
             block : "sea_lantern"
         )
-    ]
+    ]]
 )
 
 "village" : (
-    sources : ["villages/village.png"]
-    mapping : [
+    sources : [["villages/village.png"]]
+    mapping : [[
         (
             color : (r : 255, g : 0, b : 0)
             block : "rock"
@@ -110,7 +112,7 @@
             block : "wood_floor"
         )
         (
-            color : (r : 0, g : 255, b : 0)
+            color : (r : 0, g : 255, b : 4)
             block : "grass"
             mobs : [(mob: "honour_knight", prob : 0.1)]
         )
@@ -119,7 +121,7 @@
             block : "wood_wall"
         )
         (
-            color : (r : 255, g : 255, b : 0)
+            color : (r : 255, g : 225, b : 0)
             block : "wood_floor"
             mobs : [
                 (mob: "honour_knight", prob : 0.1)
@@ -128,5 +130,5 @@
                 (mob: "awesome_chest", prob : 0.05)
             ]
         )
-    ]
+    ]]
 )

@@ -1,6 +1,7 @@
 use crate::{gamedata::gamedata::GameData, rgb::RGB, vector3::Vector3, world::World};
 use anyhow::{anyhow, Result};
 
+#[derive(Debug)]
 pub struct Bounds {
     posn: Vector3,
     width: usize,
@@ -41,13 +42,16 @@ impl Bounds {
     }
 
     pub fn get_bounds(world: &World, posn: Vector3, width: usize, height: usize) -> Self {
+
         let bottom_right = posn + Vector3::new(width, height, 0);
         let bounded = Vector3::new(
             bottom_right.x().min(world.blocks().dim.x()),
             bottom_right.y().min(world.blocks().dim.y()),
             bottom_right.z(),
         );
+
         let diff = bounded - posn;
+
         let width = diff.x();
         let height = diff.y();
         Self {
@@ -59,9 +63,10 @@ impl Bounds {
 }
 
 pub struct Image {
-    width : u8,
-    rgb : Vec<u8>,
-    entities : Option<Vec<u8>>
+    pub width : u8,
+    pub height : u8,
+    pub rgb : Vec<u8>,
+    pub entities : Option<Vec<u8>>
 }
 
 impl Image {
@@ -81,18 +86,19 @@ impl Image {
         r /= bounds.height * bounds.width;
         g /= bounds.height * bounds.width;
         b /= bounds.height * bounds.width;
-        Ok(RGB::new(r as u8, g as u8, b as u8))
+        let rgb = RGB::new(r as u8, g as u8, b as u8);
+        Ok(rgb)
     }
 
-    fn display_rgb(world: &World, bounds: &Bounds, resoultion: usize) -> Result<Vec<u8>> {
+    fn display_rgb(world: &World, bounds: &Bounds, resolution: usize) -> Result<Vec<u8>> {
         let mut display = Vec::new();
-        for j in 0..bounds.height {
-            for i in 0..bounds.width {
-                let posn = bounds.posn + Vector3::new(i * resoultion, j * resoultion, 0);
+        for j in 0..(bounds.height / resolution) {
+            for i in 0..(bounds.width / resolution) {
+                let posn = bounds.posn + Vector3::new(i * resolution, j * resolution, 0);
                 let bounds = Bounds {
                     posn,
-                    width: resoultion,
-                    height: resoultion,
+                    width: resolution,
+                    height: resolution,
                 };
                 let rgb = Image::average_color(world, &bounds)?;
                 display.push(rgb.r);
@@ -123,18 +129,19 @@ impl Image {
         Ok(display)
     }
 
-    pub fn new(world : &World, g : &GameData, bounds: &Bounds, resoultion: usize) -> Result<Self> {
+    pub fn new(world : &World, g : &GameData, bounds: &Bounds, resolution: usize) -> Result<Self> {
         let mut entities = None;
-        if resoultion == 0 {
+        if resolution == 0 {
             return Err(anyhow!("resolution cannot be 0"));
-        } else if resoultion == 1 {
+        } else if resolution == 1 {
             entities = Some(Image::display_entity(world, bounds, g)?);
         }
-        let rgb = Image::display_rgb(world, bounds, resoultion)?;
+        let rgb = Image::display_rgb(world, bounds, resolution)?;
         Ok(Self {
             rgb,
             entities,
-            width: (bounds.width / resoultion) as u8,
+            width: (bounds.width / resolution) as u8,
+            height: (bounds.height / resolution) as u8
         })
     }
 

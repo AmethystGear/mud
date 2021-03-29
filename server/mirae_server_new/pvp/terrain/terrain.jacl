@@ -1,5 +1,5 @@
-dim : (x : 400, y : 400, z : 5)
-octaves : 7
+dim : (x : 1000, y : 1000, z : 5)
+octaves : 8
 full_passes : [
     // generate the land and caves
     (
@@ -9,7 +9,7 @@ full_passes : [
                 (biome : "grassland") 
                 (biome : "desert" cutoff : 0.5) 
                 (biome : "snowy" cutoff : 0.3)
-                (biome : "swamp" cutoff : 0.1)
+                (biome : "swamp" cutoff : 0.3)
             ]
             [(biome : "cave")]
             [(biome : "cave")]
@@ -21,7 +21,7 @@ full_passes : [
     (
         change_bounding_noise_per_pass : false
         layers : [
-            [(biome : "beach" cutoff : 0.6) (biome : "ocean_surface" cutoff : 0.5)]
+            [(biome : "beach" cutoff : 0.525) (biome : "ocean_surface" cutoff : 0.5)]
             [(biome : "ocean" cutoff : 0.5)]
             [(biome : "ocean" cutoff : 0.5)]
             [(biome : "underwater" cutoff : 0.5) (biome : "deep_underwater" cutoff : 0.2)]

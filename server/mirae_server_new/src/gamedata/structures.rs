@@ -33,8 +33,8 @@ struct StructureMappingDeser {
 
 #[derive(Deserialize, Debug)]
 pub struct StructureDeser {
-    sources: Vec<String>,
-    mapping: Vec<StructureMappingDeser>,
+    sources: Vec<Vec<String>>,
+    mapping: Vec<Vec<StructureMappingDeser>>,
 }
 
 impl StructureDeser {
@@ -48,31 +48,38 @@ impl StructureDeser {
         let mut v = Vec::new();
 
         let mut i = 0;
-        let mut mob_and_prob = Vec::new();
-        let mut rgb_to_block = HashMap::new();
-        for sm in self.mapping {
-            let mut vec = Vec::new();
-            let mut sum = 0.0;
-            for v in sm.mobs {
-                let mob_name = MobName::from(v.mob);
-                if !mob_names.contains(&mob_name) {
-                    return Err(anyhow!(format!("{:?} isn't a mob", mob_name)));
-                } else {
-                    sum += v.prob;
-                    vec.push(MobAndProb {
-                        mob: mob_name,
-                        prob: sum,
-                    });
+        
+        let mut mob_and_prob_layers = Vec::new();
+        let mut rgb_mappings = Vec::new();
+        for layer in self.mapping {
+            let mut rgb_to_block = HashMap::new();
+            let mut mob_and_prob = Vec::new();
+            for sm in layer {
+                let mut vec = Vec::new();
+                let mut sum = 0.0;
+                for v in sm.mobs {
+                    let mob_name = MobName::from(v.mob);
+                    if !mob_names.contains(&mob_name) {
+                        return Err(anyhow!(format!("{:?} isn't a mob", mob_name)));
+                    } else {
+                        sum += v.prob;
+                        vec.push(MobAndProb {
+                            mob: mob_name,
+                            prob: sum,
+                        });
+                    }
                 }
+                mob_and_prob.push(vec);
+                let name = BlockName::from(sm.block);
+                if !block_names.contains(&name) {
+                    return Err(anyhow!(format!("{:?} isn't a block", name)));
+                } else {
+                    rgb_to_block.insert(sm.color, (name, i));
+                }
+                i += 1;
             }
-            mob_and_prob.push(vec);
-            let name = BlockName::from(sm.block);
-            if !block_names.contains(&name) {
-                return Err(anyhow!(format!("{:?} isn't a block", name)));
-            } else {
-                rgb_to_block.insert(sm.color, (name, i));
-            }
-            i += 1;
+            mob_and_prob_layers.push(mob_and_prob);
+            rgb_mappings.push(rgb_to_block);
         }
         let mob_and_prob = Arc::new(mob_and_prob);
 
@@ -90,12 +97,15 @@ impl StructureDeser {
                 let alpha = pix.0[3];
                 // transparent pixels are ignored
                 if alpha < 255 {
+                    index += 1;
                     continue;
                 }
                 let rgb = RGB::new(pix.0[0], pix.0[1], pix.0[2]);
                 if let Some((block, mp)) = rgb_to_block.get(&rgb) {
                     block_map.direct_set(index, Some(block.clone()));
                     mob_map.direct_set(index, Some(mp.clone()));
+                } else {
+                    return Err(anyhow!(format!("invalid pixel color {:?}", rgb)));
                 }
                 index += 1;
             }
@@ -128,14 +138,16 @@ impl Structure {
         loc: Vector3,
         block_map: &mut Map<u8>,
         mob_map: &mut Map<MobU16>,
+        structure_map: &mut Map<bool>,
         g: &GameData,
         rng: &mut StdRng,
     ) -> Result<()> {
-        for y in 0..block_map.dim.y() {
-            for x in 0..block_map.dim.x() {
+        for y in 0..self.blocks.dim.y() {
+            for x in 0..self.blocks.dim.x() {
                 let struct_posn = Vector3::new(x, y, 0);
                 let posn = loc + struct_posn;
                 if let Some(block) = &self.blocks.get(struct_posn)? {
+                    structure_map.set(posn, true);
                     block_map.set(posn, g.get_block_id_by_blockname(&block)?)?;
                 }
                 if let Some(mob_index) = &self.mobs.get(struct_posn)? {
@@ -150,7 +162,6 @@ impl Structure {
                 }
             }
         }
-
         Ok(())
     }
 }

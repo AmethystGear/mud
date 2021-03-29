@@ -138,6 +138,7 @@ struct Noise<'a, 'b, 'c> {
 fn generate_biome(
     block_map: &mut Map<u8>,
     mob_map: &mut Map<MobU16>,
+    structure_map: &mut Map<bool>,
     biome: &Biome,
     noise: Noise,
     g: &GameData,
@@ -149,6 +150,9 @@ fn generate_biome(
     let layer_size = block_map.dim.x() * block_map.dim.y();
     // generate terrain
     for i in 0..layer_size {
+        if structure_map.direct_get(i + start) {
+            continue;
+        }
         if noise.bounding[i] < cutoff {
             let mut block = None;
             for check in &biome.terrain_pass {
@@ -177,27 +181,30 @@ fn generate_biome(
     }
     // generate structures
     for i in 0..layer_size {
-        for structure in &biome.spawn {
-            let chance: f64 = rng.gen();
-            if chance < structure.prob {
-                let structure = g
-                    .structures
-                    .get(&structure.structure)
-                    .ok_or(anyhow!(format!(
-                        "invalid structure name {:?}",
-                        structure.structure
-                    )))?;
+        if noise.bounding[i] < cutoff {
+            for structure in &biome.spawn {
+                let chance: f64 = rng.gen();
+                if chance < structure.prob {
+                    let structure = g
+                        .structures
+                        .get(&structure.structure)
+                        .ok_or(anyhow!(format!(
+                            "invalid structure name {:?}",
+                            structure.structure
+                        )))?;
 
-                let structure = &structure[rng.gen_range(0, structure.len())];
-                // if we can't spawn it here, just move on and ignore the error
-                let _ = structure.spawn_at(
-                    block_map.index_to_posn(start + i),
-                    block_map,
-                    mob_map,
-                    g,
-                    rng,
-                );
-                break;
+                    let structure = &structure[rng.gen_range(0, structure.len())];
+                    // if we can't spawn it here, just move on and ignore the error
+                    let _ = structure.spawn_at(
+                        block_map.index_to_posn(start + i),
+                        block_map,
+                        mob_map,
+                        structure_map,
+                        g,
+                        rng,
+                    );
+                    break;
+                }
             }
         }
     }
@@ -224,30 +231,41 @@ fn expand_light(
     let mut visited = HashSet::new();
     let mut to_eval = VecDeque::new();
     to_eval.push_back((loc, 0));
+    visited.insert(loc);
+    let mut first = true;
     while let Some((curr, depth)) = to_eval.pop_front() {
-        visited.insert(curr);
-        let block = get_block_by_loc(block_map, g, loc)?;
-        if block.unlit {
+        let block = get_block_by_loc(block_map, g, curr)?;
+        if block.unlit && !first {
+            continue;
+        } else if !block.unlit {
+            let intensity = (lighting.intensity - (depth as f64) * lighting.falloff).max(0.0);
+            let color = light_map.get(curr)?;
+            light_map.set(curr, color.add(lighting.color.scale(intensity)))?;
+        }
+
+        if block.solid && !first {
             continue;
         }
 
-        let intensity = (lighting.intensity - (depth as f64) * lighting.falloff).min(0.0);
-        let color = light_map.get(loc)?;
-        light_map.set(loc, color.add(lighting.color.scale(intensity)))?;
-
         if depth < lighting.max_range {
             let neighbors = [
-                Vector3::new(curr.x() + 1, curr.y(), curr.z()),
-                Vector3::new(curr.x() - 1, curr.y(), curr.z()),
-                Vector3::new(curr.x(), curr.y(), curr.z() + 1),
-                Vector3::new(curr.x(), curr.y(), curr.z() - 1),
+                curr - Vector3::new(1, 0, 0),
+                curr + Vector3::new(1, 0, 0),
+                curr - Vector3::new(0, 1, 0),
+                curr + Vector3::new(0, 1, 0),
+                curr - Vector3::new(1, 1, 0),
+                curr + Vector3::new(1, 1, 0),
+                curr - Vector3::new(1, 0, 0) + Vector3::new(0, 1, 0),
+                curr + Vector3::new(1, 0, 0) - Vector3::new(0, 1, 0),
             ];
             for neighbor in &neighbors {
-                if !visited.contains(neighbor) {
+                if !visited.contains(neighbor) && block_map.get(*neighbor).is_ok() {
                     to_eval.push_back((neighbor.clone(), depth + 1));
+                    visited.insert(*neighbor);
                 }
             }
         }
+        first = false;
     }
     Ok(())
 }
@@ -276,13 +294,13 @@ impl World {
                 &mut rng,
             )
         };
-
         // generate blocks
         let mut biome_noise = gen_noise(rng.gen());
         let mut terrain_noise = gen_noise(rng.gen());
         let mut bounding_noise = gen_noise(rng.gen());
         let mut block_map = Map::new(g.terrain.dim, 0u8);
         let mut mob_map = Map::new(g.terrain.dim, MobU16::empty());
+        let mut structure_map = Map::new(g.terrain.dim, false);
         for full_pass in &g.terrain.full_passes {
             for level in 0..full_pass.layers.len() {
                 for pass in &full_pass.layers[level] {
@@ -298,12 +316,13 @@ impl World {
                     generate_biome(
                         &mut block_map,
                         &mut mob_map,
+                        &mut structure_map,
                         biome,
                         noise,
                         g,
                         level,
                         pass.cutoff,
-                        &mut rng,
+                        &mut get_rand(rng.gen()),
                     )?;
                     biome_noise = gen_noise(rng.gen());
                     if full_pass.change_bounding_noise_per_pass {
@@ -365,9 +384,20 @@ impl World {
             }
         }
 
+        let min_light = 30;
+
         for i in 0..(light_map.dim.dim()) {
             let block = get_block(&block_map, g, i)?;
-            let light = light_map.direct_get(i);
+            let mut light = light_map.direct_get(i);
+            if light.r < min_light {
+                light.r = min_light;
+            }
+            if light.g < min_light {
+                light.g = min_light;
+            }
+            if light.b < min_light {
+                light.b = min_light;
+            }
             light_map.direct_set(i, light.mul(block.color));
         }
 
