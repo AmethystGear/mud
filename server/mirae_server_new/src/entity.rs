@@ -1,5 +1,5 @@
 use crate::{
-    combat::{BattleMap, StatusEffect, ID},
+    combat::{BattleMap, ID},
     display::Image,
     gamedata::{
         gamedata::{DmgType, GameData, ItemName},
@@ -102,7 +102,7 @@ pub trait Entity {
     fn run_ability(
         &mut self,
         opponent: Option<Box<&mut dyn Entity>>,
-        battle_map: &mut BattleMap,
+        _battle_map: &mut BattleMap,
         ability: Ability,
         item: Option<ItemName>,
         g: &GameData,

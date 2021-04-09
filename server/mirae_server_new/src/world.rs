@@ -1,6 +1,6 @@
 use crate::{
     gamedata::{
-        block::{Block, Lighting, PointLight},
+        block::{Block, PointLight},
         gamedata::{GameData, StructureName},
         terrain::Biome,
     },
@@ -143,7 +143,7 @@ struct Noise<'a, 'b, 'c> {
 
 fn generate_biome(
     block_map: &mut Map<u8>,
-    mob_map: &mut Map<MobU16>,
+    _mob_map: &mut Map<MobU16>,
     biome_map: &mut Map<u8>,
     biome: &Biome,
     noise: Noise,
@@ -366,7 +366,7 @@ impl World {
             bounding_noise = gen_noise(&mut rng, &g, false);
         }
         // generate structures
-        generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng);
+        generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng)?;
 
         // generate mobs
         for i in 0..(mob_map.dim.dim() as usize) {

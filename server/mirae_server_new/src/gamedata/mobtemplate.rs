@@ -1,5 +1,5 @@
 use super::{
-    gamedata::{DmgType, GameData, ItemName, MobName, StatType},
+    gamedata::{DmgType, ItemName, MobName, StatType},
     item::{Ability, AbilityDeser},
     serde_defaults::*,
 };

@@ -11,7 +11,7 @@ use crate::{
     stat::Stat,
     vector3::Vector3,
 };
-use rand::{prelude::StdRng, thread_rng, SeedableRng, Rng};
+use rand::{prelude::StdRng, SeedableRng, Rng};
 use std::{collections::HashMap, sync::mpsc::Sender};
 use anyhow::Result;
 

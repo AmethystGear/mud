@@ -2,7 +2,7 @@ use crate::{
     display::Image,
     entity::{get_items_rand, Entity, NUM_WEARS},
     gamedata::{
-        gamedata::{DmgType, GameData, MobName},
+        gamedata::{GameData, MobName},
         item::Ability,
         mobtemplate::{InventoryBuilder, MobTemplate},
     },

@@ -139,7 +139,7 @@ fn look(mut params: VecDeque<Literal>, world: &World, g: &GameData) -> Result<()
     Ok(())
 }
 
-fn save_world(mut params: VecDeque<Literal>, world: &World, g: &GameData) {}
+fn save_world(_params: VecDeque<Literal>, _world: &World, _g: &GameData) {}
 
 type ServerCommand = dyn Fn(VecDeque<Literal>, &World, &GameData) -> Result<()>;
 

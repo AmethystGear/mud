@@ -19,7 +19,8 @@ const BAD_ARGS: &str =
     "bad arguments to command, try help <command> to see how to use it correctly";
 
 
-pub fn dispatch(action_data : ActionData) -> Result<()> {
+    
+pub fn dispatch(_action_data : ActionData) -> Result<()> {
     Ok(())
 }
 

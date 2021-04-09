@@ -212,7 +212,7 @@ impl BiomeDeser {
     pub fn into_biome(
         self,
         name: BiomeName,
-        structure_names: &HashSet<StructureName>,
+        _structure_names: &HashSet<StructureName>,
         block_names: &HashSet<BlockName>,
     ) -> Result<Biome> {
         let mut terrain_pass = Vec::new();
