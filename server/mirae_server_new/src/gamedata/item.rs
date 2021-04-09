@@ -2,6 +2,7 @@ use super::{
     gamedata::{DmgType, ItemName, StatType},
     serde_defaults::*,
 };
+use crate::stat::default_empty_fields;
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
@@ -35,21 +36,22 @@ pub struct AbilityDeser {
     #[serde(default = "empty_hmap")]
     make_items: HashMap<String, u64>,
 
-    #[serde(default = "zero_u64")]
-    xp_cost: u64,
+    #[serde(default = "zero_i64")]
+    xp_cost: i64,
 }
 
 impl AbilityDeser {
     pub fn into_ability(
         self,
+        name: String,
         dmg_types: &HashSet<DmgType>,
         item_names: &HashSet<ItemName>,
     ) -> Result<Ability> {
-        let remove_items = map(self.remove_items, item_names)?;
+        let remove_items = map_key(self.remove_items, item_names)?;
         let require_items = if self.require_items.is_empty() {
             remove_items.clone()
         } else {
-            let req_items = map(self.require_items, item_names)?;
+            let req_items = map_key(self.require_items, item_names)?;
             for (k, v) in &remove_items {
                 match req_items.get(k) {
                     Some(count) => {
@@ -72,18 +74,19 @@ impl AbilityDeser {
         };
 
         Ok(Ability {
+            name,
             destroy_item: self.destroy_item,
             stun: self.stun,
             charge: self.charge,
             repeat: self.repeat,
             health: self.health,
             energy: self.energy,
-            damage: map(self.damage, dmg_types)?,
-            block: map(self.block, dmg_types)?,
-            counter: map(self.counter, dmg_types)?,
+            damage: default_empty_fields(&map_key(self.damage, dmg_types)?, 0.0, dmg_types),
+            block: default_empty_fields(&map_key(self.block, dmg_types)?, 1.0, dmg_types),
+            counter: default_empty_fields(&map_key(self.counter, dmg_types)?, 1.0, dmg_types),
             require_items,
             remove_items,
-            make_items: map(self.make_items, item_names)?,
+            make_items: map_key(self.make_items, item_names)?,
             xp_cost: self.xp_cost,
         })
     }
@@ -114,9 +117,21 @@ impl BuffsDeser {
         stat_types: &HashSet<StatType>,
     ) -> Result<Buffs> {
         Ok(Buffs {
-            defense_buffs: map(self.defense_buffs, dmg_types)?,
-            attack_buffs: map(self.attack_buffs, dmg_types)?,
-            stat_buffs: map(self.stat_buffs, stat_types)?,
+            defense_buffs: default_empty_fields(
+                &map_key(self.defense_buffs, dmg_types)?,
+                1.0,
+                dmg_types,
+            ),
+            attack_buffs: default_empty_fields(
+                &map_key(self.attack_buffs, dmg_types)?,
+                1.0,
+                dmg_types,
+            ),
+            stat_buffs: default_empty_fields(
+                &map_key(self.stat_buffs, stat_types)?,
+                1.0,
+                stat_types,
+            ),
         })
     }
 }
@@ -147,7 +162,7 @@ impl ItemDeser {
     ) -> Result<Item> {
         let mut abilities = HashMap::new();
         for (k, v) in self.abilities {
-            abilities.insert(k, v.into_ability(dmg_types, item_names)?);
+            abilities.insert(k.clone(), v.into_ability(k, dmg_types, item_names)?);
         }
 
         Ok(Item {
@@ -168,19 +183,20 @@ impl ItemDeser {
 
 #[derive(Debug, Clone)]
 pub struct Ability {
-    destroy_item: bool,
-    stun: u64,
-    charge: u64,
-    repeat: u64,
-    health: f64,
-    energy: f64,
-    damage: HashMap<DmgType, f64>,
-    block: HashMap<DmgType, f64>,
-    counter: HashMap<DmgType, f64>,
-    require_items: HashMap<ItemName, u64>,
-    remove_items: HashMap<ItemName, u64>,
-    make_items: HashMap<ItemName, u64>,
-    xp_cost: u64,
+    pub name: String,
+    pub destroy_item: bool,
+    pub stun: u64,
+    pub charge: u64,
+    pub repeat: u64,
+    pub health: f64,
+    pub energy: f64,
+    pub damage: HashMap<DmgType, f64>,
+    pub block: HashMap<DmgType, f64>,
+    pub counter: HashMap<DmgType, f64>,
+    pub require_items: HashMap<ItemName, u64>,
+    pub remove_items: HashMap<ItemName, u64>,
+    pub make_items: HashMap<ItemName, u64>,
+    pub xp_cost: i64,
 }
 
 #[derive(Debug, Clone)]

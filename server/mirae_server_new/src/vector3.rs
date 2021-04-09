@@ -2,29 +2,29 @@ use serde::Deserialize;
 use std::ops::{Add, Mul, Sub};
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Deserialize)]
 pub struct Vector3 {
-    x: usize,
-    y: usize,
-    z: usize,
+    x: isize,
+    y: isize,
+    z: isize,
 }
 
 impl Vector3 {
-    pub fn new(x: usize, y: usize, z: usize) -> Self {
+    pub fn new(x: isize, y: isize, z: isize) -> Self {
         Vector3 { x, y, z }
     }
 
-    pub fn x(&self) -> usize {
+    pub fn x(&self) -> isize {
         self.x
     }
 
-    pub fn y(&self) -> usize {
+    pub fn y(&self) -> isize {
         self.y
     }
 
-    pub fn z(&self) -> usize {
+    pub fn z(&self) -> isize {
         self.z
     }
 
-    pub fn dim(&self) -> usize {
+    pub fn dim(&self) -> isize {
         self.x * self.y * self.z
     }
 
@@ -34,6 +34,12 @@ impl Vector3 {
 
     pub fn mag(&self) -> f64 {
         self.sqr_mag().sqrt()
+    }
+
+    pub fn set(&mut self, other : Vector3) {
+        self.x = other.x();
+        self.y = other.y();
+        self.z = other.z();
     }
 }
 
@@ -49,11 +55,7 @@ impl Sub for Vector3 {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        Self::new(
-            (self.x as isize - other.x as isize).max(0) as usize,
-            (self.y as isize - other.y as isize).max(0) as usize,
-            (self.z as isize - other.z as isize).max(0) as usize,
-        )
+        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
@@ -62,17 +64,17 @@ impl Mul<f64> for Vector3 {
 
     fn mul(self, other: f64) -> Self {
         Self::new(
-            (self.x as f64 * other) as usize,
-            (self.y as f64 * other) as usize,
-            (self.z as f64 * other) as usize,
+            (self.x as f64 * other) as isize,
+            (self.y as f64 * other) as isize,
+            (self.z as f64 * other) as isize,
         )
     }
 }
 
-impl Mul<usize> for Vector3 {
+impl Mul<isize> for Vector3 {
     type Output = Self;
 
-    fn mul(self, other: usize) -> Self {
+    fn mul(self, other: isize) -> Self {
         Self::new(self.x * other, self.y * other, self.z * other)
     }
 }

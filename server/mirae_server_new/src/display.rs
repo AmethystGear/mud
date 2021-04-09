@@ -21,13 +21,13 @@ impl Bounds {
 
     pub fn get_bounds_centered(posn: Vector3, size: usize, dim: Vector3) -> Self {
         // calculate upper x and y bounds
-        let actual_size = 2 * size + 1;
+        let actual_size = 2 * (size as isize) + 1;
         let upper_bound = |dim| (dim as isize) - (actual_size as isize);
         let upper_x_bound = upper_bound(dim.x());
         let upper_y_bound = upper_bound(dim.y());
 
         let bound_upper_left =
-            |posn, upper_bound| Bounds::bound((posn as isize) - (size as isize), 0, upper_bound) as usize;
+            |posn, upper_bound| Bounds::bound((posn as isize) - (size as isize), 0, upper_bound);
 
         let upper_left_x = bound_upper_left(posn.x(), upper_x_bound);
         let upper_left_y = bound_upper_left(posn.y(), upper_y_bound);
@@ -36,14 +36,14 @@ impl Bounds {
 
         Self {
             posn: upper_left,
-            width: actual_size.min(dim.x()),
-            height: actual_size.min(dim.z()),
+            width: actual_size.min(dim.x()) as usize,
+            height: actual_size.min(dim.z()) as usize,
         }
     }
 
     pub fn get_bounds(world: &World, posn: Vector3, width: usize, height: usize) -> Self {
 
-        let bottom_right = posn + Vector3::new(width, height, 0);
+        let bottom_right = posn + Vector3::new(width as isize, height as isize, 0);
         let bounded = Vector3::new(
             bottom_right.x().min(world.blocks().dim.x()),
             bottom_right.y().min(world.blocks().dim.y()),
@@ -52,8 +52,8 @@ impl Bounds {
 
         let diff = bounded - posn;
 
-        let width = diff.x();
-        let height = diff.y();
+        let width = diff.x() as usize;
+        let height = diff.y() as usize;
         Self {
             posn,
             width,
@@ -76,7 +76,7 @@ impl Image {
         let mut b = 0;
         for y in 0..bounds.height {
             for x in 0..bounds.width {
-                let loc = bounds.posn + Vector3::new(x, y, 0);
+                let loc = bounds.posn + Vector3::new(x as isize, y as isize, 0);
                 let rgb = world.colors().get(loc)?;
                 r += rgb.r as usize;
                 g += rgb.g as usize;
@@ -94,7 +94,7 @@ impl Image {
         let mut display = Vec::new();
         for j in 0..(bounds.height / resolution) {
             for i in 0..(bounds.width / resolution) {
-                let posn = bounds.posn + Vector3::new(i * resolution, j * resolution, 0);
+                let posn = bounds.posn + Vector3::new((i * resolution) as isize, (j * resolution) as isize, 0);
                 let bounds = Bounds {
                     posn,
                     width: resolution,
@@ -113,7 +113,7 @@ impl Image {
         let mut display = Vec::new();
         for j in 0..bounds.height {
             for i in 0..bounds.width {
-                let posn = bounds.posn + Vector3::new(i, j, 0);
+                let posn = bounds.posn + Vector3::new( i as isize, j as isize, 0);
                 if let Some(curr) = world.mobs().get(posn)?.as_u16() {
                     let val = g
                         .mob_id_to_img_id

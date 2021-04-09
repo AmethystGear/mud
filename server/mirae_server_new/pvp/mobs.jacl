@@ -42,3 +42,43 @@
 "decent_chest" : (/* TODO */)
 
 "awesome_chest" : (/* TODO */)
+
+"pickle_monster" : (
+    quotes: (
+        entrance : ["Hey there mister, wanna tickle my pickle?" "Tickle my pickle, it'll only cost a nickel"]
+        mob_attack : ["Whats the dill, man" "You're in a bit of a pickle aren't you"]
+        player_run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
+        player_victory : ["Eaaaughgah"]
+        mob_victory : ["Thanks for tickling my pickle"]
+    )
+    drops : (
+        items : [
+            (name : "pickle_jar", prob : 0.25, per: 1)
+        ]
+        min : 1
+        max : 1
+    )
+)
+
+"fyzyx_knite" : (
+    quotes: (
+        entrance : ["I'm so hunrable"]
+        mob_attack : [ 
+            "Hey there mister, wanna tickle my pickle?" 
+            "Tickle my pickle, it'll only cost a nickel" 
+            "Whats the dill, man" 
+            "You're in a bit of a pickle aren't you"
+        ]
+        player_run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
+        player_victory : ["Eaaaughgah"]
+        mob_victory : ["Thanks for tickling my pickle"]
+    )
+
+    drops : (
+        items : [
+            (name : "pickle_jar", prob : 0.25, per: 1)
+        ]
+        min : 1
+        max : 1
+    )
+)

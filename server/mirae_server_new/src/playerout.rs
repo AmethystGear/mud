@@ -61,10 +61,10 @@ impl PlayerOut {
         });
     }
 
-    pub fn append_err(&mut self, err: Box<dyn Error>) {
+    pub fn append_err(&mut self, err: anyhow::Error) {
         self.add_pkt(Packet {
             p_type: PacketType::Err,
-            content: err.to_string().into_bytes(),
+            content: format!("ERROR: {}\n", err.to_string()).into_bytes(),
         });
     }
 

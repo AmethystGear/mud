@@ -3,16 +3,15 @@
     mob_spawn_chance : 0.02
 )
 "rock" : (
-    color : (r : 100, g : 100, b : 100)
+    color : (r : 150, g : 150, b : 150)
     solid : true
 )
 "stone" : (
-    color : (r : 200, g : 200, b : 250)
+    color : (r : 220, g : 220, b : 255)
     mob_spawn_chance : 0.1
 )
 "water" : (
     color : (r : 0, g : 215, b : 255)
-    solid : true
     z_passable : true
     unlit : true
     transparency : (r : 161, g : 221, b : 221)
@@ -41,16 +40,24 @@
     z_passable : true
     unlit : true
     transparency : (r : 255, g : 255, b : 255)
+    light: (
+        down_light : (
+            intensity : 0.25
+            color : (r : 255, g : 255, b : 255)
+        )
+    )
 )
 "lantern" : (
     color : (r : 255, g : 186, b : 50)
     solid : true
     unlit : true
-    light : (
-        intensity : 0.5,
-        falloff : 0.05,
-        max_range : 10
-        color : (r : 255, g : 190, b : 130)
+    light: (
+        point_light : (
+            intensity : 0.5,
+            falloff : 0.05,
+            max_range : 10
+            color : (r : 255, g : 190, b : 130)
+        )
     )
 )
 "sea_lantern" : (
@@ -58,10 +65,12 @@
     solid : true
     unlit : true
     light : (
-        intensity : 0.7,
-        falloff : 0.05,
-        max_range : 3
-        color : (r : 200, g : 200, b : 220)
+        point_light : (
+            intensity : 0.7,
+            falloff : 0.05,
+            max_range : 6
+            color : (r : 200, g : 200, b : 250)
+        )
     )
 )
 "wood_floor" : (
@@ -76,9 +85,18 @@
     solid : true
     unlit : true
     light : (
-        intensity : 0.1,
-        falloff : 0.01,
-        max_range : 4
-        color : (r : 207, g : 16, b : 32)
+        point_light : (
+            intensity : 0.1,
+            falloff : 0.01,
+            max_range : 4
+            color : (r : 207, g : 16, b : 32)
+        )
     )
+)
+"abyss" : (
+    color : (r : 0, g : 10, b : 20)
+    solid : true
+    z_passable : true
+    unlit : true
+    transparency : (r : 60, g : 60, b : 70)
 )

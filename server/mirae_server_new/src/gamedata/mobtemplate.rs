@@ -149,9 +149,9 @@ impl MobTemplateDeser {
     ) -> Result<MobTemplate> {
         let mut abilities = HashMap::new();
         for (k, v) in self.abilities {
-            abilities.insert(k, v.into_ability(dmg_types, item_names)?);
+            abilities.insert(k.clone(), v.into_ability(k, dmg_types, item_names)?);
         }
-        let base = map(self.stats, stat_types)?;
+        let base = map_key(self.stats, stat_types)?;
         Ok(MobTemplate {
             name,
             xp: self.xp,
@@ -159,7 +159,7 @@ impl MobTemplateDeser {
             quotes: self.quotes,
             tools: self.tools.into_inventorybuilder(item_names)?,
             drops: self.drops.into_inventorybuilder(item_names)?,
-            stats: Stat::new(base, stat_types),
+            stats: Stat::new(base, stat_types)?,
             display: self.display,
         })
     }

@@ -1,152 +1,32 @@
 use crate::{
+    display::Image,
+    entity::{get_items_rand, Entity, NUM_WEARS},
     gamedata::{
-        gamedata::{GameData, ItemName},
-        item::Item,
+        gamedata::{DmgType, GameData, MobName},
+        item::Ability,
         mobtemplate::{InventoryBuilder, MobTemplate},
     },
     inventory::Inventory,
     stat::Stat,
-    vector3::Vector3,
+    vector3::Vector3, combat::ID,
 };
 use anyhow::{anyhow, Result};
-use rand::{prelude::StdRng, Rng};
-
-const NUM_WEARS: usize = 3;
+use rand::{prelude::StdRng, Rng, SeedableRng};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Mob {
-    id: u64,
+    id: usize,
     inventory: Inventory,
     drops: Inventory,
-    equip: Option<ItemName>,
+    equip: Inventory,
     wear: Inventory,
     stats: Stat,
     loc: Vector3,
-}
-
-fn get_items(
-    inventory: &Inventory,
-    num_items: usize,
-    filter: fn(&Item) -> bool,
-    g: &GameData,
-    rng: &mut StdRng,
-) -> Result<Vec<ItemName>> {
-    let mut returned_items = Vec::new();
-    let mut equippable_items = Vec::new();
-    let mut equip_summed = Vec::new();
-    let mut equip_sum = 0;
-    for item_name in inventory.items() {
-        let item = g
-            .items
-            .get(item_name)
-            .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
-        if filter(item) {
-            equip_sum += inventory.get(item_name);
-            equip_summed.push(equip_sum);
-            equippable_items.push(item_name);
-        }
-    }
-    for _ in 0..num_items {
-        let index = rng.gen_range(0, equip_sum);
-        for i in 0..equip_summed.len() {
-            if equip_summed[i] > index {
-                returned_items.push(equippable_items[i].clone());
-                break;
-            }
-        }
-    }
-    return Ok(returned_items);
-}
-
-impl Mob {
-    pub fn id(&self) -> u64 {
-        self.id
-    }
-
-    pub fn new(
-        id: u64,
-        loc: Vector3,
-        template: &MobTemplate,
-        rng: &mut StdRng,
-        g: &GameData,
-    ) -> Result<Self> {
-        let inventory = make_inventory(&template.tools, rng)?;
-        let drops = make_inventory(&template.drops, rng)?;
-        let stats = template.stats.clone();
-
-        let mut mob = Self {
-            id,
-            inventory,
-            equip: None,
-            wear: Inventory::new(),
-            drops,
-            stats,
-            loc,
-        };
-
-        let item = get_items(&mob.inventory, 1, |x| x.equipable, g, rng)?;
-        if let Some(item_name) = item.get(0) {
-            mob.equip(&item_name.clone())?;
-        }
-
-        let items = get_items(&mob.inventory, NUM_WEARS, |x| x.equipable, g, rng)?;
-
-        Ok(mob)
-    }
-
-    pub fn dequip(&mut self) {
-        if let Some(equip) = &self.equip {
-            self.inventory.add(equip.clone(), 1);
-            self.equip = None;
-        }
-    }
-
-    pub fn unwear(&mut self, item_name: &ItemName) -> Result<()> {
-        if self.wear.get(item_name) > 0 {
-            self.wear.change(item_name.clone(), -1)?;
-            self.inventory.add(item_name.clone(), 1);
-            Ok(())
-        } else {
-            Err(anyhow!(format!(
-                "cannot unwear {:?} because you aren't wearing it!",
-                item_name
-            )))
-        }
-    }
-
-    pub fn unwear_all(&mut self) -> Result<()> {
-        let iter: Vec<ItemName> = self.wear.items().cloned().collect();
-        for item in iter {
-            for _ in 0..self.wear.get(&item) {
-                self.unwear(&item)?;
-            }
-        }
-        Ok(())
-    }
-
-    pub fn equip(&mut self, item_name: &ItemName) -> Result<()> {
-        self.inventory.change(item_name.clone(), -1)?;
-        self.dequip();
-        self.equip = Some(item_name.clone());
-        Ok(())
-    }
-
-    pub fn wear(&mut self, item_name: &ItemName, g: &GameData) -> Result<()> {
-        self.inventory.change(item_name.clone(), -1)?;
-        if self.wear.size() < NUM_WEARS {
-            let item = g
-                .items
-                .get(item_name)
-                .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
-            self.stats.add_buffs(&item.buffs.stat_buffs, g);
-            Ok(())
-        } else {
-            Err(anyhow!(format!(
-                "cannot wear more than {} items!",
-                NUM_WEARS
-            )))
-        }
-    }
+    rng: StdRng,
+    xp: i64,
+    abilities: HashMap<String, Ability>,
+    name: MobName,
 }
 
 fn make_inventory(gen: &InventoryBuilder, rng: &mut StdRng) -> Result<Inventory> {
@@ -177,4 +57,123 @@ fn make_inventory(gen: &InventoryBuilder, rng: &mut StdRng) -> Result<Inventory>
     }
 
     Ok(inventory)
+}
+
+impl Mob {
+    pub fn new(
+        id: usize,
+        loc: Vector3,
+        template: &MobTemplate,
+        rng: &mut StdRng,
+        g: &GameData,
+    ) -> Result<Self> {
+        let inventory = make_inventory(&template.tools, rng)?;
+        let drops = make_inventory(&template.drops, rng)?;
+        let stats = template.stats.clone();
+
+        let mut mob = Self {
+            id,
+            inventory,
+            equip: Inventory::new(),
+            wear: Inventory::new(),
+            drops,
+            stats,
+            loc,
+            rng: SeedableRng::seed_from_u64(rng.gen()),
+            xp: template.xp,
+            abilities: template.abilities.clone(),
+            name: template.name.clone(),
+        };
+
+        let item = get_items_rand(&mob.inventory, 1, |x| x.equipable, g, rng)?;
+        if let Some(item_name) = item.get(0) {
+            mob.equip(item_name)?;
+        }
+
+        let items = get_items_rand(&mob.inventory, NUM_WEARS, |x| x.equipable, g, rng)?;
+        for item in &items {
+            mob.wear(item, g)?;
+        }
+
+        Ok(mob)
+    }
+}
+
+impl Entity for Mob {
+    fn id(&self) -> ID {
+        ID::mob(self.id)
+    }
+
+    fn inventory(&self) -> &Inventory {
+        &self.inventory
+    }
+
+    fn drops(&self) -> &Inventory {
+        &self.drops
+    }
+
+    fn equipped(&self) -> &Inventory {
+        &self.equip
+    }
+
+    fn worn(&self) -> &Inventory {
+        &self.wear
+    }
+
+    fn stats(&self) -> &Stat {
+        &self.stats
+    }
+
+    fn loc(&self) -> &Vector3 {
+        &self.loc
+    }
+
+    fn abilities(&self) -> HashMap<String, Ability> {
+        self.abilities.clone()
+    }
+
+    fn xp(&self) -> i64 {
+        self.xp
+    }
+
+    fn name(&self) -> Option<String> {
+        Some(format!("{:?}", self.name))
+    }
+
+    fn inventory_mut(&mut self) -> &mut Inventory {
+        &mut self.inventory
+    }
+
+    fn drops_mut(&mut self) -> &mut Inventory {
+        &mut self.drops
+    }
+
+    fn equipped_mut(&mut self) -> &mut Inventory {
+        &mut self.equip
+    }
+
+    fn worn_mut(&mut self) -> &mut Inventory {
+        &mut self.wear
+    }
+
+    fn stats_mut(&mut self) -> &mut Stat {
+        &mut self.stats
+    }
+
+    fn loc_mut(&mut self) -> &mut Vector3 {
+        &mut self.loc
+    }
+
+    fn set_xp(&mut self, xp: i64) {
+        self.xp = xp;
+    }
+
+    fn rng(&mut self) -> &mut StdRng {
+        &mut self.rng
+    }
+
+    fn send_image(&mut self, _: Image) { /* do nothing, mobs don't care about images */
+    }
+    fn send_text(&mut self, _: String) { /* do nothing, mobs don't care about text */
+    }
 }

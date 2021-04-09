@@ -5,32 +5,47 @@ use super::{
 use crate::vector3::Vector3;
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Deserialize)]
 pub struct TerrainDeser {
     pub dim: Vector3,
     pub octaves: u8,
+    pub biome_octaves : u8,
     pub full_passes: Vec<TerrainPassDeser>,
+    pub structure_spawn: HashMap<String, StructureSpawnDeser>,
 }
 
 #[derive(Debug)]
 pub struct Terrain {
     pub dim: Vector3,
     pub octaves: u8,
+    pub biome_octaves : u8,
     pub full_passes: Vec<TerrainPass>,
+    pub structure_spawn: HashMap<StructureName, Vec<BiomePair>>,
 }
 
 impl TerrainDeser {
-    pub fn into_terrain(self, biome_names: &HashSet<BiomeName>) -> Result<Terrain> {
+    pub fn into_terrain(
+        self,
+        biome_names: &HashSet<BiomeName>,
+        structure_names: &HashSet<StructureName>,
+    ) -> Result<Terrain> {
         let mut full_passes = Vec::new();
         for full_pass in self.full_passes {
             full_passes.push(full_pass.into_terrainpass(biome_names)?);
         }
+        let biome_names_check = map_key(self.structure_spawn, structure_names)?;
+        let mut structure_spawn = HashMap::new();
+        for (key, val) in biome_names_check {
+            structure_spawn.insert(key, val.into_structurespawn(biome_names)?);
+        }
         Ok(Terrain {
             dim: self.dim,
             octaves: self.octaves,
+            biome_octaves: self.biome_octaves,
             full_passes,
+            structure_spawn,
         })
     }
 }
@@ -68,7 +83,7 @@ pub struct TerrainPass {
 #[derive(Debug, Deserialize)]
 pub struct SinglePassDeser {
     pub biome: String,
-    #[serde(default = "default_cutoff")]
+    #[serde(default = "f64_two")]
     pub cutoff: f64,
 }
 
@@ -92,44 +107,63 @@ pub struct SinglePass {
     pub cutoff: f64,
 }
 
-fn default_cutoff() -> f64 {
+fn f64_two() -> f64 {
     2.0
 }
-fn default_above() -> f64 {
+
+fn f64_neg_one() -> f64 {
     -1.0
 }
 
-#[derive(Debug)]
-pub struct StructureSpawn {
-    pub structure: StructureName,
+#[derive(Debug, Deserialize)]
+pub struct BiomePairDeser {
+    pub biome: String,
+    #[serde(default = "f64_neg_one")]
     pub prob: f64,
+}
+
+#[derive(Debug)]
+pub struct BiomePair {
+    pub biome: BiomeName,
+    pub prob: f64,
+}
+
+impl BiomePairDeser {
+    pub fn into_biomepair(
+        self,
+        biome_names: &HashSet<BiomeName>,
+        default_prob: f64,
+    ) -> Result<BiomePair> {
+        let name = self.biome.into();
+        if biome_names.contains(&name) {
+            Ok(BiomePair {
+                biome: name,
+                prob: if self.prob < 0.0 {
+                    default_prob
+                } else {
+                    self.prob
+                },
+            })
+        } else {
+            Err(anyhow!(format!("there is no biome with name {:?}", name)))
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct StructureSpawnDeser {
-    pub structure: String,
-    pub prob: f64,
-    #[serde(default = "empty_vec")]
-    pub dissallow: Vec<String>
+    pub biomes: Vec<BiomePairDeser>,
+    #[serde(default = "f64_neg_one")]
+    pub default_prob: f64,
 }
 
 impl StructureSpawnDeser {
-    pub fn into_structurespawn(
-        self,
-        structure_names: &HashSet<StructureName>,
-    ) -> Result<StructureSpawn> {
-        let name = self.structure.into();
-        if structure_names.contains(&name) {
-            Ok(StructureSpawn {
-                structure: name,
-                prob: self.prob,
-            })
-        } else {
-            Err(anyhow!(format!(
-                "there is no structure with name {:?}",
-                name
-            )))
+    pub fn into_structurespawn(self, biome_names: &HashSet<BiomeName>) -> Result<Vec<BiomePair>> {
+        let mut res = Vec::new();
+        for biome in self.biomes {
+            res.push(biome.into_biomepair(biome_names, self.default_prob)?);
         }
+        Ok(res)
     }
 }
 
@@ -141,7 +175,7 @@ pub struct BlockCutoff {
 #[derive(Debug, Deserialize)]
 pub struct BlockCutoffDeser {
     pub then: String,
-    #[serde(default = "default_above")]
+    #[serde(default = "f64_neg_one")]
     pub above: f64,
 }
 
@@ -165,8 +199,6 @@ pub struct BiomeDeser {
     pub terrain_pass: Vec<BlockCutoffDeser>,
     #[serde(default = "empty_vec")]
     pub biome_pass: Vec<BlockCutoffDeser>,
-    #[serde(default = "empty_vec")]
-    pub spawn: Vec<StructureSpawnDeser>,
 }
 
 #[derive(Debug)]
@@ -174,7 +206,6 @@ pub struct Biome {
     pub name: BiomeName,
     pub terrain_pass: Vec<BlockCutoff>,
     pub biome_pass: Vec<BlockCutoff>,
-    pub spawn: Vec<StructureSpawn>,
 }
 
 impl BiomeDeser {
@@ -193,17 +224,10 @@ impl BiomeDeser {
         for block_cutoff in self.biome_pass {
             biome_pass.push(block_cutoff.into_blockcutoff(block_names)?);
         }
-
-        let mut spawn = Vec::new();
-        for structure_spawn in self.spawn {
-            spawn.push(structure_spawn.into_structurespawn(structure_names)?);
-        }
-
         Ok(Biome {
             name,
             terrain_pass,
             biome_pass,
-            spawn,
         })
     }
 }

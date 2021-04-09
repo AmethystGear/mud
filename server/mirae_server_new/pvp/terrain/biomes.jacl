@@ -1,18 +1,15 @@
 "ocean_surface" : (
     terrain_pass : [
-        (above : 0.85 then : "grass")
-        (above : 0.8 then : "sand")
+        (above : 0.75 then : "grass")
+        (above : 0.7 then : "sand")
         (then : "water")
-    ]
-    spawn : [
-        (structure : "ship", prob : 0.0001)
     ]
 )
 "ocean" : (
-    terrain_pass : [(above : 0.9, then : "rock") (then : "water")]
+    terrain_pass : [(above : 0.7, then : "rock") (then : "water")]
 )
 "beach" : (
-    biome_pass : [(above : 0.9, then : "rock") (then : "sand")]
+    biome_pass : [(then : "sand")]
 )
 "desert" : (
     biome_pass : [
@@ -21,9 +18,6 @@
         (above : 0.1, then : "grass")
         (then : "water")
     ]
-    spawn : [
-        (structure : "cave" prob : 0.001)
-    ]
 )
 "snowy" : (
     biome_pass : [
@@ -31,48 +25,34 @@
         (above : 0.15, then : "snow")
         (then : "ice")
     ]
-    spawn : [
-        (structure : "cave", prob : 0.001)
-        (structure : "village", prob : 0.0005)
-    ]
 )
 "swamp" : (
-    biome_pass : [(above : 0.9, then : "rock") (above : 0.2, then : "forest") (then : "mud")]
+    biome_pass : [(above : 0.7, then : "rock") (above : 0.2, then : "forest") (then : "mud")]
 )
 "grassland" : (
     biome_pass : [(then : "grass")]
-    spawn : [
-        (structure : "cave" prob : 0.001)
-        (structure : "village" prob : 0.0005)
-    ]
 )
 "underwater" : (
-    terrain_pass : [(above : 0.9, then : "rock")]
+    terrain_pass : [(above : 0.8, then : "rock")]
     biome_pass : [(above : 0.5, then : "stone") (then : "sand")]
-    spawn : [
-        (structure : "lantern" prob : 0.0001)
-        (structure : "sunken_ship" prob : 0.0001)
-    ]
+)
+"abyss" : (
+    terrain_pass : [(above : 0.8, then : "rock")]
+    biome_pass : [(then : "abyss")]
 )
 "deep_underwater" : (
-    terrain_pass : [(above : 0.9, then : "rock")]
+    terrain_pass : [(above : 0.8, then : "rock")]
     biome_pass : [(above : 0.2, then : "stone") (then : "sand")]
-    spawn : [
-        (structure : "cave" prob : 0.0001)
-        (structure : "lantern" prob : 0.0001)
-        (structure : "sunken_ship" prob : 0.0001)
-    ]
 )
 "cave" : (
-    biome_pass : [(above : 0.5, then : "rock") (then : "stone")]
-    spawn : [
-        (structure : "cave" prob : 0.0005)
-        (structure : "lantern" prob : 0.001)
-    ]
+    biome_pass : [(above : 0.6, then : "rock") (then : "stone")]
 )
 "cave_bottom" : (
     biome_pass : [(above : 0.45, then : "rock") (above : 0.3, then : "stone") (then : "lava")]
-    spawn : [
-        (structure : "lantern", prob : 0.0001, disallow : ["rock", "lava"])
-    ]
+)
+"abyss" : (
+    biome_pass : [(then : "abyss")]
+)
+"rock" : (
+    biome_pass : [(then : "rock")]
 )

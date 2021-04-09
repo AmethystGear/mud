@@ -1,13 +1,13 @@
 use crate::{
     gamedata::{
-        block::{Block, Lighting},
-        gamedata::GameData,
+        block::{Block, Lighting, PointLight},
+        gamedata::{GameData, StructureName},
         terrain::Biome,
     },
     mob::Mob,
     noise,
     rgb::RGB,
-    vector3::Vector3,
+    vector3::Vector3, entity::Entity,
 };
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
@@ -43,7 +43,7 @@ where
     pub fn new(dim: Vector3, default: T) -> Self {
         Map {
             dim,
-            map: vec![default; dim.dim()],
+            map: vec![default; dim.dim() as usize],
         }
     }
 
@@ -51,15 +51,15 @@ where
         if loc.x() >= self.dim.x() || loc.y() >= self.dim.y() || loc.z() >= self.dim.z() {
             Err(anyhow!("point {:?} not in map of dim {:?}", loc, self.dim))
         } else {
-            Ok(loc.z() * self.dim.x() * self.dim.y() + loc.y() * self.dim.x() + loc.x())
+            Ok(loc.z() as usize * self.dim.x() as usize * self.dim.y() as usize + loc.y() as usize * self.dim.x() as usize + loc.x() as usize)
         }
     }
 
     pub fn index_to_posn(&self, i: usize) -> Vector3 {
         Vector3::new(
-            i % self.dim.x(),
-            (i / (self.dim.x())) % self.dim.y(),
-            i / (self.dim.x() * self.dim.y()),
+            (i % self.dim.x() as usize) as isize,
+            ((i / (self.dim.x() as usize)) % self.dim.y() as usize) as isize,
+            (i / (self.dim.x() as usize * self.dim.y() as usize)) as isize,
         )
     }
 
@@ -81,8 +81,8 @@ where
 }
 
 struct SpawnedMobs {
-    locs: BiMap<Vector3, u64>,
-    mobs: HashMap<u64, Mob>,
+    locs: BiMap<Vector3, usize>,
+    mobs: HashMap<usize, Mob>,
 }
 
 impl SpawnedMobs {
@@ -95,12 +95,24 @@ impl SpawnedMobs {
 }
 
 impl SpawnedMobs {
-    pub fn get(&self, loc: Vector3) -> Option<&Mob> {
+    pub fn get_at(&self, loc: Vector3) -> Option<&Mob> {
         self.mobs.get(self.locs.get_by_left(&loc)?)
     }
 
+    pub fn get_at_mut(&mut self, loc: Vector3) -> Option<&mut Mob> {
+        self.mobs.get_mut(self.locs.get_by_left(&loc)?)
+    }
+
+    pub fn get(&self, id: usize) -> Option<&Mob> {
+        self.mobs.get(&id)
+    }
+
+    pub fn get_mut(&mut self, id: usize) -> Option<&mut Mob> {
+        self.mobs.get_mut(&id)
+    }
+
     pub fn get_posn(&self, mob: &Mob) -> Option<Vector3> {
-        Some(self.locs.get_by_right(&mob.id())?.clone())
+        Some(self.locs.get_by_right(&mob.id().id)?.clone())
     }
 
     pub fn remove_loc(&mut self, loc: Vector3) -> Option<Mob> {
@@ -109,24 +121,18 @@ impl SpawnedMobs {
     }
 
     pub fn remove_mob(&mut self, mob: &Mob) -> Option<Mob> {
-        self.locs.remove_by_right(&mob.id());
-        self.mobs.remove(&mob.id())
+        self.locs.remove_by_right(&mob.id().id);
+        self.mobs.remove(&mob.id().id)
     }
 
     pub fn insert(&mut self, loc: Vector3, m: Mob) {
-        self.locs.insert(loc, m.id());
-        self.mobs.insert(m.id(), m);
+        self.locs.insert(loc, m.id().id);
+        self.mobs.insert(m.id().id, m);
     }
 }
 
 fn get_rand(seed: u64) -> StdRng {
-    let bytes = seed.to_le_bytes();
-    let mut seed_bytes = [0; 32];
-    for i in 0..8 {
-        seed_bytes[i] = bytes[i];
-    }
-
-    SeedableRng::from_seed(seed_bytes)
+    SeedableRng::seed_from_u64(seed)
 }
 
 struct Noise<'a, 'b, 'c> {
@@ -138,21 +144,17 @@ struct Noise<'a, 'b, 'c> {
 fn generate_biome(
     block_map: &mut Map<u8>,
     mob_map: &mut Map<MobU16>,
-    structure_map: &mut Map<bool>,
+    biome_map: &mut Map<u8>,
     biome: &Biome,
     noise: Noise,
     g: &GameData,
     level: usize,
     cutoff: f64,
-    rng: &mut StdRng,
 ) -> Result<()> {
-    let start = block_map.index(Vector3::new(0, 0, level))?;
-    let layer_size = block_map.dim.x() * block_map.dim.y();
-    // generate terrain
+    let start = block_map.index(Vector3::new(0, 0, level as isize))?;
+    let layer_size = (block_map.dim.x() * block_map.dim.y()) as usize;
+
     for i in 0..layer_size {
-        if structure_map.direct_get(i + start) {
-            continue;
-        }
         if noise.bounding[i] < cutoff {
             let mut block = None;
             for check in &biome.terrain_pass {
@@ -171,6 +173,14 @@ fn generate_biome(
             }
             if let Some(name) = block {
                 block_map.direct_set(i + start, g.get_block_id_by_blockname(name)?);
+                biome_map.direct_set(
+                    i + start,
+                    g.biomes
+                        .id_to_name
+                        .get_by_right(&biome.name)
+                        .ok_or(anyhow!(format!("invalid biome name {:?}", biome.name)))?
+                        .clone(),
+                );
             } else {
                 return Err(anyhow!(format!(
                     "bad biome specification for {:?}, empty block!",
@@ -179,33 +189,50 @@ fn generate_biome(
             }
         }
     }
-    // generate structures
-    for i in 0..layer_size {
-        if noise.bounding[i] < cutoff {
-            for structure in &biome.spawn {
-                let chance: f64 = rng.gen();
-                if chance < structure.prob {
-                    let structure = g
-                        .structures
-                        .get(&structure.structure)
-                        .ok_or(anyhow!(format!(
-                            "invalid structure name {:?}",
-                            structure.structure
-                        )))?;
+    Ok(())
+}
 
+fn generate_structures(
+    block_map: &mut Map<u8>,
+    mob_map: &mut Map<MobU16>,
+    biome_map: &mut Map<u8>,
+    g: &GameData,
+    rng: &mut StdRng,
+) -> Result<()> {
+    let mut structure_names: Vec<StructureName> = g.structures.keys().cloned().collect();
+    structure_names.sort();
+    // generate structures
+    for name in &structure_names {
+        let structure = g
+            .structures
+            .get(name)
+            .ok_or(anyhow!("invalid structure name"))?;
+        if let Some(biome_pairs) = g.terrain.structure_spawn.get(name) {
+            for i in 0..(block_map.dim.dim() as usize) {
+                let biome_name = g
+                    .biomes
+                    .id_to_name
+                    .get_by_left(&biome_map.direct_get(i))
+                    .ok_or(anyhow!("invalid biome id"))?;
+
+                let chance: f64 = rng.gen();
+                let mut prob = -1.0;
+                for biome_pair in biome_pairs {
+                    if &biome_pair.biome == biome_name {
+                        prob = biome_pair.prob;
+                        break;
+                    }
+                }
+
+                if chance < prob {
                     let structure = &structure[rng.gen_range(0, structure.len())];
                     // if we can't spawn it here, just move on and ignore the error
-                    let _ = structure.spawn_at(
-                        block_map.index_to_posn(start + i),
-                        block_map,
-                        mob_map,
-                        structure_map,
-                        g,
-                        rng,
-                    );
-                    break;
+                    let _ignore_err =
+                        structure.spawn_at(block_map.index_to_posn(i), block_map, mob_map, g, rng);
                 }
             }
+        } else {
+            return Err(anyhow!(format!("invalid structure name {:?}", name)));
         }
     }
     Ok(())
@@ -218,13 +245,16 @@ fn get_block_by_loc<'a>(block_map: &Map<u8>, g: &'a GameData, loc: Vector3) -> R
 
 fn get_block<'a>(block_map: &Map<u8>, g: &'a GameData, i: usize) -> Result<&'a Block> {
     let block = g.get_block_name_by_id(block_map.direct_get(i))?;
-    g.blocks.get(&block).ok_or(anyhow!("block doesn't exist!"))
+    g.blocks
+        .name_to_item
+        .get(&block)
+        .ok_or(anyhow!("block doesn't exist!"))
 }
 
-fn expand_light(
+fn expand_point_light(
     light_map: &mut Map<RGB>,
     block_map: &Map<u8>,
-    lighting: &Lighting,
+    lighting: &PointLight,
     g: &GameData,
     loc: Vector3,
 ) -> Result<()> {
@@ -246,7 +276,6 @@ fn expand_light(
         if block.solid && !first {
             continue;
         }
-
         if depth < lighting.max_range {
             let neighbors = [
                 curr - Vector3::new(1, 0, 0),
@@ -270,37 +299,40 @@ fn expand_light(
     Ok(())
 }
 
+fn gen_noise(rng: &mut StdRng, g: &GameData, biome: bool) -> Vec<f64> {
+    noise::generate_perlin_noise(
+        g.terrain.dim.x() as usize,
+        g.terrain.dim.y() as usize,
+        if biome {
+            g.terrain.biome_octaves
+        } else {
+            g.terrain.octaves
+        },
+        rng,
+    )
+}
+
 pub struct World {
     spawned_mobs: SpawnedMobs,
     mob_map: Map<MobU16>,
     block_map: Map<u8>,
     light_map: Map<RGB>,
     seed: u64,
-    id: u64,
-    rng: StdRng,
+    id: usize,
+    pub rng: StdRng,
 }
 
 impl World {
     pub fn from_seed(seed: u64, g: &GameData) -> Result<World> {
         let mut rng = get_rand(seed);
 
-        // make a closure that will return us new noise every time we call it
-        let gen_noise = |seed| {
-            let mut rng = get_rand(seed);
-            noise::generate_perlin_noise(
-                g.terrain.dim.x(),
-                g.terrain.dim.y(),
-                g.terrain.octaves,
-                &mut rng,
-            )
-        };
         // generate blocks
-        let mut biome_noise = gen_noise(rng.gen());
-        let mut terrain_noise = gen_noise(rng.gen());
-        let mut bounding_noise = gen_noise(rng.gen());
+        let mut biome_noise = gen_noise(&mut rng, &g, true);
+        let mut terrain_noise = gen_noise(&mut rng, &g, true);
+        let mut bounding_noise = gen_noise(&mut rng, &g, false);
         let mut block_map = Map::new(g.terrain.dim, 0u8);
         let mut mob_map = Map::new(g.terrain.dim, MobU16::empty());
-        let mut structure_map = Map::new(g.terrain.dim, false);
+        let mut biome_map = Map::new(g.terrain.dim, 0u8);
         for full_pass in &g.terrain.full_passes {
             for level in 0..full_pass.layers.len() {
                 for pass in &full_pass.layers[level] {
@@ -311,41 +343,44 @@ impl World {
                     };
                     let biome = g
                         .biomes
+                        .name_to_item
                         .get(&pass.biome)
                         .ok_or(anyhow!(format!("{:?} is not a biome", pass.biome)))?;
                     generate_biome(
                         &mut block_map,
                         &mut mob_map,
-                        &mut structure_map,
+                        &mut biome_map,
                         biome,
                         noise,
                         g,
                         level,
                         pass.cutoff,
-                        &mut get_rand(rng.gen()),
                     )?;
-                    biome_noise = gen_noise(rng.gen());
+                    biome_noise = gen_noise(&mut rng, &g, true);
                     if full_pass.change_bounding_noise_per_pass {
-                        bounding_noise = gen_noise(rng.gen());
+                        bounding_noise = gen_noise(&mut rng, &g, false);
                     }
                 }
-                terrain_noise = gen_noise(rng.gen());
+                terrain_noise = gen_noise(&mut rng, &g, true);
             }
-            bounding_noise = gen_noise(rng.gen());
+            bounding_noise = gen_noise(&mut rng, &g, false);
         }
+        // generate structures
+        generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng);
 
         // generate mobs
-        for i in 0..(mob_map.dim.dim()) {
+        for i in 0..(mob_map.dim.dim() as usize) {
             let block = g.get_block_name_by_id(block_map.direct_get(i))?;
             let block = g
                 .blocks
+                .name_to_item
                 .get(&block)
                 .ok_or(anyhow!("block doesn't exist!"))?;
             if rng.gen::<f64>() < block.mob_spawn_chance && mob_map.direct_get(i) == MobU16::empty()
             {
                 mob_map.direct_set(
                     i,
-                    MobU16(rng.gen_range(0, g.max_mob_id.as_u16().unwrap_or(0))),
+                    MobU16(rng.gen_range(0, g.mob_templates.max_id.as_u16().unwrap_or(0))),
                 );
             }
         }
@@ -354,7 +389,7 @@ impl World {
         let mut light_map = Map::new(g.terrain.dim, RGB::new(0, 0, 0));
 
         // sunlight
-        for i in 0..(light_map.dim.dim()) {
+        for i in 0..(light_map.dim.dim() as usize) {
             let block = get_block(&block_map, g, i)?;
             if block.unlit {
                 light_map.direct_set(i, RGB::white());
@@ -371,10 +406,11 @@ impl World {
         }
 
         // light emitters
-        for i in 0..(light_map.dim.dim()) {
+        for i in 0..(light_map.dim.dim() as usize) {
             let block = get_block(&block_map, g, i)?;
-            if let Some(lighting) = &block.light {
-                expand_light(
+            // expand each point light individually
+            if let Some(lighting) = &block.light.point_light {
+                expand_point_light(
                     &mut light_map,
                     &block_map,
                     lighting,
@@ -382,11 +418,21 @@ impl World {
                     block_map.index_to_posn(i),
                 )?;
             }
+            // expand down lights (assuming there's a block below this one)
+            if let Some(lighting) = &block.light.down_light {
+                let loc = block_map.index_to_posn(i) + Vector3::new(0, 0, 1);
+                if let Ok(below) = get_block_by_loc(&block_map, g, loc) {
+                    if !below.unlit {
+                        let color = light_map.get(loc)?;
+                        light_map.set(loc, color.add(lighting.color.scale(lighting.intensity)))?;
+                    }
+                }
+            }
         }
 
         let min_light = 30;
 
-        for i in 0..(light_map.dim.dim()) {
+        for i in 0..(light_map.dim.dim() as usize) {
             let block = get_block(&block_map, g, i)?;
             let mut light = light_map.direct_get(i);
             if light.r < min_light {
@@ -412,14 +458,65 @@ impl World {
         })
     }
 
-    pub fn get_mob(&mut self, loc: Vector3, g: &GameData) -> Result<Mob> {
-        if let Some(mob) = self.spawned_mobs.get(loc) {
-            Ok(mob.clone())
-        } else if let Some(_) = self.mob_map.get(loc)?.as_u16() {
-            self.spawn_mob(loc, g)?;
-            self.get_mob(loc, g)
+    fn get_spawned_mob_at(&self, loc: Vector3) -> Result<&Mob> {
+        if let Some(mob) = self.spawned_mobs.get_at(loc) {
+            Ok(mob)
         } else {
             Err(anyhow!(format!("no mob at location {:?}", loc)))
+        }
+    }
+
+    fn get_spawned_mob_at_mut(&mut self, loc: Vector3) -> Result<&mut Mob> {
+        if let Some(mob) = self.spawned_mobs.get_at_mut(loc) {
+            Ok(mob)
+        } else {
+            Err(anyhow!(format!("no mob at location {:?}", loc)))
+        }
+    }
+
+    pub fn get_mob_at(&mut self, loc: Vector3, g: &GameData) -> Result<&Mob> {
+        // why not if let here?
+        // because that would make rust complain about self.spawn_mob
+        if self.spawned_mobs.get_at(loc).is_some() {
+            Ok(self.spawned_mobs.get_at(loc).unwrap())
+        } else {
+            if self.mob_map.get(loc)?.as_u16().is_some() {
+                self.spawn_mob(loc, g)?;
+                self.get_spawned_mob_at(loc)
+            } else {
+                Err(anyhow!(format!("no mob at location {:?}", loc)))
+            }
+        }
+    }
+
+    pub fn get_mob_at_mut(&mut self, loc: Vector3, g: &GameData) -> Result<&mut Mob> {
+        // why not if let here?
+        // because that would make rust complain about self.spawn_mob
+        if self.spawned_mobs.get_at(loc).is_some() {
+            Ok(self.spawned_mobs.get_at_mut(loc).unwrap())
+        } else {
+            if self.mob_map.get(loc)?.as_u16().is_some() {
+                self.spawn_mob(loc, g)?;
+                self.get_spawned_mob_at_mut(loc)
+            } else {
+                Err(anyhow!(format!("no mob at location {:?}", loc)))
+            }
+        }
+    }
+
+    pub fn get_mob(&self, id: usize) -> Result<&Mob> {
+        if let Some(mob) = self.spawned_mobs.get(id) {
+            Ok(mob)
+        } else {
+            Err(anyhow!(format!("no mob with id {:?}", id)))
+        }
+    }
+
+    pub fn get_mob_mut(&mut self, id: usize) -> Result<&mut Mob> {
+        if let Some(mob) = self.spawned_mobs.get_mut(id) {
+            Ok(mob)
+        } else {
+            Err(anyhow!(format!("no mob with id {:?}", id)))
         }
     }
 
@@ -454,6 +551,7 @@ impl World {
         let mob_name = g.get_mob_name_by_id(self.mob_map.get(loc)?)?;
         let mob_template = g
             .mob_templates
+            .name_to_item
             .get(&mob_name)
             .ok_or_else(|| anyhow!("invalid mob name?"))?;
         self.spawned_mobs
@@ -472,5 +570,17 @@ impl World {
 
     pub fn mobs(&self) -> &Map<MobU16> {
         &self.mob_map
+    }
+
+    pub fn get_block<'a>(&self, g: &'a GameData, i: usize) -> Result<&'a Block> {
+        let block = g.get_block_name_by_id(self.block_map.direct_get(i))?;
+        g.blocks
+            .name_to_item
+            .get(&block)
+            .ok_or(anyhow!("block doesn't exist!"))
+    }
+
+    pub fn get_block_at<'a>(&self, g: &'a GameData, loc: Vector3) -> Result<&'a Block> {
+        self.get_block(g, self.blocks().index(loc)?)
     }
 }

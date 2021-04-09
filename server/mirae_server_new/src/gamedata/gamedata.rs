@@ -16,7 +16,8 @@ use serde_jacl::de::from_str;
 use std::{
     collections::{HashMap, HashSet},
     fs,
-    path::Path,
+    hash::Hash,
+    path::Path, fmt::Debug,
 };
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct DmgType(String);
@@ -28,7 +29,7 @@ impl From<String> for DmgType {
 }
 
 impl DmgType {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
         if g.dmg.contains(&val) {
             Ok(val)
@@ -58,7 +59,7 @@ impl StatType {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct StructureName(String);
 
 impl From<String> for StructureName {
@@ -68,7 +69,7 @@ impl From<String> for StructureName {
 }
 
 impl StructureName {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
         if g.structures.contains_key(&val) {
             Ok(val)
@@ -92,12 +93,12 @@ impl From<String> for BiomeName {
 }
 
 impl BiomeName {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
-        if g.biomes.contains_key(&val) {
+        if g.biomes.name_to_item.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.biomes)))
+            Err(anyhow!(format!("{:?} not in {:?}", val, g.biomes.name_to_item.keys())))
         }
     }
 }
@@ -112,7 +113,7 @@ impl From<String> for ItemName {
 }
 
 impl ItemName {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
         if g.items.contains_key(&val) {
             Ok(val)
@@ -132,15 +133,15 @@ impl From<String> for MobName {
 }
 
 impl MobName {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
-        if g.mob_templates.contains_key(&val) {
+        if g.mob_templates.name_to_item.contains_key(&val) {
             Ok(val)
         } else {
             Err(anyhow!(format!(
                 "{:?} not in {:?}",
                 val,
-                g.mob_templates.keys()
+                g.mob_templates.name_to_item.keys()
             )))
         }
     }
@@ -156,12 +157,12 @@ impl From<String> for BlockName {
 }
 
 impl BlockName {
-    fn checked_from(s: String, g: &GameData) -> Result<Self> {
+    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
         let val = Self(s);
-        if g.blocks.contains_key(&val) {
+        if g.blocks.name_to_item.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.blocks.keys())))
+            Err(anyhow!(format!("{:?} not in {:?}", val, g.blocks.name_to_item.keys())))
         }
     }
 }
@@ -259,7 +260,7 @@ impl GameMode {
             );
         }
 
-        let terrain = deser.terrain.into_terrain(&biome_names)?;
+        let terrain = deser.terrain.into_terrain(&biome_names, &structure_names)?;
 
         GameData::new(
             terrain,
@@ -286,21 +287,45 @@ pub struct GameDataDeser {
     structures: HashMap<String, StructureDeser>,
 }
 
+pub struct IDMap<A, B, C> {
+    pub name_to_item: HashMap<B, C>,
+    pub id_to_name: BiMap<A, B>,
+    pub max_id: A,
+}
+
 pub struct GameData {
     pub terrain: Terrain,
     pub dmg: HashSet<DmgType>,
     pub stat: HashSet<StatType>,
-    pub biomes: HashMap<BiomeName, Biome>,
     pub structures: HashMap<StructureName, Vec<Structure>>,
     pub items: HashMap<ItemName, Item>,
-    pub mob_templates: HashMap<MobName, MobTemplate>,
-    pub mob_id_map: BiMap<MobU16, MobName>,
-    pub max_mob_id: MobU16,
-    pub blocks: HashMap<BlockName, Block>,
-    pub block_id_map: BiMap<u8, BlockName>,
-    pub max_block_id: u8,
+    pub biomes: IDMap<u8, BiomeName, Biome>,
+    pub mob_templates: IDMap<MobU16, MobName, MobTemplate>,
+    pub blocks: IDMap<u8, BlockName, Block>,
     pub init_packet: Packet,
     pub mob_id_to_img_id: HashMap<u16, u8>,
+}
+
+fn get_idmap<A: Eq + Debug + Hash + Copy, B: Hash + Eq + Clone, C>(
+    map: HashMap<B, C>,
+    increment: fn(A) -> A,
+    start: A,
+    max: A,
+) -> Result<IDMap<A, B, C>> {
+    let mut id_map = BiMap::new();
+    let mut max_id = start;
+    for name in map.keys() {
+        if max_id == max {
+            return Err(anyhow!(format!("number of mobs cannot exceed {:?}", max)));
+        }
+        id_map.insert(max_id, name.clone());
+        max_id = increment(max_id);
+    }
+    Ok(IDMap {
+        name_to_item: map,
+        id_to_name: id_map,
+        max_id,
+    })
 }
 
 impl GameData {
@@ -314,40 +339,22 @@ impl GameData {
         biomes: HashMap<BiomeName, Biome>,
         structures: HashMap<StructureName, Vec<Structure>>,
     ) -> Result<Self> {
-        let mut mob_id_map: BiMap<MobU16, MobName> = BiMap::new();
-        let mut max_mob_id = MobU16(0);
-        for name in mob_templates.keys() {
-            if max_mob_id == MobU16::empty() {
-                return Err(anyhow!(format!(
-                    "number of mobs cannot exceed {:?}",
-                    MobU16::empty()
-                )));
-            }
-            mob_id_map.insert(max_mob_id, name.clone());
-            max_mob_id = MobU16(max_mob_id.0 + 1);
-        }
-
-        let mut block_id_map: BiMap<u8, BlockName> = BiMap::new();
-        let mut max_block_id = 0;
-        for name in blocks.keys() {
-            if max_block_id == u8::MAX {
-                return Err(anyhow!(format!(
-                    "number of blocks cannot exceed {}",
-                    u8::MAX
-                )));
-            }
-            block_id_map.insert(max_block_id, name.clone());
-            max_block_id += 1
-        }
-
         let mut img_to_img_id = HashMap::new();
         let mut mob_id_to_img_id = HashMap::new();
         let mut id: u8 = 0;
-        for i in 0..max_mob_id.0 {
-            let mob_name = mob_id_map
+        let mob_templates = get_idmap(
+            mob_templates,
+            |x| MobU16(x.0 + 1),
+            MobU16(0),
+            MobU16::empty(),
+        )?;
+        for i in 0..mob_templates.max_id.0 {
+            let mob_name = mob_templates
+                .id_to_name
                 .get_by_left(&MobU16(i))
                 .ok_or(anyhow!("invalid id"))?;
             let mob_template = mob_templates
+                .name_to_item
                 .get(&mob_name)
                 .ok_or(anyhow!("invalid mob name"))?;
 
@@ -371,13 +378,9 @@ impl GameData {
             dmg,
             stat,
             items,
+            blocks: get_idmap(blocks, |x| x + 1, 0u8, u8::MAX)?,
             mob_templates,
-            mob_id_map,
-            blocks,
-            block_id_map,
-            biomes,
-            max_block_id,
-            max_mob_id,
+            biomes: get_idmap(biomes, |x| x + 1, 0u8, u8::MAX)?,
             structures,
             init_packet: Packet {
                 p_type: PacketType::Init,
@@ -389,7 +392,8 @@ impl GameData {
 
     pub fn get_mob_name_by_id(&self, id: MobU16) -> Result<MobName> {
         Ok(self
-            .mob_id_map
+            .mob_templates
+            .id_to_name
             .get_by_left(&id)
             .ok_or_else(|| anyhow!(format!("invalid id {:?}", id)))?
             .clone())
@@ -397,7 +401,8 @@ impl GameData {
 
     pub fn get_mob_id_by_name(&self, name: &MobName) -> Result<MobU16> {
         Ok(self
-            .mob_id_map
+            .mob_templates
+            .id_to_name
             .get_by_right(name)
             .ok_or_else(|| anyhow!(format!("invalid name {:?}", name)))?
             .clone())
@@ -405,7 +410,8 @@ impl GameData {
 
     pub fn get_block_name_by_id(&self, id: u8) -> Result<BlockName> {
         Ok(self
-            .block_id_map
+            .blocks
+            .id_to_name
             .get_by_left(&id)
             .ok_or_else(|| anyhow!(format!("invalid id {}", id)))?
             .clone())
@@ -418,7 +424,8 @@ impl GameData {
 
     pub fn get_block_id_by_blockname(&self, name: &BlockName) -> Result<u8> {
         Ok(self
-            .block_id_map
+            .blocks
+            .id_to_name
             .get_by_right(name)
             .ok_or_else(|| anyhow!(format!("invalid name {:?}", name)))?
             .clone())

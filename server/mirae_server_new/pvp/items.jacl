@@ -123,14 +123,51 @@
             }
         )
         "eat" : (
-            destroy_item : true
             health : -3
+            remove_items : {
+                "bigly_stick" : 1
+            }
             make_items : {
                 "sentient_trump_orange" : 3
             }
         )
     }
     description : "biiiiiiigly"
+)
+
+
+"the_force" : (
+    equipable : true
+    abilities : {
+        "force_push" : (
+            energy : -10
+            damage : {
+                "physical" : 5
+                "magic" : 2
+            }
+            stun : 1
+        )
+        "force_choke" : (
+            energy : -6
+            damage : {
+                "physical" : 10
+                "magic" : 2
+            }
+        )
+        "force_heal" : (
+            health : 3
+            energy : -5
+        )
+    }
+)
+
+"lightsaber" : (
+    equipable : true
+    abilities : {
+        "" : (
+            energy : -5
+        )
+    }
 )
 
 "obsidian_staff" : (
@@ -248,7 +285,9 @@
     xp : 200
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "oxford_dictionary" : 1
+            }
             energy : -3
         )
     }
@@ -325,7 +364,9 @@ though they haven't even started on any of the other problems..."
     xp : 40
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "mana" : 1
+            }
             energy : 1
         )
     }
@@ -336,7 +377,9 @@ though they haven't even started on any of the other problems..."
     xp : -40
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "honour" : 1
+            }
             health : 2
             energy : -1
         )
@@ -348,17 +391,17 @@ though they haven't even started on any of the other problems..."
     xp : 1000
     abilities : {
         "eat" : (
-            destroy_item : true
-            health : -10
+            remove_items : {
+                "dragon's_blood" : 1
+            }
+            health : -2
         )
         "throw" : (
             destroy_item : true
             energy : -1
-            repeat : 3
             damage : {                
                 "toxic" : 4
             }
-            accuracy : 0.8
         )
     }
     description : "highly toxic blood obtained from a dragon"
@@ -423,9 +466,11 @@ if you simply USE this item to it's full extent..."
 "sins_of_humanity" : (
     abilities : {
         "eat" : (
-            destroy_item : true
-            health : 100
-            energy : 100
+            remove_items : {
+                "sins_of_humanity" : 1
+            }
+            health : 30
+            energy : 30
         )
     }
 )
@@ -433,9 +478,11 @@ if you simply USE this item to it's full extent..."
 "sonic_chops" : (
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "sonic_chops" : 1
+            }
             health : 10
-            energy : 25
+            energy : 15
         )
     }
     description : "Considered a rare delicacy, for few have tasted the meat of a sonic."
@@ -446,15 +493,17 @@ if you simply USE this item to it's full extent..."
     xp : 1500
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "heghead" : 1
+            }
             health : -7
             energy : 35
         )
     }
     buffs : (
         stat_buffs : {
-            "speed" : 1.5
-            "max_energy" : 1.5
+            "speed" : 1.25
+            "max_energy" : 1.25
         }
     )
     description : "The head of sonic the hedgehog. You can wear it, just mind the eyeball."
@@ -470,7 +519,7 @@ if you simply USE this item to it's full extent..."
     buffs : (
         stat_buffs : {
             "speed" : 2.0
-            "max_health" : 0.8
+            "max_health" : 0.5
         }
     )
     description : "Fast shoes, shoes go fest, gotta go festttttt!!!!"
@@ -495,7 +544,9 @@ if you simply USE this item to it's full extent..."
             }
         )
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "orange" : 1
+            }
             health : 2
         )
     }
@@ -520,7 +571,9 @@ if you simply USE this item to it's full extent..."
             }
         )
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "trump_orange" : 1
+            }
             health : -4
             damage : {
                 "bigly" : 1
@@ -563,7 +616,9 @@ if you simply USE this item to it's full extent..."
             }
         )
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "sentient_trump_orange" : 1
+            }
             health : -4
             damage : {
                 "bigly" : 2
@@ -630,7 +685,9 @@ and make the greatest comeback ever seen in history!!"
     )
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "heart_of_trump" : 1
+            }
             health : -5
             damage : {
                 "psychological" : 10
@@ -640,10 +697,11 @@ and make the greatest comeback ever seen in history!!"
 )
 
 "physics_kit" : (
-    equipable : true,
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "physics_kit" : 1
+            }
             health : -1
         )
     }
@@ -652,12 +710,12 @@ and make the greatest comeback ever seen in history!!"
 "healthy_sword" : (
     equipable : true,
     wearable : true,
-
-
     abilities : {
         "eat" : (
-            destroy_item : true
-            health : -1
+            remove_items : {
+                "healthy_sword" : 1
+            }
+            health : 10
         )
     }
 )
@@ -665,7 +723,9 @@ and make the greatest comeback ever seen in history!!"
 "faceman_meat" : (
     abilities : {
         "eat" : (
-            destroy_item : true
+            remove_items : {
+                "faceman_meat" : 1
+            }
             health : -9999999
             make_items : {
                 "meat_shield_v0" : 1

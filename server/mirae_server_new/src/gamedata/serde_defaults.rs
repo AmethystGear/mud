@@ -37,7 +37,7 @@ pub fn default_jpg_str() -> String {
     "default.jpg".to_string()
 }
 
-pub fn map<A: From<B> + Eq + Hash + Debug, B, C>(
+pub fn map_key<A: From<B> + Eq + Hash + Debug, B, C>(
     val: HashMap<B, C>,
     types: &HashSet<A>,
 ) -> Result<HashMap<A, C>> {
@@ -51,3 +51,4 @@ pub fn map<A: From<B> + Eq + Hash + Debug, B, C>(
     }
     return Ok(map);
 }
+

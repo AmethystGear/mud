@@ -2,15 +2,15 @@ use super::{gamedata::BlockName, serde_defaults::*};
 use crate::rgb::RGB;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
-pub struct LightingDeser {
-    intensity: f64,
-    falloff: f64,
-    max_range: u64,
-    color: RGB,
+#[derive(Deserialize, Debug, Clone)]
+pub struct PointLight {
+    pub intensity: f64,
+    pub falloff: f64,
+    pub max_range: u64,
+    pub color: RGB,
 }
 
-impl LightingDeser {
+impl PointLight {
     fn invalid() -> Self {
         Self {
             intensity: -1.0,
@@ -21,13 +21,51 @@ impl LightingDeser {
     }
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct DownLight {
+    pub intensity: f64,
+    pub color: RGB,
+}
+
+impl DownLight {
+    fn invalid() -> Self {
+        Self {
+            intensity: -1.0,
+            color: RGB::new(0, 0, 0),
+        }
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct LightingDeser {
+    #[serde(default = "PointLight::invalid")]
+    point_light: PointLight,
+    #[serde(default = "DownLight::invalid")]
+    down_light: DownLight,
+}
+
+impl LightingDeser {
+    fn invalid() -> Self {
+        Self {
+            point_light: PointLight::invalid(),
+            down_light: DownLight::invalid(),
+        }
+    }
+}
+
 impl Into<Lighting> for LightingDeser {
     fn into(self) -> Lighting {
         Lighting {
-            intensity: self.intensity,
-            falloff: self.falloff,
-            max_range: self.max_range,
-            color: self.color,
+            point_light: if self.point_light.intensity < 0.0 {
+                None
+            } else {
+                Some(self.point_light)
+            },
+            down_light : if self.down_light.intensity < 0.0 {
+                None
+            } else {
+                Some(self.down_light)
+            }
         }
     }
 }
@@ -56,27 +94,18 @@ impl BlockDeser {
             color: self.color,
             mob_spawn_chance: self.mob_spawn_chance,
             solid: self.solid,
-            light: if self.light.intensity < 0.0
-                || self.light.intensity > 1.0
-                || self.light.falloff < 0.0
-                || self.light.falloff > 1.0
-            {
-                None
-            } else {
-                Some(self.light.into())
-            },
+            light: self.light.into(),
             transparency: self.transparency,
             unlit: self.unlit,
+            z_passable : self.z_passable
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Lighting {
-    pub intensity: f64,
-    pub falloff: f64,
-    pub max_range: u64,
-    pub color: RGB,
+    pub point_light: Option<PointLight>,
+    pub down_light: Option<DownLight>,
 }
 
 #[derive(Debug, Clone)]
@@ -85,7 +114,8 @@ pub struct Block {
     pub color: RGB,
     pub mob_spawn_chance: f64,
     pub solid: bool,
-    pub light: Option<Lighting>,
+    pub z_passable : bool,
+    pub light: Lighting,
     pub unlit: bool,
     pub transparency: RGB,
 }
