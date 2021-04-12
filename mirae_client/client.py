@@ -27,4 +27,5 @@ class Server(http.server.SimpleHTTPRequestHandler):
 
 with socketserver.TCPServer(("", CLIENT_PORT), Server) as httpd:
     print("serving at port", CLIENT_PORT)
+    print("serving at ip", PUB_IP)
     httpd.serve_forever()

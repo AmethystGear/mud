@@ -1,0 +1,17 @@
+[package]
+name = "mirae_server"
+version = "0.1.0"
+authors = ["AmethystGear <shivenbhatt@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_jacl = "0.3.6"
+rand = "0.7.3"
+serde_json = "1.0.57"
+websocket = "0.26.2"
+serde = { version = "1.0.116", features = ["derive"] }
+anyhow = "1.0.33"
+bimap = "0.6.0"
+image = "0.23.14"

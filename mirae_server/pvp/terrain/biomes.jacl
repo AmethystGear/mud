@@ -1,0 +1,53 @@
+"ocean_surface" : (
+    terrain_pass : [
+        (then : "water")
+    ]
+)
+"ocean" : (
+    terrain_pass : [(then : "water")]
+)
+"beach" : (
+    biome_pass : [(then : "sand")]
+)
+"desert" : (
+    biome_pass : [
+        (above : 0.9,then : "rock")
+        (above : 0.15, then : "sand")
+        (above : 0.1, then : "grass")
+        (then : "water")
+    ]
+)
+"snowy" : (
+    biome_pass : [
+        (above : 0.8, then : "rock")
+        (above : 0.15, then : "snow")
+        (then : "ice")
+    ]
+)
+"swamp" : (
+    biome_pass : [(above : 0.7, then : "rock") (above : 0.2, then : "forest") (then : "mud")]
+)
+"grassland" : (
+    biome_pass : [(then : "grass")]
+)
+"underwater" : (
+    biome_pass : [(above : 0.5, then : "stone") (then : "sand")]
+)
+"abyss" : (
+    biome_pass : [(then : "abyss")]
+)
+"deep_underwater" : (
+    biome_pass : [(then : "sand")]
+)
+"cave" : (
+    biome_pass : [(above : 0.6, then : "rock") (then : "stone")]
+)
+"cave_bottom" : (
+    biome_pass : [(above : 0.45, then : "rock") (above : 0.3, then : "stone") (then : "lava")]
+)
+"abyss" : (
+    biome_pass : [(then : "abyss")]
+)
+"rock" : (
+    biome_pass : [(then : "rock")]
+)

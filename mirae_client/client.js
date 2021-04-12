@@ -1,5 +1,5 @@
 // all the potential types of Packets we can expect.
-const PacketTypes = Object.freeze({"Text":0, "Img":1, "Init":2, "Err":3})
+const PacketTypes = Object.freeze({ "Text": 0, "Img": 1, "Init": 2, "Err": 3 })
 
 const MAX_PACKET_TYPE_LEN = 5
 const MAX_PACKET_SIZE_LEN = 4
@@ -13,7 +13,7 @@ let textbox = null
 let initData = null
 let imgData = null
 let buffer = null
-
+let lastSent = ""
 
 class Player {
     constructor(ID, x, y) {
@@ -54,14 +54,14 @@ class Packet {
     }
 }
 
-class Uint16Iter {
+class Uint8Iter {
     constructor(data) {
         this.data = data
         this.index = 0
     }
 
     pop() {
-        let val = this.data.getUint16(this.index * 2, false)
+        let val = this.data.getUint8(this.index, false)
         this.index++
         return val
     }
@@ -154,7 +154,7 @@ function getPacket(msg) {
     }
     let pkt = new Packet(packetType, content.slice(0, msgLen))
     let extra = content.slice(msgLen, content.length)
-    return {pkt: pkt, extra: extra}
+    return { pkt: pkt, extra: extra }
 }
 
 /**
@@ -170,17 +170,15 @@ function handlePacket(pkt) {
         if (initData === null) {
             throw new InitDataNotInitialized()
         }
-        displayImg(new Uint16Iter(new DataView(pkt.content.buffer)))
+        displayImg(new Uint8Iter(new DataView(pkt.content.buffer)))
     } else if (pkt.packetType === PacketTypes.Init) {
         initData = JSON.parse(dec.decode(pkt.content))
         imgData = {}
-        for (entity in initData['entity_display']) {
-            let name = initData['entity_display'][entity]
+        for (var entity in initData) {
+            let name = initData[entity]
             imgData[name] = new Image()
             imgData[name].src = "resources/images/" + name
         }
-        imgData[initData['default_entity']] = new Image()
-        imgData[initData['default_entity']].src = "resources/images/" + initData['default_entity']
     } else if (pkt.packetType === PacketTypes.Err) {
         let decoded = dec.decode(pkt.content)
         let err = "ERROR: " + decoded + '\n'
@@ -191,7 +189,6 @@ function handlePacket(pkt) {
 /**
  * display string on the webpage
  * @param {string} string - string to display
- * @param {string} color - color of the text
  */
 function displayString(string) {
     text.value = text.value + string
@@ -203,76 +200,89 @@ function displayString(string) {
 
 /**
  * display image on the webpage
- * @param {Uint16Iter} data
+ * @param {Uint8Iter} data
  */
 function displayImg(data) {
+    let width = data.pop()
+    let height = data.pop()
     let numPlayers = data.pop()
-    console.log(numPlayers)
+    let numElems = width * height
+    let numElemsEnt = data.pop()
+
     let players = []
     for (let i = 0; i < numPlayers; i++) {
         let player = new Player(data.pop(), data.pop(), data.pop())
         players.push(player)
     }
 
-    let width = data.pop()
-    let numElems = data.pop()
     let blocks = []
     for (let i = 0; i < numElems; i++) {
-        blocks.push(data.pop())
+        blocks.push([data.pop(), data.pop(), data.pop()])
     }
 
-    let numElemsEnt = data.pop()
     let entities = []
     for (let i = 0; i < numElemsEnt; i++) {
         entities.push(data.pop())
     }
-    let blockWidth = Math.round(canvas.width/width)
-    let blockHeight = Math.round(canvas.height/(numElems/width))
-    
-    for (let y = 0; y < (numElems/width); y++) {
+    let blockWidth = Math.round(canvas.width / width)
+    let blockHeight = Math.round(canvas.height / (numElems / width))
+
+    for (let y = 0; y < (numElems / width); y++) {
         let yPx = y * blockHeight
         for (let x = 0; x < width; x++) {
             let xPx = x * blockWidth
             let index = y * width + x
             let block = blocks[index]
-            ct.fillStyle = initData['block_display'][block]
+            ct.fillStyle = "rgb(" + block[0] + "," + block[1] + "," + block[2] + ")";
             ct.fillRect(xPx, yPx, blockWidth, blockHeight)
         }
     }
 
     if (numElemsEnt > 0) {
-        for (let y = 0; y < (numElems/width); y++) {
+        for (let y = 0; y < (numElems / width); y++) {
             let yPx = y * blockHeight
             for (let x = 0; x < width; x++) {
                 let xPx = x * blockWidth
                 let index = y * width + x
                 let entity = entities[index]
-                if (entity === 65535) {
+                if (entity === 255) {
                     continue
                 }
-                let entityImg;
-                if (entity in initData['entity_display']) {
-                    entityImg = initData['entity_display'][entity]
-                } else {
-                    entityImg = initData['default_entity']
-                }
-                ct.drawImage(imgData[entityImg], xPx, yPx, blockWidth, blockHeight)            
+                let entityImg = initData[entity]
+                ct.drawImage(imgData[entityImg], xPx, yPx, blockWidth, blockHeight)
             }
         }
     }
 
-    
-    ct.fillStyle = "#FFFFFF"
+    ct.fillStyle = "#FF0000"
     ct.font = Math.round(blockWidth) + "px Consolas";
     for (let i = 0; i < players.length; i++) {
-        console.log(players[i])
         ct.fillText(players[i].getPlayerDisplay(), players[i].x * blockWidth, (players[i].y + 1) * blockHeight)
     }
 }
 
+function quoted(str) {
+    str.charAt(0) == '"' && str.charAt(str.length - 1) == '"'
+}
+
 function onTextboxEnter() {
-    let content = textbox.value
-    socket.send(content.trim())
+    let content = textbox.value.trim().split(/[ ,]+/)
+    let send = ""
+    for (i = 0; i < content.length; i++) {
+        if (!isNaN(content[i]) || content[i] == 'true' || content[i] == 'false') {
+            send += content[i]
+        } else {
+            send += "\"" + content[i] + "\""
+        }
+        send += " "
+    }
+    send = send.trim()
+    if (send != "") {
+        socket.send("[" + send + "]")
+        lastSent = send
+    } else {
+        socket.send("[" + lastSent + "]")
+    }
     textbox.value = ""
 }
 
@@ -283,9 +293,9 @@ function concatTypedArrays(a, b) {
     return c;
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     (async () => {
-        let ws = await fetch('/ws-server-loc').then(function(response){return response.json()})
+        let ws = await fetch('/ws-server-loc').then(function (response) { return response.json() })
         socket = new WebSocket("ws://" + ws['ip'] + ":" + ws['port'])
         canvas = document.getElementById("canvas")
         ct = canvas.getContext("2d");
@@ -298,41 +308,41 @@ $(document).ready(function() {
         textbox.addEventListener('keydown', (e) => {
             if (e.key == 'Enter') {
                 onTextboxEnter()
-            }        
+            }
         });
 
+        // auto display (10fps)
+        window.setInterval(function() {
+            if (lastSent != "\"map\"") {
+                socket.send("[\"disp\"]")
+            }
+        }, 100);
+
         socket.binaryType = 'arraybuffer';
-        socket.onmessage = function(evt) {
-            console.log(evt.data)
+        socket.onmessage = function (evt) {
             let data = new Uint8Array(evt.data)
-            console.log(data)
             buffer = concatTypedArrays(buffer, data)
-            console.log(buffer)
-            
+
             while (true) {
                 try {
-                    const {pkt, extra} = getPacket(buffer)
+                    const { pkt, extra } = getPacket(buffer)
                     handlePacket(pkt)
                     buffer = extra
                 } catch (err) {
                     if (err instanceof PacketIncomplete) {
                         break
                     } else if (err instanceof PacketBroken) {
-                        console.log(err)
-                        console.log("ERROR: recieved badly formatted packet:\n" + buffer)
                         buffer = new Uint8Array(0)
                         break
                     } else if (err instanceof InitDataNotInitialized) {
-                        console.log(err)
-                        console.log("ERROR: never recieved init data!")
                         buffer = new Uint8Array(0)
                         break
                     } else {
                         throw err
                     }
                 }
-            }    
-            
+            }
+
         };
     })();
 });
