@@ -98,14 +98,14 @@ impl Inventory {
     }
 
     pub fn to_string(&self) -> String {
-        let line = |item| format!("{:?}: {}", item, self.get(item));
+        let line = |item: &ItemName| format!("{}: {}", item.0, self.get(item));
         if self.size() == 0 {
             return "nothing".into();
         } else if self.items().len() == 1 {
             let item = self.items().next().expect("at least one item");
-            return line(item);
+            return format!("a {}", item.0);
         }
-        let mut s = "".into();
+        let mut s = "\n".into();
         for item in self.items() {
             s = format!("{}{}\n", s, line(item));
         }

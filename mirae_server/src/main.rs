@@ -264,7 +264,6 @@ fn main() -> Result<()> {
                                 sender.send((p_out, Some(id))).unwrap();
                                 let player =
                                     Player::new(id, sender, &g_arc, &mut world.rng).unwrap();
-                                println!("{}", player.inventory().to_string());
 
                                 players[id] = Some(player);
                             } else {
@@ -354,6 +353,7 @@ fn main() -> Result<()> {
                                 thread_rng().gen_range(0, dim.z()),
                             ));
                             battle_map.end_battle(player.id()).unwrap();
+                            player.send_image("none".into());
                             continue;
                         }
 
@@ -370,6 +370,7 @@ fn main() -> Result<()> {
                             let loc = mob.loc().clone();
                             world.delete_mob_by_loc(loc).unwrap();
                             battle_map.end_battle(player.id()).unwrap();
+                            player.send_image("none".into());
                             continue;
                         }
 

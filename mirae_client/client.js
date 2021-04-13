@@ -1,5 +1,5 @@
 // all the potential types of Packets we can expect.
-const PacketTypes = Object.freeze({ "Text": 0, "Img": 1, "Init": 2, "Err": 3 })
+const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img" : 4 })
 
 const MAX_PACKET_TYPE_LEN = 5
 const MAX_PACKET_SIZE_LEN = 4
@@ -14,6 +14,7 @@ let initData = null
 let imgData = null
 let buffer = null
 let lastSent = ""
+let displayingImage = false;
 
 class Player {
     constructor(ID, x, y) {
@@ -166,23 +167,42 @@ function handlePacket(pkt) {
     if (pkt.packetType === PacketTypes.Text) {
         let decoded = dec.decode(pkt.content)
         displayString(decoded)
-    } else if (pkt.packetType === PacketTypes.Img) {
+    } else if (pkt.packetType === PacketTypes.Display) {
         if (initData === null) {
             throw new InitDataNotInitialized()
         }
         displayImg(new Uint8Iter(new DataView(pkt.content.buffer)))
     } else if (pkt.packetType === PacketTypes.Init) {
         initData = JSON.parse(dec.decode(pkt.content))
+        console.log(initData)
         imgData = {}
-        for (var entity in initData) {
-            let name = initData[entity]
+        for (var entity in initData['img_id_to_img']) {
+            console.log("entity " + entity)
+            let name = initData['img_id_to_img'][entity]
+            console.log("name " + name)
             imgData[name] = new Image()
             imgData[name].src = "resources/images/" + name
         }
+        let arr = initData['images_to_load']
+        for (var i = 0; i < arr.length; i++) {
+            let name = arr[i]
+            imgData[name] = new Image()
+            imgData[name].src = "resources/images/" + name
+        }
+        console.log(imgData)
     } else if (pkt.packetType === PacketTypes.Err) {
         let decoded = dec.decode(pkt.content)
         let err = "ERROR: " + decoded + '\n'
         displayString(err)
+    } else if (pkt.packetType === PacketTypes.Img) {
+        let imgname = dec.decode(pkt.content)
+        if (imgname == "none") {
+            displayingImage = false;
+            return;
+        }
+        displayingImage = true
+        ct.clearRect(0, 0, canvas.width, canvas.height)
+        ct.drawImage(imgData[imgname], 0, 0, canvas.width, canvas.height)
     }
 }
 
@@ -248,7 +268,7 @@ function displayImg(data) {
                 if (entity === 255) {
                     continue
                 }
-                let entityImg = initData[entity]
+                let entityImg = initData['img_id_to_img'][entity]
                 ct.drawImage(imgData[entityImg], xPx, yPx, blockWidth, blockHeight)
             }
         }
@@ -311,12 +331,15 @@ $(document).ready(function () {
             }
         });
 
-        // auto display (10fps)
-        window.setInterval(function() {
-            if (lastSent != "\"map\"") {
+        setTimeout( function() {
+            // auto display (10fps)
+            window.setInterval(function() {
+                if (lastSent == "\"map\"" || displayingImage) {
+                    return;
+                }
                 socket.send("[\"disp\"]")
-            }
-        }, 100);
+            }, 100);
+        }, 1000);
 
         socket.binaryType = 'arraybuffer';
         socket.onmessage = function (evt) {

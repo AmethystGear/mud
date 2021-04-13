@@ -1,4 +1,5 @@
 use crate::{
+    combat::ID,
     display::Image,
     entity::{get_items_rand, Entity, NUM_WEARS},
     gamedata::{
@@ -8,7 +9,7 @@ use crate::{
     },
     inventory::Inventory,
     stat::Stat,
-    vector3::Vector3, combat::ID,
+    vector3::Vector3,
 };
 use anyhow::Result;
 use rand::{prelude::StdRng, Rng, SeedableRng};
@@ -27,7 +28,8 @@ pub struct Mob {
     xp: i64,
     abilities: HashMap<String, Ability>,
     name: MobName,
-    quotes : Quotes
+    quotes: Quotes,
+    pub display_img: String,
 }
 
 fn make_inventory(gen: &InventoryBuilder, rng: &mut StdRng) -> Result<Inventory> {
@@ -63,12 +65,12 @@ impl Mob {
         loc: Vector3,
         template: &MobTemplate,
         rng: &mut StdRng,
-        g: &GameData,
+        g: &GameData
     ) -> Result<Self> {
         let inventory = make_inventory(&template.tools, rng)?;
         let drops = make_inventory(&template.drops, rng)?;
         let stats = template.stats.clone();
-        
+
         let mut mob = Self {
             id,
             inventory,
@@ -81,7 +83,8 @@ impl Mob {
             xp: template.xp,
             abilities: template.abilities.clone(),
             name: template.name.clone(),
-            quotes : template.quotes.clone()
+            quotes: template.quotes.clone(),
+            display_img: template.display_img.clone()
         };
 
         let item = get_items_rand(&mob.inventory, 1, |x| x.equipable, g, rng)?;
@@ -136,7 +139,7 @@ impl Entity for Mob {
     }
 
     fn name(&self) -> Option<String> {
-        Some(format!("{:?}", self.name))
+        Some(self.name.0.clone())
     }
 
     fn inventory_mut(&mut self) -> &mut Inventory {
@@ -171,7 +174,7 @@ impl Entity for Mob {
         &mut self.rng
     }
 
-    fn send_image(&mut self, _: Image) { /* do nothing, mobs don't care about images */
+    fn send_display(&mut self, _: Image) { /* do nothing, mobs don't care about images */
     }
     fn send_text(&mut self, _: String) { /* do nothing, mobs don't care about text */
     }
@@ -205,4 +208,6 @@ impl Entity for Mob {
         let rand = self.rng().gen_range(0, len);
         Some(self.quotes.player_victory[rand].clone())
     }
+
+    fn send_image(&mut self, _: String) {}
 }

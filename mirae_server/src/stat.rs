@@ -106,7 +106,7 @@ impl Stat {
         let max_energy = self
             .get("max_energy", g)
             .expect("max_energy should be a stat");
-        let new_energy = (self.health + delta).min(max_energy);
+        let new_energy = (self.energy + delta).min(max_energy);
         if new_energy < 0.0 {
             return Err(anyhow!("not enough energy!"));
         }

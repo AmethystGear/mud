@@ -11,13 +11,14 @@ use crate::{
 };
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use serde_jacl::de::from_str;
 use std::{
     collections::{HashMap, HashSet},
+    fmt::Debug,
     fs,
     hash::Hash,
-    path::Path, fmt::Debug,
+    path::Path,
 };
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct DmgType(String);
@@ -34,7 +35,7 @@ impl DmgType {
         if g.dmg.contains(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.dmg)))
+            Err(anyhow!(format!("{} is not a damage type", val.0)))
         }
     }
 }
@@ -54,7 +55,7 @@ impl StatType {
         if g.stat.contains(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.stat)))
+            Err(anyhow!(format!("{} is not a stat", val.0)))
         }
     }
 }
@@ -98,13 +99,17 @@ impl BiomeName {
         if g.biomes.name_to_item.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.biomes.name_to_item.keys())))
+            Err(anyhow!(format!(
+                "{:?} not in {:?}",
+                val,
+                g.biomes.name_to_item.keys()
+            )))
         }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ItemName(String);
+pub struct ItemName(pub String);
 
 impl From<String> for ItemName {
     fn from(s: String) -> Self {
@@ -118,13 +123,13 @@ impl ItemName {
         if g.items.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.items.keys())))
+            Err(anyhow!(format!("{} is not an item", val.0)))
         }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MobName(String);
+pub struct MobName(pub String);
 
 impl From<String> for MobName {
     fn from(s: String) -> Self {
@@ -162,7 +167,11 @@ impl BlockName {
         if g.blocks.name_to_item.contains_key(&val) {
             Ok(val)
         } else {
-            Err(anyhow!(format!("{:?} not in {:?}", val, g.blocks.name_to_item.keys())))
+            Err(anyhow!(format!(
+                "{:?} not in {:?}",
+                val,
+                g.blocks.name_to_item.keys()
+            )))
         }
     }
 }
@@ -348,6 +357,8 @@ impl GameData {
             MobU16(0),
             MobU16::empty(),
         )?;
+
+        let mut images_to_load = HashSet::new();
         for i in 0..mob_templates.max_id.0 {
             let mob_name = mob_templates
                 .id_to_name
@@ -357,6 +368,8 @@ impl GameData {
                 .name_to_item
                 .get(&mob_name)
                 .ok_or(anyhow!("invalid mob name"))?;
+
+            images_to_load.insert(mob_template.display_img.clone());
 
             if !img_to_img_id.contains_key(&mob_template.display) {
                 img_to_img_id.insert(mob_template.display.clone(), id);
@@ -373,6 +386,14 @@ impl GameData {
             img_id_to_img.insert(format!("{}", v), k);
         }
 
+        let images_to_load: Vec<String> = images_to_load.into_iter().collect();
+
+        #[derive(Serialize)]
+        struct Content {
+            img_id_to_img: HashMap<String, String>,
+            images_to_load: Vec<String>,
+        }
+
         Ok(GameData {
             terrain,
             dmg,
@@ -384,7 +405,11 @@ impl GameData {
             structures,
             init_packet: Packet {
                 p_type: PacketType::Init,
-                content: serde_json::to_string(&img_id_to_img)?.into_bytes(),
+                content: serde_json::to_string(&Content {
+                    img_id_to_img,
+                    images_to_load,
+                })?
+                .into_bytes(),
             },
             mob_id_to_img_id,
         })

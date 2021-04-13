@@ -128,14 +128,21 @@ impl Entity for Player {
         &mut self.rng
     }
 
-    fn send_image(&mut self, i: Image) {
+    fn send_display(&mut self, i: Image) {
         let mut p_out = PlayerOut::new();
-        p_out.append_img(i);
+        p_out.append_display(i);
         self.sender.send((p_out, None)).unwrap();
     }
+
     fn send_text(&mut self, s: String) {
         let mut p_out = PlayerOut::new();
         p_out.append_text(s);
+        self.sender.send((p_out, None)).unwrap();
+    }
+
+    fn send_image(&mut self, s: String) {
+        let mut p_out = PlayerOut::new();
+        p_out.append_img(s);
         self.sender.send((p_out, None)).unwrap();
     }
 

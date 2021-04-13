@@ -392,10 +392,11 @@ fn step(mut data: ActionData) -> Result<()> {
     if let Ok(mob) = data.world.get_mob_at_mut(player.loc().clone(), data.g) {
         data.battle_map.init_battle(Box::new(player), Box::new(mob), data.g)?;
         let mob_name = mob.name().unwrap();
-        player.send_text(format!("the {} is wearing:\n{}\n", mob_name , mob.worn().to_string()));
-        player.send_text(format!("the {} has {} equipped.\n",  mob_name, mob.equipped().to_string()));
-        player.send_text(format!("the {}'s inventory is:\n{}\n",  mob_name, mob.inventory().to_string()));
+        player.send_text(format!("{} is wearing {}\n", mob_name , mob.worn().to_string()));
+        player.send_text(format!("{} has {} equipped.\n",  mob_name, mob.equipped().to_string()));
+        player.send_text(format!("{}'s inventory is {}\n",  mob_name, mob.inventory().to_string()));
         player.send_text(format!("{}: {}\n", mob_name, mob.entrance().unwrap()));
+        player.send_image(mob.display_img.clone());
     }
     Ok(())
 }
@@ -413,7 +414,7 @@ fn map(data: ActionData) -> Result<()> {
     let resolution = min_resolution.max((data.world.blocks().dim.x() as usize) / (max_map_size));
     let img = Image::new(data.world, data.players, data.g, &bounds, resolution)?;
     let player = get_mut(data.players, data.player_id)?;
-    player.send_image(img);
+    player.send_display(img);
     Ok(())
 }
 
@@ -423,7 +424,7 @@ fn disp(data: ActionData) -> Result<()> {
     let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, data.world.blocks().dim);
     let img = Image::new(data.world, data.players, data.g, &bounds, 1)?;
     let player = get_mut(data.players, data.player_id)?;
-    player.send_image(img);
+    player.send_display(img);
     Ok(())
 }
 
@@ -573,9 +574,10 @@ fn run(data: ActionData) -> Result<()> {
 
         if let Some(x) = opp.run() {
             player.send_text(format!("{}: \"{}\"\n", opp.name().unwrap(), x));
+            player.send_image("none".into());
         }
     }
-
+    
     data.battle_map
         .end_battle(ID::player(data.player_id))
         .map_err(|_| anyhow!("you aren't fighting anything"))

@@ -25,12 +25,14 @@
     )
     stats : {
         "max_health" : 4
-        "max_energy" : 10
+        "max_energy" : 5
         "energy_regen" : 1
         "health_regen" : 1
         "speed" : 1
         "agression" : 1
     }
+    display : "faceman.png"
+    display_img : "faceman_full.png"
 )
 
 "pirate_knight" : (
@@ -104,6 +106,7 @@
         "agression" : 1
     }
     display : "chest.png"
+    display_img : "none"
 )
 
 "decent_chest" : (
@@ -111,6 +114,7 @@
         "agression" : 1
     }
     display : "chest.png"
+    display_img : "none"
 )
 
 "awesome_chest" : (
@@ -118,31 +122,14 @@
         "agression" : 1
     }
     display : "chest.png"
+    display_img : "none"
 )
 
 "pickle_monster" : (
     quotes: (
         entrance : ["Hey there mister, wanna tickle my pickle?" "Tickle my pickle, it'll only cost a nickel"]
-        attack : ["Whats the dill, man" "You're in a bit of a pickle aren't you" "The left wants to tickle your pickle"]
-        run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
-        player_victory : ["Eaaaughgah"]
-        mob_victory : ["Thanks for tickling my pickle"]
-    )
-    drops : (
-        items : [
-            (name : "pickle_jar", prob : 0.25, per: 1)
-        ]
-        min : 1
-        max : 1
-    )
-)
-
-"fyzyx_knite" : (
-    quotes: (
-        entrance : ["I'm so hunrable"]
         mob_attack : [ 
-            "Hey there mister, wanna tickle my pickle?" 
-            "Tickle my pickle, it'll only cost a nickel" 
+            "The Left wants to tickle your pickle"
             "Whats the dill, man" 
             "You're in a bit of a pickle aren't you"
         ]
@@ -151,11 +138,69 @@
         mob_victory : ["Thanks for tickling my pickle"]
     )
 
-    drops : (
+    tools : (
         items : [
-            (name : "pickle_jar", prob : 0.25, per: 1)
+            (name : "pickle_sword", prob : 0.85, per: 1)
         ]
         min : 1
         max : 1
     )
+
+    drops : (
+        items : [
+            (name : "pickle_jar", prob : 0.1, per: 1)
+            (name : "pickle_sword", prob : 0.1, per: 1)
+        ]
+        min : 1
+        max : 1
+    )
+    stats : {
+        "max_health" : 15
+        "max_energy" : 15
+        "energy_regen" : 1
+        "health_regen" : 1
+        "speed" : 1
+        "agression" : 1
+    }
+    display_img : "none"
+)
+
+"fyzyx_knite" : (
+    quotes: (
+        entrance : ["I'm so hunrable"]
+        mob_attack : [ 
+            "The Left wants to tickle your pickle"
+            "Whats the dill, man" 
+            "You're in a bit of a pickle aren't you"
+        ]
+        player_run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
+        player_victory : ["Eaaaughgah"]
+        mob_victory : ["Thanks for tickling my pickle"]
+    )
+
+    tools : (
+        items : [
+            (name : "pickle_sword", prob : 0.85, per: 1)
+        ]
+        min : 1
+        max : 1
+    )
+
+    drops : (
+        items : [
+            (name : "pickle_jar", prob : 0.1, per: 1)
+            (name : "pickle_sword", prob : 0.1, per: 1)
+        ]
+        min : 1
+        max : 1
+    )
+    stats : {
+        "max_health" : 15
+        "max_energy" : 15
+        "energy_regen" : 1
+        "health_regen" : 1
+        "speed" : 1
+        "agression" : 1
+    }
+    display_img : "none"
 )

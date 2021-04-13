@@ -120,6 +120,8 @@ pub struct MobTemplateDeser {
     stats: HashMap<String, f64>,
     #[serde(default = "default_jpg_str")]
     display: String,
+    #[serde(default = "default_jpg_str")]
+    display_img: String,
 }
 
 #[derive(Debug, Clone)]
@@ -132,6 +134,7 @@ pub struct MobTemplate {
     pub drops: InventoryBuilder,
     pub stats: Stat,
     pub display: String,
+    pub display_img: String,
 }
 
 impl MobTemplateDeser {
@@ -156,6 +159,7 @@ impl MobTemplateDeser {
             drops: self.drops.into_inventorybuilder(item_names)?,
             stats: Stat::new(base, stat_types)?,
             display: self.display,
+            display_img: self.display_img,
         })
     }
 }

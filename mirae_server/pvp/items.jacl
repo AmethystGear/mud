@@ -697,9 +697,16 @@ and make the greatest comeback ever seen in history!!"
             remove_items : {
                 "heart_of_trump" : 1
             }
-            health : -5
+            health : -4
             damage : {
-                "psychological" : 10
+                "psychological" : 7
+            }
+        )
+        "throw" : (
+            destroy_item : true,
+            energy : -2
+            damage : {
+                "psychological" : 4
             }
         )
     }
@@ -836,3 +843,30 @@ and make the greatest comeback ever seen in history!!"
 
 "pickle_jar" : ()
 
+"pickle" : (
+    abilities : {
+        "eat" : (
+            health : 2
+        )
+    }
+)
+
+"pickle_sword" : (
+    equipable : true
+    abilities : {
+        "summon_pickles" : (
+            energy : -1
+            make_items : {
+                "pickle" : 2
+            }
+        )
+
+        "pickle_strike" : (
+            health : 1
+            energy : -3
+            damage : {
+                "physical" : 4
+            }
+        )
+    }
+)

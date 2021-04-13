@@ -35,7 +35,8 @@ pub trait Entity {
     fn loc_mut(&mut self) -> &mut Vector3;
     fn set_xp(&mut self, xp: i64);
     fn send_text(&mut self, str: String);
-    fn send_image(&mut self, img: Image);
+    fn send_display(&mut self, img: Image);
+    fn send_image(&mut self, s : String);
     fn rng(&mut self) -> &mut StdRng;
 
     fn entrance(&mut self) -> Option<String>;
@@ -168,20 +169,6 @@ pub trait Entity {
         self.set_xp(self.xp() - ability.xp_cost);
         self.stats_mut().change_energy(ability.energy, g)?;
         self.stats_mut().change_health(ability.health, g);
-        // tell the player what happened to their health and energy levels
-        self.print_stat(
-            "health",
-            ability.health,
-            self.stats().health(),
-            self.stats().get("max_health", g)?,
-        );
-        self.print_stat(
-            "energy",
-            ability.energy,
-            self.stats().energy(),
-            self.stats().get("max_energy", g)?,
-        );
-
         self.inventory_mut().remove_items(&ability.remove_items)?;
         self.inventory_mut().add_items(&ability.make_items);
         if ability.destroy_item {
@@ -339,19 +326,6 @@ pub trait Entity {
                 res = self.try_random_move(None, battle_map, g, &mut rng);
             }
         }
-    }
-
-    fn print_stat(&mut self, stat_name: &str, stat_delta: f64, stat_val: f64, stat_max: f64) {
-        if let Some(dir) = dir(stat_delta) {
-            self.send_text(format!(
-                "due to this ability, your {} {} by: {}\n",
-                stat_name, dir, stat_delta
-            ));
-        }
-        self.send_text(format!(
-            "your {} is now {}/{}\n",
-            stat_name, stat_val, stat_max
-        ));
     }
 }
 

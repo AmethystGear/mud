@@ -291,7 +291,6 @@ impl BattleMap {
         }
 
         entity.stats_mut().change_health(-total_dmg, g);
-        entity.send_text(format!("your health is now {}/{}", entity.stats().health(), entity.stats().get("max_health", g)?));
 
         let mut stunned = false;
         for (se, _) in &status_effects {
@@ -338,6 +337,51 @@ impl BattleMap {
             .status_effects
             .retain(|(_, num_turns)| *num_turns != 0);
 
+        Ok(())
+    }
+
+    fn report_single_stats(
+        a: Box<&mut dyn Entity>,
+        b: Box<&mut dyn Entity>,
+        opponent: bool,
+        g: &GameData,
+    ) -> Result<()> {
+        let opponent_text = if opponent { " opponent's " } else { " " };
+        let (health, max_health, energy, max_energy) = if opponent {
+            (
+                b.stats().health(),
+                b.stats().get("max_health", g)?,
+                b.stats().energy(),
+                b.stats().get("max_energy", g)?,
+            )
+        } else {
+            (
+                a.stats().health(),
+                a.stats().get("max_health", g)?,
+                a.stats().energy(),
+                a.stats().get("max_energy", g)?,
+            )
+        };
+        a.send_text(format!(
+            "your{}health is now {}/{}\n",
+            opponent_text,
+            health,
+            max_health
+        ));
+        a.send_text(format!(
+            "your{}energy is now {}/{}\n",
+            opponent_text,
+            energy,
+            max_energy
+        ));
+        Ok(())
+    }
+
+    fn report_stats(a: Box<&mut dyn Entity>, b: Box<&mut dyn Entity>, g: &GameData) -> Result<()> {
+        BattleMap::report_single_stats(Box::new(*a), Box::new(*b), false, g)?;
+        BattleMap::report_single_stats(Box::new(*a), Box::new(*b), true, g)?;
+        BattleMap::report_single_stats(Box::new(*b), Box::new(*a), false, g)?;
+        BattleMap::report_single_stats(Box::new(*b), Box::new(*a), true, g)?;
         Ok(())
     }
 
@@ -397,11 +441,12 @@ impl BattleMap {
         } else {
             battle_data.defense_turn = false;
             if a_turn {
-                self.handle_status_effects(a, g)?;
+                self.handle_status_effects(Box::new(*a), g)?;
             } else {
-                self.handle_status_effects(b, g)?;
+                self.handle_status_effects(Box::new(*b), g)?;
             }
         }
+        BattleMap::report_stats(a, b, g)?;
         Ok(())
     }
 
