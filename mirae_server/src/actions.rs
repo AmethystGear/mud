@@ -13,7 +13,10 @@ use crate::{
 use anyhow::{anyhow, Result};
 use rand::Rng;
 use serde_jacl::structs::{Literal, Number};
-use std::collections::{HashSet, VecDeque};
+use std::{
+    collections::{HashSet, VecDeque},
+    sync::{Arc, RwLock},
+};
 
 const BAD_ARGS: &str =
     "bad arguments to command, try help <command> to see how to use it correctly";
@@ -113,14 +116,18 @@ pub fn get_two(a: usize, b: usize, players: &Vec<Option<Player>>) -> Result<(&Pl
 pub struct ActionData<'a> {
     pub params: VecDeque<Literal>,
     pub player_id: usize,
-    pub players: &'a mut Vec<Option<Player>>,
-    pub world: &'a mut World,
-    pub battle_map: &'a mut BattleMap,
+    pub players: Arc<RwLock<Vec<Option<Player>>>>,
+    pub world: Arc<RwLock<World>>,
+    pub battle_map: Arc<RwLock<BattleMap>>,
     pub g: &'a GameData,
 }
 
 fn use_ability(mut data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     let ability_name;
     data.params.pop_front(); // ignore the first parameter
     match data.params.pop_front() {
@@ -158,27 +165,43 @@ fn use_ability(mut data: ActionData) -> Result<()> {
     // CODE DUPLICATION WITH EAT, FIX LATER
     let ability = ability.clone();
     let player_id = ID::player(data.player_id);
-    if let Ok(opponent) = data.battle_map.get_opponent(player_id) {
-        if data.battle_map.turn(opponent)? {
+    let mut battle_map = data
+        .battle_map
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let mut world = data
+        .world
+        .write()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+    if let Ok(opponent) = battle_map.get_opponent(player_id) {
+        if battle_map.turn(opponent)? {
             Err(anyhow!("it's not your turn!"))
         } else {
             let (player, opp) =
-                get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            player.run_ability(Some(opp), data.battle_map, ability, Some(item_name), data.g)?;
+            player.run_ability(Some(opp), &mut battle_map, ability, Some(item_name), data.g)?;
 
             let (player, opp) =
-                get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            data.battle_map.do_turn(Box::new(player), opp, data.g)
+            battle_map.do_turn(Box::new(player), opp, data.g)
         }
     } else {
-        player.run_ability(None, data.battle_map, ability, Some(item_name), data.g)
+        player.run_ability(None, &mut battle_map, ability, Some(item_name), data.g)
     }
 }
 
 fn eat(mut data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     let item_name;
     let amount;
     data.params.pop_front(); // ignore the first parameter
@@ -197,24 +220,35 @@ fn eat(mut data: ActionData) -> Result<()> {
         }
         _ => return Err(anyhow!(BAD_ARGS)),
     };
-
+    let mut battle_map = data
+        .battle_map
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let mut world = data
+        .world
+        .write()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
     let player_id = ID::player(data.player_id);
-    if let Ok(opponent) = data.battle_map.get_opponent(player_id) {
-        if data.battle_map.turn(opponent)? {
+    if let Ok(opponent) = battle_map.get_opponent(player_id) {
+        if battle_map.turn(opponent)? {
             Err(anyhow!("it's not your turn!"))
         } else {
             let (player, opp) =
-                get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            player.eat(Some(opp), data.battle_map, &item_name, amount, data.g)?;
+            player.eat(Some(opp), &mut battle_map, &item_name, amount, data.g)?;
 
             let (player, opp) =
-                get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            data.battle_map.do_turn(Box::new(player), opp, data.g)
+            battle_map.do_turn(Box::new(player), opp, data.g)
         }
     } else {
-        player.eat(None, data.battle_map, &item_name, amount, data.g)
+        player.eat(None, &mut battle_map, &item_name, amount, data.g)
     }
 }
 
@@ -299,17 +333,20 @@ fn get_step(
 
 const MAX_MOVE_SPEED: i64 = 10;
 fn step(mut data: ActionData) -> Result<()> {
-    if data
+    let battle_map = data
         .battle_map
-        .get_opponent(ID::player(data.player_id))
-        .is_ok()
-    {
+        .read()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+    if battle_map.get_opponent(ID::player(data.player_id)).is_ok() {
         return Err(anyhow!(
             "you can't move while fighting something, try using \"run\""
         ));
     }
-
-    let player = get(data.players, data.player_id)?;
+    let players = data
+        .players
+        .read()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get(&players, data.player_id)?;
     let move_speed = (player.stats().get("speed", data.g)?.round() as i64).min(MAX_MOVE_SPEED);
     let m = match (data.params.pop_front(), data.params.pop_front()) {
         (Some(Literal::String(s)), None) => match s.as_str() {
@@ -346,55 +383,95 @@ fn step(mut data: ActionData) -> Result<()> {
         _ => Err(anyhow!(BAD_ARGS)),
     }?;
 
-    let curr = *player.loc();
-    let mut get_step = |dir, num_units| get_step(data.world, data.g, curr, dir, num_units);
-    let new_posn = match m {
-        Move::X(num_units) => get_step(Vector3::new(1, 0, 0), num_units as isize),
-        Move::Y(num_units) => get_step(Vector3::new(0, 1, 0), num_units as isize),
-        Move::Z(down) => {
-            if down {
-                if curr.z() == data.world.blocks().dim.z() - 1 {
-                    Err(anyhow!("cannot move down, already at bottom layer"))
-                } else {
-                    let block_filter = |x: &Block| !x.z_passable;
-                    let closest_z_passable =
-                        find_closest_block(data.world, data.g, curr, &block_filter, 1)?;
+    // TODO: make get_step not need mutable world by using 
+    // mobtemplate instead of the actual mob
+    let mut world = data
+        .world
+        .write()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
 
-                    let below = closest_z_passable + Vector3::new(0, 0, 1);
-                    let block_filter = |x: &Block| !x.solid;
-                    find_closest_block(data.world, data.g, below, &block_filter, u64::MAX)
-                }
-            } else {
-                if curr.z() == 0 {
-                    Err(anyhow!("cannot move up, already at top layer"))
-                } else {
-                    let above = curr - Vector3::new(0, 0, 1);
-                    if !(data
-                        .world
-                        .get_block(data.g, data.world.blocks().index(above)?)?
-                        .z_passable)
-                    {
-                        Err(anyhow!(
-                            "you cannot ascend, there are solid blocks above you"
-                        ))
+    let new_posn = {
+        let curr = *player.loc();
+        match m {
+            Move::X(num_units) => {
+                let dir = Vector3::new(1, 0, 0);
+                let num_units = num_units as isize;
+                get_step(&mut world, data.g, curr, dir, num_units)
+            },
+            Move::Y(num_units) => {
+                let dir = Vector3::new(0, 1, 0);
+                let num_units = num_units as isize;
+                get_step(&mut world, data.g, curr, dir, num_units)
+            },
+            Move::Z(down) => {
+                if down {
+                    if curr.z() == world.blocks().dim.z() - 1 {
+                        Err(anyhow!("cannot move down, already at bottom layer"))
                     } else {
+                        let block_filter = |x: &Block| !x.z_passable;
+                        let closest_z_passable =
+                            find_closest_block(&world, data.g, curr, &block_filter, 1)?;
+
+                        let below = closest_z_passable + Vector3::new(0, 0, 1);
                         let block_filter = |x: &Block| !x.solid;
-                        find_closest_block(data.world, data.g, above, &block_filter, u64::MAX)
+                        find_closest_block(&world, data.g, below, &block_filter, u64::MAX)
+                    }
+                } else {
+                    if curr.z() == 0 {
+                        Err(anyhow!("cannot move up, already at top layer"))
+                    } else {
+                        let above = curr - Vector3::new(0, 0, 1);
+                        if !(world
+                            .get_block(data.g, world.blocks().index(above)?)?
+                            .z_passable)
+                        {
+                            Err(anyhow!(
+                                "you cannot ascend, there are solid blocks above you"
+                            ))
+                        } else {
+                            let block_filter = |x: &Block| !x.solid;
+                            find_closest_block(&world, data.g, above, &block_filter, u64::MAX)
+                        }
                     }
                 }
             }
-        }
-    }?;
-    let player = get_mut(data.players, data.player_id)?;
+        }?
+    };
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     player.return_posn = player.loc().clone();
     player.loc_mut().set(new_posn);
     player.send_text(format!("moved to: {:?}\n", player.loc()));
-    if let Ok(mob) = data.world.get_mob_at_mut(player.loc().clone(), data.g) {
-        data.battle_map.init_battle(Box::new(player), Box::new(mob), data.g)?;
+    if world.has_mob(*player.loc())? {
+        let mut world = data
+            .world
+            .write()
+            .map_err(|_| anyhow!("couldn't lock world"))?;
+        let mut battle_map = data
+            .battle_map
+            .write()
+            .map_err(|_| anyhow!("couldn't lock battle map"))?;
+        let mob = world.get_mob_at_mut(*player.loc(), data.g)?;
+        battle_map.init_battle(Box::new(player), Box::new(mob), data.g)?;
         let mob_name = mob.name().unwrap();
-        player.send_text(format!("{} is wearing {}\n", mob_name , mob.worn().to_string()));
-        player.send_text(format!("{} has {} equipped.\n",  mob_name, mob.equipped().to_string()));
-        player.send_text(format!("{}'s inventory is {}\n",  mob_name, mob.inventory().to_string()));
+        player.send_text(format!(
+            "{} is wearing {}\n",
+            mob_name,
+            mob.worn().to_string()
+        ));
+        player.send_text(format!(
+            "{} has {} equipped.\n",
+            mob_name,
+            mob.equipped().to_string()
+        ));
+        player.send_text(format!(
+            "{}'s inventory is {}\n",
+            mob_name,
+            mob.inventory().to_string()
+        ));
         player.send_text(format!("{}: {}\n", mob_name, mob.entrance().unwrap()));
         player.send_image(mob.display_img.clone());
     }
@@ -402,34 +479,54 @@ fn step(mut data: ActionData) -> Result<()> {
 }
 
 fn map(data: ActionData) -> Result<()> {
-    let posn = *(get(data.players, data.player_id)?.loc());
+    let world = data
+        .world
+        .read()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let posn = *(get(&players, data.player_id)?.loc());
     let bounds = Bounds::get_bounds(
-        data.world,
+        &world,
         Vector3::new(0, 0, posn.z()),
-        data.world.blocks().dim.x() as usize,
-        data.world.blocks().dim.y() as usize,
+        world.blocks().dim.x() as usize,
+        world.blocks().dim.y() as usize,
     );
     let max_map_size = 100;
     let min_resolution = 2;
-    let resolution = min_resolution.max((data.world.blocks().dim.x() as usize) / (max_map_size));
-    let img = Image::new(data.world, data.players, data.g, &bounds, resolution)?;
-    let player = get_mut(data.players, data.player_id)?;
+    let resolution = min_resolution.max((world.blocks().dim.x() as usize) / (max_map_size));
+    let img = Image::new(&world, &players, data.g, &bounds, resolution)?;
+    let player = get_mut(&mut players, data.player_id)?;
     player.send_display(img);
     Ok(())
 }
 
 const VIEW_DIST: usize = 5;
 fn disp(data: ActionData) -> Result<()> {
-    let posn = *(get(data.players, data.player_id)?.loc());
-    let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, data.world.blocks().dim);
-    let img = Image::new(data.world, data.players, data.g, &bounds, 1)?;
-    let player = get_mut(data.players, data.player_id)?;
+    let mut world = data
+        .world
+        .read()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let posn = *(get(&players, data.player_id)?.loc());
+    let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, world.blocks().dim);
+    let img = Image::new(&mut world, &players, data.g, &bounds, 1)?;
+    let player = get_mut(&mut players, data.player_id)?;
     player.send_display(img);
     Ok(())
 }
 
 fn inv(data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     player.send_text("here's what's in your inventory:\n".into());
     let inv = player.inventory().to_string();
     player.send_text(format!("{}\n", inv));
@@ -437,7 +534,11 @@ fn inv(data: ActionData) -> Result<()> {
 }
 
 fn equip(mut data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     match (data.params.pop_front(), data.params.pop_front()) {
         (Some(Literal::String(s)), None) => match s.as_str() {
             "dequip" => {
@@ -464,7 +565,11 @@ fn equip(mut data: ActionData) -> Result<()> {
 }
 
 fn wear(mut data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     match (data.params.pop_front(), data.params.pop_front()) {
         (Some(Literal::String(s)), None) => match s.as_str() {
             "unwear" => {
@@ -495,6 +600,11 @@ fn wear(mut data: ActionData) -> Result<()> {
 }
 
 fn upgrade(mut data: ActionData) -> Result<()> {
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
     data.params.pop_front(); // ignore the first parameter
 
     let stat;
@@ -502,7 +612,7 @@ fn upgrade(mut data: ActionData) -> Result<()> {
         Some(Literal::String(s)) => stat = s,
         _ => return Err(anyhow!(BAD_ARGS)),
     }
-    let player = get_mut(data.players, data.player_id)?;
+    let player = get_mut(&mut players, data.player_id)?;
     let val = player.stats().get(stat.clone(), data.g)? as i64;
     if player.xp() < val * 100 {
         return Err(anyhow!(
@@ -519,25 +629,30 @@ fn upgrade(mut data: ActionData) -> Result<()> {
 
 const BATTLE_DIST: f64 = 10.0;
 fn battle(data: ActionData) -> Result<()> {
-    if data
+    let mut battle_map = data
         .battle_map
-        .get_opponent(ID::player(data.player_id))
-        .is_ok()
-    {
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    if battle_map.get_opponent(ID::player(data.player_id)).is_ok() {
         return Err(anyhow!("you are already fighting something"));
     }
 
     let battle_dist_sqr = BATTLE_DIST * BATTLE_DIST;
-    let player_loc = get(data.players, data.player_id)?.loc().clone();
+    let player_loc = get(&players, data.player_id)?.loc().clone();
     let mut opponent_id = None;
-    for i in 0..data.players.len() {
-        let player = &mut data.players[i];
+    for i in 0..players.len() {
+        let player = &mut players[i];
         if i == data.player_id {
             continue;
         }
         if let Some(player) = player.as_mut() {
             if (player.loc().clone() - player_loc).sqr_mag() < battle_dist_sqr
-                && data.battle_map.get_opponent(ID::player(i)).is_err()
+                && battle_map.get_opponent(ID::player(i)).is_err()
             {
                 opponent_id = Some(i);
                 break;
@@ -546,10 +661,8 @@ fn battle(data: ActionData) -> Result<()> {
     }
 
     if let Some(opp) = opponent_id {
-        let (player, opponent) = get_two_mut(data.player_id, opp, data.players)?;
-        data.battle_map
-            .init_battle(Box::new(player), Box::new(opponent), data.g)?;
-
+        let (player, opponent) = get_two_mut(data.player_id, opp, &mut players)?;
+        battle_map.init_battle(Box::new(player), Box::new(opponent), data.g)?;
         Ok(())
     } else {
         Err(anyhow!("no player in range"))
@@ -557,7 +670,11 @@ fn battle(data: ActionData) -> Result<()> {
 }
 
 fn run(data: ActionData) -> Result<()> {
-    let player = get_mut(data.players, data.player_id)?;
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+    let player = get_mut(&mut players, data.player_id)?;
     let num_honour = player
         .inventory()
         .get(&ItemName::checked_from("honour".into(), data.g)?);
@@ -568,27 +685,48 @@ fn run(data: ActionData) -> Result<()> {
     let posn = player.return_posn.clone();
     player.loc_mut().set(posn);
 
-    if let Ok(opponent) = data.battle_map.get_opponent(ID::player(data.player_id)) {
+    let mut battle_map = data
+        .battle_map
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+
+    if let Ok(opponent) = battle_map.get_opponent(ID::player(data.player_id)) {
+        let mut world = data
+            .world
+            .write()
+            .map_err(|_| anyhow!("couldn't lock world"))?;
         let (player, opp) =
-            get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+            get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
         if let Some(x) = opp.run() {
             player.send_text(format!("{}: \"{}\"\n", opp.name().unwrap(), x));
             player.send_image("none".into());
         }
     }
-    
-    data.battle_map
+
+    battle_map
         .end_battle(ID::player(data.player_id))
         .map_err(|_| anyhow!("you aren't fighting anything"))
 }
 
-fn pass(data : ActionData) -> Result<()> {
-    if let Ok(opponent) = data.battle_map.get_opponent(ID::player(data.player_id)) {
+fn pass(data: ActionData) -> Result<()> {
+    let mut battle_map = data
+        .battle_map
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+    if let Ok(opponent) = battle_map.get_opponent(ID::player(data.player_id)) {
+        let mut players = data
+            .players
+            .write()
+            .map_err(|_| anyhow!("couldn't lock players"))?;
+        let mut world = data
+            .world
+            .write()
+            .map_err(|_| anyhow!("couldn't lock world"))?;
         let (player, opp) =
-            get_player_and_opponent(opponent, data.players, data.player_id, data.world)?;
+            get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-        data.battle_map.do_turn(Box::new(player), opp, data.g)
+        battle_map.do_turn(Box::new(player), opp, data.g)
     } else {
         Err(anyhow!("you aren't fighting anything"))
     }

@@ -10,7 +10,7 @@ use io::BufRead;
 use mpsc::{Sender, TryRecvError};
 use player::Player;
 use playerout::PlayerOut;
-use rand::{thread_rng, Rng};
+use rand::{thread_rng, Rng, SeedableRng};
 use serde_jacl::{
     de::from_str,
     structs::{Literal, Number},
@@ -20,7 +20,7 @@ use std::{
     env, fs, io,
     iter::FromIterator,
     net::TcpStream,
-    sync::{mpsc, Arc, Mutex},
+    sync::{mpsc, Arc, RwLock},
     thread::spawn,
     time::Instant,
 };
@@ -172,8 +172,8 @@ fn init() -> Result<(GameData, World)> {
 }
 
 fn handle_server_commands(
-    world: Arc<Mutex<World>>,
-    players: Arc<Mutex<Vec<Option<Player>>>>,
+    world: Arc<RwLock<World>>,
+    players: Arc<RwLock<Vec<Option<Player>>>>,
     g: &GameData,
 ) -> Result<()> {
     let mut commands: HashMap<String, &ServerCommand> = HashMap::new();
@@ -187,9 +187,9 @@ fn handle_server_commands(
         let res = match params.pop_front() {
             Some(Literal::String(s)) => {
                 if let Some(func) = commands.get(&s) {
-                    let world = world.lock().map_err(|_| anyhow!("couldn't lock world"))?;
+                    let world = world.read().map_err(|_| anyhow!("couldn't lock world"))?;
                     let players = players
-                        .lock()
+                        .read()
                         .map_err(|_| anyhow!("couldn't lock players"))?;
                     func(params, &world, &players, g)
                 } else {
@@ -237,33 +237,31 @@ fn main() -> Result<()> {
 
     let battle_map = BattleMap::new();
     let g = Arc::new(g);
-    let world = Arc::new(Mutex::new(world));
-    let players = Arc::new(Mutex::new(players));
-    let battle_map = Arc::new(Mutex::new(battle_map));
+    let world = Arc::new(RwLock::new(world));
+    let players = Arc::new(RwLock::new(players));
+    let battle_map = Arc::new(RwLock::new(battle_map));
 
     let g_arc = Arc::clone(&g);
     let world_arc = Arc::clone(&world);
     let players_arc = Arc::clone(&players);
     let battle_map_arc = Arc::clone(&battle_map);
     spawn(move || {
+        let mut rng = SeedableRng::seed_from_u64(thread_rng().gen());
         loop {
             let res: Result<ConnA, TryRecvError> = recv.try_recv();
             match res {
                 Ok(res) => {
                     // we have input from a player, handle it
-                    let mut world = world_arc.lock().unwrap();
-                    let mut players = players_arc.lock().unwrap();
-                    let mut battle_map = battle_map_arc.lock().unwrap();
                     match res {
                         ConnA::Init(s) => {
+                            let mut players = players_arc.write().unwrap();
                             let sender = s.clone();
                             let id = get_first_availible_id(&players);
                             if let Some(id) = id {
                                 let mut p_out = PlayerOut::new();
                                 p_out.add_pkt(g_arc.init_packet.clone());
                                 sender.send((p_out, Some(id))).unwrap();
-                                let player =
-                                    Player::new(id, sender, &g_arc, &mut world.rng).unwrap();
+                                let player = Player::new(id, sender, &g_arc, &mut rng).unwrap();
 
                                 players[id] = Some(player);
                             } else {
@@ -278,24 +276,30 @@ fn main() -> Result<()> {
                             let action_data = ActionData {
                                 params,
                                 player_id,
-                                world: &mut world,
+                                world: world_arc.clone(),
+                                battle_map: battle_map_arc.clone(),
+                                players: players_arc.clone(),
                                 g: &g_arc,
-                                battle_map: &mut battle_map,
-                                players: &mut players,
                             };
                             let res = dispatch(action_data);
                             if let Err(res) = res {
+                                let mut players = players_arc.write().unwrap();
                                 let mut p_out = PlayerOut::new();
                                 p_out.append_err(res);
                                 players[player_id]
                                     .as_mut()
                                     .unwrap()
                                     .sender
+                                    .lock()
+                                    .unwrap()
                                     .send((p_out, None))
                                     .unwrap();
                             }
                         }
                         ConnA::Quit(player_id) => {
+                            let mut battle_map = battle_map_arc.write().unwrap();
+                            let mut players = players_arc.write().unwrap();
+                            let mut world = world_arc.write().unwrap();
                             if let Ok(opponent) = battle_map.get_opponent(ID::player(player_id)) {
                                 let entity =
                                     get_entity(opponent, &mut players, &mut world).unwrap();
@@ -308,9 +312,9 @@ fn main() -> Result<()> {
                 }
                 Err(_) => {
                     /*no input to handle, do any world logic */
-                    let mut world = world_arc.lock().unwrap();
-                    let mut players = players_arc.lock().unwrap();
-                    let mut battle_map = battle_map_arc.lock().unwrap();
+                    let mut world = world_arc.write().unwrap();
+                    let mut players = players_arc.write().unwrap();
+                    let mut battle_map = battle_map_arc.write().unwrap();
 
                     let active_battles: Vec<BattleHandle> = battle_map.battles().cloned().collect();
                     for battle_handle in &active_battles {

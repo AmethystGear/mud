@@ -12,7 +12,7 @@ use crate::{
     vector3::Vector3,
 };
 use rand::{prelude::StdRng, SeedableRng, Rng};
-use std::{collections::HashMap, sync::mpsc::Sender};
+use std::{collections::HashMap, sync::{Mutex, mpsc::Sender}};
 use anyhow::Result;
 
 pub struct Player {
@@ -26,7 +26,7 @@ pub struct Player {
     rng: StdRng,
     xp: i64,
     pub return_posn : Vector3,
-    pub sender: Sender<(PlayerOut, Option<usize>)>,
+    pub sender: Mutex<Sender<(PlayerOut, Option<usize>)>>,
 }
 
 impl Player {
@@ -45,7 +45,7 @@ impl Player {
 
         Ok(Player {
             id,
-            sender,
+            sender: Mutex::new(sender),
             inventory,
             drops: Inventory::new(),
             equip: Inventory::new(),
@@ -131,19 +131,19 @@ impl Entity for Player {
     fn send_display(&mut self, i: Image) {
         let mut p_out = PlayerOut::new();
         p_out.append_display(i);
-        self.sender.send((p_out, None)).unwrap();
+        self.sender.lock().unwrap().send((p_out, None)).unwrap();
     }
 
     fn send_text(&mut self, s: String) {
         let mut p_out = PlayerOut::new();
         p_out.append_text(s);
-        self.sender.send((p_out, None)).unwrap();
+        self.sender.lock().unwrap().send((p_out, None)).unwrap();
     }
 
     fn send_image(&mut self, s: String) {
         let mut p_out = PlayerOut::new();
         p_out.append_img(s);
-        self.sender.send((p_out, None)).unwrap();
+        self.sender.lock().unwrap().send((p_out, None)).unwrap();
     }
 
     fn id(&self) -> ID {

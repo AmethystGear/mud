@@ -485,19 +485,8 @@ impl World {
         }
     }
 
-    pub fn get_mob_at(&mut self, loc: Vector3, g: &GameData) -> Result<&Mob> {
-        // why not if let here?
-        // because that would make rust complain about self.spawn_mob
-        if self.spawned_mobs.get_at(loc).is_some() {
-            Ok(self.spawned_mobs.get_at(loc).unwrap())
-        } else {
-            if self.mob_map.get(loc)?.as_u16().is_some() {
-                self.spawn_mob(loc, g)?;
-                self.get_spawned_mob_at(loc)
-            } else {
-                Err(anyhow!(format!("no mob at location {:?}", loc)))
-            }
-        }
+    pub fn has_mob(&self, loc: Vector3) -> Result<bool> {
+        Ok(self.mob_map.get(loc)?.as_u16().is_some())
     }
 
     pub fn get_mob_at_mut(&mut self, loc: Vector3, g: &GameData) -> Result<&mut Mob> {
