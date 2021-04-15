@@ -36,7 +36,7 @@ pub trait Entity {
     fn set_xp(&mut self, xp: i64);
     fn send_text(&mut self, str: String);
     fn send_display(&mut self, img: Image);
-    fn send_image(&mut self, s : String);
+    fn send_image(&mut self, s: String);
     fn rng(&mut self) -> &mut StdRng;
 
     fn entrance(&mut self) -> Option<String>;
@@ -45,7 +45,16 @@ pub trait Entity {
     fn victory(&mut self) -> Option<String>;
     fn loss(&mut self) -> Option<String>;
 
-    fn equip(&mut self, item_name: &ItemName) -> Result<()> {
+    fn equip(&mut self, item_name: &ItemName, g: &GameData) -> Result<()> {
+        let item = g
+            .items
+            .get(item_name)
+            .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
+
+        if !item.equipable {
+            return Err(anyhow!("you cannot equip this item"));
+        }
+
         self.inventory_mut().change(item_name.clone(), -1)?;
         self.dequip();
         self.equipped_mut().add(item_name.clone(), 1);
@@ -95,6 +104,9 @@ pub trait Entity {
                 .items
                 .get(item_name)
                 .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
+            if !item.wearable {
+                return Err(anyhow!("you cannot wear this item!"));
+            }
             self.stats_mut().add_buffs(&item.buffs.stat_buffs, g);
             self.worn_mut().add(item_name.clone(), 1);
             Ok(())
@@ -260,7 +272,7 @@ pub trait Entity {
                 if let Some(opp) = opponent {
                     opp.send_text(format!("your opponent equipped {:?}\n", item_name));
                 }
-                self.equip(item_name)
+                self.equip(item_name, g)
             } else {
                 Err(anyhow!("no items to equip"))
             }
@@ -272,7 +284,14 @@ pub trait Entity {
                     .get(item_name)
                     .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
                 let item_name = item_name.clone();
-                self.do_random_ability(opponent,Some(item_name), battle_map, &item.abilities, g, rng)
+                self.do_random_ability(
+                    opponent,
+                    Some(item_name),
+                    battle_map,
+                    &item.abilities,
+                    g,
+                    rng,
+                )
             } else {
                 Err(anyhow!("no item equipped"))
             }

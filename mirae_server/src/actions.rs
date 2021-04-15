@@ -551,7 +551,7 @@ fn equip(mut data: ActionData) -> Result<()> {
         (Some(Literal::String(s1)), Some(Literal::String(s2))) => match s1.as_str() {
             "equip" => {
                 let item_name = ItemName::checked_from(s2, data.g)?;
-                player.equip(&item_name)?;
+                player.equip(&item_name, data.g)?;
             }
             _ => return Err(anyhow!(BAD_ARGS)),
         },

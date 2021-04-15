@@ -65,7 +65,7 @@ impl Mob {
         loc: Vector3,
         template: &MobTemplate,
         rng: &mut StdRng,
-        g: &GameData
+        g: &GameData,
     ) -> Result<Self> {
         let inventory = make_inventory(&template.tools, rng)?;
         let drops = make_inventory(&template.drops, rng)?;
@@ -84,12 +84,12 @@ impl Mob {
             abilities: template.abilities.clone(),
             name: template.name.clone(),
             quotes: template.quotes.clone(),
-            display_img: template.display_img.clone()
+            display_img: template.display_img.clone(),
         };
 
         let item = get_items_rand(&mob.inventory, 1, |x| x.equipable, g, rng)?;
         if let Some(item_name) = item.get(0) {
-            mob.equip(item_name)?;
+            mob.equip(item_name, g)?;
         }
 
         let items = get_items_rand(&mob.inventory, NUM_WEARS, |x| x.equipable, g, rng)?;
