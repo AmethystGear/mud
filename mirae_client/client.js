@@ -264,6 +264,7 @@ function displayImg(data) {
         }
     }
 
+    let size = 0.8
     if (numElemsEnt > 0) {
         for (let y = 0; y < (numElems / width); y++) {
             let yPx = y * blockHeight
@@ -277,10 +278,10 @@ function displayImg(data) {
                 let entityImg = initData['img_id_to_img'][entity]
                 ct.drawImage(
                     imgData[entityImg], 
-                    xPx + blockWidth * 0.05,
-                    yPx + blockWidth * 0.05,
-                    blockWidth * 0.9,
-                    blockHeight * 0.9
+                    xPx + blockWidth * (1 - size) * 0.5,
+                    yPx + blockWidth * (1 - size) * 0.5,
+                    blockWidth * size,
+                    blockHeight * size
                 )
             }
         }
