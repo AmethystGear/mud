@@ -1,5 +1,5 @@
 // all the potential types of Packets we can expect.
-const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img" : 4 })
+const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img": 4 })
 
 const MAX_PACKET_TYPE_LEN = 5
 const MAX_PACKET_SIZE_LEN = 4
@@ -181,13 +181,13 @@ function handlePacket(pkt) {
             let name = initData['img_id_to_img'][entity]
             console.log("name " + name)
             imgData[name] = new Image()
-            imgData[name].src = "resources/images/" + name
+            imgData[name].src = "resources/map_img/" + name
         }
         let arr = initData['images_to_load']
         for (var i = 0; i < arr.length; i++) {
             let name = arr[i]
             imgData[name] = new Image()
-            imgData[name].src = "resources/images/" + name
+            imgData[name].src = "resources/full_img/" + name
         }
         console.log(imgData)
     } else if (pkt.packetType === PacketTypes.Err) {
@@ -202,7 +202,13 @@ function handlePacket(pkt) {
         }
         displayingImage = true
         ct.clearRect(0, 0, canvas.width, canvas.height)
-        ct.drawImage(imgData[imgname], 0, 0, canvas.width, canvas.height)
+        if (imgData[imgname].width > imgData[imgname].height) {
+            let height = imgData[imgname].height * canvas.width / imgData[imgname].width;
+            ct.drawImage(imgData[imgname], 0, (canvas.height - height)/2, canvas.width, height);
+        } else {
+            let width = imgData[imgname].width * canvas.height / imgData[imgname].height;
+            ct.drawImage(imgData[imgname], (canvas.width - width)/2, 0, width, canvas.height);
+        }        
     }
 }
 
@@ -269,7 +275,13 @@ function displayImg(data) {
                     continue
                 }
                 let entityImg = initData['img_id_to_img'][entity]
-                ct.drawImage(imgData[entityImg], xPx, yPx, blockWidth, blockHeight)
+                ct.drawImage(
+                    imgData[entityImg], 
+                    xPx + blockWidth * 0.05,
+                    yPx + blockWidth * 0.05,
+                    blockWidth * 0.9,
+                    blockHeight * 0.9
+                )
             }
         }
     }
@@ -331,9 +343,9 @@ $(document).ready(function () {
             }
         });
 
-        setTimeout( function() {
+        setTimeout(function () {
             // auto display (10fps)
-            window.setInterval(function() {
+            window.setInterval(function () {
                 if (lastSent == "\"map\"" || displayingImage) {
                     return;
                 }

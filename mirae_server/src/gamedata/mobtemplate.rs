@@ -118,9 +118,9 @@ pub struct MobTemplateDeser {
     drops: InventoryBuilderDeser,
     #[serde(default = "empty_hmap")]
     stats: HashMap<String, f64>,
-    #[serde(default = "default_jpg_str")]
+    #[serde(default = "default_png_string")]
     display: String,
-    #[serde(default = "default_jpg_str")]
+    #[serde(default = "default_png_string")]
     display_img: String,
 }
 

@@ -33,7 +33,7 @@ pub fn empty_string() -> String {
     "".to_string()
 }
 
-pub fn default_jpg_str() -> String {
+pub fn default_png_string() -> String {
     "default.png".to_string()
 }
 

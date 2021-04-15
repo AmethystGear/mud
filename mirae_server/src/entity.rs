@@ -276,17 +276,17 @@ pub trait Entity {
             } else {
                 Err(anyhow!("no item equipped"))
             }
-        } else if random_move < 0.7 {
+        } else if random_move < 0.6 {
             // attempt to do a random inherent ability
             self.do_random_ability(opponent, None, battle_map, &self.abilities(), g, rng)
-        } else if random_move < 0.95 {
+        } else if random_move < 0.99 {
             // attempt to eat a random amount of a random item
             let filter = |x: &Item| x.abilities.contains_key("eat");
             let item = get_all_items(&self.inventory(), filter, g)?;
             if item.len() > 0 {
                 let rand_item = &item[rng.gen_range(0, item.len())];
                 let count = self.inventory().get(rand_item);
-                let num_eat = rng.gen_range(1, count.min(MAX_NUM_EAT + 1));
+                let num_eat = rng.gen_range(1, MAX_NUM_EAT + 1).min(count);
                 self.eat(opponent, battle_map, rand_item, num_eat, g)
             } else {
                 Err(anyhow!("no items to eat"))
@@ -294,7 +294,7 @@ pub trait Entity {
         } else {
             // pass turn, do nothing
             // this will always work
-            // so we are probabilitistically guaranteed termination.
+            // so we are probabilistically guaranteed termination
             if let Some(opponent) = opponent {
                 opponent.send_text(format!(
                     "{} skips their turn\n",
