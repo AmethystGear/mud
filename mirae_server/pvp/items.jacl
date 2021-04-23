@@ -111,6 +111,7 @@
 )
 
 "stick" : (
+    equipable : true
     abilities : {
         "hit" : (
             damage : {

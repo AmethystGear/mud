@@ -288,7 +288,7 @@ function displayImg(data) {
     }
 
     ct.fillStyle = "#FF0000"
-    ct.font = Math.round(blockWidth) + "px Consolas";
+    ct.font = Math.round(blockWidth * size) + "px Consolas";
     for (let i = 0; i < players.length; i++) {
         ct.fillText(players[i].getPlayerDisplay(), players[i].x * blockWidth, (players[i].y + 1) * blockHeight)
     }

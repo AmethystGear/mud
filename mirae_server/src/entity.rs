@@ -24,7 +24,7 @@ pub trait Entity {
     fn loc(&self) -> &Vector3;
     fn abilities(&self) -> HashMap<String, Ability>;
     fn xp(&self) -> i64;
-    fn name(&self) -> Option<String>;
+    fn name(&self) -> String;
     fn id(&self) -> ID;
 
     fn inventory_mut(&mut self) -> &mut Inventory;
@@ -39,11 +39,11 @@ pub trait Entity {
     fn send_image(&mut self, s: String);
     fn rng(&mut self) -> &mut StdRng;
 
-    fn entrance(&mut self) -> Option<String>;
-    fn attack(&mut self) -> Option<String>;
-    fn run(&mut self) -> Option<String>;
-    fn victory(&mut self) -> Option<String>;
-    fn loss(&mut self) -> Option<String>;
+    fn entrance(&mut self) -> Result<String>;
+    fn attack(&mut self) -> Result<String>;
+    fn run(&mut self) -> Result<String>;
+    fn victory(&mut self) -> Result<String>;
+    fn loss(&mut self) -> Result<String>;
 
     fn equip(&mut self, item_name: &ItemName, g: &GameData) -> Result<()> {
         let item = g
@@ -150,7 +150,7 @@ pub trait Entity {
         if let Some(opponent) = opponent {
             opponent.send_text(format!(
                 "{} used '{}'",
-                opponent.name().unwrap_or("your opponent".into()),
+                self.name(),
                 ability.name
             ));
             if let Some(item) = item {
@@ -317,7 +317,7 @@ pub trait Entity {
             if let Some(opponent) = opponent {
                 opponent.send_text(format!(
                     "{} skips their turn\n",
-                    self.name().unwrap_or("your opponent".into())
+                    self.name()
                 ));
             }
             Ok(())
@@ -356,16 +356,6 @@ fn mul(a: &HashMap<DmgType, f64>, b: &HashMap<DmgType, f64>) -> HashMap<DmgType,
     new
 }
 
-fn dir(val: f64) -> Option<&'static str> {
-    if val > 0.0 {
-        Some("increased")
-    } else if val < 0.0 {
-        Some("decreased")
-    } else {
-        None
-    }
-}
-
 pub fn get_items_rand(
     inventory: &Inventory,
     num_items: u64,
@@ -373,32 +363,36 @@ pub fn get_items_rand(
     g: &GameData,
     rng: &mut StdRng,
 ) -> Result<Vec<ItemName>> {
+    let mut inventory = inventory.clone();
     let mut returned_items = Vec::new();
-    let mut equippable_items = Vec::new();
-    let mut equip_summed = Vec::new();
-    let mut equip_sum = 0;
-    for item_name in inventory.items() {
-        let item = g
-            .items
-            .get(item_name)
-            .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
-        if filter(item) {
-            equip_sum += inventory.get(item_name);
-            equip_summed.push(equip_sum);
-            equippable_items.push(item_name);
+    for _ in 0..num_items {
+        let mut usable_items = Vec::new();
+        let mut usable_summed = Vec::new();
+        let mut usable_sum = 0;
+        for item_name in inventory.items() {
+            let item = g
+                .items
+                .get(item_name)
+                .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
+            if filter(item) {
+                usable_sum += inventory.get(item_name);
+                usable_summed.push(usable_sum);
+                usable_items.push(item_name.clone());
+            }
         }
-    }
-    if equip_sum > 0 {
-        for _ in 0..num_items {
-            let index = rng.gen_range(0, equip_sum);
-            for i in 0..equip_summed.len() {
-                if equip_summed[i] > index {
-                    returned_items.push(equippable_items[i].clone());
-                    break;
-                }
+        if usable_sum == 0 {
+            break;
+        }
+        let index = rng.gen_range(0, usable_sum);
+        for i in 0..usable_summed.len() {
+            if usable_summed[i] > index {
+                returned_items.push(usable_items[i].clone());
+                inventory.change(usable_items[i].clone(), -1)?;
+                break;
             }
         }
     }
+    
     return Ok(returned_items);
 }
 

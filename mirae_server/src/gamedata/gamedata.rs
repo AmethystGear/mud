@@ -11,7 +11,7 @@ use crate::{
 };
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_jacl::de::from_str;
 use std::{
     collections::{HashMap, HashSet},
@@ -40,7 +40,7 @@ impl DmgType {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct StatType(String);
 
 impl From<String> for StatType {
@@ -108,7 +108,7 @@ impl BiomeName {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct ItemName(pub String);
 
 impl From<String> for ItemName {
@@ -153,7 +153,7 @@ impl MobName {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct BlockName(String);
+pub struct BlockName(pub String);
 
 impl From<String> for BlockName {
     fn from(s: String) -> Self {
@@ -188,8 +188,19 @@ pub struct GameMode {
     blocks: String,
 }
 
+type A = (
+    Terrain,
+    HashSet<DmgType>,
+    HashSet<StatType>,
+    HashMap<ItemName, Item>,
+    HashMap<MobName, MobTemplate>,
+    HashMap<BlockName, Block>,
+    HashMap<BiomeName, Biome>,
+    HashMap<StructureName, Vec<Structure>>,
+);
+
 impl GameMode {
-    pub fn into_gamedata(&self) -> Result<GameData> {
+    fn parse_data(&self) -> Result<A> {
         let deser = GameDataDeser {
             terrain: from_str(&fs::read_to_string(&self.terrain)?)?,
             dmg: from_str(&fs::read_to_string(&self.dmg)?)?,
@@ -271,7 +282,7 @@ impl GameMode {
 
         let terrain = deser.terrain.into_terrain(&biome_names, &structure_names)?;
 
-        GameData::new(
+        Ok((
             terrain,
             dmg_types,
             stat_types,
@@ -280,6 +291,62 @@ impl GameMode {
             blocks,
             biomes,
             structures,
+        ))
+    }
+
+    pub fn into_gamedata(&self) -> Result<GameData> {
+        let (
+            terrain_,
+            dmg_types_,
+            stat_types_,
+            items_,
+            mob_templates_,
+            blocks_,
+            biomes_,
+            structures_,
+        ) = self.parse_data()?;
+
+        GameData::new(
+            terrain_,
+            dmg_types_,
+            stat_types_,
+            items_,
+            mob_templates_,
+            blocks_,
+            biomes_,
+            structures_,
+            None,
+            None,
+        )
+    }
+
+    pub fn into_gamedata_with_names(
+        &self,
+        block_names: Vec<String>,
+        mob_names: Vec<String>,
+    ) -> Result<GameData> {
+        let (
+            terrain_,
+            dmg_types_,
+            stat_types_,
+            items_,
+            mob_templates_,
+            blocks_,
+            biomes_,
+            structures_,
+        ) = self.parse_data()?;
+
+        GameData::new(
+            terrain_,
+            dmg_types_,
+            stat_types_,
+            items_,
+            mob_templates_,
+            blocks_,
+            biomes_,
+            structures_,
+            Some(block_names),
+            Some(mob_names),
         )
     }
 }
@@ -337,6 +404,25 @@ fn get_idmap<A: Eq + Debug + Hash + Copy, B: Hash + Eq + Clone, C>(
     })
 }
 
+fn get_idmap_from_names<A: Eq + Debug + Hash + Copy, B: Hash + Eq + Clone + From<String>, C>(
+    map: HashMap<B, C>,
+    names: Vec<String>,
+    increment: fn(A) -> A,
+    start: A,
+) -> IDMap<A, B, C> {
+    let mut id_map = BiMap::new();
+    let mut max_id = start;
+    for name in names {
+        id_map.insert(max_id, name.into());
+        max_id = increment(max_id);
+    }
+    IDMap {
+        name_to_item: map,
+        id_to_name: id_map,
+        max_id,
+    }
+}
+
 impl GameData {
     pub fn new(
         terrain: Terrain,
@@ -347,16 +433,22 @@ impl GameData {
         blocks: HashMap<BlockName, Block>,
         biomes: HashMap<BiomeName, Biome>,
         structures: HashMap<StructureName, Vec<Structure>>,
+        block_names: Option<Vec<String>>,
+        mob_names: Option<Vec<String>>,
     ) -> Result<Self> {
         let mut img_to_img_id = HashMap::new();
         let mut mob_id_to_img_id = HashMap::new();
         let mut id: u8 = 0;
-        let mob_templates = get_idmap(
-            mob_templates,
-            |x| MobU16(x.0 + 1),
-            MobU16(0),
-            MobU16::empty(),
-        )?;
+        let mob_templates = if let Some(mob_names) = mob_names {
+            get_idmap_from_names(mob_templates, mob_names, |x| MobU16(x.0 + 1), MobU16(0))
+        } else {
+            get_idmap(
+                mob_templates,
+                |x| MobU16(x.0 + 1),
+                MobU16(0),
+                MobU16::empty(),
+            )?
+        };
 
         let mut images_to_load = HashSet::new();
         for i in 0..mob_templates.max_id.0 {
@@ -399,7 +491,11 @@ impl GameData {
             dmg,
             stat,
             items,
-            blocks: get_idmap(blocks, |x| x + 1, 0u8, u8::MAX)?,
+            blocks: if let Some(block_names) = block_names {
+                get_idmap_from_names(blocks, block_names, |x| x + 1, 0u8)
+            } else {
+                get_idmap(blocks, |x| x + 1, 0u8, u8::MAX)?
+            },
             mob_templates,
             biomes: get_idmap(biomes, |x| x + 1, 0u8, u8::MAX)?,
             structures,

@@ -3,12 +3,14 @@ use crate::{
     gamedata::{
         block::{Block, PointLight},
         gamedata::{GameData, StructureName},
+        mobtemplate::MobTemplate,
         terrain::Biome,
     },
     mob::Mob,
     noise,
     rgb::RGB,
     vector3::Vector3,
+    Load,
 };
 use anyhow::{anyhow, Result};
 use bimap::BiMap;
@@ -37,6 +39,12 @@ impl MobU16 {
     }
 }
 
+impl From<usize> for MobU16 {
+    fn from(u: usize) -> Self {
+        Self(u as u16)
+    }
+}
+
 impl<T> Map<T>
 where
     T: Clone + Eq,
@@ -45,6 +53,14 @@ where
         Map {
             dim,
             map: vec![default; dim.dim() as usize],
+        }
+    }
+
+    pub fn from_vec(dim: Vector3, map: Vec<T>) -> Result<Self> {
+        if dim.dim() as usize == map.len() {
+            Ok(Self { dim, map })
+        } else {
+            Err(anyhow!("bad dimensions"))
         }
     }
 
@@ -328,12 +344,25 @@ pub struct World {
     mob_map: Map<MobU16>,
     block_map: Map<u8>,
     light_map: Map<RGB>,
-    seed: u64,
+    pub seed: u64,
     id: usize,
     pub rng: StdRng,
 }
 
 impl World {
+    pub fn from_load(load: Load) -> Result<World> {
+        let rng = get_rand(load.seed);
+        Ok(World {
+            spawned_mobs: SpawnedMobs::new(),
+            mob_map: Map::from_vec(load.dim, load.mobs.into_iter().map(|a| MobU16(a)).collect())?,
+            block_map: Map::from_vec(load.dim, load.blocks)?,
+            light_map: Map::from_vec(load.dim, load.colors)?,
+            seed: load.seed,
+            rng,
+            id: 0,
+        })
+    }
+
     pub fn from_seed(seed: u64, g: &GameData) -> Result<World> {
         let mut rng = get_rand(seed);
 
@@ -501,6 +530,18 @@ impl World {
             } else {
                 Err(anyhow!(format!("no mob at location {:?}", loc)))
             }
+        }
+    }
+
+    pub fn get_mobtemplate_at<'a>(&self, loc: Vector3, g: &'a GameData) -> Result<&'a MobTemplate> {
+        if let Some(mob) = self.mob_map.get(loc)?.as_u16() {
+            let name = g.get_mob_name_by_id(MobU16(mob))?;
+            Ok(g.mob_templates
+                .name_to_item
+                .get(&name)
+                .expect("mob name cannot be invalid"))
+        } else {
+            Err(anyhow!("no mob at this location"))
         }
     }
 

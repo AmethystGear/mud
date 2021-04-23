@@ -1,8 +1,9 @@
 use crate::gamedata::gamedata::ItemName;
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Inventory {
     elems: HashMap<ItemName, u64>,
     size: u64,

@@ -87,14 +87,14 @@ impl Mob {
             display_img: template.display_img.clone(),
         };
 
-        let item = get_items_rand(&mob.inventory, 1, |x| x.equipable, g, rng)?;
+        let item = get_items_rand(mob.inventory(), 1, |x| x.equipable, g, rng)?;
         if let Some(item_name) = item.get(0) {
             mob.equip(item_name, g)?;
         }
 
-        let items = get_items_rand(&mob.inventory, NUM_WEARS, |x| x.equipable, g, rng)?;
-        for item in &items {
-            mob.wear(item, g)?;
+        let items = get_items_rand(mob.inventory(), NUM_WEARS, |x| x.wearable, g, rng)?;
+        for item_name in &items {
+            mob.wear(item_name, g)?;
         }
 
         Ok(mob)
@@ -138,8 +138,8 @@ impl Entity for Mob {
         self.xp
     }
 
-    fn name(&self) -> Option<String> {
-        Some(self.name.0.clone())
+    fn name(&self) -> String {
+        self.name.0.clone()
     }
 
     fn inventory_mut(&mut self) -> &mut Inventory {
@@ -179,34 +179,34 @@ impl Entity for Mob {
     fn send_text(&mut self, _: String) { /* do nothing, mobs don't care about text */
     }
 
-    fn entrance(&mut self) -> Option<String> {
+    fn entrance(&mut self) -> Result<String> {
         let len = self.quotes.entrance.len();
         let rand = self.rng().gen_range(0, len);
-        Some(self.quotes.entrance[rand].clone())
+        Ok(self.quotes.entrance[rand].clone())
     }
 
-    fn attack(&mut self) -> Option<String> {
+    fn attack(&mut self) -> Result<String> {
         let len = self.quotes.attack.len();
         let rand = self.rng().gen_range(0, len);
-        Some(self.quotes.attack[rand].clone())
+        Ok(self.quotes.attack[rand].clone())
     }
 
-    fn run(&mut self) -> Option<String> {
+    fn run(&mut self) -> Result<String> {
         let len = self.quotes.run.len();
         let rand = self.rng().gen_range(0, len);
-        Some(self.quotes.run[rand].clone())
+        Ok(self.quotes.run[rand].clone())
     }
 
-    fn victory(&mut self) -> Option<String> {
+    fn victory(&mut self) -> Result<String> {
         let len = self.quotes.mob_victory.len();
         let rand = self.rng().gen_range(0, len);
-        Some(self.quotes.mob_victory[rand].clone())
+        Ok(self.quotes.mob_victory[rand].clone())
     }
 
-    fn loss(&mut self) -> Option<String> {
+    fn loss(&mut self) -> Result<String> {
         let len = self.quotes.player_victory.len();
         let rand = self.rng().gen_range(0, len);
-        Some(self.quotes.player_victory[rand].clone())
+        Ok(self.quotes.player_victory[rand].clone())
     }
 
     fn send_image(&mut self, _: String) {}

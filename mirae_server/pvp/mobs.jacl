@@ -1,42 +1,119 @@
 "lowly_ben" : (
-    xp : 25
+    xp : 10
     quotes: (
-        entrance : ["ben"]
-        attack : ["ben"]
-        run  : ["ben"]
-        player_victory : ["ben"]
-        mob_victory : ["ben"]
+        entrance : ["ben" "benbenben"]
+        attack : ["ben" "benben"]
+        run  : ["BEN"]
+        player_victory : ["benbenbe-"]
+        mob_victory : ["BEN!!!" "BENBENBEN!!!"]
+    )
+    stats : {
+        "max_health" : 2
+        "max_energy" : 0
+        "speed" : 1
+        "agression" : 1
+    }
+    description : "A weak and pathetic creature. Easy to kill, but also no loot."
+)
+
+"bigly_ben" : (
+    xp : 69
+    quotes: (
+        entrance : ["bigly" "benbigly" "benbenben"]
+        attack : ["bigly"]
+        run  : ["BIIIGLY"]
+        player_victory : ["benbenbe-"]
+        mob_victory : ["BEN!!!" "BENBENBEN!!!"]
     )
     drops : (
         items : [
-            (name : "trump_orange", prob : 0.05, per: 1)
-            (name : "orange", prob : 0.95, per: 1)
+            (name : "trump_orange", prob : 0.25, per: 1)
+            (name : "orange", prob : 0.75, per: 3)
         ]
         min : 0
         max : 1
     )
     tools : (
         items : [
-            (name : "trump_orange", prob : 0.05, per: 1)
-            (name : "orange", prob : 0.95, per: 2)
+            (name : "trump_orange", prob : 0.1, per: 1)
+            (name : "orange", prob : 0.9, per: 1)
         ]
-        min : 1
-        max : 2
+        min : 3
+        max : 5
     )
     stats : {
-        "max_health" : 4
-        "max_energy" : 5
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
+        "max_health" : 6
+        "max_energy" : 6
+        "speed" : 2
         "agression" : 1
+    }
+    abilities : {
+        "summon_orange" : (
+            make_items : {
+                "orange" : 3
+            }
+        )
     }
     display : "faceman.png"
     display_img : "faceman_full.png"
+    description : "A lowly_ben, infected with biglitis. Stronger than the lowly variant due to bigly weaponry and magic."
+)
+
+"bogly_ben" : (
+    xp : -10
+    quotes: (
+        entrance : ["you have bigmac?" "bigmac yum"]
+        attack : ["ben" "benben"]
+        run  : ["BEN"]
+        player_victory : ["benbenbe-"]
+        mob_victory : ["BEN!!!" "BENBENBEN!!!"]
+    )
+    stats : {
+        "max_health" : 2
+        "max_energy" : 0
+        "speed" : 1
+        "agression" : 1
+    }
+    /*
+    trades : [
+        (in : "half_eaten_bigmac", out : "pag_slice", in_cnt : 3, out_cnt : 1)
+    ]
+    */
+    description : "Strange hermit that trades half eaten bigmacs for pagliacci"
+)
+
+"big_ben" : (
+    xp : 250
+    quotes: (
+        entrance : ["ben" "benbenben"]
+        attack : ["ben" "benben"]
+        run  : ["BEN"]
+        player_victory : ["benbenbe-"]
+        mob_victory : ["BEN!!!" "BENBENBEN!!!"]
+    )
+    stats : {
+        "max_health" : 15
+        "max_energy" : 0
+        "speed" : 5
+        "agression" : 1
+    }
+    abilities : {
+        "radioactive_heal" : (
+            health : 2
+        )
+
+        "BEN SMASH" : (
+            damage : {
+                "physical" : 5
+                "radiation" : 2
+            }
+        )
+    }
+    description : "A lowly ben, mutated by radiation into this monstrosity. Much stronger than the lowly variant."
 )
 
 "pirate_knight" : (
-        stats : {
+    stats : {
         "max_health" : 4
         "max_energy" : 10
         "energy_regen" : 1
@@ -125,22 +202,38 @@
     display_img : "none"
 )
 
+"opec_chest" : (
+    stats : {
+        "agression" : 1
+    }
+    display : "chest.png"
+    display_img : "none"
+)
+
+"opec_rock_videogame_chest" : (
+    stats : {
+        "agression" : 1
+    }
+    display : "chest.png"
+    display_img : "none"
+)
+
 "pickle_monster" : (
     quotes: (
         entrance : ["Hey there mister, wanna tickle my pickle?" "Tickle my pickle, it'll only cost a nickel"]
-        mob_attack : [ 
+        attack : [ 
             "The Left wants to tickle your pickle"
             "Whats the dill, man" 
             "You're in a bit of a pickle aren't you"
         ]
-        player_run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
+        run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
         player_victory : ["Eaaaughgah"]
         mob_victory : ["Thanks for tickling my pickle"]
     )
 
     tools : (
         items : [
-            (name : "pickle_sword", prob : 0.85, per: 1)
+            (name : "pickle_sword", prob : 1, per: 1)
         ]
         min : 1
         max : 1
@@ -168,19 +261,19 @@
 "fyzyx_knite" : (
     quotes: (
         entrance : ["I'm so hunrable"]
-        mob_attack : [ 
+        attack : [ 
             "The Left wants to tickle your pickle"
             "Whats the dill, man" 
             "You're in a bit of a pickle aren't you"
         ]
-        player_run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
+        run  : ["Aww... come back... my pickle hasn't been fully tickled yet"]
         player_victory : ["Eaaaughgah"]
         mob_victory : ["Thanks for tickling my pickle"]
     )
 
     tools : (
         items : [
-            (name : "pickle_sword", prob : 0.85, per: 1)
+            (name : "pickle_sword", prob : 1, per: 1)
         ]
         min : 1
         max : 1
@@ -203,4 +296,84 @@
         "agression" : 1
     }
     display_img : "none"
+)
+
+"winged_pag" : (
+    xp : 100
+    quotes: (
+        entrance : ["*flapping noises from above*"]
+        attack : ["*screeches*" "*REEEEEEE*"]
+        run : ["*bogly pagliacci noises*"]
+        player_victory : ["*falls to the ground*"]
+        mob_victory : ["*flies away, victorious*"]
+    )
+    stats : {
+        "max_health" : 5
+        "max_energy" : 0
+        "speed" : 3
+        "agression" : 1
+    }
+    abilities : {
+        "kamikaze" : (
+            health : -5
+            damage : {
+                "physical" : 1
+                "trash" : 1
+                "bogly" : 2
+            }
+        )
+
+        "*angry pag strike*" : (
+            damage : {
+                "physical" : 1
+            }
+        )
+
+        "*pag slap*" : (
+            damage : {
+                "physical" : 1
+            }
+        )
+    }
+    display_img : "winged_pag.png"
+)
+
+"pag_with_extra_wings" : (
+    xp : 200
+    quotes: (
+        entrance : ["*flapping noises from above*"]
+        attack : ["*screeches*" "*REEEEEEE*"]
+        run : ["*bogly pagliacci noises*"]
+        player_victory : ["*falls to the ground*"]
+        mob_victory : ["*flies away, victorious*"]
+    )
+    stats : {
+        "max_health" : 10
+        "max_energy" : 0
+        "speed" : 6
+        "agression" : 1
+    }
+    abilities : {
+        "kamikaze" : (
+            health : -5
+            damage : {
+                "physical" : 1
+                "trash" : 1
+                "bogly" : 3
+            }
+        )
+
+        "*angry pag strike*" : (
+            damage : {
+                "physical" : 2
+            }
+        )
+
+        "*pag slap*" : (
+            damage : {
+                "physical" : 1
+            }
+        )
+    }
+    display_img : "pag_extra_wings.png"
 )

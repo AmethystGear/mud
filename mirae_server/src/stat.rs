@@ -4,8 +4,9 @@ use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
 };
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Stat {
     health: f64,
     energy: f64,

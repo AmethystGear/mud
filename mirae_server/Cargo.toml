@@ -15,3 +15,4 @@ serde = { version = "1.0.116", features = ["derive"] }
 anyhow = "1.0.33"
 bimap = "0.6.0"
 image = "0.23.14"
+crossbeam = "0.8.0"

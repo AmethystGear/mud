@@ -204,32 +204,21 @@ impl BattleMap {
 
         self.handle_to_data.insert(battle_handle, battle_data);
 
+        attacker.send_text(format!(
+            "You are fighting {}\n",
+            defender.name()
+        ));
+        defender.send_text(format!(
+            "You are fighting {}\n",
+            attacker.name()
+        ));
+
         if self.turn(attacker.id())? {
-            attacker.send_text(format!(
-                "You are fighting {}, it is your turn\n",
-                defender
-                    .name()
-                    .unwrap_or(format!("player {}", defender.id().id))
-            ));
-            defender.send_text(format!(
-                "You are fighting {}, it is not your turn\n",
-                defender
-                    .name()
-                    .unwrap_or(format!("player {}", defender.id().id))
-            ));
+            attacker.send_text("it's your turn!\n".into());
+            defender.send_text("it's not your turn!\n".into());
         } else {
-            attacker.send_text(format!(
-                "You are fighting {}, it is not your turn\n",
-                defender
-                    .name()
-                    .unwrap_or(format!("player {}", defender.id().id))
-            ));
-            defender.send_text(format!(
-                "You are fighting {}, it is your turn\n",
-                defender
-                    .name()
-                    .unwrap_or(format!("player {}", defender.id().id))
-            ));
+            defender.send_text("it's your turn!\n".into());
+            attacker.send_text("it's not your turn!\n".into());
         }
         Ok(())
     }
@@ -244,7 +233,11 @@ impl BattleMap {
         Ok(())
     }
 
-    fn handle_status_effects(&mut self, entity: Box<&mut dyn Entity>, g: &GameData) -> Result<()> {
+    pub fn handle_status_effects(
+        &mut self,
+        entity: Box<&mut dyn Entity>,
+        g: &GameData,
+    ) -> Result<()> {
         let opponent = self.get_opponent(entity.id())?;
         let battle_data = self.get_battle_data(entity.id())?;
         let combat_data = battle_data.combat_data(entity.id())?;
@@ -364,15 +357,11 @@ impl BattleMap {
         };
         a.send_text(format!(
             "your{}health is now {}/{}\n",
-            opponent_text,
-            health,
-            max_health
+            opponent_text, health, max_health
         ));
         a.send_text(format!(
             "your{}energy is now {}/{}\n",
-            opponent_text,
-            energy,
-            max_energy
+            opponent_text, energy, max_energy
         ));
         Ok(())
     }
