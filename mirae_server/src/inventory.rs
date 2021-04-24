@@ -23,24 +23,24 @@ impl Inventory {
 
     pub fn change(&mut self, item: ItemName, amount: i64) -> Result<()> {
         let num_item = self.get(&item);
-        if ((num_item as i64) + amount) < 0 {
+        let new_amount = (num_item as i64) + amount;
+        if new_amount < 0 {
             return Err(anyhow!(format!(
                 "not enough of {:?} in this inventory!",
                 item
             )));
-        } else if ((num_item as i64) + amount) == 0 {
-            self.elems.remove(&item);
         } else {
-            self.set(item, ((num_item as i64) + amount) as u64);
+            self.set(item.clone(), new_amount as u64);
+            if new_amount == 0 {
+                self.elems.remove(&item);
+            }
         }
-        self.size = (self.size as i64 + amount) as u64;
         Ok(())
     }
 
     pub fn add(&mut self, item: ItemName, amount: u64) {
         let current = self.get(&item);
         self.set(item, current + amount);
-        self.size += amount;
     }
 
     pub fn set(&mut self, item: ItemName, num: u64) {
@@ -56,7 +56,6 @@ impl Inventory {
 
     pub fn add_items(&mut self, other: &HashMap<ItemName, u64>) {
         for (item, count) in other {
-            self.size += count;
             self.set(item.clone(), self.get(&item) + count);
         }
     }
@@ -102,7 +101,7 @@ impl Inventory {
         let line = |item: &ItemName| format!("{}: {}", item.0, self.get(item));
         if self.size() == 0 {
             return "nothing".into();
-        } else if self.items().len() == 1 {
+        } else if self.size() == 1 {
             let item = self.items().next().expect("at least one item");
             return format!("a {}", item.0);
         }

@@ -8,7 +8,8 @@ use crate::{
     },
     player::Player,
     vector3::Vector3,
-    world::World, PLAYER_SAVE_FOLDER,
+    world::World,
+    PLAYER_SAVE_FOLDER,
 };
 use anyhow::{anyhow, Result};
 use fs::File;
@@ -17,8 +18,9 @@ use serde_jacl::structs::{Literal, Number};
 use std::{
     collections::{HashSet, VecDeque},
     fs,
+    io::Write,
     path::Path,
-    sync::{Arc, RwLock}, io::Write,
+    sync::{Arc, RwLock},
 };
 
 const BAD_ARGS: &str =
@@ -40,8 +42,7 @@ pub fn dispatch(data: ActionData) -> Result<()> {
                 "map" => map,
                 "pass" => pass,
                 "run" => run,
-                "login" => login,
-                "createacc" => create_account,
+                "acc" => account,
                 _ => return Err(anyhow!("invalid command")),
             };
             func(data)
@@ -130,6 +131,34 @@ pub struct ActionData<'a> {
     pub g: &'a GameData,
 }
 
+fn run_turn_with(
+    battle_map: &mut BattleMap,
+    player_id: ID,
+    players: &mut Vec<Option<Player>>,
+    world: &mut World,
+    g: &GameData,
+    func: &dyn Fn(
+        &mut Player,
+        Option<Box<&mut dyn Entity>>,
+        &GameData,
+        &mut BattleMap,
+    ) -> Result<()>,
+) -> Result<()> {
+    if let Ok(opponent) = battle_map.get_opponent(player_id) {
+        if battle_map.turn(opponent)? {
+            Err(anyhow!("it's not your turn!"))
+        } else {
+            let (player, opp) = get_player_and_opponent(opponent, players, player_id.id, world)?;
+            func(player, Some(opp), g, battle_map)?;
+            let (player, opp) = get_player_and_opponent(opponent, players, player_id.id, world)?;
+            battle_map.do_turn(Box::new(player), opp, g)
+        }
+    } else {
+        let player = get_mut(players, player_id.id)?;
+        func(player, None, g, battle_map)
+    }
+}
+
 fn use_ability(mut data: ActionData) -> Result<()> {
     let mut players = data
         .players
@@ -170,7 +199,7 @@ fn use_ability(mut data: ActionData) -> Result<()> {
             item.abilities.keys()
         )));
     }
-    // CODE DUPLICATION WITH EAT, FIX LATER
+
     let ability = ability.clone();
     let player_id = ID::player(data.player_id);
     let mut battle_map = data
@@ -181,23 +210,22 @@ fn use_ability(mut data: ActionData) -> Result<()> {
         .world
         .write()
         .map_err(|_| anyhow!("couldn't lock world"))?;
-    if let Ok(opponent) = battle_map.get_opponent(player_id) {
-        if battle_map.turn(opponent)? {
-            Err(anyhow!("it's not your turn!"))
-        } else {
-            let (player, opp) =
-                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            player.run_ability(Some(opp), &mut battle_map, ability, Some(item_name), data.g)?;
+    let func = |player: &mut Player,
+                opp: Option<Box<&mut dyn Entity>>,
+                g: &GameData,
+                battle_map: &mut BattleMap| {
+        player.run_ability(opp, battle_map, ability.clone(), Some(item_name.clone()), g)
+    };
 
-            let (player, opp) =
-                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
-
-            battle_map.do_turn(Box::new(player), opp, data.g)
-        }
-    } else {
-        player.run_ability(None, &mut battle_map, ability, Some(item_name), data.g)
-    }
+    run_turn_with(
+        &mut battle_map,
+        player_id,
+        &mut players,
+        &mut world,
+        data.g,
+        &func,
+    )
 }
 
 fn eat(mut data: ActionData) -> Result<()> {
@@ -205,7 +233,6 @@ fn eat(mut data: ActionData) -> Result<()> {
         .players
         .write()
         .map_err(|_| anyhow!("couldn't lock players"))?;
-    let player = get_mut(&mut players, data.player_id)?;
     let item_name;
     let amount;
     data.params.pop_front(); // ignore the first parameter
@@ -233,23 +260,21 @@ fn eat(mut data: ActionData) -> Result<()> {
         .write()
         .map_err(|_| anyhow!("couldn't lock world"))?;
     let player_id = ID::player(data.player_id);
-    if let Ok(opponent) = battle_map.get_opponent(player_id) {
-        if battle_map.turn(opponent)? {
-            Err(anyhow!("it's not your turn!"))
-        } else {
-            let (player, opp) =
-                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
-            player.eat(Some(opp), &mut battle_map, &item_name, amount, data.g)?;
+    let func =
+        |player: &mut Player,
+         opp: Option<Box<&mut dyn Entity>>,
+         g: &GameData,
+         battle_map: &mut BattleMap| { player.eat(opp, battle_map, &item_name, amount, g) };
 
-            let (player, opp) =
-                get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
-
-            battle_map.do_turn(Box::new(player), opp, data.g)
-        }
-    } else {
-        player.eat(None, &mut battle_map, &item_name, amount, data.g)
-    }
+    run_turn_with(
+        &mut battle_map,
+        player_id,
+        &mut players,
+        &mut world,
+        data.g,
+        &func,
+    )
 }
 
 enum Move {
@@ -698,68 +723,71 @@ fn pass(data: ActionData) -> Result<()> {
     }
 }
 
-fn login(mut data: ActionData) -> Result<()> {
+fn account(mut data: ActionData) -> Result<()> {
     data.params.pop_front(); // ignore first argument
 
+    let flag;
     let name;
-    match data.params.pop_front() {
-        Some(Literal::String(s)) => name = s,
+    match (data.params.pop_front(), data.params.pop_front()) {
+        (Some(Literal::String(f)), Some(Literal::String(n))) => {
+            flag = f;
+            name = n;
+        }
         _ => return Err(anyhow!(BAD_ARGS)),
     }
-
     let mut players = data
         .players
         .write()
         .map_err(|_| anyhow!("couldn't lock players"))?;
 
     let player = get_mut(&mut players, data.player_id)?;
-    if player.username.is_some() {
-        return Err(anyhow!("you are already logged in!"));
-    }
 
-    for player in players.iter() {
-        if let Some(player) = player {
-            if let Some(username) = &player.username {
-                if username == &name {
-                    return Err(anyhow!("someone with that username is already logged in!"));
+    let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, name);
+    match flag.as_str() {
+        "create" => {
+            if Path::new(&save_file).exists() {
+                return Err(anyhow!("A save file already exists with that username!"));
+            }
+            let mut f = File::create(save_file)?;
+            f.write_all(&player.save()?.as_bytes())?;
+            player.send_text(format!("created account '{}'\n", name));
+        }
+        "delete" => {
+            if !Path::new(&save_file).exists() {
+                return Err(anyhow!("No save file exists with that username!"));
+            }
+            fs::remove_file(&save_file)?;
+            player.send_text(format!("deleted account '{}'\n", name));
+        }
+        "login" => {
+            if player.username.is_some() {
+                return Err(anyhow!("you are already logged in!"));
+            }
+
+            for player in players.iter() {
+                if let Some(player) = player {
+                    if let Some(username) = &player.username {
+                        if username == &name {
+                            return Err(anyhow!(
+                                "someone with that username is already logged in!"
+                            ));
+                        }
+                    }
                 }
             }
+
+            let player = get_mut(&mut players, data.player_id)?;
+
+            let err = "No save file exists with that username!";
+            player.load(fs::read_to_string(save_file).map_err(|_| anyhow!(err))?)?;
+            player.username = Some(name);
+            player.send_text(format!("you are now logged in as '{}'\n", player.name()));
         }
-    }
-
-    let player = get_mut(&mut players, data.player_id)?;
-
-    let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, name);
-    let err =
-        "No save file exists with that username! Use \"createacc <name>\" to make an account.";
-    player.load(fs::read_to_string(save_file).map_err(|_| anyhow!(err))?)?;
-    player.username = Some(name);
-    Ok(())
-}
-
-fn create_account(mut data: ActionData) -> Result<()> {
-    data.params.pop_front(); // ignore first argument
-
-    let name;
-    match data.params.pop_front() {
-        Some(Literal::String(s)) => name = s,
-        _ => return Err(anyhow!(BAD_ARGS)),
-    }
-    let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, name);
-    if Path::new(&save_file).exists() {
-        return Err(anyhow!("A save file already exists with that username!"));
-    }
-
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-
-    let player = get_mut(&mut players, data.player_id)?;
-
-    let mut f = File::create(save_file)?;
-    f.write_all(&player.save()?.as_bytes())?;
-    player.send_text("created account\n".into());
-    player.username = Some(name);
+        _ => {
+            return Err(anyhow!(
+                "expected first arg to be either login, create, or delete"
+            ))
+        }
+    };
     Ok(())
 }
