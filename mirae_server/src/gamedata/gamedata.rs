@@ -20,6 +20,25 @@ use std::{
     hash::Hash,
     path::Path,
 };
+
+pub trait Named<T: From<String> + Debug + Hash + Eq + Named = Self> {
+    const NAMED_TYPE: &'static str;
+    fn set(g: &GameData) -> HashSet<T>;
+    fn checked_from(s: String, g: &GameData) -> Result<T> {
+        let s: T = s.into();
+        let set = T::set(g);
+        if set.contains(&s) {
+            Ok(s)
+        } else {
+            Err(anyhow!(format!(
+                "'{:?}' is not a {}",
+                s,
+                T::NAMED_TYPE
+            )))
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct DmgType(String);
 
@@ -29,19 +48,16 @@ impl From<String> for DmgType {
     }
 }
 
-impl DmgType {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.dmg.contains(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!("{} is not a damage type", val.0)))
-        }
+impl Named for DmgType {
+    const NAMED_TYPE: &'static str = "damage type";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.dmg.clone()
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct StatType(String);
+pub struct StatType(pub String);
 
 impl From<String> for StatType {
     fn from(s: String) -> Self {
@@ -49,14 +65,11 @@ impl From<String> for StatType {
     }
 }
 
-impl StatType {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.stat.contains(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!("{} is not a stat", val.0)))
-        }
+impl Named for StatType {
+    const NAMED_TYPE: &'static str = "stat type";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.stat.clone()
     }
 }
 
@@ -69,18 +82,11 @@ impl From<String> for StructureName {
     }
 }
 
-impl StructureName {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.structures.contains_key(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!(
-                "{:?} not in {:?}",
-                val,
-                g.structures.keys().collect::<Vec<&StructureName>>()
-            )))
-        }
+impl Named for StructureName {
+    const NAMED_TYPE: &'static str = "structure";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.structures.keys().cloned().collect()
     }
 }
 
@@ -93,18 +99,11 @@ impl From<String> for BiomeName {
     }
 }
 
-impl BiomeName {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.biomes.name_to_item.contains_key(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!(
-                "{:?} not in {:?}",
-                val,
-                g.biomes.name_to_item.keys()
-            )))
-        }
+impl Named for BiomeName {
+    const NAMED_TYPE: &'static str = "biome";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.biomes.name_to_item.keys().cloned().collect()
     }
 }
 
@@ -117,14 +116,11 @@ impl From<String> for ItemName {
     }
 }
 
-impl ItemName {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.items.contains_key(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!("{} is not an item", val.0)))
-        }
+impl Named for ItemName {
+    const NAMED_TYPE: &'static str = "item";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.items.keys().cloned().collect()
     }
 }
 
@@ -137,18 +133,11 @@ impl From<String> for MobName {
     }
 }
 
-impl MobName {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.mob_templates.name_to_item.contains_key(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!(
-                "{:?} not in {:?}",
-                val,
-                g.mob_templates.name_to_item.keys()
-            )))
-        }
+impl Named for MobName {
+    const NAMED_TYPE: &'static str = "mob";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.mob_templates.name_to_item.keys().cloned().collect()
     }
 }
 
@@ -161,18 +150,11 @@ impl From<String> for BlockName {
     }
 }
 
-impl BlockName {
-    pub fn checked_from(s: String, g: &GameData) -> Result<Self> {
-        let val = Self(s);
-        if g.blocks.name_to_item.contains_key(&val) {
-            Ok(val)
-        } else {
-            Err(anyhow!(format!(
-                "{:?} not in {:?}",
-                val,
-                g.blocks.name_to_item.keys()
-            )))
-        }
+impl Named for BlockName {
+    const NAMED_TYPE: &'static str = "block";
+
+    fn set(g: &GameData) -> HashSet<Self> {
+        g.blocks.name_to_item.keys().cloned().collect()
     }
 }
 

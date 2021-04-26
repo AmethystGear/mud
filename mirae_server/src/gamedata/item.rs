@@ -1,5 +1,5 @@
 use super::{
-    gamedata::{DmgType, ItemName, StatType},
+    gamedata::{DmgType, ItemName, StatType, GameData},
     serde_defaults::*,
 };
 use crate::stat::default_empty_fields;
@@ -81,9 +81,9 @@ impl AbilityDeser {
             repeat: self.repeat,
             health: self.health,
             energy: self.energy,
-            damage: default_empty_fields(&map_key(self.damage, dmg_types)?, 0.0, dmg_types),
-            block: default_empty_fields(&map_key(self.block, dmg_types)?, 1.0, dmg_types),
-            counter: default_empty_fields(&map_key(self.counter, dmg_types)?, 0.0, dmg_types),
+            damage: map_key(self.damage, dmg_types)?,
+            block: map_key(self.block, dmg_types)?,
+            counter: map_key(self.counter, dmg_types)?,
             require_items,
             remove_items,
             make_items: map_key(self.make_items, item_names)?,
@@ -117,21 +117,9 @@ impl BuffsDeser {
         stat_types: &HashSet<StatType>,
     ) -> Result<Buffs> {
         Ok(Buffs {
-            defense_buffs: default_empty_fields(
-                &map_key(self.defense_buffs, dmg_types)?,
-                1.0,
-                dmg_types,
-            ),
-            attack_buffs: default_empty_fields(
-                &map_key(self.attack_buffs, dmg_types)?,
-                1.0,
-                dmg_types,
-            ),
-            stat_buffs: default_empty_fields(
-                &map_key(self.stat_buffs, stat_types)?,
-                1.0,
-                stat_types,
-            ),
+            defense_buffs: map_key(self.defense_buffs, dmg_types)?,
+            attack_buffs: map_key(self.attack_buffs, dmg_types)?,
+            stat_buffs: map_key(self.stat_buffs, stat_types)?,
         })
     }
 }
@@ -190,20 +178,48 @@ pub struct Ability {
     pub repeat: u64,
     pub health: f64,
     pub energy: f64,
-    pub damage: HashMap<DmgType, f64>,
-    pub block: HashMap<DmgType, f64>,
-    pub counter: HashMap<DmgType, f64>,
+    damage: HashMap<DmgType, f64>,
+    block: HashMap<DmgType, f64>,
+    counter: HashMap<DmgType, f64>,
     pub require_items: HashMap<ItemName, u64>,
     pub remove_items: HashMap<ItemName, u64>,
     pub make_items: HashMap<ItemName, u64>,
     pub xp_cost: i64,
 }
 
+impl Ability {
+    pub fn damage(&self, g : &GameData) -> HashMap<DmgType, f64> {
+        default_empty_fields(&self.damage, 0.0, &g.dmg)
+    }
+
+    pub fn block(&self, g : &GameData) -> HashMap<DmgType, f64> {
+        default_empty_fields(&self.block, 1.0, &g.dmg)
+    }
+
+    pub fn counter(&self, g : &GameData) -> HashMap<DmgType, f64> {
+        default_empty_fields(&self.counter, 0.0, &g.dmg)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Buffs {
-    pub defense_buffs: HashMap<DmgType, f64>,
-    pub attack_buffs: HashMap<DmgType, f64>,
-    pub stat_buffs: HashMap<StatType, f64>,
+    defense_buffs: HashMap<DmgType, f64>,
+    attack_buffs: HashMap<DmgType, f64>,
+    stat_buffs: HashMap<StatType, f64>,
+}
+
+impl Buffs {
+    pub fn defense_buffs(&self, g : &GameData) -> HashMap<DmgType, f64> {
+        default_empty_fields(&self.defense_buffs, 1.0, &g.dmg)
+    }
+
+    pub fn attack_buffs(&self, g : &GameData) -> HashMap<DmgType, f64> {
+        default_empty_fields(&self.attack_buffs, 1.0, &g.dmg)
+    }
+
+    pub fn stat_buffs(&self, g : &GameData) -> HashMap<StatType, f64> {
+        default_empty_fields(&self.stat_buffs, 1.0, &g.stat)
+    }
 }
 
 #[derive(Debug, Clone)]

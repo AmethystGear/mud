@@ -407,7 +407,7 @@ impl World {
         }
         // generate structures
         generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng)?;
-
+        
         // generate mobs
         for i in 0..(mob_map.dim.dim() as usize) {
             let block = g.get_block_name_by_id(block_map.direct_get(i))?;
@@ -462,7 +462,7 @@ impl World {
             if let Some(lighting) = &block.light.down_light {
                 let loc = block_map.index_to_posn(i) + Vector3::new(0, 0, 1);
                 if let Ok(below) = get_block_by_loc(&block_map, g, loc) {
-                    if !below.unlit {
+                    if !below.unlit && !below.solid {
                         let color = light_map.get(loc)?;
                         light_map.set(loc, color.add(lighting.color.scale(lighting.intensity)))?;
                     }

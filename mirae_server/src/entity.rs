@@ -77,7 +77,7 @@ pub trait Entity {
                 .items
                 .get(item_name)
                 .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
-            self.stats_mut().remove_buffs(&item.buffs.stat_buffs, g);
+            self.stats_mut().remove_buffs(&item.buffs.stat_buffs(g), g);
             Ok(())
         } else {
             Err(anyhow!(format!(
@@ -107,7 +107,7 @@ pub trait Entity {
             if !item.wearable {
                 return Err(anyhow!("you cannot wear this item!"));
             }
-            self.stats_mut().add_buffs(&item.buffs.stat_buffs, g);
+            self.stats_mut().add_buffs(&item.buffs.stat_buffs(g), g);
             self.worn_mut().add(item_name.clone(), 1);
             Ok(())
         } else {
@@ -161,19 +161,19 @@ pub trait Entity {
 
             battle_map.add_effect(
                 opponent.id(),
-                StatusEffect::Damage(ability.damage),
+                StatusEffect::Damage(ability.damage(g)),
                 ability.repeat as usize + 1,
             )?;
 
             battle_map.add_effect(
                 self.id(),
-                StatusEffect::Block(ability.block),
+                StatusEffect::Block(ability.block(g)),
                 ability.repeat as usize + 1,
             )?;
 
             battle_map.add_effect(
                 self.id(),
-                StatusEffect::Counter(ability.counter),
+                StatusEffect::Counter(ability.counter(g)),
                 ability.repeat as usize + 1,
             )?;
         }

@@ -122,6 +122,10 @@ pub struct MobTemplateDeser {
     display: String,
     #[serde(default = "default_png_string")]
     display_img: String,
+    #[serde(default = "empty_string")]
+    scan: String,
+    #[serde(default = "empty_string")]
+    descr : String
 }
 
 #[derive(Debug, Clone)]
@@ -135,6 +139,8 @@ pub struct MobTemplate {
     pub stats: Stat,
     pub display: String,
     pub display_img: String,
+    pub scan : String,
+    pub descr : String
 }
 
 impl MobTemplateDeser {
@@ -160,6 +166,8 @@ impl MobTemplateDeser {
             stats: Stat::new(base, stat_types)?,
             display: self.display,
             display_img: self.display_img,
+            scan : self.scan,
+            descr : self.descr
         })
     }
 }

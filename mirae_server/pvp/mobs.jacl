@@ -184,6 +184,7 @@
     }
     display : "chest.png"
     display_img : "none"
+    scan : "some kind of chest"
 )
 
 "decent_chest" : (
@@ -192,6 +193,7 @@
     }
     display : "chest.png"
     display_img : "none"
+    scan : "some kind of chest"
 )
 
 "awesome_chest" : (
@@ -200,6 +202,7 @@
     }
     display : "chest.png"
     display_img : "none"
+    scan : "some kind of chest"
 )
 
 "opec_chest" : (
@@ -208,6 +211,7 @@
     }
     display : "chest.png"
     display_img : "none"
+    scan : "some kind of chest"
 )
 
 "opec_rock_videogame_chest" : (
@@ -216,6 +220,7 @@
     }
     display : "chest.png"
     display_img : "none"
+    scan : "some kind of chest"
 )
 
 "pickle_monster" : (

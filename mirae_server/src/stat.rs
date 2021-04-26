@@ -1,10 +1,10 @@
-use crate::gamedata::gamedata::{GameData, StatType};
+use crate::gamedata::gamedata::{GameData, Named, StatType};
 use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
 };
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Stat {
@@ -51,6 +51,11 @@ impl Stat {
     pub fn get<S: Into<String>>(&self, s: S, g: &GameData) -> Result<f64> {
         let stat = StatType::checked_from(s.into(), g)?;
         Ok(self.base.get(&stat).expect("bug") + self.upgrades.get(&stat).expect("bug"))
+    }
+
+    pub fn get_upgrade<S: Into<String>>(&self, s: S, g: &GameData) -> Result<f64> {
+        let stat = StatType::checked_from(s.into(), g)?;
+        Ok(*self.upgrades.get(&stat).expect("bug"))
     }
 
     pub fn add_buffs(&mut self, buffs: &HashMap<StatType, f64>, g: &GameData) {
@@ -137,5 +142,18 @@ impl Stat {
         let val = self.upgrades.get(&stat).expect("bug") + 1.0;
         self.upgrades.insert(stat, val);
         Ok(())
+    }
+
+    pub fn to_string(&self, g: &GameData) -> String {
+        let mut s = "".into();
+        for k in self.base.keys() {
+            s = format!(
+                "{}{}: {}\n",
+                s,
+                k.0,
+                self.get(k.0.clone(), g).expect("valid stat")
+            )
+        }
+        s
     }
 }

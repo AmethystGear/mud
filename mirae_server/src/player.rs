@@ -3,7 +3,7 @@ use crate::{
     display::Image,
     entity::Entity,
     gamedata::{
-        gamedata::{GameData, StatType, ItemName},
+        gamedata::{GameData, StatType, ItemName, Named},
         item::Ability,
     },
     inventory::Inventory,

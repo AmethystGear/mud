@@ -4,7 +4,8 @@ use crate::{
     entity::{Entity, MAX_NUM_EAT},
     gamedata::{
         block::Block,
-        gamedata::{GameData, ItemName},
+        gamedata::{BlockName, GameData, ItemName, MobName, Named},
+        mobtemplate::MobTemplate,
     },
     player::Player,
     vector3::Vector3,
@@ -31,18 +32,20 @@ pub fn dispatch(data: ActionData) -> Result<()> {
         Some(Literal::String(s)) => {
             let func = match s.as_str() {
                 "disp" => disp,
-                "inv" => inv,
-                "eat" => eat,
+                "inv" | "inventory" => inv,
+                "eat" | "drink" | "consume" => eat,
                 "w" | "a" | "s" | "d" | "ww" | "aa" | "ss" | "dd" | "q" | "e" => step,
-                "wear" | "unwear" => wear,
-                "equip" | "dequip" => equip,
+                "wear" | "unwear" | "wearing" => wear,
+                "equip" | "dequip" | "equipped" => equip,
                 "use" => use_ability,
                 "upgrade" => upgrade,
                 "battle" => battle,
                 "map" => map,
                 "pass" => pass,
-                "run" => run,
-                "acc" => account,
+                "run" | "flee" => run,
+                "acc" | "account" => account,
+                "scan" => scan,
+                "info" | "stat" => info,
                 _ => return Err(anyhow!("invalid command")),
             };
             func(data)
@@ -284,21 +287,42 @@ enum Move {
     Z(bool),
 }
 
-fn find_closest_block(
+fn find_closest_posn(
     world: &World,
     g: &GameData,
     start: Vector3,
-    block_filter: &dyn Fn(&Block) -> bool,
+    filter: &dyn Fn(&Block, Option<&MobTemplate>) -> bool,
     max_dist: u64,
 ) -> Result<Vector3> {
+    let closest = find_all_posn(world, g, start, filter, max_dist, 1)?;
+    if closest.len() == 0 {
+        Err(anyhow!("no such block in range"))
+    } else {
+        Ok(closest[0])
+    }
+}
+
+fn find_all_posn(
+    world: &World,
+    g: &GameData,
+    start: Vector3,
+    filter: &dyn Fn(&Block, Option<&MobTemplate>) -> bool,
+    max_dist: u64,
+    max_ret: usize,
+) -> Result<Vec<Vector3>> {
     let mut visited = HashSet::new();
     let mut to_eval = VecDeque::new();
+    let mut ret = Vec::new();
     to_eval.push_back((start, 0));
     visited.insert(start);
     while let Some((curr, dist)) = to_eval.pop_front() {
+        if ret.len() >= max_ret {
+            break;
+        }
         let block = world.get_block(g, world.blocks().index(curr)?)?;
-        if block_filter(block) {
-            return Ok(curr);
+        let mob_template = world.get_mobtemplate_at(curr, g).ok();
+        if filter(block, mob_template) {
+            ret.push(curr);
         } else if dist < max_dist {
             let neighbors = [
                 Vector3::new(-1, 0, 0),
@@ -319,7 +343,7 @@ fn find_closest_block(
             }
         }
     }
-    Err(anyhow!("no such block in range"))
+    Ok(ret)
 }
 
 fn bound(posn: Vector3, world: &World) -> Vector3 {
@@ -408,8 +432,6 @@ fn step(mut data: ActionData) -> Result<()> {
         _ => Err(anyhow!(BAD_ARGS)),
     }?;
 
-    // TODO: make get_step not need mutable world by using
-    // mobtemplate instead of the actual mob
     let world = data
         .world
         .read()
@@ -433,13 +455,13 @@ fn step(mut data: ActionData) -> Result<()> {
                     if curr.z() == world.blocks().dim.z() - 1 {
                         Err(anyhow!("cannot move down, already at bottom layer"))
                     } else {
-                        let block_filter = |x: &Block| x.z_passable;
+                        let block_filter = |x: &Block, _: Option<&MobTemplate>| x.z_passable;
                         let closest_z_passable =
-                            find_closest_block(&world, data.g, curr, &block_filter, 1)?;
+                            find_closest_posn(&world, data.g, curr, &block_filter, 1)?;
 
                         let below = closest_z_passable + Vector3::new(0, 0, 1);
-                        let block_filter = |x: &Block| !x.solid;
-                        find_closest_block(&world, data.g, below, &block_filter, u64::MAX)
+                        let block_filter = |x: &Block, _: Option<&MobTemplate>| !x.solid;
+                        find_closest_posn(&world, data.g, below, &block_filter, u64::MAX)
                     }
                 } else {
                     if curr.z() == 0 {
@@ -454,8 +476,8 @@ fn step(mut data: ActionData) -> Result<()> {
                                 "you cannot ascend, there are solid blocks above you"
                             ))
                         } else {
-                            let block_filter = |x: &Block| !x.solid;
-                            find_closest_block(&world, data.g, above, &block_filter, u64::MAX)
+                            let block_filter = |x: &Block, _: Option<&MobTemplate>| !x.solid;
+                            find_closest_posn(&world, data.g, above, &block_filter, u64::MAX)
                         }
                     }
                 }
@@ -485,7 +507,7 @@ fn map(data: ActionData) -> Result<()> {
         world.blocks().dim.x() as usize,
         world.blocks().dim.y() as usize,
     );
-    let max_map_size = 100;
+    let max_map_size = 30;
     let min_resolution = 2;
     let resolution = min_resolution.max((world.blocks().dim.x() as usize) / (max_map_size));
     let img = Image::new(&world, &players, data.g, &bounds, resolution)?;
@@ -534,9 +556,9 @@ fn equip(mut data: ActionData) -> Result<()> {
         (Some(Literal::String(s)), None) => match s.as_str() {
             "dequip" => {
                 player.send_text("dequipping item...\n".into());
-                player.dequip()
+                player.dequip();
             }
-            "equip" => {}
+            "equipped" => {}
             _ => return Err(anyhow!(BAD_ARGS)),
         },
         (Some(Literal::String(s1)), Some(Literal::String(s2))) => match s1.as_str() {
@@ -566,7 +588,7 @@ fn wear(mut data: ActionData) -> Result<()> {
             "unwear" => {
                 player.unwear_all(data.g)?;
             }
-            "wear" => {}
+            "wearing" => {}
             _ => return Err(anyhow!(BAD_ARGS)),
         },
         (Some(Literal::String(s1)), Some(Literal::String(s2))) => {
@@ -604,7 +626,7 @@ fn upgrade(mut data: ActionData) -> Result<()> {
         _ => return Err(anyhow!(BAD_ARGS)),
     }
     let player = get_mut(&mut players, data.player_id)?;
-    let val = player.stats().get(stat.clone(), data.g)? as i64;
+    let val = player.stats().get_upgrade(stat.clone(), data.g)? as i64;
     if player.xp() < val * 100 {
         return Err(anyhow!(
             "you need {} xp to upgrade this stat, you have {} xp",
@@ -789,5 +811,133 @@ fn account(mut data: ActionData) -> Result<()> {
             ))
         }
     };
+    Ok(())
+}
+
+const MAX_SCAN_DIST: u64 = 5;
+fn scan(data: ActionData) -> Result<()> {
+    let start = {
+        let players = data
+            .players
+            .read()
+            .map_err(|_| anyhow!("couldn't lock players"))?;
+
+        *get(&players, data.player_id)?.loc()
+    };
+
+    let world = data
+        .world
+        .read()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+
+    let filter = |_: &Block, mob: Option<&MobTemplate>| mob.is_some();
+
+    let mut posns = find_all_posn(&world, data.g, start, &filter, MAX_SCAN_DIST, usize::MAX)?;
+
+    if posns.len() == 0 {
+        return Err(anyhow!("no mobs in scan range!"));
+    }
+
+    posns.retain(|&x| x != Vector3::zero());
+
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+    for posn in posns {
+        let mob_template = world.get_mobtemplate_at(posn, data.g)?;
+        let diff = posn - start;
+        let name = if mob_template.scan != "" {
+            &mob_template.scan
+        } else {
+            &mob_template.name.0
+        };
+        let x = if diff.x() < 0 {
+            format!("{} left", -diff.x())
+        } else if diff.x() > 0 {
+            format!("{} right", diff.x())
+        } else {
+            "".into()
+        };
+        let y = if diff.y() < 0 {
+            format!(", {} up", -diff.x())
+        } else if diff.x() > 0 {
+            format!(", {} down", diff.x())
+        } else {
+            "".into()
+        };
+        player.send_text(format!(
+            "'{}' at {}{}\n",
+            name,
+            x,
+            y
+        ));
+    }
+    Ok(())
+}
+
+fn info(mut data: ActionData) -> Result<()> {
+    data.params.pop_front(); // ignore first argument
+
+    let type_;
+    let name;
+    match (data.params.pop_front(), data.params.pop_front()) {
+        (Some(Literal::String(t)), Some(Literal::String(n))) => {
+            type_ = t;
+            name = n;
+        }
+        _ => return Err(anyhow!(BAD_ARGS)),
+    }
+
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+
+    match type_.as_str() {
+        "block" => {
+            let b_name = BlockName::checked_from(name, data.g)?;
+            let block = data
+                .g
+                .blocks
+                .name_to_item
+                .get(&b_name)
+                .expect("blockname was validated");
+
+            player.send_text(format!("{:#?}", block));
+        }
+        "mob" => {
+            let m_name = MobName::checked_from(name, data.g)?;
+            let mob_template = data
+                .g
+                .mob_templates
+                .name_to_item
+                .get(&m_name)
+                .expect("mobname was validated");
+
+            player.send_text(format!("{:#?}", mob_template));
+        }
+        "item" => {
+            let item_name = ItemName::checked_from(name, data.g)?;
+            let item = data
+                .g
+                .items
+                .get(&item_name)
+                .expect("itemname was validated");
+
+            player.send_text(format!("{:#?}", item));
+        }
+        "opp" => {}
+        _ => {
+            return Err(anyhow!(
+                "expected first arg to be either block, mob, or item!"
+            ))
+        }
+    }
+
     Ok(())
 }

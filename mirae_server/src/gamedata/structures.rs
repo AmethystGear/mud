@@ -140,6 +140,16 @@ impl Structure {
                 let posn = loc + struct_posn;
                 if let Some(block) = &self.blocks.get(struct_posn)? {
                     block_map.set(posn, g.get_block_id_by_blockname(&block)?)?;
+                    let block = g.blocks.name_to_item.get(block).expect("validated");
+                    if block.z_passable {
+                        let below = loc + Vector3::new(0, 0, 1);
+                        let below_block = g.get_block_name_by_id(block_map.get(below)?)?;
+                        let below_block = g.blocks.name_to_item.get(&below_block).expect("validated");
+                        if below_block.solid {
+                            println!("here");
+                            block_map.set(below, g.get_block_id_by_name("stone")?)?;
+                        }
+                    }
                 }
                 if let Some(mob_index) = &self.mobs.get(struct_posn)? {
                     let mobs = &self.mobgen[mob_index.clone()];
