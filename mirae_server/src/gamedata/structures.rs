@@ -146,7 +146,6 @@ impl Structure {
                         let below_block = g.get_block_name_by_id(block_map.get(below)?)?;
                         let below_block = g.blocks.name_to_item.get(&below_block).expect("validated");
                         if below_block.solid {
-                            println!("here");
                             block_map.set(below, g.get_block_id_by_name("stone")?)?;
                         }
                     }
