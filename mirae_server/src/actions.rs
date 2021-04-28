@@ -8,6 +8,7 @@ use crate::{
         mobtemplate::MobTemplate,
     },
     player::Player,
+    players_op,
     vector3::Vector3,
     world::World,
     PLAYER_SAVE_FOLDER,
@@ -21,7 +22,7 @@ use std::{
     fs,
     io::Write,
     path::Path,
-    sync::{Arc, RwLock},
+    sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
 const BAD_ARGS: &str =
@@ -56,7 +57,7 @@ pub fn dispatch(data: ActionData) -> Result<()> {
 
 fn get_player_and_opponent<'a>(
     opponent: ID,
-    players: &'a mut Vec<Option<Player>>,
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     player_id: usize,
     world: &'a mut World,
 ) -> Result<(&'a mut Player, Box<&'a mut dyn Entity>)> {
@@ -64,71 +65,91 @@ fn get_player_and_opponent<'a>(
         EntityType::Mob => {
             let player = get_mut(players, player_id)?;
             let opponent = world.get_mob_mut(opponent.id)?;
-            Ok((player, Box::new(opponent as &mut dyn Entity)))
+            Ok((
+                player.as_mut().ok_or(anyhow!("invalid player id"))?,
+                Box::new(opponent as &mut dyn Entity),
+            ))
         }
         EntityType::Player => {
             let (player, opponent) = get_two_mut(player_id, opponent.id, players)?;
-            Ok((player, Box::new(opponent as &mut dyn Entity)))
+            Ok((
+                player.as_mut().ok_or(anyhow!("invalid player id"))?,
+                Box::new(opponent.as_mut().ok_or(anyhow!("invalid player id"))? as &mut dyn Entity),
+            ))
         }
     }
 }
 
-pub fn get_mut(players: &mut Vec<Option<Player>>, player_id: usize) -> Result<&mut Player> {
-    players[player_id]
-        .as_mut()
-        .ok_or(anyhow!("invalid player id"))
+pub fn get_mut<'a>(
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
+    player_id: usize,
+) -> Result<RwLockWriteGuard<'a, Option<Player>>> {
+    players[player_id].write().map_err(players_op)
 }
 
-pub fn get(players: &Vec<Option<Player>>, player_id: usize) -> Result<&Player> {
-    players[player_id]
-        .as_ref()
-        .ok_or(anyhow!("invalid player id"))
+pub fn get<'a>(
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
+    player_id: usize,
+) -> Result<RwLockReadGuard<'a, Option<Player>>> {
+    players[player_id].read().map_err(players_op)
 }
 
-pub fn get_two_mut(
+pub fn get_two_mut<'a>(
     a: usize,
     b: usize,
-    players: &mut Vec<Option<Player>>,
-) -> Result<(&mut Player, &mut Player)> {
-    let (head, tail) = players.split_at_mut(std::cmp::max(a, b) as usize);
-    let err = "invalid player ids";
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
+) -> Result<(
+    RwLockWriteGuard<'a, Option<Player>>,
+    RwLockWriteGuard<'a, Option<Player>>,
+)> {
+    let split: _ = players.split_at(std::cmp::max(a, b) as usize);
+    let head: _ = split.0;
+    let tail: _ = split.1;
     if a > b {
-        return Ok((
-            tail[0].as_mut().ok_or(anyhow!(err.clone()))?,
-            head[b as usize].as_mut().ok_or(anyhow!(err.clone()))?,
-        ));
+        Ok((
+            tail[0].write().map_err(players_op)?,
+            head[b as usize].write().map_err(players_op)?,
+        ))
     } else if a < b {
-        return Ok((
-            head[a as usize].as_mut().ok_or(anyhow!(err.clone()))?,
-            tail[0].as_mut().ok_or(anyhow!(err.clone()))?,
-        ));
+        Ok((
+            head[a as usize].write().map_err(players_op)?,
+            tail[0].write().map_err(players_op)?,
+        ))
     } else {
-        return Err(anyhow!("player ids cannot be equal"));
+        Err(anyhow!("player ids cannot be equal"))
     }
 }
 
-pub fn get_two(a: usize, b: usize, players: &Vec<Option<Player>>) -> Result<(&Player, &Player)> {
-    let (head, tail) = players.split_at(std::cmp::max(a, b) as usize);
-    let err = "invalid player ids";
+pub fn get_two<'a>(
+    a: usize,
+    b: usize,
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
+) -> Result<(
+    RwLockReadGuard<'a, Option<Player>>,
+    RwLockReadGuard<'a, Option<Player>>,
+)> {
+    let split: _ = players.split_at(std::cmp::max(a, b) as usize);
+    let head: _ = split.0;
+    let tail: _ = split.1;
     if a > b {
-        return Ok((
-            tail[0].as_ref().ok_or(anyhow!(err.clone()))?,
-            head[b as usize].as_ref().ok_or(anyhow!(err.clone()))?,
-        ));
+        Ok((
+            tail[0].read().map_err(players_op)?,
+            head[b as usize].read().map_err(players_op)?,
+        ))
     } else if a < b {
-        return Ok((
-            head[a as usize].as_ref().ok_or(anyhow!(err.clone()))?,
-            tail[0].as_ref().ok_or(anyhow!(err.clone()))?,
-        ));
+        Ok((
+            head[a as usize].read().map_err(players_op)?,
+            tail[0].read().map_err(players_op)?,
+        ))
     } else {
-        return Err(anyhow!("player ids cannot be equal"));
+        Err(anyhow!("player ids cannot be equal"))
     }
 }
 
 pub struct ActionData<'a> {
     pub params: VecDeque<Literal>,
     pub player_id: usize,
-    pub players: Arc<RwLock<Vec<Option<Player>>>>,
+    pub players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     pub world: Arc<RwLock<World>>,
     pub battle_map: Arc<RwLock<BattleMap>>,
     pub g: &'a GameData,
@@ -137,7 +158,7 @@ pub struct ActionData<'a> {
 fn run_turn_with(
     battle_map: &mut BattleMap,
     player_id: ID,
-    players: &mut Vec<Option<Player>>,
+    players: Arc<Vec<Arc<RwLock<std::option::Option<Player>>>>>,
     world: &mut World,
     g: &GameData,
     func: &dyn Fn(
@@ -157,17 +178,18 @@ fn run_turn_with(
             battle_map.do_turn(Box::new(player), opp, g)
         }
     } else {
-        let player = get_mut(players, player_id.id)?;
+        let player = get_mut(players, player_id.id)?
+            .as_mut()
+            .ok_or(anyhow!("invalid player id"))?;
         func(player, None, g, battle_map)
     }
 }
 
 fn use_ability(mut data: ActionData) -> Result<()> {
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-    let player = get_mut(&mut players, data.player_id)?;
+    let player = get_mut(data.players, data.player_id)?
+        .as_mut()
+        .ok_or(anyhow!("invalid player id"))?;
+
     let ability_name;
     data.params.pop_front(); // ignore the first parameter
     match data.params.pop_front() {
@@ -224,7 +246,7 @@ fn use_ability(mut data: ActionData) -> Result<()> {
     run_turn_with(
         &mut battle_map,
         player_id,
-        &mut players,
+        data.players,
         &mut world,
         data.g,
         &func,
@@ -232,10 +254,6 @@ fn use_ability(mut data: ActionData) -> Result<()> {
 }
 
 fn eat(mut data: ActionData) -> Result<()> {
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
     let item_name;
     let amount;
     data.params.pop_front(); // ignore the first parameter
@@ -273,7 +291,7 @@ fn eat(mut data: ActionData) -> Result<()> {
     run_turn_with(
         &mut battle_map,
         player_id,
-        &mut players,
+        data.players,
         &mut world,
         data.g,
         &func,
@@ -391,11 +409,10 @@ fn step(mut data: ActionData) -> Result<()> {
             "you can't move while fighting something, try using \"run\""
         ));
     }
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-    let player = get(&players, data.player_id)?;
+    let player = get_mut(data.players, data.player_id)?
+        .as_mut()
+        .ok_or(anyhow!("invalid player id"))?;
+
     let move_speed = (player.stats().get("speed", data.g)?.round() as i64).min(MAX_MOVE_SPEED);
     let m = match (data.params.pop_front(), data.params.pop_front()) {
         (Some(Literal::String(s)), None) => match s.as_str() {
@@ -484,7 +501,7 @@ fn step(mut data: ActionData) -> Result<()> {
             }
         }?
     };
-    let player = get_mut(&mut players, data.player_id)?;
+
     player.return_posn = player.loc().clone();
     player.loc_mut().set(new_posn);
     player.send_text(format!("moved to: {:?}\n", player.loc()));
@@ -496,22 +513,27 @@ fn map(data: ActionData) -> Result<()> {
         .world
         .read()
         .map_err(|_| anyhow!("couldn't lock world"))?;
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-    let posn = *(get(&players, data.player_id)?.loc());
+
+    let player = get_mut(data.players, data.player_id)?
+        .as_ref()
+        .ok_or(anyhow!("invalid player id"))?;
+
     let bounds = Bounds::get_bounds(
         &world,
-        Vector3::new(0, 0, posn.z()),
+        Vector3::new(0, 0, player.loc().z()),
         world.blocks().dim.x() as usize,
         world.blocks().dim.y() as usize,
     );
     let max_map_size = 30;
     let min_resolution = 2;
     let resolution = min_resolution.max((world.blocks().dim.x() as usize) / (max_map_size));
-    let img = Image::new(&world, &players, data.g, &bounds, resolution)?;
-    let player = get_mut(&mut players, data.player_id)?;
+
+    let mut all = vec![];
+    for p in data.players.iter() {
+        all.push(*p.read().map_err(players_op)?);
+    }
+
+    let img = Image::new(&world, &all, data.g, &bounds, resolution)?;
     player.send_display(img);
     Ok(())
 }
@@ -522,10 +544,6 @@ fn disp(data: ActionData) -> Result<()> {
         .world
         .read()
         .map_err(|_| anyhow!("couldn't lock world"))?;
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
     let posn = *(get(&players, data.player_id)?.loc());
     let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, world.blocks().dim);
     let img = Image::new(&mut world, &players, data.g, &bounds, 1)?;
@@ -868,12 +886,7 @@ fn scan(data: ActionData) -> Result<()> {
         } else {
             "".into()
         };
-        player.send_text(format!(
-            "'{}' at {}{}\n",
-            name,
-            x,
-            y
-        ));
+        player.send_text(format!("'{}' at {}{}\n", name, x, y));
     }
     Ok(())
 }

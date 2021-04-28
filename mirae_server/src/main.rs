@@ -17,7 +17,7 @@ use serde_jacl::{
 use std::{
     collections::{HashMap, VecDeque},
     env, fs, io,
-    iter::FromIterator,
+    iter::{self, FromIterator},
     net::TcpStream,
     sync::{Arc, RwLock},
     thread::{self, spawn},
@@ -50,8 +50,8 @@ mod stat;
 mod vector3;
 mod world;
 
-const PLAYER_SAVE_FOLDER : &str = "save/player_save";
-const WORLD_SAVE_FOLDER : &str = "save/world_save";
+const PLAYER_SAVE_FOLDER: &str = "save/player_save";
+const WORLD_SAVE_FOLDER: &str = "save/world_save";
 const DEBUG_BLOCK_SIZE: u32 = 10;
 
 fn save_img(image: Image, save_location: &str) -> Result<()> {
@@ -81,7 +81,7 @@ fn save_img(image: Image, save_location: &str) -> Result<()> {
 fn map(
     mut params: VecDeque<Literal>,
     world: &World,
-    players: &Vec<Option<Player>>,
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     g: &GameData,
 ) -> Result<()> {
     // parse in our parameters
@@ -109,7 +109,11 @@ fn map(
         world.blocks().dim.x() as usize,
         world.blocks().dim.y() as usize,
     );
-    let image = Image::new(&world, &players, &g, &bounds, resolution as usize)?;
+    let mut all = vec![];
+    for p in players.iter() {
+        all.push(*p.read().map_err(players_op)?);
+    }
+    let image = Image::new(&world, &all, &g, &bounds, resolution as usize)?;
     save_img(image, &save_location)?;
     Ok(())
 }
@@ -117,7 +121,7 @@ fn map(
 fn look(
     mut params: VecDeque<Literal>,
     world: &World,
-    players: &Vec<Option<Player>>,
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     g: &GameData,
 ) -> Result<()> {
     let x;
@@ -155,7 +159,11 @@ fn look(
 
     let posn = Vector3::new(x as isize, y as isize, z as isize);
     let bounds = Bounds::get_bounds(&world, posn, width as usize, height as usize);
-    let image = Image::new(&world, &players, &g, &bounds, 1)?;
+    let mut all = vec![];
+    for p in players.iter() {
+        all.push(*p.read().map_err(players_op)?);
+    }
+    let image = Image::new(&world, &all, &g, &bounds, 1)?;
     save_img(image, &save_location)?;
     Ok(())
 }
@@ -163,7 +171,7 @@ fn look(
 fn save_world(
     mut params: VecDeque<Literal>,
     world: &World,
-    _players: &Vec<Option<Player>>,
+    _players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     g: &GameData,
 ) -> Result<()> {
     let help = "\"save\" <world_name>";
@@ -323,8 +331,12 @@ fn load_world(name: &str) -> Result<Load> {
     })
 }
 
-type ServerCommand =
-    dyn Fn(VecDeque<Literal>, &World, &Vec<Option<Player>>, &GameData) -> Result<()>;
+type ServerCommand = dyn Fn(
+    VecDeque<Literal>,
+    &World,
+    Arc<Vec<Arc<RwLock<Option<Player>>>>>,
+    &GameData,
+) -> Result<()>;
 
 fn init(args: &Vec<String>) -> Result<(GameData, World)> {
     fs::create_dir_all(WORLD_SAVE_FOLDER)?;
@@ -366,7 +378,7 @@ fn init(args: &Vec<String>) -> Result<(GameData, World)> {
 
 fn handle_server_commands(
     world: Arc<RwLock<World>>,
-    players: Arc<RwLock<Vec<Option<Player>>>>,
+    players: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     g: &GameData,
 ) -> Result<()> {
     let mut commands: HashMap<String, &ServerCommand> = HashMap::new();
@@ -382,10 +394,7 @@ fn handle_server_commands(
             Some(Literal::String(s)) => {
                 if let Some(func) = commands.get(&s) {
                     let world = world.read().map_err(|_| anyhow!("couldn't lock world"))?;
-                    let players = players
-                        .read()
-                        .map_err(|_| anyhow!("couldn't lock players"))?;
-                    func(params, &world, &players, g)
+                    func(params, &world, players.clone(), g)
                 } else {
                     Err(anyhow!(format!(
                         "invalid command, choose one of the following {:?}",
@@ -409,40 +418,39 @@ enum ConnA {
     Quit(usize),
 }
 
-fn get_first_availible_id(players: &Vec<Option<Player>>) -> Option<usize> {
+fn get_first_availible_id(players: Arc<Vec<Arc<RwLock<Option<Player>>>>>) -> Result<Option<usize>> {
     for i in 0..players.len() {
-        if players[i].is_none() {
-            return Some(i);
+        if players[i].read().map_err(players_op)?.is_none() {
+            return Ok(Some(i));
         }
     }
-    return None;
+    return Ok(None);
 }
 const LOCK_TEXT: &str = "couldn't aquire lock for";
-fn world_op<T>(_: T) -> Error {
+pub fn world_op<T>(_: T) -> Error {
     anyhow!("{} world", LOCK_TEXT)
 }
-fn players_op<T>(_: T) -> Error {
+pub fn players_op<T>(_: T) -> Error {
     anyhow!("{} players", LOCK_TEXT)
 }
-fn battle_map_op<T>(_: T) -> Error {
+pub fn battle_map_op<T>(_: T) -> Error {
     anyhow!("{} battle map", LOCK_TEXT)
 }
 
 fn world_logic(
     world_arc: Arc<RwLock<World>>,
-    players_arc: Arc<RwLock<Vec<Option<Player>>>>,
+    players_arc: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     battle_map_arc: Arc<RwLock<BattleMap>>,
     g_arc: Arc<GameData>,
 ) -> Result<()> {
     let mut world = world_arc.write().map_err(world_op)?;
-    let mut players = players_arc.write().map_err(players_op)?;
     let mut battle_map = battle_map_arc.write().map_err(battle_map_op)?;
-
     let dim = world.blocks().dim.clone();
 
     // start battles with mobs
-    for i in 0..players.len() {
-        if let Some(player) = &mut players[i] {
+    for i in 0..players_arc.len() {
+        let player = players_arc[i].write().map_err(players_op)?;
+        if let Some(player) = &mut *player {
             if world.has_mob(*player.loc())? && battle_map.get_opponent(player.id()).is_err() {
                 let mob = world.get_mob_at_mut(*player.loc(), &g_arc)?;
                 battle_map.init_battle(Box::new(player), Box::new(mob), &g_arc)?;
@@ -462,7 +470,10 @@ fn world_logic(
         let battle = battle_map.data_from_handle_mut(battle_handle).unwrap();
         let (a, b) = battle.ids();
         let (a, b) = match (a.enity_type, b.enity_type) {
-            (EntityType::Player, EntityType::Player) => get_two_mut(a.id, b.id, &mut players)?,
+            (EntityType::Player, EntityType::Player) => {
+                let split: _ = get_two_mut(a.id, b.id, players_arc.clone())?;
+                (split.0.as_mut().expect(""), split.1.as_mut().expect(""))
+            }
             _ => continue,
         };
         let players = [a, b];
@@ -496,13 +507,13 @@ fn world_logic(
         let (entity, player) = match (a.enity_type, b.enity_type) {
             (EntityType::Mob, EntityType::Player) => {
                 let mob = world.get_mob_mut(a.id)?;
-                let opponent = get_mut(&mut players, b.id)?;
-                (mob, opponent)
+                let opponent = get_mut(players_arc.clone(), b.id)?;
+                (mob, opponent.as_mut().unwrap())
             }
             (EntityType::Player, EntityType::Mob) => {
                 let mob = world.get_mob_mut(b.id)?;
-                let opponent = get_mut(&mut players, a.id)?;
-                (mob, opponent)
+                let opponent = get_mut(players_arc.clone(), a.id)?;
+                (mob, opponent.as_mut().unwrap())
             }
             _ => {
                 continue;
@@ -563,23 +574,22 @@ fn world_logic(
 fn handle_player_input(
     player_input: ConnA,
     world_arc: Arc<RwLock<World>>,
-    players_arc: Arc<RwLock<Vec<Option<Player>>>>,
+    players_arc: Arc<Vec<Arc<RwLock<Option<Player>>>>>,
     battle_map_arc: Arc<RwLock<BattleMap>>,
     g_arc: Arc<GameData>,
     rng: &mut StdRng,
 ) -> Result<()> {
     match player_input {
         ConnA::Init(s) => {
-            let mut players = players_arc.write().map_err(players_op)?;
             let sender = s.clone();
-            let id = get_first_availible_id(&players);
+            let id = get_first_availible_id(players_arc.clone())?;
             if let Some(id) = id {
                 let mut p_out = PlayerOut::new();
                 p_out.add_pkt(g_arc.init_packet.clone());
                 sender.send((p_out, Some(id)))?;
                 let player = Player::new(id, sender, &g_arc, rng)?;
-
-                players[id] = Some(player);
+                let mut guard = players_arc[id].write().map_err(players_op)?;
+                std::mem::replace(&mut *guard, Some(player));
             } else {
                 let mut p_out = PlayerOut::new();
                 p_out.append_err(anyhow!("There are already 256 players in the game!"));
@@ -597,10 +607,11 @@ fn handle_player_input(
             };
             let res = dispatch(action_data);
             if let Err(res) = res {
-                let mut players = players_arc.write().map_err(players_op)?;
                 let mut p_out = PlayerOut::new();
                 p_out.append_err(res);
-                players[player_id]
+                players_arc[player_id]
+                    .write()
+                    .map_err(players_op)?
                     .as_mut()
                     .ok_or(anyhow!("bad player id"))?
                     .sender
@@ -609,14 +620,14 @@ fn handle_player_input(
         }
         ConnA::Quit(player_id) => {
             let mut battle_map = battle_map_arc.write().map_err(battle_map_op)?;
-            let mut players = players_arc.write().map_err(players_op)?;
             let mut world = world_arc.write().map_err(world_op)?;
             if let Ok(opponent) = battle_map.get_opponent(ID::player(player_id)) {
-                let entity = get_entity(opponent, &mut players, &mut world)?;
+                let entity = get_entity(opponent, players_arc.clone(), &mut world)?;
                 entity.send_text("your opponent disconnected!\n".into());
                 battle_map.end_battle(opponent)?;
             }
-            players[player_id] = None;
+            let mut guard = players_arc[player_id].write().map_err(players_op)?;
+            std::mem::replace(&mut *guard, None);
         }
     }
     Ok(())
@@ -630,15 +641,15 @@ fn main() -> Result<()> {
 
     let (send, recv) = unbounded();
 
-    let mut players = vec![];
-    for _ in 0..(std::u8::MAX as usize + 1) {
-        players.push(None);
-    }
+    let players: Arc<Vec<Arc<RwLock<Option<Player>>>>> = Arc::new(
+        iter::repeat_with(|| Arc::new(RwLock::new(None)))
+            .take(256)
+            .collect(),
+    );
 
     let battle_map = BattleMap::new();
     let g = Arc::new(g);
     let world = Arc::new(RwLock::new(world));
-    let players = Arc::new(RwLock::new(players));
     let battle_map = Arc::new(RwLock::new(battle_map));
 
     let g_arc = Arc::clone(&g);
@@ -653,17 +664,14 @@ fn main() -> Result<()> {
         loop {
             let res = recv.try_recv();
             let res = match res {
-                Ok(player_input) => {
-                    // we have input from a player, handle it
-                    handle_player_input(
-                        player_input,
-                        world_arc.clone(),
-                        players_arc.clone(),
-                        battle_map_arc.clone(),
-                        g_arc.clone(),
-                        &mut rng,
-                    )
-                }
+                Ok(player_input) => handle_player_input(
+                    player_input,
+                    world_arc.clone(),
+                    players_arc.clone(),
+                    battle_map_arc.clone(),
+                    g_arc.clone(),
+                    &mut rng,
+                ),
                 Err(_) => {
                     // no player input to handle, just do world logic
                     world_logic(
@@ -704,12 +712,15 @@ fn main() -> Result<()> {
             let dur = Duration::from_secs(10);
             thread::sleep(dur);
 
-            let players = players.read().unwrap();
             for player in players.iter() {
-                if let Some(player) = player {
+                if let Some(player) = player.read().unwrap().as_mut() {
                     if let Some(username) = &player.username {
                         let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, username);
-                        let mut file = OpenOptions::new().write(true).truncate(true).open(save_file).unwrap();
+                        let mut file = OpenOptions::new()
+                            .write(true)
+                            .truncate(true)
+                            .open(save_file)
+                            .unwrap();
                         file.write_all(&player.save().unwrap().as_bytes()).unwrap();
                     }
                 }
@@ -720,7 +731,9 @@ fn main() -> Result<()> {
     // handle server commands on the console
     // print out any errors
     loop {
-        if let Err(res) = handle_server_commands(Arc::clone(&world), Arc::clone(&players), &g) {
+        let world = world.clone();
+        let players = players.clone();
+        if let Err(res) = handle_server_commands(world, players, &g) {
             println!("{:?}\n", res);
         }
     }
@@ -788,7 +801,7 @@ fn handle_connection(stream: Client<TcpStream>, channel: Sender<ConnA>) {
 
 pub fn get_entity<'a>(
     entity: ID,
-    players: &'a mut Vec<Option<Player>>,
+    players: Arc<Vec<Arc<RwLock<std::option::Option<Player>>>>>,
     world: &'a mut World,
 ) -> Result<Box<&'a mut dyn Entity>> {
     match entity.enity_type {
@@ -798,6 +811,7 @@ pub fn get_entity<'a>(
         }
         EntityType::Player => {
             let entity = get_mut(players, entity.id)?;
+            let entity = entity.as_mut().ok_or(anyhow!("invalid player id"))?;
             Ok(Box::new(entity as &mut dyn Entity))
         }
     }
