@@ -30,11 +30,7 @@ pub trait Named<T: From<String> + Debug + Hash + Eq + Named = Self> {
         if set.contains(&s) {
             Ok(s)
         } else {
-            Err(anyhow!(format!(
-                "'{:?}' is not a {}",
-                s,
-                T::NAMED_TYPE
-            )))
+            Err(anyhow!(format!("'{:?}' is not a {}", s, T::NAMED_TYPE)))
         }
     }
 }
@@ -449,11 +445,8 @@ impl GameData {
                 img_to_img_id.insert(mob_template.display.clone(), id);
                 id += 1;
             }
-            let val = img_to_img_id
-                .get(&mob_template.display)
-                .expect("this should never happen");
-
-            mob_id_to_img_id.insert(i, val.clone());
+            let val = img_to_img_id[&mob_template.display];
+            mob_id_to_img_id.insert(i, val);
         }
         let mut img_id_to_img = HashMap::new();
         for (k, v) in img_to_img_id {

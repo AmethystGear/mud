@@ -21,6 +21,8 @@ pub trait Entity {
     fn equipped(&self) -> &Inventory;
     fn worn(&self) -> &Inventory;
     fn stats(&self) -> &Stat;
+    fn attack_buffs(&self) -> &HashMap<DmgType, f64>;
+    fn defense_buffs(&self) -> &HashMap<DmgType, f64>;
     fn loc(&self) -> &Vector3;
     fn abilities(&self) -> HashMap<String, Ability>;
     fn xp(&self) -> i64;
@@ -38,6 +40,8 @@ pub trait Entity {
     fn send_display(&mut self, img: Image);
     fn send_image(&mut self, s: String);
     fn rng(&mut self) -> &mut StdRng;
+    fn attack_buffs_mut(&mut self) -> &mut HashMap<DmgType, f64>;
+    fn defense_buffs_mut(&mut self) -> &mut HashMap<DmgType, f64>;
 
     fn entrance(&mut self) -> Result<String>;
     fn attack(&mut self) -> Result<String>;
@@ -78,6 +82,20 @@ pub trait Entity {
                 .get(item_name)
                 .ok_or(anyhow!(format!("invalid item name! {:?}", item_name)))?;
             self.stats_mut().remove_buffs(&item.buffs.stat_buffs(g), g);
+            for (dmg_type, buff) in item.buffs.attack_buffs(g) {
+                let curr = *self
+                    .attack_buffs()
+                    .get(&dmg_type)
+                    .expect("attack buffs should have every damage type");
+                self.attack_buffs_mut().insert(dmg_type, curr / buff);
+            }
+            for (dmg_type, buff) in item.buffs.defense_buffs(g) {
+                let curr = *self
+                    .defense_buffs()
+                    .get(&dmg_type)
+                    .expect("defense buffs should have every damage type");
+                self.defense_buffs_mut().insert(dmg_type, curr / buff);
+            }
             Ok(())
         } else {
             Err(anyhow!(format!(
@@ -108,6 +126,20 @@ pub trait Entity {
                 return Err(anyhow!("you cannot wear this item!"));
             }
             self.stats_mut().add_buffs(&item.buffs.stat_buffs(g), g);
+            for (dmg_type, buff) in item.buffs.attack_buffs(g) {
+                let curr = *self
+                    .attack_buffs()
+                    .get(&dmg_type)
+                    .expect("attack buffs should have every damage type");
+                self.attack_buffs_mut().insert(dmg_type, curr * buff);
+            }
+            for (dmg_type, buff) in item.buffs.defense_buffs(g) {
+                let curr = *self
+                    .defense_buffs()
+                    .get(&dmg_type)
+                    .expect("defense buffs should have every damage type");
+                self.defense_buffs_mut().insert(dmg_type, curr * buff);
+            }
             self.worn_mut().add(item_name.clone(), 1);
             Ok(())
         } else {
@@ -120,12 +152,22 @@ pub trait Entity {
 
     fn run_ability(
         &mut self,
-        opponent: Option<Box<&mut dyn Entity>>,
+        opponent: &mut Option<Box<&mut dyn Entity>>,
         battle_map: &mut BattleMap,
         ability: Ability,
-        item: Option<ItemName>,
+        item: &Option<ItemName>,
         g: &GameData,
     ) -> Result<()> {
+        if self.rng().gen::<f64>() > ability.accuracy
+            || self.rng().gen::<f64>() > self.stats().get("accuracy", g)?
+        {
+            self.send_text("missed!\n".into());
+            if let Some(opponent) = opponent {
+                opponent.send_text(format!("{} missed!\n", self.name()));
+            }
+            return Ok(());
+        }
+
         // checks to ensure we can actually use the ability
         if self.xp() + ability.xp_cost < 0 {
             return Err(anyhow!(format!(
@@ -148,11 +190,7 @@ pub trait Entity {
 
         // if we're in battle, do damage calcs
         if let Some(opponent) = opponent {
-            opponent.send_text(format!(
-                "{} used '{}'",
-                self.name(),
-                ability.name
-            ));
+            opponent.send_text(format!("{} used '{}'", self.name(), ability.name));
             if let Some(item) = item {
                 opponent.send_text(format!(" which is an ability of {:?}.\n", item));
             } else {
@@ -161,7 +199,7 @@ pub trait Entity {
 
             battle_map.add_effect(
                 opponent.id(),
-                StatusEffect::Damage(ability.damage(g)),
+                StatusEffect::Damage(mul(&ability.damage(g), self.attack_buffs())),
                 ability.repeat as usize + 1,
             )?;
 
@@ -176,6 +214,10 @@ pub trait Entity {
                 StatusEffect::Counter(ability.counter(g)),
                 ability.repeat as usize + 1,
             )?;
+
+            if ability.text != "" {
+                opponent.send_text(format!("{}\n", ability.text.clone()));
+            }
         }
 
         self.set_xp(self.xp() - ability.xp_cost);
@@ -186,12 +228,15 @@ pub trait Entity {
         if ability.destroy_item {
             self.equipped_mut().clear();
         }
+        if ability.self_text != "" {
+            self.send_text(format!("{}\n", ability.self_text.clone()));
+        }
         Ok(())
     }
 
     fn eat(
         &mut self,
-        opponent: Option<Box<&mut dyn Entity>>,
+        mut opponent: Option<Box<&mut dyn Entity>>,
         battle_map: &mut BattleMap,
         item_name: &ItemName,
         amount: u64,
@@ -212,22 +257,10 @@ pub trait Entity {
             self.inventory_mut()
                 .change(item_name.clone(), -(amount as i64))?;
 
-            if let Some(opponent) = opponent {
-                for _ in 0..amount {
-                    let ability = ability.clone();
-                    self.run_ability(
-                        Some(Box::new(*opponent)),
-                        battle_map,
-                        ability,
-                        Some(item.name.clone()),
-                        g,
-                    )?;
-                }
-            } else {
-                for _ in 0..amount {
-                    let ability = ability.clone();
-                    self.run_ability(None, battle_map, ability, Some(item.name.clone()), g)?;
-                }
+            let item_name = Some(item_name.clone());
+            for _ in 0..amount {
+                let ability = ability.clone();
+                self.run_ability(&mut opponent, battle_map, ability, &item_name, g)?;
             }
             Ok(())
         } else {
@@ -237,23 +270,22 @@ pub trait Entity {
 
     fn do_random_ability(
         &mut self,
-        opponent: Option<Box<&mut dyn Entity>>,
+        mut opponent: Option<Box<&mut dyn Entity>>,
         item: Option<ItemName>,
         battle_map: &mut BattleMap,
         abilities: &HashMap<String, Ability>,
         g: &GameData,
         rng: &mut StdRng,
     ) -> Result<()> {
-        let ability_names: Vec<&String> = abilities.keys().collect();
-        if ability_names.len() > 0 {
-            let rand_ability = abilities
-                .get(ability_names[rng.gen_range(0, ability_names.len())])
-                .expect("bug")
-                .clone();
-            self.run_ability(opponent, battle_map, rand_ability, item, g)
-        } else {
-            Err(anyhow!("no abilities to do"))
+        let mut ability_names: Vec<&String> = abilities.keys().collect();
+        while ability_names.len() > 0 {
+            let index = rng.gen_range(0, ability_names.len());
+            let rand_ability = abilities[ability_names.remove(index)].clone();
+            if let Ok(_) = self.run_ability(&mut opponent, battle_map, rand_ability, &item, g) {
+                return Ok(());
+            }
         }
+        Err(anyhow!("cannot run any abilities"))
     }
 
     fn try_random_move(
@@ -264,7 +296,7 @@ pub trait Entity {
         rng: &mut StdRng,
     ) -> Result<()> {
         let random_move: f64 = rng.gen();
-        if random_move < 0.2 {
+        if random_move < 0.1 {
             // try to equip a random item
             let filter = |x: &Item| x.equipable;
             let item = get_items_rand(&self.inventory(), 1, filter, g, rng)?;
@@ -276,7 +308,7 @@ pub trait Entity {
             } else {
                 Err(anyhow!("no items to equip"))
             }
-        } else if random_move < 0.4 {
+        } else if random_move < 0.7 {
             // attempt to do a randomly chosen ability of the current item
             if let Some(item_name) = self.equipped().items().next() {
                 let item = g
@@ -295,10 +327,10 @@ pub trait Entity {
             } else {
                 Err(anyhow!("no item equipped"))
             }
-        } else if random_move < 0.6 {
+        } else if random_move < 0.95 {
             // attempt to do a random inherent ability
             self.do_random_ability(opponent, None, battle_map, &self.abilities(), g, rng)
-        } else if random_move < 0.99 {
+        } else if random_move < 0.999 {
             // attempt to eat a random amount of a random item
             let filter = |x: &Item| x.abilities.contains_key("eat");
             let item = get_all_items(&self.inventory(), filter, g)?;
@@ -315,10 +347,7 @@ pub trait Entity {
             // this will always work
             // so we are probabilistically guaranteed termination
             if let Some(opponent) = opponent {
-                opponent.send_text(format!(
-                    "{} skips their turn\n",
-                    self.name()
-                ));
+                opponent.send_text(format!("{} skips their turn\n", self.name()));
             }
             Ok(())
         }
@@ -392,7 +421,7 @@ pub fn get_items_rand(
             }
         }
     }
-    
+
     return Ok(returned_items);
 }
 

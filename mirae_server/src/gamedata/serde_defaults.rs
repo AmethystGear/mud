@@ -21,6 +21,10 @@ pub fn zero_f64() -> f64 {
     0.0
 }
 
+pub fn one_f64() -> f64 {
+    1.0
+}
+
 pub fn empty_hmap<K, V>() -> HashMap<K, V> {
     HashMap::new()
 }
@@ -35,6 +39,10 @@ pub fn empty_string() -> String {
 
 pub fn default_png_string() -> String {
     "default.png".to_string()
+}
+
+pub fn no_description() -> String {
+    "no description".into()
 }
 
 pub fn map_key<A: From<B> + Eq + Hash + Debug, B, C>(

@@ -1,5 +1,5 @@
 use super::{
-    gamedata::{DmgType, ItemName, StatType, GameData},
+    gamedata::{DmgType, GameData, ItemName, StatType},
     serde_defaults::*,
 };
 use crate::stat::default_empty_fields;
@@ -38,6 +38,15 @@ pub struct AbilityDeser {
 
     #[serde(default = "zero_i64")]
     xp_cost: i64,
+
+    #[serde(default = "one_f64")]
+    accuracy: f64,
+
+    #[serde(default = "empty_string")]
+    text: String,
+
+    #[serde(default = "empty_string")]
+    self_text: String,
 }
 
 impl AbilityDeser {
@@ -88,6 +97,9 @@ impl AbilityDeser {
             remove_items,
             make_items: map_key(self.make_items, item_names)?,
             xp_cost: self.xp_cost,
+            accuracy: self.accuracy,
+            text: self.text,
+            self_text: self.self_text
         })
     }
 }
@@ -136,8 +148,10 @@ pub struct ItemDeser {
     buffs: BuffsDeser,
     #[serde(default = "empty_hmap")]
     abilities: HashMap<String, AbilityDeser>,
-    #[serde(default = "empty_string")]
+    #[serde(default = "no_description")]
     description: String,
+    #[serde(default = "empty_vec")]
+    tags: Vec<String>,
 }
 
 impl ItemDeser {
@@ -160,11 +174,8 @@ impl ItemDeser {
             xp: self.xp,
             buffs: self.buffs.into_buffs(dmg_types, stat_types)?,
             abilities,
-            description: if self.description == "" {
-                None
-            } else {
-                Some(self.description)
-            },
+            description: self.description,
+            tags: self.tags,
         })
     }
 }
@@ -185,18 +196,21 @@ pub struct Ability {
     pub remove_items: HashMap<ItemName, u64>,
     pub make_items: HashMap<ItemName, u64>,
     pub xp_cost: i64,
+    pub accuracy: f64,
+    pub text: String,
+    pub self_text: String,
 }
 
 impl Ability {
-    pub fn damage(&self, g : &GameData) -> HashMap<DmgType, f64> {
+    pub fn damage(&self, g: &GameData) -> HashMap<DmgType, f64> {
         default_empty_fields(&self.damage, 0.0, &g.dmg)
     }
 
-    pub fn block(&self, g : &GameData) -> HashMap<DmgType, f64> {
+    pub fn block(&self, g: &GameData) -> HashMap<DmgType, f64> {
         default_empty_fields(&self.block, 1.0, &g.dmg)
     }
 
-    pub fn counter(&self, g : &GameData) -> HashMap<DmgType, f64> {
+    pub fn counter(&self, g: &GameData) -> HashMap<DmgType, f64> {
         default_empty_fields(&self.counter, 0.0, &g.dmg)
     }
 }
@@ -209,15 +223,15 @@ pub struct Buffs {
 }
 
 impl Buffs {
-    pub fn defense_buffs(&self, g : &GameData) -> HashMap<DmgType, f64> {
+    pub fn defense_buffs(&self, g: &GameData) -> HashMap<DmgType, f64> {
         default_empty_fields(&self.defense_buffs, 1.0, &g.dmg)
     }
 
-    pub fn attack_buffs(&self, g : &GameData) -> HashMap<DmgType, f64> {
+    pub fn attack_buffs(&self, g: &GameData) -> HashMap<DmgType, f64> {
         default_empty_fields(&self.attack_buffs, 1.0, &g.dmg)
     }
 
-    pub fn stat_buffs(&self, g : &GameData) -> HashMap<StatType, f64> {
+    pub fn stat_buffs(&self, g: &GameData) -> HashMap<StatType, f64> {
         default_empty_fields(&self.stat_buffs, 1.0, &g.stat)
     }
 }
@@ -230,5 +244,6 @@ pub struct Item {
     pub xp: i64,
     pub buffs: Buffs,
     pub abilities: HashMap<String, Ability>,
-    pub description: Option<String>,
+    pub description: String,
+    pub tags: Vec<String>,
 }

@@ -50,8 +50,8 @@ mod stat;
 mod vector3;
 mod world;
 
-const PLAYER_SAVE_FOLDER : &str = "save/player_save";
-const WORLD_SAVE_FOLDER : &str = "save/world_save";
+const PLAYER_SAVE_FOLDER: &str = "save/player_save";
+const WORLD_SAVE_FOLDER: &str = "save/world_save";
 const DEBUG_BLOCK_SIZE: u32 = 10;
 
 fn save_img(image: Image, save_location: &str) -> Result<()> {
@@ -438,14 +438,15 @@ fn world_logic(
     let mut players = players_arc.write().map_err(players_op)?;
     let mut battle_map = battle_map_arc.write().map_err(battle_map_op)?;
 
-    let dim = world.blocks().dim.clone();
-
     // start battles with mobs
     for i in 0..players.len() {
         if let Some(player) = &mut players[i] {
             if world.has_mob(*player.loc())? && battle_map.get_opponent(player.id()).is_err() {
+                let mob_template = world.get_mobtemplate_at(*player.loc(), &g_arc)?;
+                let defender_trades = mob_template.trades.len() > 0;
+
                 let mob = world.get_mob_at_mut(*player.loc(), &g_arc)?;
-                battle_map.init_battle(Box::new(player), Box::new(mob), &g_arc)?;
+                battle_map.init_battle(Box::new(player), Box::new(mob), defender_trades, &g_arc)?;
                 let mob_name = mob.name();
                 player.send_text(format!("{}: {}\n", mob_name, mob.entrance()?));
                 player.send_image(mob.display_img.clone());
@@ -472,16 +473,7 @@ fn world_logic(
             if players[curr].stats().health() <= 0.0 {
                 let other_name = players[other].name();
                 players[curr].send_text(format!("you were killed by {}\n", other_name));
-                players[curr].send_text(format!("respawning...\n"));
-
-                players[curr].stats_mut().reset_health(&g_arc);
-                players[curr].stats_mut().reset_energy(&g_arc);
-                players[curr].loc_mut().set(Vector3::new(
-                    thread_rng().gen_range(0, dim.x()),
-                    thread_rng().gen_range(0, dim.y()),
-                    thread_rng().gen_range(0, dim.z()),
-                ));
-
+                players[curr].respawn(&world, &g_arc)?;
                 let curr_name = players[curr].name();
                 players[other].send_text(format!("you killed {}\n", curr_name));
                 battle_map.end_battle(players[other].id())?;
@@ -533,15 +525,7 @@ fn world_logic(
 
             if player_health <= 0.0 {
                 player.send_text(format!("you were killed by {}\n", name));
-                player.send_text(format!("respawning...\n"));
-                player.stats_mut().reset_health(&g_arc);
-                player.stats_mut().reset_energy(&g_arc);
-                player.loc_mut().set(Vector3::new(
-                    thread_rng().gen_range(0, dim.x()),
-                    thread_rng().gen_range(0, dim.y()),
-                    thread_rng().gen_range(0, dim.z()),
-                ));
-                player.return_posn = *player.loc();
+                player.respawn(&world, &g_arc)?;
             }
 
             battle_map.end_battle(player.id())?;
@@ -556,6 +540,16 @@ fn world_logic(
         player.send_text(format!("{}: {}\n", entity.name(), entity.attack()?));
         entity.do_random_move(Some(Box::new(player)), &mut battle_map, &g_arc);
         battle_map.do_turn(Box::new(entity), Box::new(player), &g_arc)?;
+    }
+
+    // handle players dying outside of battle
+    for player in players.iter_mut() {
+        if let Some(player) = player {
+            if player.stats().health() <= 0.0 {
+                player.send_text(format!("you died.\n"));
+                player.respawn(&world, &g_arc)?;
+            }
+        }
     }
     Ok(())
 }
@@ -577,8 +571,9 @@ fn handle_player_input(
                 let mut p_out = PlayerOut::new();
                 p_out.add_pkt(g_arc.init_packet.clone());
                 sender.send((p_out, Some(id)))?;
-                let player = Player::new(id, sender, &g_arc, rng)?;
-
+                let mut player = Player::new(id, sender, &g_arc, rng)?;
+                let world = world_arc.read().map_err(world_op)?;
+                player.respawn(&world, &g_arc)?;
                 players[id] = Some(player);
             } else {
                 let mut p_out = PlayerOut::new();
@@ -709,7 +704,11 @@ fn main() -> Result<()> {
                 if let Some(player) = player {
                     if let Some(username) = &player.username {
                         let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, username);
-                        let mut file = OpenOptions::new().write(true).truncate(true).open(save_file).unwrap();
+                        let mut file = OpenOptions::new()
+                            .write(true)
+                            .truncate(true)
+                            .open(save_file)
+                            .unwrap();
                         file.write_all(&player.save().unwrap().as_bytes()).unwrap();
                     }
                 }

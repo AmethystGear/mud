@@ -1,39 +1,149 @@
 "grass" : (
     color : (r : 0, g : 175, b : 95)
-    mob_spawn_chance : 0.02
+    mob_spawn : (
+        exclude : ["hot", "cold", "cave", "swamp", "aquatic", "surface_aquatic" "bigly"]
+        spawn_chance : 0.01
+    )
 )
-"rock" : (
-    color : (r : 150, g : 150, b : 150)
+
+"iron_ore" : (
+    color : (r : 183, g : 65, b : 14)
+    break_into : "stone"
+    drop : "iron_ore"
     solid : true
 )
+
+"gold_ore" : (
+    color : (r : 212, g : 175, b : 55)
+    break_into : "stone"
+    drop : "gold_ore"
+    solid : true
+)
+
+"bigly_ore" : (
+    color : (r : 255, g : 165, b : 0)
+    break_into : "stone"
+    drop : "trump_orange"
+    solid : true
+)
+
+"rock" : (
+    color : (r : 150, g : 150, b : 150)
+    break_into : "stone"
+    solid : true
+)
+
 "stone" : (
     color : (r : 220, g : 220, b : 255)
-    mob_spawn_chance : 0.1
 )
+
+"cave_stone" : (
+    color : (r : 220, g : 220, b : 255)
+    mob_spawn : (
+        exclude : ["hot", "cold", "aquatic", "surface_aquatic"]
+        favor : ["cave"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
+)
+
+"underwater_stone" : (
+    color : (r : 220, g : 220, b : 255)
+    mob_spawn : (
+        require : ["aquatic"]
+        spawn_chance : 0.01
+    )
+)
+
 "water" : (
     color : (r : 0, g : 215, b : 255)
     z_passable : true
     unlit : true
     transparency : (r : 161, g : 221, b : 221)
+    mob_spawn : (
+        require : ["aquatic"]
+        spawn_chance : 0.01
+    )
 )
+"surface_water" : (
+    color : (r : 0, g : 215, b : 255)
+    z_passable : true
+    unlit : true
+    transparency : (r : 161, g : 221, b : 221)
+    mob_spawn : (
+        require : ["surface_aquatic"]
+        spawn_chance : 0.01
+    )
+)
+
 "forest" : (
     color : (r : 0, g : 95, b : 0)
-    mob_spawn_chance : 0.2
+    mob_spawn : (
+        exclude : ["hot", "cold", "cave", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["swamp"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
 )
+
 "mud" : (
     color : (r : 112, g : 84, b : 62)
+    mob_spawn : (
+        exclude : ["hot", "cold", "cave", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["swamp"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
 )
-"sand" : (
+
+"desert_sand" : (
     color : (r : 194, g : 178, b : 128)
-    mob_spawn_chance : 0.05
+    mob_spawn : (
+        exclude : ["cold", "cave", "swamp", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["hot"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
 )
+
+"beach_sand" : (
+    color : (r : 194, g : 178, b : 128)
+    mob_spawn : (
+        exclude : ["hot", "cold", "cave", "swamp", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["beached"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
+)
+
+"underwater_sand" : (
+    color : (r : 194, g : 178, b : 128)
+    mob_spawn : (
+        require : ["aquatic"]
+        spawn_chance : 0.01
+    )
+)
+
 "ice" : (
     color : (r : 185, g : 232, b : 234)
+    mob_spawn : (
+        exclude : ["hot", "cave", "swamp", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["cold"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
 )
+
 "snow" : (
     color : (r : 250, g : 250, b : 250)
-    mob_spawn_chance : 0.05
+    mob_spawn : (
+        exclude : ["hot", "cave", "swamp", "aquatic", "surface_aquatic", "bigly"]
+        favor : ["cold"]
+        favor_prob : 0.9
+        spawn_chance : 0.01
+    )
 )
+
 "empty" : (
     color : (r : 0, g : 0, b : 0)
     solid : true
@@ -47,6 +157,7 @@
         )
     )
 )
+
 "lantern" : (
     color : (r : 255, g : 186, b : 50)
     solid : true
@@ -60,6 +171,22 @@
         )
     )
 )
+
+
+"dim_lantern" : (
+    color : (r : 255, g : 186, b : 50)
+    solid : true
+    unlit : true
+    light: (
+        point_light : (
+            intensity : 0.3,
+            falloff : 0.1,
+            max_range : 5
+            color : (r : 255, g : 190, b : 130)
+        )
+    )
+)
+
 "sea_lantern" : (
     color : (r : 0, g : 200, b : 200)
     solid : true
@@ -73,13 +200,16 @@
         )
     )
 )
+
 "wood_floor" : (
     color : (r : 112, g : 84, b : 62)
 )
+
 "wood_wall" : (
     color : (r : 68, g : 48, b : 34)
     solid : true
 )
+
 "lava" : (
     color : (r : 207, g : 16, b : 32)
     solid : true
@@ -93,10 +223,21 @@
         )
     )
 )
+
 "abyss" : (
-    color : (r : 0, g : 10, b : 20)
+    color : (r : 0, g : 15, b : 30)
     solid : true
     z_passable : true
     unlit : true
-    transparency : (r : 60, g : 60, b : 70)
+    transparency : (r : 40, g : 100, b : 200)
+)
+
+"trash" : (
+    color : (r : 148, g : 119, b : 6)
+    mob_spawn : (
+        exclude : ["aquatic", "surface_aquatic"]
+        favor : ["trash", "bogly", "radioactive"]
+        favor_prob : 0.99
+        spawn_chance : 0.1
+    )
 )

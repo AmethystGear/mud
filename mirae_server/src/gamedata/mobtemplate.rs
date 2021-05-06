@@ -8,10 +8,45 @@ use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 
+#[derive(Debug, Clone)]
+pub struct Trade {
+    pub in_item: ItemName,
+    pub out_item: ItemName,
+    pub in_cnt: u64,
+    pub out_cnt: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct TradeDeser {
+    in_item: String,
+    out_item: String,
+    in_cnt: u64,
+    out_cnt: u64,
+}
+
+impl TradeDeser {
+    pub fn into_trade(self, items: &HashSet<ItemName>) -> Result<Trade> {
+        let in_item = ItemName::from(self.in_item);
+        let out_item = ItemName::from(self.out_item);
+        if items.contains(&in_item) && items.contains(&out_item) {
+            Ok(Trade {
+                in_item,
+                out_item,
+                in_cnt: self.in_cnt,
+                out_cnt: self.out_cnt,
+            })
+        } else {
+            Err(anyhow!(format!(
+                "possibly invalid item name(s): {:?}, {:?}",
+                in_item, out_item
+            )))
+        }
+    }
+}
+
 #[derive(Deserialize, Debug)]
 struct ItemGenDeser {
     name: String,
-    prob: f64,
     per: u64,
 }
 
@@ -21,7 +56,6 @@ impl ItemGenDeser {
         if items.contains(&name) {
             Ok(ItemGen {
                 name,
-                prob: self.prob,
                 per: self.per,
             })
         } else {
@@ -33,22 +67,33 @@ impl ItemGenDeser {
 #[derive(Debug, Clone)]
 pub struct ItemGen {
     pub name: ItemName,
-    pub prob: f64,
     pub per: u64,
 }
 
 #[derive(Deserialize, Debug)]
 struct InventoryBuilderDeser {
+    #[serde(default = "zero_u64")]
     min: u64,
+    #[serde(default = "zero_u64")]
     max: u64,
-    items: Vec<ItemGenDeser>,
+    #[serde(default = "empty_vec")]
+    tags: Vec<String>,
+    #[serde(default = "empty_vec")]
+    required_items: Vec<ItemGenDeser>,
+    #[serde(default = "empty_vec")]
+    items: Vec<Vec<ItemGenDeser>>,
+    #[serde(default = "empty_vec")]
+    probs: Vec<f64>,
 }
 
 #[derive(Debug, Clone)]
 pub struct InventoryBuilder {
     pub min: u64,
     pub max: u64,
-    pub items: Vec<ItemGen>,
+    pub tags: Vec<String>,
+    pub required_items: Vec<ItemGen>,
+    pub items: Vec<Vec<ItemGen>>,
+    pub probs: Vec<f64>,
 }
 
 impl InventoryBuilderDeser {
@@ -56,20 +101,40 @@ impl InventoryBuilderDeser {
         InventoryBuilderDeser {
             min: 0,
             max: 0,
+            tags: vec![],
+            required_items: vec![],
             items: vec![],
+            probs: vec![],
         }
     }
 
     fn into_inventorybuilder(self, items: &HashSet<ItemName>) -> Result<InventoryBuilder> {
-        let mut new_items = vec![];
-        for item in self.items {
-            new_items.push((item.into_itemgen(items))?);
+        let text = format!("{:#?}", self);
+        let mut n_items = vec![];
+        for item_list in self.items {
+            let mut new_items = vec![];
+            for item in item_list {
+                new_items.push((item.into_itemgen(items))?);
+            }
+            n_items.push(new_items);
+        }
+
+        let mut req_items = vec![];
+        for item in self.required_items {
+            req_items.push(item.into_itemgen(items)?);
+        }
+
+        if n_items.len() != self.probs.len() {
+            return Err(anyhow!(format!("probs len != items len\n{}", text)));
         }
 
         Ok(InventoryBuilder {
             min: self.min,
             max: self.max,
-            items: new_items,
+            items: n_items,
+            probs: self.probs,
+            required_items: req_items,
+            tags: self.tags,
         })
     }
 }
@@ -124,8 +189,12 @@ pub struct MobTemplateDeser {
     display_img: String,
     #[serde(default = "empty_string")]
     scan: String,
-    #[serde(default = "empty_string")]
-    descr : String
+    #[serde(default = "no_description")]
+    descr: String,
+    #[serde(default = "empty_vec")]
+    trades: Vec<TradeDeser>,
+    #[serde(default = "empty_vec")]
+    tags: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -139,8 +208,10 @@ pub struct MobTemplate {
     pub stats: Stat,
     pub display: String,
     pub display_img: String,
-    pub scan : String,
-    pub descr : String
+    pub scan: String,
+    pub description: String,
+    pub trades: Vec<Trade>,
+    pub tags: Vec<String>,
 }
 
 impl MobTemplateDeser {
@@ -156,6 +227,12 @@ impl MobTemplateDeser {
             abilities.insert(k.clone(), v.into_ability(k, dmg_types, item_names)?);
         }
         let base = map_key(self.stats, stat_types)?;
+
+        let mut trades = Vec::new();
+        for t in self.trades {
+            trades.push(t.into_trade(item_names)?);
+        }
+
         Ok(MobTemplate {
             name,
             xp: self.xp,
@@ -166,8 +243,10 @@ impl MobTemplateDeser {
             stats: Stat::new(base, stat_types)?,
             display: self.display,
             display_img: self.display_img,
-            scan : self.scan,
-            descr : self.descr
+            scan: self.scan,
+            description: self.descr,
+            trades,
+            tags : self.tags
         })
     }
 }

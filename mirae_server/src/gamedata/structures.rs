@@ -93,10 +93,28 @@ impl StructureDeser {
                 // transparent pixels are ignored
                 if alpha == u8::MAX {
                     let rgb = RGB::new(pix.0[0], pix.0[1], pix.0[2]);
-                    if let Some((block, mp)) = rgb_to_block.get(&rgb) {
-                        block_map.direct_set(index, Some(block.clone()));
-                        mob_map.direct_set(index, Some(mp.clone()));
-                    } else {
+                    let mut set = false;
+                    for r in &[rgb.r, rgb.r + 1, rgb.r - 1] {
+                        for g in &[rgb.g, rgb.g + 1, rgb.g - 1] {
+                            for b in &[rgb.b, rgb.b + 1, rgb.b - 1] {
+                                let rgb = RGB::new(*r, *g, *b);
+                                if let Some((block, mp)) = rgb_to_block.get(&rgb) {
+                                    block_map.direct_set(index, Some(block.clone()));
+                                    mob_map.direct_set(index, Some(mp.clone()));
+                                    set = true;
+                                    break;
+                                } 
+                            }
+                            if set {
+                                break;
+                            }
+                        }
+                        if set {
+                            break;
+                        }
+                    }
+
+                    if !set {
                         return Err(anyhow!(format!("invalid pixel color {:?}", rgb)));
                     }
                 }
@@ -134,6 +152,7 @@ impl Structure {
         g: &GameData,
         rng: &mut StdRng,
     ) -> Result<()> {
+        println!("spawned {:?} at {:?}", self.structure_name, loc);
         for y in 0..self.blocks.dim.y() {
             for x in 0..self.blocks.dim.x() {
                 let struct_posn = Vector3::new(x, y, 0);

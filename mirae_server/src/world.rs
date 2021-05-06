@@ -234,8 +234,13 @@ fn generate_structures(
             .structures
             .get(name)
             .ok_or(anyhow!("invalid structure name"))?;
-        if let Some(biome_pairs) = g.terrain.structure_spawn.get(name) {
+        let mut count = 0;
+        if let Some(structure_spawn) = g.terrain.structure_spawn.get(name) {
             for i in 0..(block_map.dim.dim() as usize) {
+                if count >= structure_spawn.cap {
+                    break;
+                }
+
                 let biome_name = g
                     .biomes
                     .id_to_name
@@ -244,7 +249,7 @@ fn generate_structures(
 
                 let chance: f64 = rng.gen();
                 let mut prob = -1.0;
-                for biome_pair in biome_pairs {
+                for biome_pair in &structure_spawn.biomes {
                     if &biome_pair.biome == biome_name {
                         prob = biome_pair.prob;
                         break;
@@ -254,8 +259,11 @@ fn generate_structures(
                 if chance < prob {
                     let structure = &structure[rng.gen_range(0, structure.len())];
                     // if we can't spawn it here, just move on and ignore the error
-                    let _ignore_err =
-                        structure.spawn_at(block_map.index_to_posn(i), block_map, mob_map, g, rng);
+                    if let Ok(_) =
+                        structure.spawn_at(block_map.index_to_posn(i), block_map, mob_map, g, rng)
+                    {
+                        count += 1;
+                    }
                 }
             }
         } else {
@@ -407,7 +415,7 @@ impl World {
         }
         // generate structures
         generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng)?;
-        
+
         // generate mobs
         for i in 0..(mob_map.dim.dim() as usize) {
             let block = g.get_block_name_by_id(block_map.direct_get(i))?;
@@ -416,12 +424,72 @@ impl World {
                 .name_to_item
                 .get(&block)
                 .ok_or(anyhow!("block doesn't exist!"))?;
-            if rng.gen::<f64>() < block.mob_spawn_chance && mob_map.direct_get(i) == MobU16::empty()
+            if rng.gen::<f64>() < block.mob_spawn.spawn_chance
+                && mob_map.direct_get(i) == MobU16::empty()
             {
-                mob_map.direct_set(
-                    i,
-                    MobU16(rng.gen_range(0, g.mob_templates.max_id.as_u16().unwrap_or(0))),
-                );
+                let mut f = || -> Result<bool> {
+                    let max = g.mob_templates.max_id.as_u16().unwrap_or(0);
+                    let mob_id = MobU16(rng.gen_range(0, max));
+                    let mob_name = g.get_mob_name_by_id(mob_id)?;
+                    let mob = &g.mob_templates.name_to_item[&mob_name];
+
+                    for tag0 in &block.mob_spawn.exclude {
+                        for tag1 in &mob.tags {
+                            if tag0 == tag1 {
+                                return Ok(false);
+                            }
+                        }
+                    }
+
+                    if block.mob_spawn.require.len() > 0 {
+                        let mut has_require = false;
+                        for tag0 in &block.mob_spawn.require {
+                            for tag1 in &mob.tags {
+                                if tag0 == tag1 {
+                                    has_require = true;
+                                    break;
+                                }
+                            }
+                            if has_require {
+                                break;
+                            }
+                        }
+    
+                        if !has_require {
+                            return Ok(false);
+                        }
+                    }
+
+                    if block.mob_spawn.favor.len() > 0 {
+                        let mut favored = false;
+                        for tag0 in &block.mob_spawn.favor {
+                            for tag1 in &mob.tags {
+                                if tag0 == tag1 {
+                                    favored = true;
+                                    break;
+                                }
+                            }
+                            if favored {
+                                break;
+                            }
+                        }
+                        
+                        if !favored && rng.gen_range(0.0, 1.0) < block.mob_spawn.favor_prob {
+                            //println!("rejected {:?} because not favored", mob_name);
+                            return Ok(false);
+                        } else if !favored {
+                            //println!("accepted {:?} even though not favored", mob_name);
+                        } else {
+                            println!("{:?} was favored on block {:?}", mob_name, block.name);
+                        }
+                    }
+                    mob_map.direct_set(i, mob_id);
+                    Ok(true)
+                };
+                let mut pass = false;
+                while !pass {
+                    pass = f()?;
+                }
             }
         }
 
@@ -435,7 +503,7 @@ impl World {
                 light_map.direct_set(i, RGB::white());
                 continue;
             }
-            let mut light = RGB::white();
+            let mut light = RGB::new(200, 200, 200);
             let loc = block_map.index_to_posn(i);
             for z in 0..loc.z() {
                 let loc = Vector3::new(loc.x(), loc.y(), z);
@@ -471,9 +539,7 @@ impl World {
         }
 
         let min_light = 30;
-
         for i in 0..(light_map.dim.dim() as usize) {
-            let block = get_block(&block_map, g, i)?;
             let mut light = light_map.direct_get(i);
             if light.r < min_light {
                 light.r = min_light;
@@ -484,7 +550,7 @@ impl World {
             if light.b < min_light {
                 light.b = min_light;
             }
-            light_map.direct_set(i, light.mul(block.color));
+            light_map.direct_set(i, light);
         }
 
         Ok(World {
@@ -522,7 +588,10 @@ impl World {
         // why not if let here?
         // because that would make rust complain about self.spawn_mob
         if self.spawned_mobs.get_at(loc).is_some() {
-            Ok(self.spawned_mobs.get_at_mut(loc).unwrap())
+            Ok(self
+                .spawned_mobs
+                .get_at_mut(loc)
+                .expect("there should be a mob here"))
         } else {
             if self.mob_map.get(loc)?.as_u16().is_some() {
                 self.spawn_mob(loc, g)?;
@@ -536,10 +605,7 @@ impl World {
     pub fn get_mobtemplate_at<'a>(&self, loc: Vector3, g: &'a GameData) -> Result<&'a MobTemplate> {
         if let Some(mob) = self.mob_map.get(loc)?.as_u16() {
             let name = g.get_mob_name_by_id(MobU16(mob))?;
-            Ok(g.mob_templates
-                .name_to_item
-                .get(&name)
-                .expect("mob name cannot be invalid"))
+            Ok(&g.mob_templates.name_to_item[&name])
         } else {
             Err(anyhow!("no mob at this location"))
         }
@@ -607,6 +673,10 @@ impl World {
 
     pub fn blocks(&self) -> &Map<u8> {
         &self.block_map
+    }
+
+    pub fn blocks_mut(&mut self) -> &mut Map<u8> {
+        &mut self.block_map
     }
 
     pub fn mobs(&self) -> &Map<MobU16> {

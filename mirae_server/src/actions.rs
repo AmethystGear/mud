@@ -24,8 +24,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-const BAD_ARGS: &str =
-    "bad arguments to command, try help <command> to see how to use it correctly";
+const BAD_ARGS: &str = "bad arguments to command";
 
 pub fn dispatch(data: ActionData) -> Result<()> {
     match data.params.get(0) {
@@ -46,6 +45,9 @@ pub fn dispatch(data: ActionData) -> Result<()> {
                 "acc" | "account" => account,
                 "scan" => scan,
                 "info" | "stat" => info,
+                "descr" | "describe" => describe,
+                "trade" => trade,
+                "mine" | "break" => mine,
                 _ => return Err(anyhow!("invalid command")),
             };
             func(data)
@@ -183,12 +185,7 @@ fn use_ability(mut data: ActionData) -> Result<()> {
         return Err(anyhow!("you don't have any item equipped!"));
     }
 
-    let item = data
-        .g
-        .items
-        .get(item_name)
-        .expect("player somehow equipped an item that doesn't exist");
-
+    let item = &data.g.items[item_name];
     let item_name = item_name.clone();
 
     let ability;
@@ -215,10 +212,16 @@ fn use_ability(mut data: ActionData) -> Result<()> {
         .map_err(|_| anyhow!("couldn't lock world"))?;
 
     let func = |player: &mut Player,
-                opp: Option<Box<&mut dyn Entity>>,
+                mut opp: Option<Box<&mut dyn Entity>>,
                 g: &GameData,
                 battle_map: &mut BattleMap| {
-        player.run_ability(opp, battle_map, ability.clone(), Some(item_name.clone()), g)
+        player.run_ability(
+            &mut opp,
+            battle_map,
+            ability.clone(),
+            &Some(item_name.clone()),
+            g,
+        )
     };
 
     run_turn_with(
@@ -637,6 +640,7 @@ fn upgrade(mut data: ActionData) -> Result<()> {
         player.set_xp(player.xp() - val * 100);
     }
     player.stats_mut().upgrade(stat, data.g)?;
+    player.send_text("upgraded stat\n".into());
     Ok(())
 }
 
@@ -675,7 +679,7 @@ fn battle(data: ActionData) -> Result<()> {
 
     if let Some(opp) = opponent_id {
         let (player, opponent) = get_two_mut(data.player_id, opp, &mut players)?;
-        battle_map.init_battle(Box::new(player), Box::new(opponent), data.g)?;
+        battle_map.init_battle(Box::new(player), Box::new(opponent), false, data.g)?;
         Ok(())
     } else {
         Err(anyhow!("no player in range"))
@@ -834,11 +838,11 @@ fn scan(data: ActionData) -> Result<()> {
 
     let mut posns = find_all_posn(&world, data.g, start, &filter, MAX_SCAN_DIST, usize::MAX)?;
 
+    posns.retain(|&x| x != start);
+
     if posns.len() == 0 {
         return Err(anyhow!("no mobs in scan range!"));
     }
-
-    posns.retain(|&x| x != Vector3::zero());
 
     let mut players = data
         .players
@@ -855,30 +859,105 @@ fn scan(data: ActionData) -> Result<()> {
             &mob_template.name.0
         };
         let x = if diff.x() < 0 {
-            format!("{} left", -diff.x())
+            format!(" {} left", -diff.x())
         } else if diff.x() > 0 {
-            format!("{} right", diff.x())
+            format!(" {} right", diff.x())
         } else {
             "".into()
         };
         let y = if diff.y() < 0 {
-            format!(", {} up", -diff.x())
-        } else if diff.x() > 0 {
-            format!(", {} down", diff.x())
+            format!(" {} up", -diff.y())
+        } else if diff.y() > 0 {
+            format!(" {} down", diff.y())
         } else {
             "".into()
         };
-        player.send_text(format!(
-            "'{}' at {}{}\n",
-            name,
-            x,
-            y
-        ));
+        player.send_text(format!("'{}' at{}{}\n", name, x, y));
     }
     Ok(())
 }
 
+fn get_info(entity: Box<&mut dyn Entity>, g: &GameData) -> String {
+    let equip = format!("equip: {}\n", entity.equipped().to_string());
+    let wear = format!("wearing:\n{}\n", entity.worn().to_string());
+    let inventory = format!("inventory:\n{}\n", entity.inventory().to_string());
+    let stats = format!("stats:\n{}", entity.stats().to_string(g));
+    format!("{}{}{}{}", equip, wear, inventory, stats)
+}
+
 fn info(mut data: ActionData) -> Result<()> {
+    data.params.pop_front(); // ignore first argument
+
+    let type_;
+    let name;
+    match (data.params.pop_front(), data.params.pop_front()) {
+        (Some(Literal::String(t)), Some(Literal::String(n))) => {
+            type_ = t;
+            name = n;
+        }
+        (Some(Literal::String(t)), None) => {
+            type_ = t;
+            name = "".into();
+        }
+        _ => return Err(anyhow!(BAD_ARGS)),
+    }
+
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+
+    match type_.as_str() {
+        "block" => {
+            let b_name = BlockName::checked_from(name, data.g)?;
+            let block = &data.g.blocks.name_to_item[&b_name];
+            player.send_text(format!("{:#?}\n", block));
+        }
+        "mob" => {
+            let m_name = MobName::checked_from(name, data.g)?;
+            let mob_template = &data.g.mob_templates.name_to_item[&m_name];
+            player.send_text(format!("{:#?}\n", mob_template));
+        }
+        "item" => {
+            let item_name = ItemName::checked_from(name, data.g)?;
+            let item = &data.g.items[&item_name];
+            player.send_text(format!("{:#?}\n", item));
+        }
+        "opp" => {
+            let battle_map = data
+                .battle_map
+                .read()
+                .map_err(|_| anyhow!("couldn't lock battle map"))?;
+            if let Ok(opponent) = battle_map.get_opponent(ID::player(data.player_id)) {
+                let mut world = data
+                    .world
+                    .write()
+                    .map_err(|_| anyhow!("couldn't lock world"))?;
+                let (player, opp) =
+                    get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
+
+                let info = get_info(opp, data.g);
+                player.send_text(info);
+            } else {
+                return Err(anyhow!("you're not fighting anything"));
+            }
+        }
+        "self" => {
+            let info = get_info(Box::new(player), data.g);
+            player.send_text(info);
+        }
+        _ => {
+            return Err(anyhow!(
+                "expected first arg to be either block, mob, or item"
+            ))
+        }
+    }
+    Ok(())
+}
+
+fn describe(mut data: ActionData) -> Result<()> {
     data.params.pop_front(); // ignore first argument
 
     let type_;
@@ -899,45 +978,146 @@ fn info(mut data: ActionData) -> Result<()> {
     let player = get_mut(&mut players, data.player_id)?;
 
     match type_.as_str() {
-        "block" => {
-            let b_name = BlockName::checked_from(name, data.g)?;
-            let block = data
-                .g
-                .blocks
-                .name_to_item
-                .get(&b_name)
-                .expect("blockname was validated");
-
-            player.send_text(format!("{:#?}", block));
-        }
         "mob" => {
             let m_name = MobName::checked_from(name, data.g)?;
-            let mob_template = data
-                .g
-                .mob_templates
-                .name_to_item
-                .get(&m_name)
-                .expect("mobname was validated");
-
-            player.send_text(format!("{:#?}", mob_template));
+            let mob_template = &data.g.mob_templates.name_to_item[&m_name];
+            player.send_text(format!("\"{}\"\n", mob_template.description));
         }
         "item" => {
             let item_name = ItemName::checked_from(name, data.g)?;
-            let item = data
-                .g
-                .items
-                .get(&item_name)
-                .expect("itemname was validated");
-
-            player.send_text(format!("{:#?}", item));
+            let item = &data.g.items[&item_name];
+            player.send_text(format!("\"{}\"\n", item.description));
         }
-        "opp" => {}
         _ => {
             return Err(anyhow!(
-                "expected first arg to be either block, mob, or item!"
+                "expected first arg to be either block, mob, or item"
             ))
         }
     }
+    Ok(())
+}
 
+fn trade(mut data: ActionData) -> Result<()> {
+    data.params.pop_front(); // ignore first arg
+
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+
+    let world = data
+        .world
+        .read()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+
+    let mob_template = world.get_mobtemplate_at(*player.loc(), data.g)?;
+    if mob_template.trades.len() == 0 {
+        return Err(anyhow!("you cannot trade with this mob!"));
+    }
+
+    match (data.params.pop_front(), data.params.pop_front()) {
+        (
+            Some(Literal::Number(Number::Int(trade_no))),
+            Some(Literal::Number(Number::Int(num_times))),
+        ) => {
+            // do the requested trade
+            if trade_no < 0 {
+                return Err(anyhow!("trade number cannot be negative"));
+            }
+            let trade_no = trade_no as usize;
+            let n_trades = mob_template.trades.len();
+            if trade_no >= n_trades {
+                return Err(anyhow!(format!(
+                    "trade number must be less than {}",
+                    n_trades
+                )));
+            }
+            if num_times <= 0 {
+                return Err(anyhow!("num times to do trade must at least be one"));
+            }
+            let trade = &mob_template.trades[trade_no];
+            let in_cnt = trade.in_cnt as i64 * num_times;
+            let out_cnt = trade.out_cnt * num_times as u64;
+
+            player
+                .inventory_mut()
+                .change(trade.in_item.clone(), -in_cnt)?;
+            player.inventory_mut().add(trade.out_item.clone(), out_cnt);
+        }
+        (None, None) => {
+            // display the trades
+            let mut i = 0;
+            for trade in &mob_template.trades {
+                player.send_text(format!("{}: {:?}\n", i, trade));
+                i += 1;
+            }
+        }
+        _ => return Err(anyhow!(BAD_ARGS)),
+    }
+
+    Ok(())
+}
+
+fn mine(mut data: ActionData) -> Result<()> {
+    data.params.pop_front(); // ignore first arg
+
+    let direction;
+    let num_units;
+    match (data.params.pop_front(), data.params.pop_front()) {
+        (Some(Literal::String(dir)), Some(Literal::Number(Number::Int(len)))) => {
+            if len < 1 || len > 5 {
+                return Err(anyhow!(
+                    "cannot break less than 1 block or more than 5 blocks"
+                ));
+            }
+            num_units = len as isize;
+            match dir.as_str() {
+                "w" => {
+                    direction = Vector3::new(0, -1, 0);
+                }
+                "a" => {
+                    direction = Vector3::new(-1, 0, 0);
+                }
+                "s" => {
+                    direction = Vector3::new(0, 1, 0);
+                }
+                "d" => {
+                    direction = Vector3::new(1, 0, 0);
+                }
+                _ => return Err(anyhow!(BAD_ARGS)),
+            }
+        }
+        _ => return Err(anyhow!(BAD_ARGS)),
+    }
+
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+
+    let mut world = data
+        .world
+        .write()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+
+    let start = *player.loc();
+    for i in 1..(num_units + 1) {
+        let curr = (direction * i) + start;
+        let block = world.get_block_at(data.g, curr)?;
+        if let Some(break_into) = &block.break_into {
+            let block_id = data.g.get_block_id_by_blockname(break_into)?;
+            world.blocks_mut().set(curr, block_id)?;
+            if let Some(drop) = &block.drop {
+                player.inventory_mut().add(drop.clone(), 1);
+                player.send_text(format!("+1 '{}'\n", drop.0))
+            }
+        } else {
+            return Err(anyhow!("cannot break {:?} at {:?}", block.name, curr));
+        }
+    }
     Ok(())
 }

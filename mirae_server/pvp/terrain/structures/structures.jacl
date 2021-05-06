@@ -68,6 +68,21 @@
     mapping : [(color : (r : 255, g : 0, b : 0), block : "sea_lantern")]
 )
 
+"iron_ore" : (
+    sources : ["caves/cave2.png", "caves/cave3.png"]
+    mapping : [(color : (r : 0, g : 0, b : 0), block : "iron_ore")]
+)
+
+"gold_ore" : (
+    sources : ["single.png"]
+    mapping : [(color : (r : 255, g : 0, b : 0), block : "gold_ore")]
+)
+
+"bigly_ore" : (
+    sources : ["caves/cave2.png", "caves/cave3.png"]
+    mapping : [(color : (r : 0, g : 0, b : 0), block : "bigly_ore")]
+)
+
 "village" : (
     sources : ["villages/village.png"]
     mapping : [
@@ -88,6 +103,20 @@
                 (mob: "chestaroo", prob : 0.2)
                 (mob: "awesome_chest", prob : 0.05)
             ]
+        )
+    ]
+)
+
+"reges_shack" : (
+    sources : ["reges_shack.png"]
+    mapping : [
+        (color : (r : 0, g : 0, b : 0), block : "rock")
+        (color : (r : 255, g : 0, b : 0), block : "wood_floor")
+        (color : (r : 0, g : 255, b : 0), block : "dim_lantern")
+        (
+            color : (r : 0, g : 0, b : 255)
+            block : "wood_floor"
+            mobs : [(mob : "reges" prob : 1.0)]
         )
     ]
 )

@@ -1,6 +1,6 @@
-dim : (x : 300, y : 300, z : 5)
-octaves : 7
-biome_octaves : 6
+dim : (x : 350, y : 350, z : 5)
+octaves : 8
+biome_octaves : 5
 full_passes : [
     // generate the land and caves
     (
@@ -10,7 +10,7 @@ full_passes : [
                 (biome : "grassland") 
                 (biome : "desert" cutoff : 0.6) 
                 (biome : "snowy" cutoff : 0.4)
-                (biome : "swamp" cutoff : 0.3)
+                (biome : "swamp" cutoff : 0.4)
             ]
             [(biome : "cave")]
             [(biome : "cave")]
@@ -24,9 +24,19 @@ full_passes : [
         layers : [
             [(biome : "beach" cutoff : 0.525) (biome : "ocean_surface" cutoff : 0.5)]
             [(biome : "ocean" cutoff : 0.5)]
-            [(biome : "ocean" cutoff : 0.5)]
             [(biome : "underwater" cutoff : 0.5) (biome : "abyss" cutoff : 0.35)]
-            [(biome : "rock" cutoff : 0.5) (biome : "deep_underwater" cutoff : 0.35)]
+            [(biome : "cracked_rock" cutoff : 0.375) (biome : "deep_underwater" cutoff : 0.35)]
+        ]
+    )
+    // generate trash lands
+    (
+        change_bounding_noise_per_pass : false
+        layers : [
+            [(biome : "trash", cutoff : 0.2)]
+            [(biome : "rock", cutoff : 0.2)]
+            [(biome : "rock", cutoff : 0.2)]
+            [(biome : "rock", cutoff : 0.2)]
+            [(biome : "rock", cutoff : 0.2)]
         ]
     )
 ]
@@ -54,16 +64,34 @@ structure_spawn : {
             (biome: "swamp")
             (biome: "underwater")
             (biome: "deep_underwater")
-            (biome: "cave" prob: 0.0002)
+            (biome: "cave" prob: 0.0004)
         ]
         default_prob : 0.0001
     )
 
     "lantern" : (
         biomes : [
-            (biome: "snowy" prob : 0.000025)
-            (biome: "cave" prob : 0.00015)
-            (biome: "cave_bottom" prob : 0.00005)
+            (biome: "cave" prob : 0.0015)
+            (biome: "cave_bottom" prob : 0.001)
+        ]
+    )
+
+    "iron_ore" : (
+        biomes : [
+            (biome: "cave" prob : 0.0015)
+            (biome: "cave_bottom" prob : 0.001)
+        ]
+    )
+
+    "gold_ore" : (
+        biomes : [
+            (biome: "cave_bottom" prob : 0.001)
+        ]
+    )
+
+    "bigly_ore" : (
+        biomes : [
+            (biome: "cave" prob : 0.0005)
         ]
     )
 
@@ -80,6 +108,13 @@ structure_spawn : {
             (biome: "desert")
             (biome: "snowy")
         ]
-        default_prob : 0.00005
+        default_prob : 0.0005
+    )
+
+    "reges_shack" : (
+        biomes : [
+            (biome : "swamp" prob : 0.001)
+        ]
+        cap : 1
     )
 }

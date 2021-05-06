@@ -73,14 +73,14 @@ pub struct Image {
 }
 
 impl Image {
-    fn average_color(world: &World, bounds: &Bounds) -> Result<RGB> {
+    fn average_color(world: &World, bounds: &Bounds, gd : &GameData) -> Result<RGB> {
         let mut r = 0;
         let mut g = 0;
         let mut b = 0;
         for y in 0..bounds.height {
             for x in 0..bounds.width {
                 let loc = bounds.posn + Vector3::new(x as isize, y as isize, 0);
-                let rgb = world.colors().get(loc)?;
+                let rgb = world.colors().get(loc)?.mul(world.get_block_at(gd, loc)?.color);
                 r += rgb.r as usize;
                 g += rgb.g as usize;
                 b += rgb.b as usize;
@@ -93,7 +93,7 @@ impl Image {
         Ok(rgb)
     }
 
-    fn display_rgb(world: &World, bounds: &Bounds, resolution: usize) -> Result<Vec<u8>> {
+    fn display_rgb(world: &World, bounds: &Bounds, resolution: usize, g : &GameData) -> Result<Vec<u8>> {
         let mut display = Vec::new();
         for j in 0..(bounds.height / resolution) {
             for i in 0..(bounds.width / resolution) {
@@ -104,7 +104,7 @@ impl Image {
                     width: resolution,
                     height: resolution,
                 };
-                let rgb = Image::average_color(world, &bounds)?;
+                let rgb = Image::average_color(world, &bounds, g)?;
                 display.push(rgb.r);
                 display.push(rgb.g);
                 display.push(rgb.b);
@@ -175,7 +175,7 @@ impl Image {
         } else if resolution == 1 {
             entities = Some(Image::display_entity(world, bounds, g)?);
         }
-        let rgb = Image::display_rgb(world, bounds, resolution)?;
+        let rgb = Image::display_rgb(world, bounds, resolution, g)?;
         let players = Image::display_players(players, bounds, resolution)?;
         Ok(Self {
             rgb,
@@ -191,8 +191,8 @@ impl Image {
         vec.push(self.width);
         vec.push(self.height);
         vec.push((self.players.len() / 3) as u8);
-        if self.entities.is_some() {
-            vec.push(self.entities.as_ref().unwrap().len() as u8);
+        if let Some(e) = self.entities.as_ref() {
+            vec.push(e.len() as u8);
         } else {
             vec.push(0);
         }

@@ -108,6 +108,7 @@
         )
         */
     }
+    tags : ["A"]
 )
 
 "stick" : (
@@ -306,7 +307,8 @@
 
 "honourable_rune" : (
     xp : 10000
-    description : "Rare magical artifact that only knights can decipher. Can be used to increase the power of certain spells."
+    description : "Rare magical artifact that only knights can decipher. Required by some more powerful spells."
+    tags : ["A"]
 )
 
 "incomplete_physics_homework" : (
@@ -365,10 +367,17 @@
     description : "A knight's physics homework... 
 looks like the knight was stuck on the extra credit,
 though they haven't even started on any of the other problems..."
+    tags : ["D"]
 )
 
-"completed_physics_homework" : (xp : 2000)
-"completed_physics_extra_credit" : (xp : 5000)
+"completed_physics_homework" : (
+    xp : 2000
+    tags : ["C"]
+)
+"completed_physics_extra_credit" : (
+    xp : 5000
+    tags : ["B"]
+)
 
 "mana" : (
     xp : 40
@@ -434,6 +443,8 @@ the challenges you overcame
 they were the TRUE prize,
 not this trinket.
 (This totally isn't just us scamming you btw.)"
+
+tags : ["F"]
 )
 
 "CPU" : (
@@ -446,6 +457,7 @@ not this trinket.
 
 "broken_machinery" : (
     xp : -10
+    tags : ["D"]
 )
 
 "newton's_laws" : (
@@ -457,21 +469,24 @@ not this trinket.
     description : 
 "the meaning of LIFE, the UNIVERSE and EVERYTHING can be understood
 if you simply USE this item to it's full extent..."
+
     abilities : {
-        "42" : (
+        "attain_enlightenment" : (
             destroy_item : true
             health : -424242
         )
     }
+
+    tags : ["F"]
 )
 
 // grades, lol
-"F" : ( xp : -100 )
-"D+" : ( xp : 100 )
-"C-" : ( xp : 200 )
-"C++" : ( xp : -500 )
-"B+" : ( xp : 500 )
-"A+" : ( xp : 1000 )
+"F" : ( xp : -100, tags : ["F"])
+"D+" : ( xp : 100, tags : ["D"])
+"C-" : ( xp : 200, tags : ["C"])
+"C++" : ( xp : -500, tags : ["F"])
+"B+" : ( xp : 500, tags : ["B"])
+"A+" : ( xp : 1000, tags : ["A"])
 
 "sins_of_humanity" : (
     abilities : {
@@ -522,6 +537,8 @@ if you simply USE this item to it's full extent..."
 "wood" : ()
 
 "iron_ore" : ()
+
+"gold_ore" : ()
 
 "sonic's_shoes" : (
     wearable : true
@@ -616,7 +633,10 @@ if you simply USE this item to it's full extent..."
             health : 3
             energy : -3
             counter : {
-                "physical" : 0.35
+                "physical" : 0.25
+            }
+            block : {
+                "physical" : 0.75
             }
         )
         "speak" : (
@@ -738,18 +758,30 @@ and make the greatest comeback ever seen in history!!"
 )
 
 "faceman_meat" : (
+    equipable : true
     abilities : {
-        "eat" : (
-            remove_items : {
-                "faceman_meat" : 1
-            }
+        "yummy" : (
+            destroy_item : true
             health : -9999999
             make_items : {
                 "meat_shield_v0" : 1
                 "teeth_v0" : 1
             }
+            self_text : 
+"Your life flashes before your eyes... 
+how could you have been so stupid?
+Why did you willingly consume faceman meat?
+Your consciousness begins to fade... you begin to feel a strong, unrelenting hunger...
+...
+...
+...
+..
+.
+.
+bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
         )
     }
+    tags : ["D"]
 )
 
 "meat_shield_v0" : (
@@ -839,10 +871,12 @@ and make the greatest comeback ever seen in history!!"
 )
 
 "iron_darksword" : (
-
+    // TODO
 )
 
-"pickle_jar" : ()
+"pickle_jar" : (
+    // TODO
+)
 
 "pickle" : (
     abilities : {
@@ -871,3 +905,119 @@ and make the greatest comeback ever seen in history!!"
         )
     }
 )
+
+"pag_slice" : (
+    // TODO
+    tags : ["C"]
+)
+
+"half_eaten_bigmac" : (
+    // TODO
+    tags : ["F"]
+)
+
+"metal" : (
+    // TODO
+    tags : ["C"]
+)
+
+"missile" : (
+    // TODO 
+)
+
+"AA_batteries" : (
+    // TODO
+    tags : ["B"]
+)
+
+"laser" : (
+    // TODO 
+)
+
+"nuclear_warhead" : (
+    // TODO
+    tags : ["A"]
+)
+
+"missile_launcher" : (
+    // TODO
+    tags : ["A"]
+)
+
+"gravitino_ball" : (
+    // TODO
+    tags : ["B"]
+)
+
+"nanites" : (
+    // TODO
+    tags : ["C"]
+)
+
+"opec_rock_videogame_music" : (
+    equipable : true
+    description : "terrible music, though knights seem to like it"
+    abilities : {
+        "listen" : (
+            energy : -1
+            self_text : "ew... this music sucks"
+        )
+    }
+    tags : ["F"]
+)
+
+"bong" : (
+    wearable : true
+    equipable : true
+    buffs : (
+        attack_buffs : {
+            "high" : 1.5
+        }
+        stat_buffs : {
+            "max_health" : 0.75
+            "accuracy" : 0.75
+        }
+    )
+    abilities : {
+        "pass_the_bong" : (
+            text : "hands shaking, eyes red, you take another hit of the bong...
+whoa... dude... it's like totally a whole new dimension..."
+
+            energy : -6
+            damage : {
+                "high" : 8
+            }
+
+            remove_items : {
+                "regesplant" : 2
+            }
+
+            accuracy : 0.7
+        )
+
+        "take_a_hit" : (
+            self_text : "you take another hit, ascending to a totally new plane of existence... bro"
+            energy : 12
+            health : -2
+
+            remove_items : {
+                "regesplant" : 1
+            }
+
+            accuracy : 0.9
+        )
+    }
+)
+
+"regesplant" : (
+    abilities : {
+        "eat" : (
+            energy : 4
+            health : -1
+        )
+    }
+)
+"viscous_fluid" : ()
+"shrek_sauce" : ()
+"strange_compound" : (tags : ["C"])
+"radioactive_mutagen" : ()

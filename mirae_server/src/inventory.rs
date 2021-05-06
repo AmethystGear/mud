@@ -5,15 +5,13 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Inventory {
-    elems: HashMap<ItemName, u64>,
-    size: u64,
+    elems: HashMap<ItemName, u64>
 }
 
 impl Inventory {
     pub fn new() -> Self {
         Self {
             elems: HashMap::new(),
-            size: 0,
         }
     }
 
@@ -44,10 +42,7 @@ impl Inventory {
     }
 
     pub fn set(&mut self, item: ItemName, num: u64) {
-        let current = self.get(&item);
         self.elems.insert(item, num);
-        self.size -= current;
-        self.size += num;
     }
 
     pub fn add_inventory(&mut self, other: &Inventory) {
@@ -85,7 +80,11 @@ impl Inventory {
     }
 
     pub fn size(&self) -> u64 {
-        self.size
+        let mut size = 0;
+        for (_, v) in &self.elems {
+            size += v;
+        }
+        size
     }
 
     pub fn items(&self) -> std::collections::hash_map::Keys<ItemName, u64> {
@@ -94,7 +93,6 @@ impl Inventory {
 
     pub fn clear(&mut self) {
         self.elems = HashMap::new();
-        self.size = 0;
     }
 
     pub fn to_string(&self) -> String {

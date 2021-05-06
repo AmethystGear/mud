@@ -27,17 +27,19 @@
     )
     drops : (
         items : [
-            (name : "trump_orange", prob : 0.25, per: 1)
-            (name : "orange", prob : 0.75, per: 3)
+            [(name : "trump_orange", per: 1)]
+            [(name : "orange", per: 3)]
         ]
+        probs : [0.25, 0.75]
         min : 0
         max : 1
     )
     tools : (
         items : [
-            (name : "trump_orange", prob : 0.1, per: 1)
-            (name : "orange", prob : 0.9, per: 1)
+            [(name : "trump_orange", per: 1)]
+            [(name : "orange", per: 1)]
         ]
+        probs : [0.2, 0.8]
         min : 3
         max : 5
     )
@@ -57,12 +59,13 @@
     display : "faceman.png"
     display_img : "faceman_full.png"
     description : "A lowly_ben, infected with biglitis. Stronger than the lowly variant due to bigly weaponry and magic."
+    tags : ["bigly" "cave"]
 )
 
 "bogly_ben" : (
     xp : -10
     quotes: (
-        entrance : ["you have bigmac?" "bigmac yum"]
+        entrance : ["you have bigmac?" "bigmac yum" "you smell like bigmac"]
         attack : ["ben" "benben"]
         run  : ["BEN"]
         player_victory : ["benbenbe-"]
@@ -70,16 +73,12 @@
     )
     stats : {
         "max_health" : 2
-        "max_energy" : 0
-        "speed" : 1
-        "agression" : 1
     }
-    /*
     trades : [
-        (in : "half_eaten_bigmac", out : "pag_slice", in_cnt : 3, out_cnt : 1)
+        (in_item : "half_eaten_bigmac", out_item : "pag_slice", in_cnt : 3, out_cnt : 1)
     ]
-    */
-    description : "Strange hermit that trades half eaten bigmacs for pagliacci"
+    description : "Strange hermit that trades half eaten bigmacs for slices of pagliacci"
+    tags : ["bogly"]
 )
 
 "big_ben" : (
@@ -104,130 +103,446 @@
 
         "BEN SMASH" : (
             damage : {
-                "physical" : 5
-                "radiation" : 2
+                "physical" : 4
+                "radiation" : 1
             }
         )
     }
     description : "A lowly ben, mutated by radiation into this monstrosity. Much stronger than the lowly variant."
+    tags : ["radioactive"]
 )
 
 "pirate_knight" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
-        "agression" : 1
     }
+    tags : ["pirate"]
 )
 
 "sunken_pirate" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
         "speed" : 1
         "agression" : 1
     }
+    tags : ["pirate", "aquatic"]
 )
 
 "pirate" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
-        "agression" : 1
     }
+    tags : ["pirate"]
 )
 
 "sunken_ghost" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
-        "agression" : 1
     }
+    tags : ["aquatic"]
 )
 
 "honour_knight" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
-        "agression" : 1
     }
+    tags : ["honourable"]
 )
 
 "honour_mage" : (
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "energy_regen" : 1
-        "health_regen" : 1
-        "speed" : 1
+    }
+    tags : ["honourable"]
+)
+
+"wet_knight" : (
+    stats : {
+        "max_health" : 4
+        "max_energy" : 10
+    }
+    tags : ["honourable", "aquatic", "surface_aquatic"]
+)
+
+"aquatic_nose" : (
+    stats : {
+        "max_health" : 20
+        "speed" : 10
+    }
+    quotes: (
+        entrance : ["*sniff*"]
+        attack : ["*sniff*"]
+        run  : ["*sniff*"]
+        player_victory : ["*perishes*"]
+        mob_victory : ["*snort snort*"]
+    )
+    abilities : {
+        "runny nose" : (
+            damage : {
+                "toxic" : 1
+            }
+            repeat : 3
+        )
+
+        "achoo" : (
+            damage : {
+                "physical" : 3
+            }
+        )
+    }
+    tags : ["bogly", "aquatic"]
+)
+
+"gulperoo" : (
+    stats : {
+        "max_health" : 15
+        "speed" : 20
         "agression" : 1
     }
+    abilities : {
+        "GULP" : (
+            damage : {
+                "physical" : 999999
+            }
+            accuracy : 0.6
+        )
+    }
+    tags : ["bogly", "aquatic"]
 )
+
+"hand_plant" : (
+    stats : {
+        "max_health" : 5
+        "speed" : 25
+        "agression" : 0.1
+    }
+    abilities : {
+        "slap" : (
+            damage : {
+                "physical" : 1
+            }
+        )
+        "flip_off" : (
+            damage : {
+                "psychological" : 1
+            }
+        )
+        "thumbs_up" : (
+            health : 1
+        )
+    }
+    tags : ["bogly", "aquatic"]
+)
+
+"automated_submarine" : (    
+    quotes: (
+        entrance : ["THREAT DETECTED"]
+        attack : [
+            "*BOOP*" "*whirring noises*" "ACTION: NEUTRALIZE THREAT"
+        ]
+        run  : ["DISENGAGE" "CANNOT LOCATE THREAT"]
+        player_victory : ["SYSTEM FAILURE" "BACKING UP DATA" "ERROR-ERROR-ERR-"]
+        mob_victory : ["THREAT NEUTRALIZED" "HARVESTING DATA FROM CORPSE"]
+    )
+
+    stats : {
+        "max_health" : 40
+        "max_energy" : 30
+        "speed" : 7
+        "agression" : 1.0
+    }
+
+    tools : (
+        items : [
+            [(name : "missile", per : 5)]
+            [(name : "missile", per : 1)]
+            [(name : "nuclear_warhead", per: 1)]
+            [(name : "metal", per : 15)]
+        ]
+        probs : [0.05, 0.8, 0.02, 0.1]
+        min : 5
+        max : 10
+    )
+
+    drops : (
+        items : [
+            [(name : "missile", per : 1)]
+            [(name : "metal", per : 10)]
+        ]
+        probs : [0.5, 0.5]
+        min : 1
+        max : 4
+    )
+
+    abilities : {
+        "shoot_missile" : (
+            energy : -5
+            remove_items : {
+                "missile" : 1
+            }
+            damage : {
+                "physical" : 5
+                "heat" : 10
+            }
+        )
+
+        "detonate_nuclear_warhead" : (
+            energy : -20
+            health : -5
+            damage : {
+                "physical" : 10
+                "radiation" : 15
+                "heat" : 10
+            }
+            remove_items : {
+                "nuclear_warhead" : 1
+            }
+        )
+
+        "hull_ram" : (
+            damage : {
+                "physical" : 2
+            }
+        )
+
+        "harness_nuclear_generator" : (
+            energy : 10
+        )
+
+        "build_missile" : (
+            energy : -5
+            remove_items : {
+                "metal" : 5
+            }
+            add_items : {
+                "missile" : 1
+            }
+        )
+    }
+    display : "robot.png"
+    display_img : "submarine.png"
+    tags : ["robotic", "aquatic"]
+)
+
+"sentinel" : (    
+    quotes: (
+        entrance : ["THREAT DETECTED"]
+        attack : [
+            "*BOOP*" "*whirring noises*" "ACTION: NEUTRALIZE THREAT"
+        ]
+        run  : ["DISENGAGE" "CANNOT LOCATE THREAT"]
+        player_victory : ["SYSTEM FAILURE" "BACKING UP DATA" "ERROR-ERROR-ERR-"]
+        mob_victory : ["THREAT NEUTRALIZED" "HARVESTING DATA FROM CORPSE"]
+    )
+
+    stats : {
+        "max_health" : 20
+        "max_energy" : 20
+        "speed" : 7
+        "agression" : 1.0
+    }
+
+    tools : (
+        required_items : [
+            (name : "missile_launcher", per : 1)
+            (name : "missile", per : 5)
+        ]
+        items : [
+            [(name : "missile", per : 3)]
+            [(name : "AA_batteries", per : 5)]
+        ]
+        probs : [0.5, 0.5]
+        min : 1
+        max : 2
+    )
+
+    drops : (
+        items : [
+            [(name : "gravitino_ball", per : 1)]
+        ]
+        probs : [0.2]
+        min : 0
+        max : 3
+    )
+
+    display : "robot.png"
+    display_img : "sentinel.png"
+    tags : ["robotic"]
+)
+
+"sentinel_walker" : (    
+    quotes: (
+        entrance : ["THREAT DETECTED"]
+        attack : [
+            "*BOOP*" "*whirring noises*" "ACTION: NEUTRALIZE THREAT"
+        ]
+        run  : ["DISENGAGE" "CANNOT LOCATE THREAT"]
+        player_victory : ["SYSTEM FAILURE" "BACKING UP DATA" "ERROR-ERROR-ERR-"]
+        mob_victory : ["THREAT NEUTRALIZED" "HARVESTING DATA FROM CORPSE"]
+    )
+
+    stats : {
+        "max_health" : 50
+        "max_energy" : 30
+        "speed" : 5
+        "agression" : 1.0
+    }
+
+    tools : (
+        required_items : [
+            (name : "missile_launcher", per : 1)
+            (name : "missile", per : 10)
+        ]
+        items : [
+            [(name : "laser", per : 1)]
+            [(name : "missile", per : 5)]
+            [(name : "AA_batteries", per : 10)]
+            [(name : "metal", per : 3)]
+        ]
+        probs : [0.25, 0.25, 0.25, 0.25]
+        min : 1
+        max : 5
+    )
+
+    drops : (
+        items : [
+            [(name : "gravitino_ball", per : 1)]
+            [(name : "nanites", per : 10)]
+        ]
+        probs : [0.2, 0.2]
+        min : 0
+        max : 3
+    )
+
+    abilities : {
+        "electrical_surge" : (
+            energy : 8
+        )
+
+        "mine_metal" : (
+            add_items : {
+                "metal" : 7
+            }
+        )
+
+        "build_missile" : (
+            energy : -5
+            remove_items : {
+                "metal" : 4
+            }
+            add_items : {
+                "missile" : 1
+            }
+        )
+    }
+
+    display : "robot.png"
+    display_img : "sentinel_walker.png"
+    tags : ["robotic"]
+)
+
+"tripod" : ()
+
+"robot" : ()
 
 "chestaroo" : (
     stats : {
-        "agression" : 1
+        "max_health" : 0
     }
+
+    drops : (
+        tags : ["D", "F"]
+        min : 3
+        max : 10
+    )
+
     display : "chest.png"
     display_img : "none"
     scan : "some kind of chest"
+    tags : ["chest"]
+    spawn_chance : 0.1
 )
 
 "decent_chest" : (
     stats : {
-        "agression" : 1
+        "max_health" : 0
     }
+
+    drops : (
+        tags : ["B", "C", "D"]
+        min : 1
+        max : 2
+    )
+
     display : "chest.png"
     display_img : "none"
     scan : "some kind of chest"
+    tags : ["chest"]
+    spawn_chance : 0.1
 )
 
 "awesome_chest" : (
     stats : {
-        "agression" : 1
+        "max_health" : 0
     }
+
+    drops : (
+        tags : ["B", "C"]
+        min : 1
+        max : 5
+    )
+
     display : "chest.png"
     display_img : "none"
     scan : "some kind of chest"
+    tags : ["chest"]
+    spawn_chance : 0.1
 )
 
 "opec_chest" : (
     stats : {
-        "agression" : 1
+        "max_health" : 0
     }
+
+    drops : (
+        tags : ["A"]
+        min : 1
+        max : 1
+    )
+
     display : "chest.png"
     display_img : "none"
     scan : "some kind of chest"
+    tags : ["chest"]
+    spawn_chance : 0.1
 )
 
 "opec_rock_videogame_chest" : (
     stats : {
-        "agression" : 1
+        "max_health" : 0
     }
+
+    drops : (
+        required_items : [(name : "opec_rock_videogame_music", per : 1)]
+    )
+
     display : "chest.png"
     display_img : "none"
     scan : "some kind of chest"
+    tags : ["chest"]
+    spawn_chance : 0.1
 )
 
 "pickle_monster" : (
     quotes: (
         entrance : ["Hey there mister, wanna tickle my pickle?" "Tickle my pickle, it'll only cost a nickel"]
-        attack : [ 
-            "The Left wants to tickle your pickle"
+        attack : [
             "Whats the dill, man" 
             "You're in a bit of a pickle aren't you"
         ]
@@ -237,37 +552,33 @@
     )
 
     tools : (
-        items : [
-            (name : "pickle_sword", prob : 1, per: 1)
+        required_items : [
+            (name : "pickle_sword", per: 1)
         ]
-        min : 1
-        max : 1
     )
-
     drops : (
         items : [
-            (name : "pickle_jar", prob : 0.1, per: 1)
-            (name : "pickle_sword", prob : 0.1, per: 1)
+            [(name : "pickle_jar", per: 1)]
+            [(name : "pickle_sword", per: 1)]
         ]
+        probs : [0.2, 0.1]
         min : 1
         max : 1
     )
     stats : {
         "max_health" : 15
         "max_energy" : 15
-        "energy_regen" : 1
-        "health_regen" : 1
         "speed" : 1
         "agression" : 1
     }
-    display_img : "none"
+    display_img : "pickle_monster.png"
+    tags : ["bogly"]
 )
 
 "fyzyx_knite" : (
     quotes: (
         entrance : ["I'm so hunrable"]
-        attack : [ 
-            "The Left wants to tickle your pickle"
+        attack : [
             "Whats the dill, man" 
             "You're in a bit of a pickle aren't you"
         ]
@@ -277,30 +588,28 @@
     )
 
     tools : (
-        items : [
-            (name : "pickle_sword", prob : 1, per: 1)
+        required_items : [
+            (name : "pickle_sword", per: 1)
         ]
-        min : 1
-        max : 1
     )
-
     drops : (
         items : [
-            (name : "pickle_jar", prob : 0.1, per: 1)
-            (name : "pickle_sword", prob : 0.1, per: 1)
+            [(name : "pickle_jar", per: 1)]
+            [(name : "pickle_sword", per: 1)]
         ]
+        probs : [0.2, 0.1]
         min : 1
         max : 1
     )
     stats : {
         "max_health" : 15
         "max_energy" : 15
-        "energy_regen" : 1
-        "health_regen" : 1
         "speed" : 1
         "agression" : 1
     }
-    display_img : "none"
+    display_img : "pickle_monster.png"
+    display : "honour.png"
+    tags : ["bogly"]
 )
 
 "winged_pag" : (
@@ -341,6 +650,7 @@
         )
     }
     display_img : "winged_pag.png"
+    tags : ["bogly"]
 )
 
 "pag_with_extra_wings" : (
@@ -381,4 +691,63 @@
         )
     }
     display_img : "pag_extra_wings.png"
+    tags : ["bogly"]
+)
+
+"reges" : (
+    xp : 420
+    quotes: (
+        entrance : [
+            "hey man... wanna trade for some good stuff?" 
+            "The real war is the war on drugs..." 
+            "whoa... dude... im so stoned right now"
+        ]
+        attack : [
+            "whoa bro... attacking me is so not cool..."
+            "whoa... dude... im so stoned right now"
+            "you will ascend to a higher plane of existence dude..."
+        ]
+        run : ["come back when you want to get stoned with me bro"]
+        player_victory : ["Urk.. ugh... my only regret is being sober for 3 days in my whole life"]
+        mob_victory : ["Yeah man, I knew you could do it... transcend with me Dude..."]
+    )
+    stats : {
+        "max_health" : 25
+        "max_energy" : 30
+        "speed" : 8
+        "agression" : 0
+    }
+    tools : (
+        required_items : [
+            (name : "bong", per: 1)
+            (name : "regesplant", per : 420)
+        ]
+        items : [
+            [(name : "bong", per : 1)]
+        ]
+        probs : [1.0]
+        min : 0
+        max : 3
+    )
+    drops : (
+        items : [
+            [(name : "regesplant", per : 1)]
+        ]
+        probs : [1.0]
+        min : 0
+        max : 20
+    )
+    abilities : {
+        "nap" : (
+            health : 5
+            energy : 5
+        )
+    }
+    trades : [
+        (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 3, out_cnt : 1)
+        (in_item : "strange_compound", out_item : "regesplant", in_cnt : 1, out_cnt : 2)
+        (in_item : "shrek_sauce", out_item : "regesplant", in_cnt : 1, out_cnt : 15)
+        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 1, out_cnt : 2)
+    ]
+    display_img : "reges.png"
 )

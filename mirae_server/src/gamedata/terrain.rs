@@ -11,7 +11,7 @@ use std::collections::{HashMap, HashSet};
 pub struct TerrainDeser {
     pub dim: Vector3,
     pub octaves: u8,
-    pub biome_octaves : u8,
+    pub biome_octaves: u8,
     pub full_passes: Vec<TerrainPassDeser>,
     pub structure_spawn: HashMap<String, StructureSpawnDeser>,
 }
@@ -20,9 +20,9 @@ pub struct TerrainDeser {
 pub struct Terrain {
     pub dim: Vector3,
     pub octaves: u8,
-    pub biome_octaves : u8,
+    pub biome_octaves: u8,
     pub full_passes: Vec<TerrainPass>,
-    pub structure_spawn: HashMap<StructureName, Vec<BiomePair>>,
+    pub structure_spawn: HashMap<StructureName, StructureSpawn>,
 }
 
 impl TerrainDeser {
@@ -150,20 +150,35 @@ impl BiomePairDeser {
     }
 }
 
+fn u64_max() -> u64 {
+    u64::MAX
+}
+
 #[derive(Debug, Deserialize)]
 pub struct StructureSpawnDeser {
     pub biomes: Vec<BiomePairDeser>,
     #[serde(default = "f64_neg_one")]
     pub default_prob: f64,
+    #[serde(default = "u64_max")]
+    pub cap: u64,
+}
+
+#[derive(Debug)]
+pub struct StructureSpawn {
+    pub biomes: Vec<BiomePair>,
+    pub cap: u64,
 }
 
 impl StructureSpawnDeser {
-    pub fn into_structurespawn(self, biome_names: &HashSet<BiomeName>) -> Result<Vec<BiomePair>> {
+    pub fn into_structurespawn(self, biome_names: &HashSet<BiomeName>) -> Result<StructureSpawn> {
         let mut res = Vec::new();
         for biome in self.biomes {
             res.push(biome.into_biomepair(biome_names, self.default_prob)?);
         }
-        Ok(res)
+        Ok(StructureSpawn {
+            biomes : res,
+            cap : self.cap
+        })
     }
 }
 

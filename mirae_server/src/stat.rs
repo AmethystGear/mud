@@ -30,7 +30,7 @@ pub fn default_empty_fields<A: Hash + Eq + Clone, B: Clone>(
 
 impl Stat {
     pub fn new(base: HashMap<StatType, f64>, stat_types: &HashSet<StatType>) -> Result<Self> {
-        let base = default_empty_fields(&base, 0.0, stat_types);
+        let base = default_empty_fields(&base, 1.0, stat_types);
         let upgrades = default_empty_fields(&HashMap::new(), 0.0, stat_types);
         let max_health = StatType::from("max_health".to_string());
         let max_energy = StatType::from("max_energy".to_string());
@@ -50,19 +50,19 @@ impl Stat {
 
     pub fn get<S: Into<String>>(&self, s: S, g: &GameData) -> Result<f64> {
         let stat = StatType::checked_from(s.into(), g)?;
-        Ok(self.base.get(&stat).expect("bug") + self.upgrades.get(&stat).expect("bug"))
+        Ok(self.base[&stat] + self.upgrades[&stat])
     }
 
     pub fn get_upgrade<S: Into<String>>(&self, s: S, g: &GameData) -> Result<f64> {
         let stat = StatType::checked_from(s.into(), g)?;
-        Ok(*self.upgrades.get(&stat).expect("bug"))
+        Ok(self.upgrades[&stat])
     }
 
     pub fn add_buffs(&mut self, buffs: &HashMap<StatType, f64>, g: &GameData) {
         let buffs = default_empty_fields(buffs, 1.0, &g.stat);
         for field in &g.stat {
-            let current = self.base.get(field).expect("bug").clone();
-            let new_buff = buffs.get(field).expect("bug").clone();
+            let current = self.base[field];
+            let new_buff = buffs[field];
             self.base.insert(field.clone(), current * new_buff);
         }
         self.bound_health_and_energy(&g);
@@ -71,8 +71,8 @@ impl Stat {
     pub fn remove_buffs(&mut self, buffs: &HashMap<StatType, f64>, g: &GameData) {
         let buffs = default_empty_fields(buffs, 1.0, &g.stat);
         for field in &g.stat {
-            let current = self.base.get(field).expect("bug").clone();
-            let new_buff = buffs.get(field).expect("bug").clone();
+            let current = self.base[field];
+            let new_buff = buffs[field];
             self.base.insert(field.clone(), current / new_buff);
         }
         self.bound_health_and_energy(g);
@@ -139,7 +139,7 @@ impl Stat {
     pub fn upgrade<S: Into<String>>(&mut self, stat: S, g: &GameData) -> Result<()> {
         let s = stat.into();
         let stat = StatType::checked_from(s.clone(), g)?;
-        let val = self.upgrades.get(&stat).expect("bug") + 1.0;
+        let val = self.upgrades[&stat] + 1.0;
         self.upgrades.insert(stat, val);
         Ok(())
     }
@@ -154,6 +154,6 @@ impl Stat {
                 self.get(k.0.clone(), g).expect("valid stat")
             )
         }
-        s
+        format!("{}\nhealth: {}\nenergy: {}", s, self.health, self.energy)
     }
 }

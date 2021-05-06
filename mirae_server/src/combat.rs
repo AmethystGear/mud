@@ -173,6 +173,7 @@ impl BattleMap {
         &mut self,
         attacker: Box<&mut dyn Entity>,
         defender: Box<&mut dyn Entity>,
+        defender_trades: bool,
         g: &GameData,
     ) -> Result<()> {
         let battle_handle = self.curr_handle;
@@ -189,7 +190,11 @@ impl BattleMap {
             status_effects: Vec::new(),
         };
         let defender_cd = CombatData {
-            acc_speed: defender.stats().get(speed, g)?,
+            acc_speed: if defender_trades {
+                0.0
+            } else {
+                defender.stats().get(speed, g)?
+            },
             stunned: false,
             status_effects: Vec::new(),
         };
@@ -204,14 +209,8 @@ impl BattleMap {
 
         self.handle_to_data.insert(battle_handle, battle_data);
 
-        attacker.send_text(format!(
-            "You are fighting {}\n",
-            defender.name()
-        ));
-        defender.send_text(format!(
-            "You are fighting {}\n",
-            attacker.name()
-        ));
+        attacker.send_text(format!("You are fighting {}\n", defender.name()));
+        defender.send_text(format!("You are fighting {}\n", attacker.name()));
 
         if self.turn(attacker.id())? {
             attacker.send_text("it's your turn!\n".into());
@@ -273,6 +272,7 @@ impl BattleMap {
 
         let mut total_dmg = 0.0;
         for (dmg_type, val) in &net_dmg {
+            let val = val * entity.defense_buffs()[dmg_type];
             if val.abs() > f64::EPSILON {
                 entity.send_text(format!("you recieved {} {:?} damage.\n", val, dmg_type));
             }
@@ -447,7 +447,7 @@ impl BattleMap {
 fn mul(a: &HashMap<DmgType, f64>, b: &HashMap<DmgType, f64>) -> HashMap<DmgType, f64> {
     let mut new = HashMap::new();
     for (k, v) in a {
-        new.insert(k.clone(), (*v) * (*b.get(k).expect("bug")));
+        new.insert(k.clone(), (*v) * b[k]);
     }
     new
 }
@@ -455,7 +455,7 @@ fn mul(a: &HashMap<DmgType, f64>, b: &HashMap<DmgType, f64>) -> HashMap<DmgType,
 fn add(a: &HashMap<DmgType, f64>, b: &HashMap<DmgType, f64>) -> HashMap<DmgType, f64> {
     let mut new = HashMap::new();
     for (k, v) in a {
-        new.insert(k.clone(), (*v) + (*b.get(k).expect("bug")));
+        new.insert(k.clone(), (*v) + b[k]);
     }
     new
 }
