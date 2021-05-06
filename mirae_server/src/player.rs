@@ -197,9 +197,13 @@ impl Entity for Player {
         &mut self.rng
     }
 
-    fn send_display(&mut self, i: Image) {
+    fn send_display(&mut self, i: Image, static_display : bool) {
         let mut p_out = PlayerOut::new();
-        p_out.append_display(i);
+        if static_display {
+            p_out.append_static_display(i);
+        } else {
+            p_out.append_display(i);
+        }
         self.sender.send((p_out, None)).unwrap();
     }
 

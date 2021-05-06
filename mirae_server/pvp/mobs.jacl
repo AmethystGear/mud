@@ -56,8 +56,7 @@
             }
         )
     }
-    display : "faceman.png"
-    display_img : "faceman_full.png"
+    display : "bigly.png"
     description : "A lowly_ben, infected with biglitis. Stronger than the lowly variant due to bigly weaponry and magic."
     tags : ["bigly" "cave"]
 )
@@ -74,6 +73,16 @@
     stats : {
         "max_health" : 2
     }
+
+    drops : (
+        items : [
+            [(name : "half_eaten_bigmac", per: 1)]
+        ]
+        probs : [1.0]
+        min : 0
+        max : 1
+    )
+
     trades : [
         (in_item : "half_eaten_bigmac", out_item : "pag_slice", in_cnt : 3, out_cnt : 1)
     ]
@@ -108,10 +117,141 @@
             }
         )
     }
+
+    drops : (
+        items : [
+            [(name : "radioactive_mutagen", per: 1)]
+        ]
+        probs : [0.3]
+        min : 0
+        max : 2
+    )
+
     description : "A lowly ben, mutated by radiation into this monstrosity. Much stronger than the lowly variant."
     tags : ["radioactive"]
 )
 
+"sentient_sludge" : (
+    xp : 50
+    stats : {
+        "max_health" : 7
+        "speed" : 5
+    }
+
+    abilities : {
+        "emit_toxin" : (
+            damage : {
+                "toxic" : 1
+            }
+            repeat : 5
+            accuracy : 0.4
+        )
+    }
+
+    drops : (
+        items : [
+            [(name : "viscous_fluid", per : 7)]
+            [(name : "viscous_fluid", per : 1)]
+        ]
+        probs : [0.1, 0.9]
+        min : 0
+        max : 2
+    )
+)
+
+"sonic" : (
+    stats : {
+        "max_health" : 3
+        "speed" : 343
+    }
+
+    quotes: (
+        entrance : ["WHOOOOOOOOOOO" "GOTTA GO FAST!!!!!!"]
+        attack : ["SONIC SPEED" "HAAAA" "WHOOOOOOOOOOO" "GOTTA GO FAST!!!!!!"]
+        run  : ["meh... i'm going to go eat some chillidogs"]
+        player_victory : ["*ring drop noise*"]
+        mob_victory : ["SONICS THE NAME SPEEDS MY GAME" "BYE BYE EGGMAN"]
+    )
+
+    abilities : {
+        "homing_attack" : (
+            damage : {
+                "physical" : 1
+            }
+            accuracy : 0.7
+        )
+
+        "spindash" : (
+            damage : {
+                "physical" : 5
+            }
+            accuracy : 0.5
+        )
+    }
+
+    drops : (
+        items : [
+            [(name : "heghead", per : 1)]
+            [(name : "sonic_chops", per : 2)]
+            [(name : "sonic's_shoes", per : 1)]
+        ]
+        probs : [0.1, 0.2, 0.1]
+        min : 1
+        max : 1
+    )
+
+    display : "sonic.png"
+    display_img : "sonic_full.png"
+)
+
+"faceman" : (
+    xp : 300
+    stats : {
+        "max_health" : 15
+        "max_energy" : 15
+        "speed" : 15
+    }
+
+    quotes: (
+        entrance : ["BOGLY" "BOOOOOGLY" "BOOGLY BOOGLY JOOGLY"]
+        attack : ["BOGLY" "BOOOOOGLY" "BOOGLY BOOGLY JOOGLY"]
+        run : ["BOGLY" "BOOOOOGLY" "BOOGLY BOOGLY JOOGLY"]
+        player_victory : ["BOGLY" "BOOOOOGLY" "BOOGLY BOOGLY JOOGLY"]
+        mob_victory : ["BOGLY" "BOOOOOGLY" "BOOGLY BOOGLY JOOGLY"]
+    )
+
+    abilities : {
+        "yummy" : (
+            energy : 3
+            health : 3
+            damage : {
+                "physical" : 3
+            }
+        )
+
+        "throw_garbage" : (
+            energy : -6
+            damage : {
+                "trash" : 5
+            }
+            accuracy : 0.75
+        )
+    }
+
+    drops : (
+        items : [
+            [(name : "faceman_meat", per : 1)]
+        ]
+        probs : [0.4]
+        min : 1
+        max : 3
+    )
+
+    display : "faceman.png"
+    display_img : "faceman_full.png"
+)
+
+/*
 "pirate_knight" : (
     stats : {
         "max_health" : 4
@@ -124,9 +264,8 @@
     stats : {
         "max_health" : 4
         "max_energy" : 10
-        "speed" : 1
-        "agression" : 1
     }
+
     tags : ["pirate", "aquatic"]
 )
 
@@ -169,6 +308,7 @@
     }
     tags : ["honourable", "aquatic", "surface_aquatic"]
 )
+*/
 
 "aquatic_nose" : (
     stats : {
@@ -447,10 +587,6 @@
     tags : ["robotic"]
 )
 
-"tripod" : ()
-
-"robot" : ()
-
 "chestaroo" : (
     stats : {
         "max_health" : 0
@@ -695,6 +831,7 @@
 )
 
 "reges" : (
+    dont_spawn : true
     xp : 420
     quotes: (
         entrance : [
@@ -745,9 +882,7 @@
     }
     trades : [
         (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 3, out_cnt : 1)
-        (in_item : "strange_compound", out_item : "regesplant", in_cnt : 1, out_cnt : 2)
-        (in_item : "shrek_sauce", out_item : "regesplant", in_cnt : 1, out_cnt : 15)
-        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 1, out_cnt : 2)
+        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 1, out_cnt : 1)
     ]
     display_img : "reges.png"
 )

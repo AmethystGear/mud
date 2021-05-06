@@ -1,5 +1,4 @@
-use crate::{display::Image};
-
+use crate::display::Image;
 
 use std::collections::VecDeque;
 
@@ -9,7 +8,8 @@ pub enum PacketType {
     Display = 1,
     Init = 2,
     Err = 3,
-    Img = 4
+    Img = 4,
+    StaticDisplay = 5,
 }
 
 impl std::fmt::Display for PacketType {
@@ -66,17 +66,24 @@ impl PlayerOut {
         });
     }
 
-    pub fn append_display(&mut self, img : Image) {
+    pub fn append_display(&mut self, img: Image) {
         self.add_pkt(Packet {
-            p_type : PacketType::Display,
-            content: img.into_bytes()
+            p_type: PacketType::Display,
+            content: img.into_bytes(),
         });
     }
 
-    pub fn append_img(&mut self, img : String) {
+    pub fn append_static_display(&mut self, img: Image) {
         self.add_pkt(Packet {
-            p_type : PacketType::Img,
-            content: img.into_bytes()
+            p_type: PacketType::StaticDisplay,
+            content: img.into_bytes(),
+        });
+    }
+
+    pub fn append_img(&mut self, img: String) {
+        self.add_pkt(Packet {
+            p_type: PacketType::Img,
+            content: img.into_bytes(),
         });
     }
 

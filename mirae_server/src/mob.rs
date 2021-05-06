@@ -208,7 +208,7 @@ impl Entity for Mob {
         &mut self.rng
     }
 
-    fn send_display(&mut self, _: Image) { /* do nothing, mobs don't care about images */
+    fn send_display(&mut self, _: Image, _: bool) { /* do nothing, mobs don't care about images */
     }
     fn send_text(&mut self, _: String) { /* do nothing, mobs don't care about text */
     }

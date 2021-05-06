@@ -932,6 +932,18 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 
 "laser" : (
     // TODO 
+    equipable : true
+
+    abilities : {
+        "BZZZRK" : (
+            damage : {
+                "physical" : 15
+            }
+            remove_items : {
+                "AA_batteries" : 1
+            }
+        )
+    }
 )
 
 "nuclear_warhead" : (
@@ -941,6 +953,20 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 
 "missile_launcher" : (
     // TODO
+    equipable : true
+    
+    abilities : {
+        "launch_missile" : (
+            energy : -5
+            damage : {
+                "physical" : 5
+                "heat" : 5
+            }
+            remove_items : {
+                "missile" : 1
+            }
+        )
+    }
     tags : ["A"]
 )
 

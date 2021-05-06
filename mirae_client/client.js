@@ -1,5 +1,5 @@
 // all the potential types of Packets we can expect.
-const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img": 4 })
+const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img": 4, "StaticDisplay": 5 })
 
 const MAX_PACKET_TYPE_LEN = 5
 const MAX_PACKET_SIZE_LEN = 4
@@ -8,13 +8,15 @@ const MAX_TEXTAREA_SIZE = 25000
 let socket = null
 let canvas = null
 let ct = null
+let l_canvas = null
+let l_ct = null
 let text = null
 let textbox = null
 let initData = null
 let imgData = null
 let buffer = null
 let lastSent = ""
-let displayingImage = false;
+let displayingImage = false
 
 class Player {
     constructor(ID, x, y) {
@@ -28,7 +30,7 @@ class Player {
      * @returns {string} - player string representation
      */
     getPlayerDisplay() {
-        let hex = Number(this.ID).toString(16);
+        let hex = Number(this.ID).toString(16)
         if (hex.length == 1) {
             hex = "0" + hex
         }
@@ -171,13 +173,12 @@ function handlePacket(pkt) {
         if (initData === null) {
             throw new InitDataNotInitialized()
         }
-        displayImg(new Uint8Iter(new DataView(pkt.content.buffer)))
+        ct.clearRect(0, 0, canvas.width, canvas.height)
+        displayImg(new Uint8Iter(new DataView(pkt.content.buffer)), canvas, ct)
     } else if (pkt.packetType === PacketTypes.Init) {
         initData = JSON.parse(dec.decode(pkt.content))
-        console.log(initData)
         imgData = {}
         for (var entity in initData['img_id_to_img']) {
-            console.log("entity " + entity)
             let name = initData['img_id_to_img'][entity]
             console.log("name " + name)
             imgData[name] = new Image()
@@ -189,26 +190,29 @@ function handlePacket(pkt) {
             imgData[name] = new Image()
             imgData[name].src = "resources/full_img/" + name
         }
-        console.log(imgData)
     } else if (pkt.packetType === PacketTypes.Err) {
         let decoded = dec.decode(pkt.content)
         let err = "ERROR: " + decoded + '\n'
         displayString(err)
     } else if (pkt.packetType === PacketTypes.Img) {
         let imgname = dec.decode(pkt.content)
+        l_ct.clearRect(0, 0, l_canvas.width, l_canvas.height)
         if (imgname == "none") {
-            displayingImage = false;
             return;
         }
-        displayingImage = true
-        ct.clearRect(0, 0, canvas.width, canvas.height)
         if (imgData[imgname].width > imgData[imgname].height) {
-            let height = imgData[imgname].height * canvas.width / imgData[imgname].width;
-            ct.drawImage(imgData[imgname], 0, (canvas.height - height)/2, canvas.width, height);
+            let height = imgData[imgname].height * l_canvas.width / imgData[imgname].width;
+            l_ct.drawImage(imgData[imgname], 0, (l_canvas.height - height)/2, l_canvas.width, height);
         } else {
-            let width = imgData[imgname].width * canvas.height / imgData[imgname].height;
-            ct.drawImage(imgData[imgname], (canvas.width - width)/2, 0, width, canvas.height);
+            let width = imgData[imgname].width * l_canvas.height / imgData[imgname].height;
+            l_ct.drawImage(imgData[imgname], (l_canvas.width - width)/2, 0, width, l_canvas.height);
         }        
+    } else if (pkt.packetType === PacketTypes.StaticDisplay) {
+        if (initData === null) {
+            throw new InitDataNotInitialized()
+        }
+        l_ct.clearRect(0, 0, l_canvas.width, l_canvas.height)
+        displayImg(new Uint8Iter(new DataView(pkt.content.buffer)), l_canvas, l_ct)
     }
 }
 
@@ -228,7 +232,7 @@ function displayString(string) {
  * display image on the webpage
  * @param {Uint8Iter} data
  */
-function displayImg(data) {
+function displayImg(data, canvas, ct) {
     let width = data.pop()
     let height = data.pop()
     let numPlayers = data.pop()
@@ -332,6 +336,10 @@ $(document).ready(function () {
         socket = new WebSocket("ws://" + ws['ip'] + ":" + ws['port'])
         canvas = document.getElementById("canvas")
         ct = canvas.getContext("2d");
+
+        l_canvas = document.getElementById("img_canvas")
+        l_ct = l_canvas.getContext("2d");
+
         text = document.getElementById("text")
         textbox = document.getElementById("textbox")
         initData = null
@@ -347,9 +355,6 @@ $(document).ready(function () {
         setTimeout(function () {
             // auto display (10fps)
             window.setInterval(function () {
-                if (lastSent == "\"map\"" || displayingImage) {
-                    return;
-                }
                 socket.send("[\"disp\"]")
             }, 100);
         }, 1000);

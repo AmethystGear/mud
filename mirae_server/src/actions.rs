@@ -515,7 +515,7 @@ fn map(data: ActionData) -> Result<()> {
     let resolution = min_resolution.max((world.blocks().dim.x() as usize) / (max_map_size));
     let img = Image::new(&world, &players, data.g, &bounds, resolution)?;
     let player = get_mut(&mut players, data.player_id)?;
-    player.send_display(img);
+    player.send_display(img, true);
     Ok(())
 }
 
@@ -533,7 +533,7 @@ fn disp(data: ActionData) -> Result<()> {
     let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, world.blocks().dim);
     let img = Image::new(&mut world, &players, data.g, &bounds, 1)?;
     let player = get_mut(&mut players, data.player_id)?;
-    player.send_display(img);
+    player.send_display(img, false);
     Ok(())
 }
 

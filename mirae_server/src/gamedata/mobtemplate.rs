@@ -195,6 +195,8 @@ pub struct MobTemplateDeser {
     trades: Vec<TradeDeser>,
     #[serde(default = "empty_vec")]
     tags: Vec<String>,
+    #[serde(default = "false_bool")]
+    dont_spawn: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -212,6 +214,7 @@ pub struct MobTemplate {
     pub description: String,
     pub trades: Vec<Trade>,
     pub tags: Vec<String>,
+    pub dont_spawn: bool,
 }
 
 impl MobTemplateDeser {
@@ -246,7 +249,8 @@ impl MobTemplateDeser {
             scan: self.scan,
             description: self.descr,
             trades,
-            tags : self.tags
+            tags: self.tags,
+            dont_spawn: self.dont_spawn,
         })
     }
 }

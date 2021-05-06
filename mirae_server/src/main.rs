@@ -518,6 +518,9 @@ fn world_logic(
                 player.send_text("you got:\n".into());
                 player.send_text(format!("{}\n", entity.drops().to_string()));
                 player.inventory_mut().add_inventory(entity.drops());
+                player.send_text(format!("+ {}xp\n", entity.xp()));
+                player.set_xp(player.xp() + entity.xp());
+                player.send_text(format!("your xp is now {}\n", player.xp()));
                 let loc = entity.loc().clone();
                 world.delete_mob_by_loc(loc)?;
                 battle_map.handle_status_effects(Box::new(player), &g_arc)?;

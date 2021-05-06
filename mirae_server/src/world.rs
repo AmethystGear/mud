@@ -433,6 +433,10 @@ impl World {
                     let mob_name = g.get_mob_name_by_id(mob_id)?;
                     let mob = &g.mob_templates.name_to_item[&mob_name];
 
+                    if mob.dont_spawn {
+                        return Ok(false);
+                    }
+
                     for tag0 in &block.mob_spawn.exclude {
                         for tag1 in &mob.tags {
                             if tag0 == tag1 {
@@ -475,12 +479,7 @@ impl World {
                         }
                         
                         if !favored && rng.gen_range(0.0, 1.0) < block.mob_spawn.favor_prob {
-                            //println!("rejected {:?} because not favored", mob_name);
                             return Ok(false);
-                        } else if !favored {
-                            //println!("accepted {:?} even though not favored", mob_name);
-                        } else {
-                            println!("{:?} was favored on block {:?}", mob_name, block.name);
                         }
                     }
                     mob_map.direct_set(i, mob_id);

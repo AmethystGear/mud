@@ -37,7 +37,7 @@ pub trait Entity {
     fn loc_mut(&mut self) -> &mut Vector3;
     fn set_xp(&mut self, xp: i64);
     fn send_text(&mut self, str: String);
-    fn send_display(&mut self, img: Image);
+    fn send_display(&mut self, img: Image, static_display : bool);
     fn send_image(&mut self, s: String);
     fn rng(&mut self) -> &mut StdRng;
     fn attack_buffs_mut(&mut self) -> &mut HashMap<DmgType, f64>;
