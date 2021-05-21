@@ -57,6 +57,7 @@ impl Player {
         base_stats.insert(StatType::from("speed".to_string()), 10.0);
         let mut inventory = Inventory::new();
         inventory.set(ItemName::checked_from("stick".into(), g)?, 1);
+        inventory.set(ItemName::checked_from("workbench".into(), g)?, 1);
 
         let buffs = default_empty_fields(&HashMap::new(), 1.0, &g.dmg);
 

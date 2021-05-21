@@ -53,6 +53,7 @@ mod world;
 const PLAYER_SAVE_FOLDER: &str = "save/player_save";
 const WORLD_SAVE_FOLDER: &str = "save/world_save";
 const DEBUG_BLOCK_SIZE: u32 = 10;
+const TICK: u128 = 500;
 
 fn save_img(image: Image, save_location: &str) -> Result<()> {
     let width = (image.width as u32) * DEBUG_BLOCK_SIZE;
@@ -62,9 +63,9 @@ fn save_img(image: Image, save_location: &str) -> Result<()> {
     for y in 0..(image.height as u32) {
         for x in 0..(image.width as u32) {
             let index = ((x as usize) + (y as usize) * (image.width as usize)) * 3;
-            let r = image.rgb[index];
-            let g = image.rgb[index + 1];
-            let b = image.rgb[index + 2];
+            let r = image.blocks[index];
+            let g = image.blocks[index + 1];
+            let b = image.blocks[index + 2];
             for j in 0..DEBUG_BLOCK_SIZE {
                 for i in 0..DEBUG_BLOCK_SIZE {
                     let x = x * DEBUG_BLOCK_SIZE + i;
@@ -346,19 +347,19 @@ fn init(args: &Vec<String>) -> Result<(GameData, World)> {
     }
 
     println!("read game data");
-
+    let start = Instant::now();
     let world = if let Some(load) = load {
         let w = World::from_load(load);
-        println!("loaded world");
+        print!("loaded world");
         w
     } else {
         println!("begin world generation...");
-        let start = Instant::now();
         let w = World::from_seed(args[3].parse()?, &g);
-        let duration = start.elapsed();
-        println!("generated world in {:?}", duration);
+        print!("generated world");
         w
     }?;
+    let duration = start.elapsed();
+    println!(" in {:?}", duration);
 
     println!("ready to accept server commands:");
     Ok((g, world))
@@ -428,6 +429,20 @@ fn battle_map_op<T>(_: T) -> Error {
     anyhow!("{} battle map", LOCK_TEXT)
 }
 
+fn world_tick(
+    world_arc: Arc<RwLock<World>>,
+    players_arc: Arc<RwLock<Vec<Option<Player>>>>,
+    battle_map_arc: Arc<RwLock<BattleMap>>,
+    g_arc: Arc<GameData>,
+) -> Result<()> {
+    let mut world = world_arc.write().map_err(world_op)?;
+    let mut players = players_arc.write().map_err(players_op)?;
+    let mut battle_map = battle_map_arc.write().map_err(battle_map_op)?;
+
+
+    Ok(())
+}
+
 fn world_logic(
     world_arc: Arc<RwLock<World>>,
     players_arc: Arc<RwLock<Vec<Option<Player>>>>,
@@ -446,10 +461,17 @@ fn world_logic(
                 let defender_trades = mob_template.trades.len() > 0;
 
                 let mob = world.get_mob_at_mut(*player.loc(), &g_arc)?;
-                battle_map.init_battle(Box::new(player), Box::new(mob), defender_trades, &g_arc)?;
-                let mob_name = mob.name();
-                player.send_text(format!("{}: {}\n", mob_name, mob.entrance()?));
-                player.send_image(mob.display_img.clone());
+                if battle_map.get_opponent(mob.id()).is_err() {
+                    battle_map.init_battle(
+                        Box::new(player),
+                        Box::new(mob),
+                        defender_trades,
+                        &g_arc,
+                    )?;
+                    let mob_name = mob.name();
+                    player.send_text(format!("{}: {}\n", mob_name, mob.entrance()?));
+                    player.send_image(mob.display_img.clone());
+                }
             }
         }
     }
@@ -648,32 +670,44 @@ fn main() -> Result<()> {
     // world logic runs whenever player input isn't happening
     spawn(move || {
         let mut rng = SeedableRng::seed_from_u64(thread_rng().gen());
+        let mut last_update = Instant::now();
         loop {
-            let res = recv.try_recv();
-            let res = match res {
-                Ok(player_input) => {
-                    // we have input from a player, handle it
-                    handle_player_input(
-                        player_input,
-                        world_arc.clone(),
-                        players_arc.clone(),
-                        battle_map_arc.clone(),
-                        g_arc.clone(),
-                        &mut rng,
-                    )
-                }
-                Err(_) => {
-                    // no player input to handle, just do world logic
-                    world_logic(
-                        world_arc.clone(),
-                        players_arc.clone(),
-                        battle_map_arc.clone(),
-                        g_arc.clone(),
-                    )
+            let mut res = |input| {
+                match input {
+                    Ok(player_input) => {
+                        // we have input from a player, handle it
+                        handle_player_input(
+                            player_input,
+                            world_arc.clone(),
+                            players_arc.clone(),
+                            battle_map_arc.clone(),
+                            g_arc.clone(),
+                            &mut rng,
+                        )
+                    }
+                    Err(_) => {
+                        // no player input to handle, just do world logic
+                        world_logic(
+                            world_arc.clone(),
+                            players_arc.clone(),
+                            battle_map_arc.clone(),
+                            g_arc.clone(),
+                        )?;
+                        if last_update.elapsed().as_millis() > TICK {
+                            world_tick(
+                                world_arc.clone(),
+                                players_arc.clone(),
+                                battle_map_arc.clone(),
+                                g_arc.clone(),
+                            )?;
+                            last_update = Instant::now();                            
+                        }
+                        Ok(())
+                    }
                 }
             };
             // if we encounter any errors, print them
-            if let Err(err) = res {
+            if let Err(err) = res(recv.try_recv()) {
                 println!("{}", err);
             }
         }
@@ -701,20 +735,28 @@ fn main() -> Result<()> {
         loop {
             let dur = Duration::from_secs(10);
             thread::sleep(dur);
-
-            let players = players.read().unwrap();
-            for player in players.iter() {
-                if let Some(player) = player {
-                    if let Some(username) = &player.username {
-                        let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, username);
-                        let mut file = OpenOptions::new()
-                            .write(true)
-                            .truncate(true)
-                            .open(save_file)
-                            .unwrap();
-                        file.write_all(&player.save().unwrap().as_bytes()).unwrap();
+            if let Ok(players) = players.read().map_err(players_op) {
+                for player in players.iter() {
+                    if let Some(player) = player {
+                        if let Some(username) = &player.username {
+                            let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, username);
+                            let try_write = || -> Result<()> {
+                                let mut file = OpenOptions::new()
+                                    .write(true)
+                                    .truncate(true)
+                                    .create(true)
+                                    .open(save_file)?;
+                                file.write_all(&player.save()?.as_bytes())?;
+                                Ok(())
+                            };
+                            if let Err(e) = try_write() {
+                                println!("Error while saving: {}", e);
+                            }
+                        }
                     }
                 }
+            } else {
+                println!("Error! can't read players!");
             }
         }
     });

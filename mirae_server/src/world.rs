@@ -416,6 +416,8 @@ impl World {
         // generate structures
         generate_structures(&mut block_map, &mut mob_map, &mut biome_map, &g, &mut rng)?;
 
+        println!("made structures");
+
         // generate mobs
         for i in 0..(mob_map.dim.dim() as usize) {
             let block = g.get_block_name_by_id(block_map.direct_get(i))?;
@@ -432,7 +434,6 @@ impl World {
                     let mob_id = MobU16(rng.gen_range(0, max));
                     let mob_name = g.get_mob_name_by_id(mob_id)?;
                     let mob = &g.mob_templates.name_to_item[&mob_name];
-
                     if mob.dont_spawn {
                         return Ok(false);
                     }
@@ -491,6 +492,8 @@ impl World {
                 }
             }
         }
+
+        println!("made mobs");
 
         // calculate lighting
         let mut light_map = Map::new(g.terrain.dim, RGB::new(0, 0, 0));

@@ -1,9 +1,14 @@
 // all the potential types of Packets we can expect.
 const PacketTypes = Object.freeze({ "Text": 0, "Display": 1, "Init": 2, "Err": 3, "Img": 4, "StaticDisplay": 5 })
-
-const MAX_PACKET_TYPE_LEN = 5
-const MAX_PACKET_SIZE_LEN = 4
+const MAX_PACKET_TYPE_LEN = "StaticDisplay".length
+const MAX_PACKET_SIZE_LEN = 5
 const MAX_TEXTAREA_SIZE = 25000
+const mob_imgs = 'mob_images_to_load'
+const id_to_mob = 'mob_img_id_to_img'
+const id_to_block = 'block_img_id_to_img'
+const path_to_blocks = 'resources/blocks/'
+const path_to_mob_map = 'resources/mobs/map_img/'
+const path_to_mob_full = 'resources/mobs/full_img/'
 
 let socket = null
 let canvas = null
@@ -15,8 +20,6 @@ let textbox = null
 let initData = null
 let imgData = null
 let buffer = null
-let lastSent = ""
-let displayingImage = false
 
 class Player {
     constructor(ID, x, y) {
@@ -177,18 +180,29 @@ function handlePacket(pkt) {
         displayImg(new Uint8Iter(new DataView(pkt.content.buffer)), canvas, ct)
     } else if (pkt.packetType === PacketTypes.Init) {
         initData = JSON.parse(dec.decode(pkt.content))
+        console.log(initData)
         imgData = {}
-        for (var entity in initData['img_id_to_img']) {
-            let name = initData['img_id_to_img'][entity]
-            console.log("name " + name)
+        for (var entity in initData[id_to_mob]) {
+            let name = initData[id_to_mob][entity]
+            if (name == "none") {
+                continue;
+            }
             imgData[name] = new Image()
-            imgData[name].src = "resources/map_img/" + name
+            imgData[name].src = path_to_mob_map + name
         }
-        let arr = initData['images_to_load']
+        let arr = initData[mob_imgs]
         for (var i = 0; i < arr.length; i++) {
             let name = arr[i]
+            if (name == "none") {
+                continue;
+            }
             imgData[name] = new Image()
-            imgData[name].src = "resources/full_img/" + name
+            imgData[name].src = path_to_mob_full + name
+        }
+        for (var entity in initData[id_to_block]) {
+            let name = initData[id_to_block][entity]
+            imgData[name] = new Image()
+            imgData[name].src = path_to_blocks + name
         }
     } else if (pkt.packetType === PacketTypes.Err) {
         let decoded = dec.decode(pkt.content)
@@ -236,8 +250,8 @@ function displayImg(data, canvas, ct) {
     let width = data.pop()
     let height = data.pop()
     let numPlayers = data.pop()
+    let resolution_is_1 = data.pop()
     let numElems = width * height
-    let numElemsEnt = data.pop()
 
     let players = []
     for (let i = 0; i < numPlayers; i++) {
@@ -251,26 +265,59 @@ function displayImg(data, canvas, ct) {
     }
 
     let entities = []
-    for (let i = 0; i < numElemsEnt; i++) {
-        entities.push(data.pop())
+    let block_img_ids = []
+    if (resolution_is_1 == 1) {
+        for (let i = 0; i < numElems; i++) {
+            block_img_ids.push(data.pop())
+        }
+        for (let i = 0; i < numElems; i++) {
+            entities.push(data.pop())
+        }
     }
-    let blockWidth = Math.round(canvas.width / width)
-    let blockHeight = Math.round(canvas.height / (numElems / width))
 
-    for (let y = 0; y < (numElems / width); y++) {
+    let blockWidth = Math.round(canvas.width / width)
+    let blockHeight = Math.round(canvas.height / height)
+
+    for (let y = 0; y < height; y++) {
         let yPx = y * blockHeight
         for (let x = 0; x < width; x++) {
             let xPx = x * blockWidth
             let index = y * width + x
-            let block = blocks[index]
-            ct.fillStyle = "rgb(" + block[0] + "," + block[1] + "," + block[2] + ")";
-            ct.fillRect(xPx, yPx, blockWidth, blockHeight)
+
+            let clr = blocks[index]
+            let color = "rgb(" + clr[0] + "," + clr[1] + "," + clr[2] + ")"
+
+            let block = block_img_ids.length === 0 ? 255 : block_img_ids[index];
+            if (block == 255) {
+                // color incorporates block color, just draw a solid block
+                ct.fillStyle = color;
+                ct.fillRect(xPx, yPx, blockWidth, blockHeight)
+            } else {
+                // color is just the lighting, have to draw the block texture
+                let blockImg = initData[id_to_block][block]
+                // draw the block
+                ct.drawImage(
+                    imgData[blockImg],
+                    xPx,
+                    yPx,
+                    blockWidth,
+                    blockHeight
+                )
+
+                // multiply the lighting
+                ct.fillStyle = color;
+                ct.globalCompositeOperation = 'multiply'
+                ct.fillRect(xPx, yPx, blockWidth, blockHeight);
+
+                // reset to default
+                ct.globalCompositeOperation = 'source-over'
+            }
         }
     }
 
-    let size = 0.8
-    if (numElemsEnt > 0) {
-        for (let y = 0; y < (numElems / width); y++) {
+    let size = 0.7
+    if (entities.length > 0) {
+        for (let y = 0; y < height; y++) {
             let yPx = y * blockHeight
             for (let x = 0; x < width; x++) {
                 let xPx = x * blockWidth
@@ -279,7 +326,7 @@ function displayImg(data, canvas, ct) {
                 if (entity === 255) {
                     continue
                 }
-                let entityImg = initData['img_id_to_img'][entity]
+                let entityImg = initData[id_to_mob][entity]
                 ct.drawImage(
                     imgData[entityImg], 
                     xPx + blockWidth * (1 - size) * 0.5,
@@ -294,7 +341,9 @@ function displayImg(data, canvas, ct) {
     ct.fillStyle = "#FF0000"
     ct.font = Math.round(blockWidth * size) + "px Consolas";
     for (let i = 0; i < players.length; i++) {
-        ct.fillText(players[i].getPlayerDisplay(), players[i].x * blockWidth, (players[i].y + 1) * blockHeight)
+        let xPx = players[i].x * blockWidth
+        let yPx = (players[i].y + 1) * blockHeight
+        ct.fillText(players[i].getPlayerDisplay(), xPx + blockWidth * (1 - size) * 0.5, yPx - blockWidth * (1 - (size - 0.1)) * 0.5)
     }
 }
 
@@ -336,9 +385,11 @@ $(document).ready(function () {
         socket = new WebSocket("ws://" + ws['ip'] + ":" + ws['port'])
         canvas = document.getElementById("canvas")
         ct = canvas.getContext("2d");
+        ct.imageSmoothingEnabled = false;
 
         l_canvas = document.getElementById("img_canvas")
         l_ct = l_canvas.getContext("2d");
+        l_ct.imageSmoothingEnabled = false;
 
         text = document.getElementById("text")
         textbox = document.getElementById("textbox")

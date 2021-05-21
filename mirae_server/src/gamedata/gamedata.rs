@@ -358,6 +358,7 @@ pub struct GameData {
     pub blocks: IDMap<u8, BlockName, Block>,
     pub init_packet: Packet,
     pub mob_id_to_img_id: HashMap<u16, u8>,
+    pub block_id_to_img_id: HashMap<u8, u8>,
 }
 
 fn get_idmap<A: Eq + Debug + Hash + Copy, B: Hash + Eq + Clone, C>(
@@ -414,51 +415,85 @@ impl GameData {
         block_names: Option<Vec<String>>,
         mob_names: Option<Vec<String>>,
     ) -> Result<Self> {
-        let mut img_to_img_id = HashMap::new();
-        let mut mob_id_to_img_id = HashMap::new();
-        let mut id: u8 = 0;
         let mob_templates = if let Some(mob_names) = mob_names {
-            get_idmap_from_names(mob_templates, mob_names, |x| MobU16(x.0 + 1), MobU16(0))
+            get_idmap_from_names(
+                mob_templates,
+                mob_names,
+                |x: MobU16| MobU16(x.0 + 1),
+                MobU16(0),
+            )
         } else {
             get_idmap(
                 mob_templates,
-                |x| MobU16(x.0 + 1),
+                |x: MobU16| MobU16(x.0 + 1),
                 MobU16(0),
                 MobU16::empty(),
             )?
         };
 
-        let mut images_to_load = HashSet::new();
+        let mut id: u8 = 0;
+        let mut mob_img_to_img_id = HashMap::new();
+        let mut mob_id_to_img_id = HashMap::new();
+        let mut mob_images_to_load = HashSet::new();
         for i in 0..mob_templates.max_id.0 {
             let mob_name = mob_templates
                 .id_to_name
                 .get_by_left(&MobU16(i))
                 .ok_or(anyhow!("invalid id"))?;
-            let mob_template = mob_templates
-                .name_to_item
-                .get(&mob_name)
-                .ok_or(anyhow!("invalid mob name"))?;
+            let mob_template = &mob_templates.name_to_item[mob_name];
 
-            images_to_load.insert(mob_template.display_img.clone());
+            mob_images_to_load.insert(mob_template.display_img.clone());
 
-            if !img_to_img_id.contains_key(&mob_template.display) {
-                img_to_img_id.insert(mob_template.display.clone(), id);
+            if !mob_img_to_img_id.contains_key(&mob_template.display) {
+                mob_img_to_img_id.insert(mob_template.display.clone(), id);
                 id += 1;
             }
-            let val = img_to_img_id[&mob_template.display];
+            let val = mob_img_to_img_id[&mob_template.display];
             mob_id_to_img_id.insert(i, val);
         }
-        let mut img_id_to_img = HashMap::new();
-        for (k, v) in img_to_img_id {
-            img_id_to_img.insert(format!("{}", v), k);
+        let mut mob_img_id_to_img = HashMap::new();
+        for (k, v) in mob_img_to_img_id {
+            mob_img_id_to_img.insert(format!("{}", v), k);
         }
 
-        let images_to_load: Vec<String> = images_to_load.into_iter().collect();
+        let mob_images_to_load: Vec<String> = mob_images_to_load.into_iter().collect();
+
+        let blocks = if let Some(block_names) = block_names {
+            get_idmap_from_names(blocks, block_names, |x| x + 1, 0u8)
+        } else {
+            get_idmap(blocks, |x| x + 1, 0u8, u8::MAX)?
+        };
+
+        let mut id: u8 = 0;
+        let mut block_img_to_img_id = HashMap::new();
+        let mut block_id_to_img_id = HashMap::new();
+        for i in 0..blocks.max_id {
+            let block_name = blocks
+                .id_to_name
+                .get_by_left(&i)
+                .ok_or(anyhow!("invalid id"))?;
+
+            let block = &blocks.name_to_item[block_name];
+
+            if let Some(texture) = &block.texture {
+                if !block_img_to_img_id.contains_key(texture) {
+                    block_img_to_img_id.insert(texture.clone(), id);
+                    id += 1;
+                }
+                let val = block_img_to_img_id[texture];
+                block_id_to_img_id.insert(i, val);
+            }
+        }
+        let mut block_img_id_to_img = HashMap::new();
+        for (k, v) in block_img_to_img_id {
+            block_img_id_to_img.insert(format!("{}", v), k);
+        }
 
         #[derive(Serialize)]
         struct Content {
-            img_id_to_img: HashMap<String, String>,
-            images_to_load: Vec<String>,
+            mob_img_id_to_img: HashMap<String, String>,
+            mob_images_to_load: Vec<String>,
+            block_img_id_to_img: HashMap<String, String>,
         }
 
         Ok(GameData {
@@ -466,23 +501,21 @@ impl GameData {
             dmg,
             stat,
             items,
-            blocks: if let Some(block_names) = block_names {
-                get_idmap_from_names(blocks, block_names, |x| x + 1, 0u8)
-            } else {
-                get_idmap(blocks, |x| x + 1, 0u8, u8::MAX)?
-            },
+            blocks,
             mob_templates,
             biomes: get_idmap(biomes, |x| x + 1, 0u8, u8::MAX)?,
             structures,
             init_packet: Packet {
                 p_type: PacketType::Init,
                 content: serde_json::to_string(&Content {
-                    img_id_to_img,
-                    images_to_load,
+                    mob_img_id_to_img,
+                    mob_images_to_load,
+                    block_img_id_to_img
                 })?
                 .into_bytes(),
             },
             mob_id_to_img_id,
+            block_id_to_img_id
         })
     }
 

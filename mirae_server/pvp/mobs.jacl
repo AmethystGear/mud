@@ -13,7 +13,7 @@
         "speed" : 1
         "agression" : 1
     }
-    description : "A weak and pathetic creature. Easy to kill, but also no loot."
+    description : "A weak and pathetic creature. Easy to kill, but also no loot. At least you get some xp."
 )
 
 "bigly_ben" : (
@@ -27,19 +27,21 @@
     )
     drops : (
         items : [
+            [(name : "orange", per: 1)]
             [(name : "trump_orange", per: 1)]
-            [(name : "orange", per: 3)]
+            [(name : "heart_of_trump", per: 1)]
         ]
-        probs : [0.25, 0.75]
-        min : 0
-        max : 1
+        probs : [0.7, 0.2, 0.1]
+        min : 1
+        max : 2
     )
     tools : (
         items : [
-            [(name : "trump_orange", per: 1)]
-            [(name : "orange", per: 1)]
+            [(name : "trump_orange", per: 2)]
+            [(name : "orange", per: 3)]
+            [(name : "heart_of_trump", per: 1)]
         ]
-        probs : [0.2, 0.8]
+        probs : [0.3, 0.6, 0.1]
         min : 3
         max : 5
     )
@@ -61,32 +63,72 @@
     tags : ["bigly" "cave"]
 )
 
+"trump" : (
+    quotes: (
+        entrance : ["bigly" "yesyesyes" "I am oh so very beautiful"]
+        attack : ["bigly" "yesyesyes" "I am oh so very beautiful"]
+        run  : ["bigly" "yesyesyes" "I am oh so very beautiful"]
+        player_victory : ["trust me, believe me i win yesyesyes"]
+        mob_victory : ["trust me, believe me i win yesyesyes"]
+    )
+
+    tools : (
+        items : [
+            [(name : "trump_orange", per: 2)]
+            [(name : "orange", per: 3)]
+            [(name : "heart_of_trump", per: 1)]
+        ]
+        probs : [0.3, 0.6, 0.1]
+        min : 3
+        max : 5
+    )
+
+    drops : (
+        items : [
+            [(name : "orange", per: 1)]
+            [(name : "trump_orange", per: 1)]
+            [(name : "heart_of_trump", per: 1)]
+            [(name : "orange_shotgun", per: 1)]
+        ]
+        probs : [0.3, 0.2, 0.3, 0.2]
+        min : 1
+        max : 2
+    )
+
+    stats : {
+        "max_health" : 8
+        "max_energy" : 5
+        "speed" : 10
+        "agression" : 1
+    }
+
+    display : "bigly.png"
+    display_img : "bigly.png"
+    tags : ["bigly" "cave"]
+)
+
 "bogly_ben" : (
-    xp : -10
+    xp : 0
     quotes: (
         entrance : ["you have bigmac?" "bigmac yum" "you smell like bigmac"]
         attack : ["ben" "benben"]
         run  : ["BEN"]
-        player_victory : ["benbenbe-"]
+        player_victory : [
+"Why did you kill a bogly ben. Seriously. What the heck.
+It gives you NO xp, drops NOTHING, can't fight back, and even helpfully trades useless bigmacs for pagliacci.
+Seriously, what the actual fuck. I put this mob in the game to HELP YOU OUT. And then you sadistically murder him.
+Wow. Just wow. I am dissapointed."
+]
         mob_victory : ["BEN!!!" "BENBENBEN!!!"]
     )
     stats : {
         "max_health" : 2
     }
 
-    drops : (
-        items : [
-            [(name : "half_eaten_bigmac", per: 1)]
-        ]
-        probs : [1.0]
-        min : 0
-        max : 1
-    )
-
     trades : [
         (in_item : "half_eaten_bigmac", out_item : "pag_slice", in_cnt : 3, out_cnt : 1)
     ]
-    description : "Strange hermit that trades half eaten bigmacs for slices of pagliacci"
+    description : "Strange but friendly hermit that trades half eaten bigmacs for slices of pagliacci"
     tags : ["bogly"]
 )
 
@@ -99,12 +141,14 @@
         player_victory : ["benbenbe-"]
         mob_victory : ["BEN!!!" "BENBENBEN!!!"]
     )
+
     stats : {
         "max_health" : 15
         "max_energy" : 0
         "speed" : 5
         "agression" : 1
     }
+
     abilities : {
         "radioactive_heal" : (
             health : 2
@@ -123,12 +167,43 @@
             [(name : "radioactive_mutagen", per: 1)]
         ]
         probs : [0.3]
-        min : 0
-        max : 2
+        min : 4
+        max : 4
     )
 
     description : "A lowly ben, mutated by radiation into this monstrosity. Much stronger than the lowly variant."
     tags : ["radioactive"]
+)
+
+"pile_of_radioactive_garbage" : (
+    xp : 1000
+    stats : {
+        "max_health" : 20
+        "max_energy" : 0
+        "speed" : 5
+    }
+
+    abilities : {
+        "give_opponent_cancer" : (
+            damage : {
+                "radiation" : 2
+            }
+            repeat : 3
+        )
+    }
+
+    drops : (
+        items : [
+            [(name : "radioactive_mutagen", per: 1)]
+            [(name : "plutonium", per: 1)]
+        ]
+        probs : [0.5, 0.5]
+        min : 4
+        max : 5
+    )
+
+    description : "literally a massive pile of radioactive garbage"
+    tags : ["radioactive" "trash"]
 )
 
 "sentient_sludge" : (
@@ -153,13 +228,15 @@
             [(name : "viscous_fluid", per : 7)]
             [(name : "viscous_fluid", per : 1)]
         ]
-        probs : [0.1, 0.9]
-        min : 0
+        probs : [0.25, 0.75]
+        min : 1
         max : 2
     )
+    tags : ["swamp"]
 )
 
 "sonic" : (
+    xp : 10000
     stats : {
         "max_health" : 3
         "speed" : 343
@@ -205,7 +282,7 @@
 )
 
 "faceman" : (
-    xp : 300
+    xp : 350
     stats : {
         "max_health" : 15
         "max_energy" : 15
@@ -251,66 +328,154 @@
     display_img : "faceman_full.png"
 )
 
-/*
 "pirate_knight" : (
+    xp : 100
     stats : {
-        "max_health" : 4
-        "max_energy" : 10
+        "max_health" : 8
+        "max_energy" : 30
+        "speed" : 15
     }
+
+    tools : (
+        required_items : [
+            (name : "iron_sword", per: 1)
+        ]
+    )
+
+    drops : (
+        required_items : [
+            (name : "gold", per: 1)
+        ]
+    )
+
+    abilities : {
+        "honourable_heal" : (
+            health : 3
+        )
+    }
+
+    display : "honour.png"
     tags : ["pirate"]
 )
 
 "sunken_pirate" : (
+    xp : 100
     stats : {
         "max_health" : 4
-        "max_energy" : 10
+        "max_energy" : 20
+        "speed" : 15
     }
+
+    drops : (
+        required_items : [
+            (name : "gold", per: 2)
+        ]
+    )
+
+    tools : (
+        required_items : [
+            (name : "iron_sword", per: 1)
+        ]
+    )
 
     tags : ["pirate", "aquatic"]
 )
 
 "pirate" : (
+    xp : 100
     stats : {
         "max_health" : 4
         "max_energy" : 10
+        "speed" : 15
     }
+
+    drops : (
+        required_items : [
+            (name : "gold", per: 1)
+        ]
+    )
+
+    tools : (
+        required_items : [
+            (name : "iron_sword", per: 1)
+        ]
+    )
     tags : ["pirate"]
 )
 
 "sunken_ghost" : (
+    xp : 100
     stats : {
         "max_health" : 4
         "max_energy" : 10
+        "speed" : 15
     }
+
+    abilities : {
+        "annoying_ghost_noises" : (
+            health : 1
+            damage : {
+                "psychological" : 1
+            }
+        )
+    }
+
     tags : ["aquatic"]
 )
 
 "honour_knight" : (
+    xp : 100
     stats : {
-        "max_health" : 4
+        "max_health" : 15
         "max_energy" : 10
+        "speed" : 15
     }
+
+    tools : (
+        required_items : [
+            (name : "iron_honoursword", per: 1)
+            (name : "honour", per: 50)
+            (name : "mana", per : 50)
+        ]
+    )
+
+    display : "honour.png"
     tags : ["honourable"]
 )
 
 "honour_mage" : (
+    xp : 100
     stats : {
-        "max_health" : 4
+        "max_health" : 15
         "max_energy" : 10
+        "speed" : 15
     }
+
+    tools : (
+        required_items : [
+            (name : "iron_honoursword", per: 1)
+            (name : "honour", per: 50)
+            (name : "mana", per : 50)
+        ]
+    )
+
+    display : "honour.png"
     tags : ["honourable"]
 )
 
 "wet_knight" : (
+    xp : 100
     stats : {
-        "max_health" : 4
+        "max_health" : 15
         "max_energy" : 10
+        "speed" : 15
     }
+    display : "honour.png"
     tags : ["honourable", "aquatic", "surface_aquatic"]
 )
-*/
 
 "aquatic_nose" : (
+    xp : 300
     stats : {
         "max_health" : 20
         "speed" : 10
@@ -319,8 +484,8 @@
         entrance : ["*sniff*"]
         attack : ["*sniff*"]
         run  : ["*sniff*"]
-        player_victory : ["*perishes*"]
-        mob_victory : ["*snort snort*"]
+        player_victory : ["*achoo-*"]
+        mob_victory : ["*SNORT*"]
     )
     abilities : {
         "runny nose" : (
@@ -380,11 +545,31 @@
     tags : ["bogly", "aquatic"]
 )
 
+"surferoo" : (
+    xp : 12
+    stats : {
+        "max_health" : 3
+        "speed" : 25
+        "agression" : 0.1
+    }
+
+    drops : (
+        items : [
+            [(name : "regesplant", per : 1)]
+        ]
+        probs : [0.3]
+        min : 5
+        max : 5
+    )
+
+    tags : ["bogly", "surface_aquatic"]
+)
+
 "automated_submarine" : (    
     quotes: (
         entrance : ["THREAT DETECTED"]
         attack : [
-            "*BOOP*" "*whirring noises*" "ACTION: NEUTRALIZE THREAT"
+            "*BEEP*-*BOOP*" "*whirring noises*" "ACTION: NEUTRALIZE THREAT"
         ]
         run  : ["DISENGAGE" "CANNOT LOCATE THREAT"]
         player_victory : ["SYSTEM FAILURE" "BACKING UP DATA" "ERROR-ERROR-ERR-"]
@@ -413,9 +598,10 @@
     drops : (
         items : [
             [(name : "missile", per : 1)]
-            [(name : "metal", per : 10)]
+            [(name : "busted_machinery", per : 1)]
+            [(name : "junk_metal", per : 1)]
         ]
-        probs : [0.5, 0.5]
+        probs : [0.5, 0.25, 0.25]
         min : 1
         max : 4
     )
@@ -763,6 +949,15 @@
         "speed" : 3
         "agression" : 1
     }
+    drops : (
+        items : [
+            [(name : "wing", per: 1)]
+            [(name : "pag_slice", per: 1)]
+        ]
+        probs : [0.2, 0.7]
+        min : 1
+        max : 1
+    )
     abilities : {
         "kamikaze" : (
             health : -5
@@ -804,6 +999,15 @@
         "speed" : 6
         "agression" : 1
     }
+    drops : (
+        items : [
+            [(name : "wing", per: 1)]
+            [(name : "pag_slice", per: 1)]
+        ]
+        probs : [0.5, 0.5]
+        min : 0
+        max : 2
+    )
     abilities : {
         "kamikaze" : (
             health : -5
@@ -830,6 +1034,55 @@
     tags : ["bogly"]
 )
 
+"pagliacci_tree" : (
+    xp : 250
+    dont_spawn : true
+    stats : {
+        "max_health" : 5
+        "speed" : 5
+    }
+    drops : (
+        items : [
+            [(name : "wood", per: 1)]
+            [(name : "pag_slice", per: 1)]
+        ]
+        probs : [0.5, 0.5]
+        min : 4
+        max : 8
+    )
+    display : "tree.jpg"
+    display_img : "tree.jpg"
+)
+
+"orange_tree" : (
+    xp : 75
+    quotes: (
+        entrance : ["No no no, I have nothing to give you, I am not a tree, believe me, go away"]
+        attack : ["Why are you chopping me down, I am so great and wonderful"]
+        run : ["Yes yes yes, you are very very smart for going away"]
+        player_victory : ["No no no, believe me, I have lots of health"]
+        mob_victory : ["Yes yes yes, I am the most powerful mob, they should make me King Trump I tell them"]
+    )
+    stats : {
+        "max_health" : 5
+        "speed" : 5
+    }
+    drops : (
+        items : [
+            [(name : "wood", per: 1)]
+            [(name : "orange", per: 1)]
+            [(name : "trump_orange", per: 1)]
+            [(name : "sentient_trump_orange", per: 1)]
+        ]
+        probs : [0.5, 0.3, 0.15, 0.05]
+        min : 4
+        max : 8
+    )
+    display : "bigly.png"
+    display_img : "orange_tree.png"
+    tags : ["cave", "bigly"]
+)
+
 "reges" : (
     dont_spawn : true
     xp : 420
@@ -846,7 +1099,7 @@
         ]
         run : ["come back when you want to get stoned with me bro"]
         player_victory : ["Urk.. ugh... my only regret is being sober for 3 days in my whole life"]
-        mob_victory : ["Yeah man, I knew you could do it... transcend with me Dude..."]
+        mob_victory : ["Yeah man, I knew you could do it... transcend with me dude..."]
     )
     stats : {
         "max_health" : 25
@@ -856,33 +1109,115 @@
     }
     tools : (
         required_items : [
-            (name : "bong", per: 1)
+            (name : "bong", per: 4)
             (name : "regesplant", per : 420)
         ]
-        items : [
-            [(name : "bong", per : 1)]
-        ]
-        probs : [1.0]
-        min : 0
-        max : 3
     )
     drops : (
-        items : [
-            [(name : "regesplant", per : 1)]
+        required_items : [
+            (name : "regesplant", per : 420)
         ]
-        probs : [1.0]
-        min : 0
-        max : 20
     )
     abilities : {
-        "nap" : (
+        "take_a_nap" : (
             health : 5
-            energy : 5
+        )
+        "ascend" : (
+            energy : 420
         )
     }
     trades : [
-        (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 3, out_cnt : 1)
-        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 1, out_cnt : 1)
+        (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 10, out_cnt : 1)
+        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 10, out_cnt : 1)
+        (in_item : "gold", out_item : "pipe", in_cnt : 5, out_cnt : 1)
     ]
     display_img : "reges.png"
 )
+
+"thomas" : (
+    xp : 1000
+    quotes: (
+        entrance : [
+            "WOOOO WOOOOO" "CHOOOOOO CHOOOOO" "CHUGGA CHUGGA"
+        ]
+        attack : [
+            "WOOOO WOOOOO" "CHOOOOOO CHOOOOO" "CHUGGA CHUGGA"
+        ]
+        run : ["WOOOO WOOOOO" "CHOOOOOO CHOOOOO" "CHUGGA CHUGGA"]
+        player_victory : ["WOOOO WOOOOO" "CHOOOOOO CHOOOOO" "CHUGGA CHUGGA"]
+        mob_victory : ["WOOOO WOOOOO" "CHOOOOOO CHOOOOO" "CHUGGA CHUGGA"]
+    )
+
+    stats : {
+        "max_health" : 20
+        "max_energy" : 20
+        "speed" : 35
+        "agression" : 0
+    }
+
+    drops : (
+        items : [
+            [(name : "trainmail_armor", per: 1)]
+        ]
+        probs : [0.5]
+        min : 1
+        max : 1
+    )
+
+    abilities : {
+        "eat_shield" : (
+            health : 5
+            energy : 5
+        )
+
+        "thomas_rushdown" : (
+            energy : -10
+            damage : {
+                "physical" : 15
+            }
+            accuracy : 0.5
+        )
+
+        "blow_whistle" : (
+            text : "WHEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+        )
+    }
+
+    display_img : "thomas_train.png"
+)
+
+"lightning_mcqeeen" : (
+    xp : 1000
+    quotes: (
+        entrance : [
+            "KACHOW" "SPEED, I AM SPEED"
+        ]
+        attack : [
+            "KACHOW" "SPEED, I AM SPEED"
+        ]
+        run : ["KACHOW" "SPEED, I AM SPEED"]
+        player_victory : ["KACHOW" "SPEED, I AM SPEED"]
+        mob_victory : ["KACHOW" "SPEED, I AM SPEED"]
+    )
+
+    stats : {
+        "max_health" : 20
+        "max_energy" : 20
+        "speed" : 55
+    }
+
+    abilities : {
+        "take_performace_enhancing_gasoline" : (
+            energy : 10
+        )
+
+        "roadkill" : (
+            energy : -5
+            damage : {
+                "physical" : 10
+            }
+        )
+    }
+    display_img : "lightning_mcqeen.png"
+)
+

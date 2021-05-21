@@ -1,6 +1,6 @@
-dim : (x : 350, y : 350, z : 5)
-octaves : 8
-biome_octaves : 5
+dim : (x : 150, y : 150, z : 3)
+octaves : 6
+biome_octaves : 4
 full_passes : [
     // generate the land and caves
     (
@@ -13,8 +13,6 @@ full_passes : [
                 (biome : "swamp" cutoff : 0.4)
             ]
             [(biome : "cave")]
-            [(biome : "cave")]
-            [(biome : "cave")]
             [(biome : "cave_bottom")]
         ]
     )
@@ -23,7 +21,6 @@ full_passes : [
         change_bounding_noise_per_pass : false
         layers : [
             [(biome : "beach" cutoff : 0.525) (biome : "ocean_surface" cutoff : 0.5)]
-            [(biome : "ocean" cutoff : 0.5)]
             [(biome : "underwater" cutoff : 0.5) (biome : "abyss" cutoff : 0.35)]
             [(biome : "cracked_rock" cutoff : 0.375) (biome : "deep_underwater" cutoff : 0.35)]
         ]
@@ -32,18 +29,25 @@ full_passes : [
     (
         change_bounding_noise_per_pass : false
         layers : [
-            [(biome : "trash", cutoff : 0.2)]
-            [(biome : "rock", cutoff : 0.2)]
-            [(biome : "rock", cutoff : 0.2)]
-            [(biome : "rock", cutoff : 0.2)]
-            [(biome : "rock", cutoff : 0.2)]
+            [(biome : "ocean_surface", cutoff : 0.35) (biome : "trash" cutoff : 0.3)]
+            [(biome : "rock", cutoff : 0.3)]
+            [(biome : "rock", cutoff : 0.3)]
+        ]
+    )
+
+    // generate nuclear hotspots
+    (
+        change_bounding_noise_per_pass : true
+        layers : [
+            []
+            [(biome : "nuclear" cutoff : 0.2)]
+            [(biome : "nuclear" cutoff : 0.2)]
         ]
     )
 ]
 structure_spawn : {
     "sunken_ship" : (
         biomes : [
-            (biome: "underwater")
             (biome: "deep_underwater")
         ]
         default_prob : 0.0005
@@ -97,8 +101,8 @@ structure_spawn : {
 
     "sea_lantern" : (
         biomes : [
-            (biome: "underwater" prob : 0.00015)
-            (biome: "deep_underwater" prob : 0.00005)
+            (biome: "underwater" prob : 0.00005)
+            (biome: "deep_underwater" prob : 0.0001)
         ]
     )
 
@@ -108,7 +112,7 @@ structure_spawn : {
             (biome: "desert")
             (biome: "snowy")
         ]
-        default_prob : 0.0005
+        default_prob : 0.00025
     )
 
     "reges_shack" : (
@@ -116,5 +120,11 @@ structure_spawn : {
             (biome : "swamp" prob : 0.001)
         ]
         cap : 1
+    )
+
+    "pagliacci_tree" : (
+        biomes : [
+            (biome : "trash" prob : 0.003)
+        ]
     )
 }

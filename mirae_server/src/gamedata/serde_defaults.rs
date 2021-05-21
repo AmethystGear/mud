@@ -13,8 +13,13 @@ pub fn zero_u64() -> u64 {
     0
 }
 
+
 pub fn zero_i64() -> i64 {
     0
+}
+
+pub fn neg_one_i64() -> i64 {
+    -1
 }
 
 pub fn zero_f64() -> f64 {

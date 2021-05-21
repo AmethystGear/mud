@@ -1,14 +1,7 @@
-use crate::{
-    combat::{BattleMap, StatusEffect, ID},
-    display::Image,
-    gamedata::{
+use crate::{combat::{BattleMap, EntityType, ID, StatusEffect}, display::Image, gamedata::{
         gamedata::{DmgType, GameData, ItemName},
         item::{Ability, Item},
-    },
-    inventory::Inventory,
-    stat::Stat,
-    vector3::Vector3,
-};
+    }, inventory::Inventory, stat::Stat, vector3::Vector3};
 use anyhow::{anyhow, Result};
 use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::collections::HashMap;
@@ -169,16 +162,22 @@ pub trait Entity {
         }
 
         // checks to ensure we can actually use the ability
-        if self.xp() + ability.xp_cost < 0 {
+        if self.xp() + ability.xp < 0 {
             return Err(anyhow!(format!(
                 "you need at least {} xp to use this ability",
-                ability.xp_cost
+                -ability.xp
             )));
         }
         if self.stats().energy() + ability.energy < 0.0 {
             return Err(anyhow!(format!(
                 "you need at least {} energy to use this ability",
                 -ability.energy
+            )));
+        }
+        if self.stats().health() + ability.health < 0.0 && self.id().enity_type == EntityType::Mob {
+            return Err(anyhow!(format!(
+                "you need at least {} health to use this ability",
+                -ability.health
             )));
         }
         if !self.inventory().contains(&ability.require_items) {
@@ -220,7 +219,7 @@ pub trait Entity {
             }
         }
 
-        self.set_xp(self.xp() - ability.xp_cost);
+        self.set_xp(self.xp() + ability.xp);
         self.stats_mut().change_energy(ability.energy, g)?;
         self.stats_mut().change_health(ability.health, g);
         self.inventory_mut().remove_items(&ability.remove_items)?;

@@ -75,6 +75,7 @@ impl Into<Lighting> for LightingDeser {
 
 #[derive(Deserialize, Debug)]
 pub struct BlockDeser {
+    #[serde(default = "RGB::black")]
     color: RGB,
     #[serde(default = "false_bool")]
     solid: bool,
@@ -92,6 +93,8 @@ pub struct BlockDeser {
     break_into: String,
     #[serde(default = "empty_string")]
     drop: String,
+    #[serde(default = "empty_string")]
+    texture: String,
 }
 
 impl BlockDeser {
@@ -117,6 +120,11 @@ impl BlockDeser {
             mob_spawn: self.mob_spawn,
             break_into,
             drop,
+            texture: if self.texture == "" {
+                None
+            } else {
+                Some(self.texture)
+            },
         }
     }
 }
@@ -165,4 +173,5 @@ pub struct Block {
     pub mob_spawn: MobInfo,
     pub break_into: Option<BlockName>,
     pub drop: Option<ItemName>,
+    pub texture: Option<String>,
 }

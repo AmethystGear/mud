@@ -37,7 +37,7 @@ pub struct AbilityDeser {
     make_items: HashMap<String, u64>,
 
     #[serde(default = "zero_i64")]
-    xp_cost: i64,
+    xp: i64,
 
     #[serde(default = "one_f64")]
     accuracy: f64,
@@ -47,6 +47,12 @@ pub struct AbilityDeser {
 
     #[serde(default = "empty_string")]
     self_text: String,
+
+    #[serde(default = "false_bool")]
+    run_without_equip: bool,
+
+    #[serde(default = "neg_one_i64")]
+    max_times_per_turn: i64,
 }
 
 impl AbilityDeser {
@@ -96,10 +102,16 @@ impl AbilityDeser {
             require_items,
             remove_items,
             make_items: map_key(self.make_items, item_names)?,
-            xp_cost: self.xp_cost,
+            xp: self.xp,
             accuracy: self.accuracy,
             text: self.text,
-            self_text: self.self_text
+            self_text: self.self_text,
+            run_without_equip: self.run_without_equip,
+            max_times_per_turn: if self.max_times_per_turn == -1 {
+                u64::MAX
+            } else {
+                self.max_times_per_turn as u64
+            },
         })
     }
 }
@@ -195,10 +207,12 @@ pub struct Ability {
     pub require_items: HashMap<ItemName, u64>,
     pub remove_items: HashMap<ItemName, u64>,
     pub make_items: HashMap<ItemName, u64>,
-    pub xp_cost: i64,
+    pub xp: i64,
     pub accuracy: f64,
     pub text: String,
     pub self_text: String,
+    pub run_without_equip: bool,
+    pub max_times_per_turn: u64,
 }
 
 impl Ability {

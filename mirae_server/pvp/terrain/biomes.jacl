@@ -66,5 +66,9 @@
 )
 
 "cracked_rock" : (
-    biome_pass : [(above : 0.3, then : "rock") (then : "underwater_sand")]
+    biome_pass : [(above : 0.4, then : "rock") (then : "underwater_sand")]
+)
+
+"nuclear" : (
+    biome_pass : [(above : 0.6, then : "nuclear_block") (then : "nuclear_stone")]
 )

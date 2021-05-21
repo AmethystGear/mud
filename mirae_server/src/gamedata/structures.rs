@@ -1,6 +1,6 @@
 use super::{
     gamedata::{BlockName, GameData, MobName, StructureName},
-    serde_defaults::empty_vec,
+    serde_defaults::*,
 };
 use crate::{
     rgb::RGB,
@@ -26,6 +26,7 @@ struct MobAndProbDeser {
 #[derive(Deserialize, Debug)]
 struct StructureMappingDeser {
     color: RGB,
+    #[serde(default = "empty_string")]
     block: String,
     #[serde(default = "empty_vec")]
     mobs: Vec<MobAndProbDeser>,
@@ -35,6 +36,10 @@ struct StructureMappingDeser {
 pub struct StructureDeser {
     sources: Vec<String>,
     mapping: Vec<StructureMappingDeser>,
+}
+
+fn get_nearby(val : u8) -> [u8; 3] {
+    [val, val.saturating_add(1), val.saturating_sub(1)]
 }
 
 impl StructureDeser {
@@ -48,7 +53,6 @@ impl StructureDeser {
         let mut v = Vec::new();
 
         let mut i = 0;
-        
         let mut rgb_to_block = HashMap::new();
         let mut mob_and_prob = Vec::new();
         for sm in self.mapping {
@@ -69,13 +73,16 @@ impl StructureDeser {
             mob_and_prob.push(vec);
             let name = BlockName::from(sm.block);
             if !block_names.contains(&name) {
-                return Err(anyhow!(format!("{:?} isn't a block", name)));
+                if name.0 == "" {
+                    rgb_to_block.insert(sm.color, (None, i));
+                } else {
+                    return Err(anyhow!("{:?} isn't a block", name));
+                }
             } else {
-                rgb_to_block.insert(sm.color, (name, i));
+                rgb_to_block.insert(sm.color, (Some(name), i));
             }
             i += 1;
         }
-        
         let mob_and_prob = Arc::new(mob_and_prob);
 
         for source in self.sources {
@@ -94,23 +101,17 @@ impl StructureDeser {
                 if alpha == u8::MAX {
                     let rgb = RGB::new(pix.0[0], pix.0[1], pix.0[2]);
                     let mut set = false;
-                    for r in &[rgb.r, rgb.r + 1, rgb.r - 1] {
-                        for g in &[rgb.g, rgb.g + 1, rgb.g - 1] {
-                            for b in &[rgb.b, rgb.b + 1, rgb.b - 1] {
+                    'escape: for r in &get_nearby(rgb.r) {
+                        for g in &get_nearby(rgb.g) {
+                            for b in &get_nearby(rgb.b) {
                                 let rgb = RGB::new(*r, *g, *b);
                                 if let Some((block, mp)) = rgb_to_block.get(&rgb) {
-                                    block_map.direct_set(index, Some(block.clone()));
+                                    block_map.direct_set(index, block.clone());
                                     mob_map.direct_set(index, Some(mp.clone()));
                                     set = true;
-                                    break;
-                                } 
+                                    break 'escape;
+                                }
                             }
-                            if set {
-                                break;
-                            }
-                        }
-                        if set {
-                            break;
                         }
                     }
 
@@ -152,7 +153,12 @@ impl Structure {
         g: &GameData,
         rng: &mut StdRng,
     ) -> Result<()> {
-        println!("spawned {:?} at {:?}", self.structure_name, loc);
+        let loc = Vector3::new(
+            loc.x() - self.blocks.dim.x() / 2,
+            loc.y() - self.blocks.dim.y() / 2,
+            loc.z(),
+        );
+        println!("trying to spawn {:?}", self.structure_name);
         for y in 0..self.blocks.dim.y() {
             for x in 0..self.blocks.dim.x() {
                 let struct_posn = Vector3::new(x, y, 0);
@@ -163,7 +169,8 @@ impl Structure {
                     if block.z_passable {
                         let below = loc + Vector3::new(0, 0, 1);
                         let below_block = g.get_block_name_by_id(block_map.get(below)?)?;
-                        let below_block = g.blocks.name_to_item.get(&below_block).expect("validated");
+                        let below_block =
+                            g.blocks.name_to_item.get(&below_block).expect("validated");
                         if below_block.solid {
                             block_map.set(below, g.get_block_id_by_name("stone")?)?;
                         }
@@ -181,6 +188,7 @@ impl Structure {
                 }
             }
         }
+        println!("spawned {:?} at {:?}", self.structure_name, loc);
         Ok(())
     }
 }

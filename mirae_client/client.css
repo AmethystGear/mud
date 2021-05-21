@@ -20,7 +20,7 @@ body {
     background-color: transparent;
     float: left;
     width: 70vw;
-    height:40vw;
+    height:90vh;
     color: white;
     font-family: 'Courier New', Courier, monospace;
     margin-right: 1vw;
@@ -28,8 +28,8 @@ body {
 }
 
 .canvas {
-    width: 20vw;
-    height: 20vw;
+    width: 25vw;
+    height: 25vw;
     margin-top: 1vw
 }
 

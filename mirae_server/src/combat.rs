@@ -176,6 +176,10 @@ impl BattleMap {
         defender_trades: bool,
         g: &GameData,
     ) -> Result<()> {
+        if self.get_handle(attacker.id()).is_ok() || self.get_handle(defender.id()).is_ok() {
+            return Err(anyhow!("trying to init a battle where one or more entities are already in battles"));
+        }
+
         let battle_handle = self.curr_handle;
         self.curr_handle = BattleHandle(battle_handle.0 + 1);
         self.id_to_handle.insert(attacker.id(), battle_handle);

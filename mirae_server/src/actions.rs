@@ -32,22 +32,22 @@ pub fn dispatch(data: ActionData) -> Result<()> {
             let func = match s.as_str() {
                 "disp" => disp,
                 "inv" | "inventory" => inv,
-                "eat" | "drink" | "consume" => eat,
                 "w" | "a" | "s" | "d" | "ww" | "aa" | "ss" | "dd" | "q" | "e" => step,
                 "wear" | "unwear" | "wearing" => wear,
                 "equip" | "dequip" | "equipped" => equip,
                 "use" => use_ability,
+                "do" => do_ability,
                 "upgrade" => upgrade,
                 "battle" => battle,
                 "map" => map,
                 "pass" => pass,
-                "run" | "flee" => run,
+                "run" => run,
                 "acc" | "account" => account,
                 "scan" => scan,
-                "info" | "stat" => info,
+                "info" => info,
                 "descr" | "describe" => describe,
                 "trade" => trade,
-                "mine" | "break" => mine,
+                "mine" => mine,
                 _ => return Err(anyhow!("invalid command")),
             };
             func(data)
@@ -234,29 +234,57 @@ fn use_ability(mut data: ActionData) -> Result<()> {
     )
 }
 
-fn eat(mut data: ActionData) -> Result<()> {
+fn do_ability(mut data: ActionData) -> Result<()> {
     let mut players = data
         .players
         .write()
         .map_err(|_| anyhow!("couldn't lock players"))?;
     let item_name;
     let amount;
+    let ability;
     data.params.pop_front(); // ignore the first parameter
-    match (data.params.pop_front(), data.params.pop_front()) {
-        (Some(Literal::String(item)), Some(Literal::Number(Number::Int(number)))) => {
+    match (
+        data.params.pop_front(),
+        data.params.pop_front(),
+        data.params.pop_front(),
+    ) {
+        (
+            Some(Literal::String(ability_name)),
+            Some(Literal::String(item)),
+            Some(Literal::Number(Number::Int(number))),
+        ) => {
             item_name = ItemName::checked_from(item, data.g)?;
-            if number > 0 {
-                amount = number as u64;
+            let item = &data.g.items[&item_name];
+
+            if let Some(a) = item.abilities.get(&ability_name) {
+                ability = a.clone();
             } else {
-                return Err(anyhow!("can't eat a negative number of an item"));
+                return Err(anyhow!(format!(
+                    "the item {:?} doesn't have the ability {:?}. It has the abilities: {:?}",
+                    item_name,
+                    ability_name,
+                    item.abilities.keys()
+                )));
             }
-        }
-        (Some(Literal::String(item)), None) => {
-            item_name = ItemName::checked_from(item, data.g)?;
-            amount = MAX_NUM_EAT;
+
+            if !ability.run_without_equip {
+                return Err(anyhow!("you must equip this item to run this ability!"));
+            }
+
+            if number > 0 && number as u64 <= ability.max_times_per_turn {
+                amount = number as u64;
+            } else if number <= 0 {
+                return Err(anyhow!("can't run an ability on less than 1 item"));
+            } else {
+                return Err(anyhow!(
+                    "you can only run this ability a maximum of {} times per turn",
+                    ability.max_times_per_turn
+                ));
+            }
         }
         _ => return Err(anyhow!(BAD_ARGS)),
     };
+
     let mut battle_map = data
         .battle_map
         .write()
@@ -267,11 +295,25 @@ fn eat(mut data: ActionData) -> Result<()> {
         .map_err(|_| anyhow!("couldn't lock world"))?;
     let player_id = ID::player(data.player_id);
 
-    let func =
-        |player: &mut Player,
-         opp: Option<Box<&mut dyn Entity>>,
-         g: &GameData,
-         battle_map: &mut BattleMap| { player.eat(opp, battle_map, &item_name, amount, g) };
+    let func = |player: &mut Player,
+                mut opp: Option<Box<&mut dyn Entity>>,
+                g: &GameData,
+                battle_map: &mut BattleMap|
+     -> Result<()> {
+        for _ in 0..amount {
+            if let Err(e) = player.run_ability(
+                &mut opp,
+                battle_map,
+                ability.clone(),
+                &Some(item_name.clone()),
+                g,
+            ) {
+                player.send_text(format!("ERROR: {:?}", e));
+                break;
+            }
+        }
+        Ok(())
+    };
 
     run_turn_with(
         &mut battle_map,
@@ -752,6 +794,13 @@ fn pass(data: ActionData) -> Result<()> {
 fn account(mut data: ActionData) -> Result<()> {
     data.params.pop_front(); // ignore first argument
 
+    let mut players = data
+        .players
+        .write()
+        .map_err(|_| anyhow!("couldn't lock players"))?;
+
+    let player = get_mut(&mut players, data.player_id)?;
+
     let flag;
     let name;
     match (data.params.pop_front(), data.params.pop_front()) {
@@ -759,14 +808,19 @@ fn account(mut data: ActionData) -> Result<()> {
             flag = f;
             name = n;
         }
+        (None, None) => {
+            let username;
+            if let Some(uname) = &player.username {
+                username = uname.clone();
+            } else {
+                return Err(anyhow!("you are not logged in, no account to access"));
+            }
+
+            player.send_text(format!("logged in as: {}\n", username));
+            return Ok(());
+        }
         _ => return Err(anyhow!(BAD_ARGS)),
     }
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-
-    let player = get_mut(&mut players, data.player_id)?;
 
     let save_file = format!("{}/{}", PLAYER_SAVE_FOLDER, name);
     match flag.as_str() {

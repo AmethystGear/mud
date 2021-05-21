@@ -120,3 +120,31 @@
         )
     ]
 )
+
+"pagliacci_tree" : (
+    sources : ["protected_item.png"]
+    mapping : [
+        (
+            color : (r : 0, g : 0, b : 0)
+            block : "mud"
+            mobs : [
+                (mob: "pagliacci_tree", prob : 1.0)
+            ]
+        )
+        (
+            color : (r : 255, g : 0, b : 0)
+            block : "rock"
+            mobs : [
+                (mob: "pag_with_extra_wings", prob : 1.0)
+            ]
+        )
+        (
+            color : (r : 0, g : 255, b : 0)
+            block : "mud"
+            mobs : [
+                (mob: "winged_pag", prob : 0.6)
+                (mob: "pag_with_extra_wings", prob : 0.2)
+            ]
+        )
+    ]
+)

@@ -42,9 +42,18 @@
             }
         )
 
+        "gold_from_ore" : (
+            remove_items : {
+                "gold_ore" : 2
+            }
+            make_items : {
+                "gold" : 3
+            }
+        )
+
         "iron_from_junk_metal" : (
             remove_items : {
-                "junk_metal" : 5
+                "junk_metal" : 1
             }
             make_items : {
                 "iron" : 2
@@ -75,7 +84,7 @@
                 "busted_machinery" : 1
             }
             make_items : {
-                "junk_metal" : 5
+                "junk_metal" : 9
             }
         )
 
@@ -122,7 +131,19 @@
     }
 )
 
-"gold" : (xp : 100)
+"gold" : (
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "gold" : 1
+            }
+            run_without_equip : true
+            xp : 500
+        )
+    }
+)
+
+"plutonium" : ()
 
 "bigly_stick" : (
     equipable : true
@@ -141,6 +162,7 @@
             make_items : {
                 "sentient_trump_orange" : 3
             }
+            run_without_equip : true
         )
     }
     description : "biiiiiiigly"
@@ -189,16 +211,25 @@
             damage : {
                 "magic" : 2
                 "heat" : 8
-                "honourable" : 2
+                "honourable" : 5
             }
             require_items : {
-                "honour" : 15
+                "honour" : 25
                 "mana" : 1
+                "honourable_rune" : 1
             }
             remove_items : {
                 "mana" : 1
             }
         )
+
+        "honourable_poke" : (
+            damage : {
+                "magic" : 1
+                "honourable" : 2
+            }
+        )
+
         "honourable_throw" : (
             destroy_item : true
             damage : {
@@ -211,6 +242,7 @@
         )
     }
     description : "A magic staff, crafted by a skilled knight adept in the use of fire magic. You must have honour to weild it."
+    tags : ["A"]
 )
 
 "iron_honoursword" : (
@@ -253,21 +285,66 @@
         )
 
         "concentrate" : (
+            health : 1
+            energy : 1
             make_items : {
                 "honour" : 2
                 "mana" : 3
+            }
+            require_items : {
+                "honourable_rune" : 1
             }
         )
     }
 )
 
-"quill" : (xp : 10)
+"quill" : (
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "quill" : 1
+            }
+            run_without_equip : true
+            xp : 5
+        )
+    }
+)
 
-"ink" : (xp : 5)
+"ink" : (
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "ink" : 1
+            }
+            run_without_equip : true
+            xp : 5
+        )
+    }
+)
 
-"honourable_ink" : (xp : 50)
+"honourable_ink" : (
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "honourable_ink" : 1
+            }
+            run_without_equip : true
+            xp : 50
+        )
+    }
+)
 
-"iron" : (xp : 10)
+"iron" : (
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "iron" : 1
+            }
+            run_without_equip : true
+            xp : 20
+        )
+    }
+)
 
 "junk_metal" : (
     xp : 0
@@ -285,28 +362,46 @@
         }
     )
     description : "Metal scrap, rusty, broken, junk. Not extremely useful."
+    tags : ["C"]
 )
 
 "busted_machinery" : (
     xp : 0
     description : "Broken pieces of a once functional machine."
+    tags : ["D"]
 )
 
 "oxford_dictionary" : (
-    xp : 200
+    equipable : true
     abilities : {
         "eat" : (
             remove_items : {
                 "oxford_dictionary" : 1
             }
             energy : -3
+            run_without_equip : true
+        )
+        "sell" : (
+            remove_items : {
+                "oxford_dictionary" : 1
+            }
+            run_without_equip : true
+            xp : 200
         )
     }
     description : "A tome codifying the sacred rules of the knight's language"
 )
 
 "honourable_rune" : (
-    xp : 10000
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "honourable_rune" : 1
+            }
+            run_without_equip : true
+            xp : 10000
+        )
+    }
     description : "Rare magical artifact that only knights can decipher. Required by some more powerful spells."
     tags : ["A"]
 )
@@ -371,49 +466,85 @@ though they haven't even started on any of the other problems..."
 )
 
 "completed_physics_homework" : (
-    xp : 2000
+    equipable : true
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "completed_physics_homework" : 1
+            }
+            run_without_equip : true
+            xp : 2000
+        )
+    }
     tags : ["C"]
 )
 "completed_physics_extra_credit" : (
-    xp : 5000
+    equipable : true
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "completed_physics_extra_credit" : 1
+            }
+            run_without_equip : true
+            xp : 5000
+        )
+    }
     tags : ["B"]
 )
 
 "mana" : (
-    xp : 40
     abilities : {
         "eat" : (
             remove_items : {
                 "mana" : 1
             }
             energy : 1
+            run_without_equip : true
+            max_times_per_turn : 10
+        )
+        "sell" : (
+            remove_items : {
+                "mana" : 1
+            }
+            run_without_equip : true
+            xp : 15
         )
     }
     description : "A form of energy used by knights"
 )
 
 "honour" : (
-    xp : -40
     abilities : {
         "eat" : (
             remove_items : {
                 "honour" : 1
             }
-            health : 2
+            health : 1
             energy : -1
+            run_without_equip : true
+            max_times_per_turn : 4
+        )
+        "sell" : (
+            remove_items : {
+                "honour" : 1
+            }
+            run_without_equip : true
+            xp : -200
         )
     }
     description : "A knight's favorite substance. Processed mana."
+    tags : ["C"]
 )
 
 "dragon's_blood" : (
-    xp : 1000
+    equipable : true
     abilities : {
         "eat" : (
             remove_items : {
                 "dragon's_blood" : 1
             }
             health : -2
+            run_without_equip : true
         )
         "throw" : (
             destroy_item : true
@@ -422,17 +553,30 @@ though they haven't even started on any of the other problems..."
                 "toxic" : 4
             }
         )
+        "sell" : (
+            remove_items : {
+                "dragon's_blood" : 1
+            }
+            run_without_equip : true
+            xp : 1000
+        )
     }
     description : "highly toxic blood obtained from a dragon"
+    tags : ["B"]
 )
 
 "the_journey_was_the_prize" : (
-    xp : -100
-    equipable : true
     abilities : {
         "self_reflection" : (
             destroy_item : true
             energy : -1
+        )
+        "sell" : (
+            remove_items : {
+                "the_journey_was_the_prize" : 1
+            }
+            run_without_equip : true
+            xp : -750
         )
     }
 
@@ -448,24 +592,43 @@ tags : ["F"]
 )
 
 "CPU" : (
-    xp : 3000
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "CPU" : 1
+            }
+            run_without_equip : true
+            xp : 3000
+        )
+    }
 )
 
 "copper_wires" : (
-    xp : 2
-)
-
-"broken_machinery" : (
-    xp : -10
-    tags : ["D"]
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "copper_wires" : 1
+            }
+            run_without_equip : true
+            xp : 2
+        )
+    }
 )
 
 "newton's_laws" : (
-    xp : 100
+    abilities : {
+        "sell" : (
+            remove_items : {
+                "newton's_laws" : 1
+            }
+            run_without_equip : true
+            xp : 100
+        )
+    }
 )
 
 "the_meaning_of_the_universe" : (
-    xp : -200
+    equipable : true
     description : 
 "the meaning of LIFE, the UNIVERSE and EVERYTHING can be understood
 if you simply USE this item to it's full extent..."
@@ -481,12 +644,12 @@ if you simply USE this item to it's full extent..."
 )
 
 // grades, lol
-"F" : ( xp : -100, tags : ["F"])
-"D+" : ( xp : 100, tags : ["D"])
-"C-" : ( xp : 200, tags : ["C"])
-"C++" : ( xp : -500, tags : ["F"])
-"B+" : ( xp : 500, tags : ["B"])
-"A+" : ( xp : 1000, tags : ["A"])
+"F" : (  abilities : {"sell" : (xp : -250, run_without_equip : true, remove_items : {"F" : 1})}, tags : ["F"])
+"D+" : (  abilities : {"sell" : (xp : 100, run_without_equip : true, remove_items : {"D+" : 1})}, tags : ["D"])
+"C-" : (  abilities : {"sell" : (xp : 200, run_without_equip : true, remove_items : {"C-" : 1})}, tags : ["C"])
+"C++" : (  abilities : {"sell" : (xp : -500, run_without_equip : true, remove_items : {"C++" : 1})}, tags : ["F"])
+"B+" : ( abilities : {"sell" : (xp : 500, run_without_equip : true, remove_items : {"B+" : 1})}, tags : ["B"])
+"A+" : ( abilities : {"sell" : (xp : 2000, run_without_equip : true, remove_items : {"A+" : 1})}, tags : ["A"])
 
 "sins_of_humanity" : (
     abilities : {
@@ -496,6 +659,8 @@ if you simply USE this item to it's full extent..."
             }
             health : 30
             energy : 30
+            run_without_equip : true
+            max_times_per_turn : 1
         )
     }
 )
@@ -508,6 +673,8 @@ if you simply USE this item to it's full extent..."
             }
             health : 10
             energy : 15
+            run_without_equip : true
+            max_times_per_turn : 2
         )
     }
     description : "Considered a rare delicacy, for few have tasted the meat of a sonic."
@@ -523,6 +690,8 @@ if you simply USE this item to it's full extent..."
             }
             health : -7
             energy : 35
+            run_without_equip : true
+            max_times_per_turn : 1
         )
     }
     buffs : (
@@ -532,6 +701,19 @@ if you simply USE this item to it's full extent..."
         }
     )
     description : "The head of sonic the hedgehog. You can wear it, just mind the eyeball."
+)
+
+"trainmail_armor" : (
+    wearable : true
+    buffs : (
+        attack_buffs : {
+            "physical" : 0.8
+        }
+        stat_buffs : {
+            "speed" : 1.3
+            "max_health" : 1.1
+        }
+    )
 )
 
 "wood" : ()
@@ -575,6 +757,8 @@ if you simply USE this item to it's full extent..."
                 "orange" : 1
             }
             health : 2
+            run_without_equip : true
+            max_times_per_turn : 3
         )
     }
 )
@@ -606,6 +790,8 @@ if you simply USE this item to it's full extent..."
                 "bigly" : 1
                 "psychological" : 7
             }
+            run_without_equip : true
+            max_times_per_turn : 1
         )
     }
 )
@@ -629,6 +815,7 @@ if you simply USE this item to it's full extent..."
                 "psychological" : 4
             }
         )
+
         "no_no_no" : (
             health : 3
             energy : -3
@@ -638,13 +825,30 @@ if you simply USE this item to it's full extent..."
             block : {
                 "physical" : 0.75
             }
+            require_items : {
+                "mark_of_the_bigly" : 1
+            }
         )
+
         "speak" : (
-            energy : -5
+            energy : -4
             damage : {
                 "psychological" : 6
             }
+            require_items : {
+                "mark_of_the_bigly" : 1
+            }
         )
+
+        "worship" : (
+            destroy_item : true
+            health : -69
+            make_items : {
+                "mark_of_the_bigly" : 1
+            }
+            self_text : "yes yes yes, the trumps are oh so very beautiful, believe me, believe me"
+        )
+
         "eat" : (
             remove_items : {
                 "sentient_trump_orange" : 1
@@ -654,13 +858,20 @@ if you simply USE this item to it's full extent..."
                 "bigly" : 2
                 "psychological" : 10
             }
+            run_without_equip : true
+            max_times_per_turn : 1
         )
     }
 )
 
+"mark_of_the_bigly" : (
+    description : "those who follow the path of the bigly attain this mark"
+)
+
 "wall_staff" : (
     equipable : true
-    xp : 100
+    wearable : true
+
     buffs : (
         defense_buffs : {
             "honourable" : 0.7
@@ -670,7 +881,7 @@ if you simply USE this item to it's full extent..."
 
     abilities : {
         "shoot_wall" : (
-            health : -4
+            health : -2
             energy : -8
             damage : {
                 "magic" : 4
@@ -722,6 +933,8 @@ and make the greatest comeback ever seen in history!!"
             damage : {
                 "psychological" : 7
             }
+            run_without_equip : true
+            max_times_per_turn : 1
         )
         "throw" : (
             destroy_item : true,
@@ -731,6 +944,7 @@ and make the greatest comeback ever seen in history!!"
             }
         )
     }
+    tags : ["C"]
 )
 
 "physics_kit" : (
@@ -740,21 +954,27 @@ and make the greatest comeback ever seen in history!!"
                 "physics_kit" : 1
             }
             health : -1
+            run_without_equip : true
         )
     }
+    tags : ["F"]
 )
 
 "healthy_sword" : (
     equipable : true,
     wearable : true,
+    buffs : (
+        stat_buffs : {
+            "max_health" : 1.5
+        }
+    )
     abilities : {
-        "eat" : (
-            remove_items : {
-                "healthy_sword" : 1
-            }
+        "yum" : (
+            destroy_item : true
             health : 10
         )
     }
+    tags : ["A"]
 )
 
 "faceman_meat" : (
@@ -778,25 +998,50 @@ Your consciousness begins to fade... you begin to feel a strong, unrelenting hun
 ..
 .
 .
-bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
+bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
         )
     }
     tags : ["D"]
 )
 
 "meat_shield_v0" : (
-
+    wearable : true
+    buffs : (        
+        attack_buffs : {
+            "bogly" : 1.1
+        }
+        stat_buffs : {
+            "speed" : 1.1
+        }
+    )
 )
 
 "meat_shield_v1" : (
-
+    wearable : true
+    buffs : (      
+        attack_buffs : {
+            "bogly" : 1.25
+        }
+        stat_buffs : {
+            "speed" : 1.25
+        }
+    )
 )
 
 "meat_shield_v2" : (
-
+    wearable : true,
+    buffs : ( 
+        attack_buffs : {
+            "bogly" : 1.4
+        }
+        stat_buffs : {
+            "speed" : 1.4
+        }
+    )
 )
 
 "teeth_v0" : (
+    equipable : true
     abilities : {
         "bite" : (
             health : 2
@@ -805,7 +1050,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
             }
         )
         "upgrade" : (
-            xp_cost : 1000
+            xp : -1000
             destroy_item : true
             make_items : {
                 "teeth_v1" : 1
@@ -815,6 +1060,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 )
 
 "teeth_v1" : (
+    equipable : true
     abilities : {
         "bite" : (
             health : 3
@@ -824,7 +1070,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
             }
         )
         "upgrade" : (
-            xp_cost : 2000
+            xp : -2000
             destroy_item : true
             make_items : {
                 "teeth_v2" : 1
@@ -834,6 +1080,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 )
 
 "teeth_v2" : (
+    equipable : true
     abilities : {
         "bite" : (
             health : 4
@@ -881,7 +1128,12 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 "pickle" : (
     abilities : {
         "eat" : (
-            health : 2
+            remove_items : {
+                "pickle" : 1
+            }
+            energy : 2
+            run_without_equip : true
+            max_times_per_turn : 7
         )
     }
 )
@@ -890,7 +1142,6 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
     equipable : true
     abilities : {
         "summon_pickles" : (
-            energy : -1
             make_items : {
                 "pickle" : 2
             }
@@ -906,24 +1157,55 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
     }
 )
 
+"wing" : (
+    wearable : true
+    buffs : (
+        stat_buffs : {
+            "speed" : 1.2
+        }
+    )
+)
+
 "pag_slice" : (
-    // TODO
+    abilities : {
+        "eat" : (
+            health : 2
+            energy : 2
+            remove_items : {
+                "pag_slice" : 1
+            }
+            self_text : "MMMM, delicious! Yummy, goey, cheesy, brain-structure-filled pagliacci yeetza.."
+            run_without_equip : true
+            max_times_per_turn : 4
+        )
+    }
     tags : ["C"]
 )
 
 "half_eaten_bigmac" : (
-    // TODO
+    abilities : {
+        "eat" : (
+            health : -1
+            damage : {
+                "bigly" : 1
+                "psychological" : 1
+            }
+            remove_items : {
+                "half_eaten_bigmac" : 1
+            }
+            self_text : "you force down another bite of the half eaten bigmac, gross... it tastes bigly"
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
     tags : ["F"]
 )
 
 "metal" : (
-    // TODO
     tags : ["C"]
 )
 
-"missile" : (
-    // TODO 
-)
+"missile" : ()
 
 "AA_batteries" : (
     // TODO
@@ -971,7 +1253,16 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
 )
 
 "gravitino_ball" : (
-    // TODO
+    abilities : {
+        "APPEASE_ATLAS" : (
+            health : -2
+            energy : -10
+            destroy_item : true
+            damage : {
+                "psychological" : 15
+            }
+        )
+    }
     tags : ["B"]
 )
 
@@ -1006,7 +1297,8 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY\n"
     )
     abilities : {
         "pass_the_bong" : (
-            text : "hands shaking, eyes red, you take another hit of the bong...
+            text : 
+"hands shaking, eyes red, you take another hit of the bong...
 whoa... dude... it's like totally a whole new dimension..."
 
             energy : -6
@@ -1035,15 +1327,124 @@ whoa... dude... it's like totally a whole new dimension..."
     }
 )
 
-"regesplant" : (
+"orange_shotgun" : (
+    equipable : true
     abilities : {
-        "eat" : (
-            energy : 4
-            health : -1
+        "shoot" : (
+            text : "yesyesyes get a load of the bigly"
+            energy : -6
+            damage : {
+                "bigly" : 8
+            }
+
+            remove_items : {
+                "orange" : 2
+            }
+
+            accuracy : 0.7
         )
     }
 )
+
+"regesplant" : (
+    abilities : {
+        "smoke" : (
+            require_items : {
+                "pipe" : 1
+                "regesplant" : 1
+            }
+            remove_items : {
+                "regesplant" : 1
+            }
+            energy : 4
+            health : -1
+            run_without_equip : true
+        )
+    }
+)
+
+"pipe" : ()
 "viscous_fluid" : ()
 "shrek_sauce" : ()
 "strange_compound" : (tags : ["C"])
 "radioactive_mutagen" : ()
+
+"soda_but_its_just_a_cup_no_soda" : (tags : ["F"])
+
+"lemonade" : (
+    abilities : {
+        "drink" : (
+            remove_items : {
+                "lemonade" : 1
+            }
+            energy : 2
+            run_without_equip : true
+            max_times_per_turn : 3
+        )
+    }
+    tags : ["C"]
+)
+
+"green_soda" : (
+    abilities : {
+        "drink" : (
+            remove_items : {
+                "green_soda" : 1
+            }
+            health : 5
+            run_without_equip : true
+            max_times_per_turn : 2
+        )
+    }
+    tags : ["B"]
+)
+
+"blue_soda" : (
+    abilities : {
+        "drink" : (
+            remove_items : {
+                "blue_soda" : 1
+            }
+            energy : 5
+            run_without_equip : true
+            max_times_per_turn : 3
+        )
+    }
+    tags : ["B"]
+)
+
+"red_soda" : (
+    abilities : {
+        "drink" : (
+            remove_items : {
+                "red_soda" : 1
+            }
+            energy : 1
+            run_without_equip : true
+            max_times_per_turn : 30
+        )
+    }
+    tags : ["D"]
+)
+
+"orange_soda" : (
+    abilities : {
+        "drink" : (
+            remove_items : {
+                "orange_soda" : 1
+            }
+            counter : {
+                "bigly" : 1.0
+            }
+            block : {
+                "bigly" : 1.0
+            }
+            self_text : "yesyesyes"
+            text : "yesyesyes"
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
+    tags : ["D"]
+)
+

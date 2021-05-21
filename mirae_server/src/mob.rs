@@ -69,12 +69,17 @@ fn make_inventory(gen: &InventoryBuilder, rng: &mut StdRng, g: &GameData) -> Res
             summed.push(sum);
         }
 
+        println!("{}", num_picks);
+        println!("{:?}", summed);
+        println!("{:?}", gen.items);
+
         for _ in 0..num_picks {
             let flt: f64 = rng.gen();
             let mut items = None;
             for i in 0..gen.items.len() {
-                if flt > summed[i] {
+                if flt < summed[i] {
                     items = Some(&gen.items[i]);
+                    break;
                 }
             }
             if let Some(items) = items {
@@ -87,6 +92,7 @@ fn make_inventory(gen: &InventoryBuilder, rng: &mut StdRng, g: &GameData) -> Res
     for item in &gen.required_items {
         inventory.add(item.name.clone(), item.per);
     }
+    println!("{:?}",inventory);
     Ok(inventory)
 }
 
@@ -99,6 +105,7 @@ impl Mob {
         g: &GameData,
     ) -> Result<Self> {
         let inventory = make_inventory(&template.tools, rng, g)?;
+        println!("making drops inventory:");
         let drops = make_inventory(&template.drops, rng, g)?;
         let stats = template.stats.clone();
 
