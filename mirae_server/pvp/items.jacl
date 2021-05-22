@@ -1050,6 +1050,20 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
             "speed" : 1.1
         }
     )
+
+    abilities : {
+        "upgrade" : (
+            xp : -1000
+            remove_items : {
+                "meat_shield_v0" : 1
+            }
+            make_items : {
+                "meat_shield_v1" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
 )
 
 "meat_shield_v1" : (
@@ -1062,6 +1076,20 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
             "speed" : 1.25
         }
     )
+
+    abilities : {
+        "upgrade" : (
+            xp : -2000
+            remove_items : {
+                "meat_shield_v1" : 1
+            }
+            make_items : {
+                "meat_shield_v2" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
 )
 
 "meat_shield_v2" : (
@@ -1074,23 +1102,104 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
             "speed" : 1.4
         }
     )
+
+    abilities : {
+        "upgrade" : (
+            xp : -3000
+            remove_items : {
+                "meat_shield_v2" : 1
+            }
+            make_items : {
+                "meat_shield_v3" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
+)
+
+"meat_shield_v3" : (
+    wearable : true,
+    buffs : ( 
+        attack_buffs : {
+            "bogly" : 1.65
+        }
+        stat_buffs : {
+            "speed" : 1.65
+        }
+    )
+
+    abilities : {
+        "upgrade" : (
+            xp : -4000
+            destroy_item : true
+            remove_items : {
+                "meat_shield_v3" : 1
+            }
+            make_items : {
+                "meat_shield_v4" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
+)
+
+"meat_shield_v4" : (
+    wearable : true
+    buffs : ( 
+        attack_buffs : {
+            "bogly" : 1.8
+        }
+        stat_buffs : {
+            "speed" : 1.8
+        }
+    )
+
+    abilities : {
+        "upgrade" : (
+            xp : -5000
+            destroy_item : true
+            make_items : {
+                "meat_shield_v5" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+        )
+    }
+)
+
+"meat_shield_v5" : (
+    wearable : true
+    buffs : ( 
+        attack_buffs : {
+            "bogly" : 2
+        }
+        stat_buffs : {
+            "speed" : 2
+        }
+    )
 )
 
 "teeth_v0" : (
     equipable : true
     abilities : {
         "bite" : (
-            health : 2
+            health : 1
             damage : {
                 "bogly" : 1
             }
         )
         "upgrade" : (
             xp : -1000
-            destroy_item : true
             make_items : {
                 "teeth_v1" : 1
             }
+            remove_items : {
+                "teeth_v0" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
         )
     }
 )
@@ -1099,7 +1208,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
     equipable : true
     abilities : {
         "bite" : (
-            health : 3
+            health : 2
             damage : {
                 "bogly" : 1
                 "trash" : 1
@@ -1107,7 +1216,11 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
         )
         "upgrade" : (
             xp : -2000
-            destroy_item : true
+            remove_items : {
+                "teeth_v1" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
             make_items : {
                 "teeth_v2" : 1
             }
@@ -1119,11 +1232,86 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
     equipable : true
     abilities : {
         "bite" : (
-            health : 4
+            health : 3
             damage : {
                 "bogly" : 1
                 "trash" : 1
                 "radiation" : 1
+            }
+        )
+        "upgrade" : (
+            xp : -3000
+            remove_items : {
+                "teeth_v2" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+            make_items : {
+                "teeth_v3" : 1
+            }
+        )
+    }
+)
+
+"teeth_v3" : (
+    equipable : true
+    abilities : {
+        "bite" : (
+            health : 3
+            damage : {
+                "bogly" : 2
+                "trash" : 2
+                "radiation" : 1
+            }
+        )
+        "upgrade" : (
+            xp : -4000
+            remove_items : {
+                "teeth_v3" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+            make_items : {
+                "teeth_v4" : 1
+            }
+        )
+    }
+)
+
+"teeth_v4" : (
+    equipable : true
+    abilities : {
+        "bite" : (
+            health : 3
+            damage : {
+                "bogly" : 3
+                "trash" : 2
+                "radiation" : 2
+            }
+        )
+        "upgrade" : (
+            xp : -5000
+            remove_items : {
+                "teeth_v4" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 1
+            make_items : {
+                "teeth_v5" : 1
+            }
+        )
+    }
+)
+
+"teeth_v5" : (
+    equipable : true
+    abilities : {
+        "bite" : (
+            health : 4
+            damage : {
+                "bogly" : 4
+                "trash" : 3
+                "radiation" : 2
             }
         )
     }
