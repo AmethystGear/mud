@@ -1,7 +1,7 @@
 use crate::{
     combat::{BattleMap, EntityType, ID},
     display::{Bounds, Image},
-    entity::{Entity, MAX_NUM_EAT},
+    entity::Entity,
     gamedata::{
         block::Block,
         gamedata::{BlockName, GameData, ItemName, MobName, Named},
@@ -23,6 +23,7 @@ use std::{
     path::Path,
     sync::{Arc, RwLock},
 };
+use websocket::websocket_base::header::names::ACCEPT;
 
 const BAD_ARGS: &str = "bad arguments to command";
 
@@ -563,7 +564,7 @@ fn map(data: ActionData) -> Result<()> {
 
 const VIEW_DIST: usize = 5;
 fn disp(data: ActionData) -> Result<()> {
-    let mut world = data
+    let world = data
         .world
         .read()
         .map_err(|_| anyhow!("couldn't lock world"))?;
@@ -573,7 +574,7 @@ fn disp(data: ActionData) -> Result<()> {
         .map_err(|_| anyhow!("couldn't lock players"))?;
     let posn = *(get(&players, data.player_id)?.loc());
     let bounds = Bounds::get_bounds_centered(posn, VIEW_DIST, world.blocks().dim);
-    let img = Image::new(&mut world, &players, data.g, &bounds, 1)?;
+    let img = Image::new(&world, &players, data.g, &bounds, 1)?;
     let player = get_mut(&mut players, data.player_id)?;
     player.send_display(img, false);
     Ok(())
@@ -591,70 +592,101 @@ fn inv(data: ActionData) -> Result<()> {
     Ok(())
 }
 
-fn equip(mut data: ActionData) -> Result<()> {
+fn do_turn_if_in_battle(data: ActionData) -> Result<()> {
     let mut players = data
         .players
         .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+
     let player = get_mut(&mut players, data.player_id)?;
-    match (data.params.pop_front(), data.params.pop_front()) {
-        (Some(Literal::String(s)), None) => match s.as_str() {
-            "dequip" => {
-                player.send_text("dequipping item...\n".into());
-                player.dequip();
-            }
-            "equipped" => {}
-            _ => return Err(anyhow!(BAD_ARGS)),
-        },
-        (Some(Literal::String(s1)), Some(Literal::String(s2))) => match s1.as_str() {
-            "equip" => {
-                let item_name = ItemName::checked_from(s2, data.g)?;
-                player.equip(&item_name, data.g)?;
-            }
-            _ => return Err(anyhow!(BAD_ARGS)),
-        },
-        _ => return Err(anyhow!(BAD_ARGS)),
-    };
-    player.send_text(format!(
-        "you currently have {} equipped\n",
-        player.equipped().to_string()
-    ));
+
+    let mut battle_map = data
+        .battle_map
+        .write()
+        .map_err(|_| anyhow!("couldn't lock battle map"))?;
+
+    let mut world = data
+        .world
+        .write()
+        .map_err(|_| anyhow!("couldn't lock world"))?;
+
+    let player_id = player.id();
+    if let Ok(opponent) = battle_map.get_opponent(player_id) {
+        let (player, opp) =
+            get_player_and_opponent(opponent, &mut players, player_id.id, &mut world)?;
+        battle_map.do_turn(Box::new(player), opp, data.g)?;
+    }
     Ok(())
 }
 
-fn wear(mut data: ActionData) -> Result<()> {
-    let mut players = data
-        .players
-        .write()
-        .map_err(|_| anyhow!("couldn't lock players"))?;
-    let player = get_mut(&mut players, data.player_id)?;
-    match (data.params.pop_front(), data.params.pop_front()) {
-        (Some(Literal::String(s)), None) => match s.as_str() {
-            "unwear" => {
-                player.unwear_all(data.g)?;
-            }
-            "wearing" => {}
-            _ => return Err(anyhow!(BAD_ARGS)),
-        },
-        (Some(Literal::String(s1)), Some(Literal::String(s2))) => {
-            let item_name = ItemName::checked_from(s2, data.g)?;
-            match s1.as_str() {
-                "wear" => {
-                    player.wear(&item_name, data.g)?;
+fn equip(mut data: ActionData) -> Result<()> {
+    {
+        let mut players = data
+            .players
+            .write()
+            .map_err(|_| anyhow!("couldn't lock players"))?;
+        let player = get_mut(&mut players, data.player_id)?;
+        match (data.params.pop_front(), data.params.pop_front()) {
+            (Some(Literal::String(s)), None) => match s.as_str() {
+                "dequip" => {
+                    player.send_text("dequipping item...\n".into());
+                    player.dequip();
                 }
-                "unwear" => {
-                    player.unwear(&item_name, data.g)?;
+                "equipped" => {}
+                _ => return Err(anyhow!(BAD_ARGS)),
+            },
+            (Some(Literal::String(s1)), Some(Literal::String(s2))) => match s1.as_str() {
+                "equip" => {
+                    let item_name = ItemName::checked_from(s2, data.g)?;
+                    player.equip(&item_name, data.g)?;
                 }
                 _ => return Err(anyhow!(BAD_ARGS)),
+            },
+            _ => return Err(anyhow!(BAD_ARGS)),
+        };
+        player.send_text(format!(
+            "you currently have {} equipped\n",
+            player.equipped().to_string()
+        ));
+    }
+    do_turn_if_in_battle(data)
+}
+
+fn wear(mut data: ActionData) -> Result<()> {
+    {
+        let mut players = data
+            .players
+            .write()
+            .map_err(|_| anyhow!("couldn't lock players"))?;
+        let player = get_mut(&mut players, data.player_id)?;
+        match (data.params.pop_front(), data.params.pop_front()) {
+            (Some(Literal::String(s)), None) => match s.as_str() {
+                "unwear" => {
+                    player.unwear_all(data.g)?;
+                }
+                "wearing" => {}
+                _ => return Err(anyhow!(BAD_ARGS)),
+            },
+            (Some(Literal::String(s1)), Some(Literal::String(s2))) => {
+                let item_name = ItemName::checked_from(s2, data.g)?;
+                match s1.as_str() {
+                    "wear" => {
+                        player.wear(&item_name, data.g)?;
+                    }
+                    "unwear" => {
+                        player.unwear(&item_name, data.g)?;
+                    }
+                    _ => return Err(anyhow!(BAD_ARGS)),
+                }
             }
-        }
-        _ => return Err(anyhow!(BAD_ARGS)),
-    };
-    player.send_text(format!(
-        "you are currently wearing:\n {}\n",
-        player.worn().to_string()
-    ));
-    Ok(())
+            _ => return Err(anyhow!(BAD_ARGS)),
+        };
+        player.send_text(format!(
+            "you are currently wearing:\n {}\n",
+            player.worn().to_string()
+        ));
+    }
+    do_turn_if_in_battle(data)
 }
 
 fn upgrade(mut data: ActionData) -> Result<()> {
@@ -757,6 +789,10 @@ fn run(data: ActionData) -> Result<()> {
         let (player, opp) =
             get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
 
+        if opp.id().enity_type == EntityType::Player {
+            return Err(anyhow!("you can't run away from players"));
+        }
+
         if let Ok(x) = opp.run() {
             player.send_text(format!("{}: \"{}\"\n", opp.name(), x));
             player.send_image("none".into());
@@ -769,26 +805,16 @@ fn run(data: ActionData) -> Result<()> {
 }
 
 fn pass(data: ActionData) -> Result<()> {
-    let mut battle_map = data
-        .battle_map
-        .write()
-        .map_err(|_| anyhow!("couldn't lock battle map"))?;
-    if let Ok(opponent) = battle_map.get_opponent(ID::player(data.player_id)) {
-        let mut players = data
-            .players
+    {
+        let battle_map = data
+            .battle_map
             .write()
-            .map_err(|_| anyhow!("couldn't lock players"))?;
-        let mut world = data
-            .world
-            .write()
-            .map_err(|_| anyhow!("couldn't lock world"))?;
-        let (player, opp) =
-            get_player_and_opponent(opponent, &mut players, data.player_id, &mut world)?;
-
-        battle_map.do_turn(Box::new(player), opp, data.g)
-    } else {
-        Err(anyhow!("you aren't fighting anything"))
+            .map_err(|_| anyhow!("couldn't lock battle map"))?;
+        if let Err(_) = battle_map.get_opponent(ID::player(data.player_id)) {
+            return Err(anyhow!("you aren't fighting anything"));
+        }
     }
+    do_turn_if_in_battle(data)
 }
 
 fn account(mut data: ActionData) -> Result<()> {
@@ -872,7 +898,6 @@ fn account(mut data: ActionData) -> Result<()> {
     Ok(())
 }
 
-const MAX_SCAN_DIST: u64 = 5;
 fn scan(data: ActionData) -> Result<()> {
     let start = {
         let players = data
@@ -890,7 +915,7 @@ fn scan(data: ActionData) -> Result<()> {
 
     let filter = |_: &Block, mob: Option<&MobTemplate>| mob.is_some();
 
-    let mut posns = find_all_posn(&world, data.g, start, &filter, MAX_SCAN_DIST, usize::MAX)?;
+    let mut posns = find_all_posn(&world, data.g, start, &filter, 6, usize::MAX)?;
 
     posns.retain(|&x| x != start);
 

@@ -747,9 +747,9 @@ if you simply USE this item to it's full extent..."
     abilities : {
         "throw" : (
             destroy_item : true
-            energy : -1
+            energy : -2
             damage : {
-                "bigly" : 5
+                "bigly" : 1.5
             }
         )
         "eat" : (
@@ -759,6 +759,20 @@ if you simply USE this item to it's full extent..."
             health : 2
             run_without_equip : true
             max_times_per_turn : 3
+        )
+
+        "biglify" : (
+            require_items : {
+                "mark_of_the_bigly" : 1
+            }
+            remove_items : {
+                "orange" : 3
+            }
+            make_items : {
+                "trump_orange" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 2
         )
     }
 )
@@ -778,7 +792,10 @@ if you simply USE this item to it's full extent..."
             destroy_item : true
             energy : -3
             damage : {
-                "bigly" : 4
+                "bigly" : 2
+            }
+            require_items : {
+                "mark_of_the_bigly" : 1
             }
         )
         "eat" : (
@@ -788,10 +805,26 @@ if you simply USE this item to it's full extent..."
             health : -4
             damage : {
                 "bigly" : 1
-                "psychological" : 7
+                "psychological" : 3
+            }
+            require_items : {
+                "mark_of_the_bigly" : 1
             }
             run_without_equip : true
             max_times_per_turn : 1
+        )
+        "biglify" : (
+            require_items : {
+                "mark_of_the_bigly" : 1
+            }
+            remove_items : {
+                "trump_orange" : 3
+            }
+            make_items : {
+                "sentient_trump_orange" : 1
+            }
+            run_without_equip : true
+            max_times_per_turn : 2
         )
     }
 )
@@ -811,13 +844,13 @@ if you simply USE this item to it's full extent..."
             destroy_item : true
             energy : -3
             damage : {
-                "bigly" : 4
-                "psychological" : 4
+                "bigly" : 3
+                "psychological" : 2
             }
         )
 
         "no_no_no" : (
-            health : 3
+            health : 2
             energy : -3
             counter : {
                 "physical" : 0.25
@@ -853,10 +886,13 @@ if you simply USE this item to it's full extent..."
             remove_items : {
                 "sentient_trump_orange" : 1
             }
-            health : -4
+            health : -1
             damage : {
                 "bigly" : 2
-                "psychological" : 10
+                "psychological" : 4
+            }
+            require_items : {
+                "mark_of_the_bigly" : 1
             }
             run_without_equip : true
             max_times_per_turn : 1
@@ -1169,8 +1205,8 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
 "pag_slice" : (
     abilities : {
         "eat" : (
-            health : 2
-            energy : 2
+            health : 3
+            energy : 3
             remove_items : {
                 "pag_slice" : 1
             }
@@ -1253,6 +1289,7 @@ bogly boogly BOGLY boogly JOOGLY BOG-BOGLY BOOGLY BOGLY BooGLY JOOOGLY"
 )
 
 "gravitino_ball" : (
+    equipable : true
     abilities : {
         "APPEASE_ATLAS" : (
             health : -2

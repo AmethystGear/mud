@@ -299,8 +299,8 @@ Wow. Just wow. I am dissapointed."
 
     abilities : {
         "yummy" : (
-            energy : 3
-            health : 3
+            energy : 2
+            health : 1
             damage : {
                 "physical" : 3
             }
@@ -350,7 +350,7 @@ Wow. Just wow. I am dissapointed."
 
     abilities : {
         "honourable_heal" : (
-            health : 3
+            health : 1
         )
     }
 
@@ -439,11 +439,53 @@ Wow. Just wow. I am dissapointed."
         ]
     )
 
+    abilities : {
+        "honourable_heal" : (
+            health : 1
+        )
+    }
+
+    trades : [
+        (in_item : "heart_of_trump", out_item : "honour", in_cnt : 1, out_cnt : 10)
+        (in_item : "heart_of_trump", out_item : "mana", in_cnt : 1, out_cnt : 10)
+    ]
+
     display : "honour.png"
     tags : ["honourable"]
 )
 
 "honour_mage" : (
+    xp : 100
+    stats : {
+        "max_health" : 15
+        "max_energy" : 20
+        "speed" : 15
+    }
+
+    tools : (
+        required_items : [
+            (name : "obsidian_staff", per: 1)
+            (name : "honour", per: 50)
+            (name : "mana", per : 50)
+        ]
+    )
+
+    abilities : {
+        "honourable_heal" : (
+            health : 1
+        )
+    }
+
+    trades : [
+        (in_item : "heart_of_trump", out_item : "honour", in_cnt : 1, out_cnt : 10)
+        (in_item : "heart_of_trump", out_item : "mana", in_cnt : 1, out_cnt : 10)
+    ]
+
+    display : "honour.png"
+    tags : ["honourable"]
+)
+
+"wet_knight" : (
     xp : 100
     stats : {
         "max_health" : 15
@@ -459,17 +501,10 @@ Wow. Just wow. I am dissapointed."
         ]
     )
 
-    display : "honour.png"
-    tags : ["honourable"]
-)
-
-"wet_knight" : (
-    xp : 100
-    stats : {
-        "max_health" : 15
-        "max_energy" : 10
-        "speed" : 15
-    }
+    trades : [
+        (in_item : "heart_of_trump", out_item : "honour", in_cnt : 1, out_cnt : 10)
+        (in_item : "heart_of_trump", out_item : "mana", in_cnt : 1, out_cnt : 10)
+    ]
     display : "honour.png"
     tags : ["honourable", "aquatic", "surface_aquatic"]
 )
@@ -1127,8 +1162,8 @@ Wow. Just wow. I am dissapointed."
         )
     }
     trades : [
-        (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 10, out_cnt : 1)
-        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 10, out_cnt : 1)
+        (in_item : "viscous_fluid", out_item : "regesplant", in_cnt : 1, out_cnt : 3)
+        (in_item : "radioactive_mutagen", out_item : "bong", in_cnt : 8, out_cnt : 1)
         (in_item : "gold", out_item : "pipe", in_cnt : 5, out_cnt : 1)
     ]
     display_img : "reges.png"
