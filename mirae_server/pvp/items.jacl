@@ -763,6 +763,7 @@ if you simply USE this item to it's full extent..."
 
         "biglify" : (
             require_items : {
+                "orange" : 3
                 "mark_of_the_bigly" : 1
             }
             remove_items : {
@@ -808,6 +809,7 @@ if you simply USE this item to it's full extent..."
                 "psychological" : 3
             }
             require_items : {
+                "trump_orange" : 1
                 "mark_of_the_bigly" : 1
             }
             run_without_equip : true
@@ -815,6 +817,7 @@ if you simply USE this item to it's full extent..."
         )
         "biglify" : (
             require_items : {
+                "trump_orange" : 3
                 "mark_of_the_bigly" : 1
             }
             remove_items : {
@@ -892,6 +895,7 @@ if you simply USE this item to it's full extent..."
                 "psychological" : 4
             }
             require_items : {
+                "sentient_trump_orange" : 1
                 "mark_of_the_bigly" : 1
             }
             run_without_equip : true
