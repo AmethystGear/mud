@@ -2,7 +2,8 @@
 pkill python
 pkill mirae
 sleep 10s
-(./run.sh seed $RANDOM &)
+R=${RANDOM}
+(./run.sh seed $R &)
 while true; do
     git remote update
     git checkout master
@@ -10,6 +11,7 @@ while true; do
     LOCAL=$(git rev-parse @)
     REMOTE=$(git rev-parse "$UPSTREAM")
     BASE=$(git merge-base @ "$UPSTREAM")
+    R=${RANDOM}
     if [ $LOCAL = $BASE ] && [ $LOCAL != $REMOTE ]; then
         git pull origin master
         pkill python
