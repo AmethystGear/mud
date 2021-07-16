@@ -25,7 +25,11 @@ class Server(http.server.SimpleHTTPRequestHandler):
         else:
             http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-with socketserver.TCPServer(("", CLIENT_PORT), Server) as httpd:
-    print("serving at port", CLIENT_PORT)
-    print("serving at ip", PUB_IP)
-    httpd.serve_forever()
+while True:
+    try:
+        with socketserver.TCPServer(("", CLIENT_PORT), Server) as httpd:
+            print("serving at port", CLIENT_PORT)
+            print("serving at ip", PUB_IP)
+            httpd.serve_forever()
+    except OSError as e:
+        print("port in use?")
