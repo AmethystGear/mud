@@ -85,7 +85,6 @@ fn map(
     players: &Vec<Option<Player>>,
     g: &GameData,
 ) -> Result<()> {
-    // parse in our parameters
     let size;
     let layer;
     let save_location;
