@@ -16,8 +16,8 @@ while true; do
         git pull origin master
         pkill python
         pkill mirae
-	sleep 10s
-	(./run.sh seed $RANDOM &)
+	    sleep 10s
+	    (./run.sh seed $R &)
     fi
     sleep 10s
 done
