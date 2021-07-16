@@ -23,7 +23,6 @@ use std::{
     path::Path,
     sync::{Arc, RwLock},
 };
-use websocket::websocket_base::header::names::ACCEPT;
 
 const BAD_ARGS: &str = "bad arguments to command";
 
