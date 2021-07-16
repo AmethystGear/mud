@@ -1,2 +1,5 @@
 save/*
 .vscode/*
+nohup.out
+mirae_client/client_log
+mirae_server/server_log

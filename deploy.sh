@@ -9,7 +9,7 @@ while true; do
         pkill python
         pkill mirae
 	sleep 10s
-        ./run.sh seed $RANDOM
+	(nohup ./run.sh seed $RANDOM > mirae_server/server_log &)
     fi
     sleep 10s
 done
