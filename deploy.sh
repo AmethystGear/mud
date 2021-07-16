@@ -1,8 +1,10 @@
 #!/bin/bash
+> nohup.out
 pkill python
 pkill mirae
 sleep 10s
 R=$(shuf -i0-1000 -n1)
+echo "seed: $R"
 (./run.sh seed $R &)
 while true; do
     git remote update
@@ -15,9 +17,10 @@ while true; do
         git pull origin master
         pkill python
         pkill mirae
-	    sleep 10s
+	sleep 10s
         R=$(shuf -i0-1000 -n1)
-	    (./run.sh seed $R &)
+	echo "seed: $R"
+        (./run.sh seed $R &)
     fi
     sleep 10s
 done
