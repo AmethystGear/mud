@@ -837,8 +837,8 @@ if you simply USE this item to it's full extent..."
     equipable : true
     buffs : (
         attack_buffs : {
-            "bigly" : 1.15
-            "psychological" : 1.45
+            "bigly" : 1.2
+            "psychological" : 1.2
         }
     )
 
