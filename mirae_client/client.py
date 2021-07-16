@@ -6,7 +6,7 @@ import sys
 
 CLIENT_PORT = int(sys.argv[1])
 WS_SERVER_PORT = int(sys.argv[2])
-IP_SERVICE = 'https://api.ipify.org'
+IP_SERVICE = "https://api.ipify.org"
 
 if len(sys.argv) == 4:
     PUB_IP = sys.argv[3]
