@@ -143,7 +143,16 @@
     }
 )
 
-"plutonium" : ()
+"plutonium" : (
+    abilities : {
+        "eat" : (
+            health : -9999
+            run_without_equip : true
+            self_text : "Wtf? why did you eat the plutonium?! Enjoy dying I guess."
+        )
+    }
+    tags : ["B"]
+)
 
 "bigly_stick" : (
     equipable : true
