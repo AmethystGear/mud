@@ -1,6 +1,8 @@
+#!/bin/bash
 pkill python
 pkill mirae
-(./run.sh seed $RANDOM > mirae_server/server_log &)
+sleep 10s
+(./run.sh seed $RANDOM &)
 while true; do
     git remote update
     git checkout master
@@ -13,7 +15,7 @@ while true; do
         pkill python
         pkill mirae
 	sleep 10s
-	(./run.sh seed $RANDOM > mirae_server/server_log &)
+	(./run.sh seed $RANDOM &)
     fi
     sleep 10s
 done
