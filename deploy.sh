@@ -1,4 +1,6 @@
+(nohup ./run.sh seed $RANDOM > mirae_server/server_log &)
 while true; do
+    git remote update
     git checkout master
     UPSTREAM=${1:-'@{u}'}
     LOCAL=$(git rev-parse @)
