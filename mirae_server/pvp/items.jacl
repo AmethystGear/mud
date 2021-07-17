@@ -106,6 +106,17 @@
                 "mana" : 2
             }
         )
+
+        "missile" : (
+            remove_items : {
+                "metal" : 1
+                "iron" : 15
+            }
+            make_items : {
+                "missile" : 5
+            }
+        )
+
         /* TODO
         "pewpew" : (
             remove_items : {
